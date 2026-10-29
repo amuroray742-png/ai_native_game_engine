@@ -12,7 +12,7 @@
 
 - 双方各一个单位，场景给出唯一正整数 ID；A 先手，回合编号从 1 开始。
 - 默认每回合 2 行动点，移动或攻击耗 1 点。耗尽不自动换方，当前方仍可 EndTurn；换方后恢复配置指定的行动点，每次换方回合编号加 1。
-- 移动必须上下左右一格，禁止越界、障碍或单位占用。
+- 移动命令只接受 MoveDirection 的 Up、Down、Left、Right；分别对应 Y+1、Y-1、X-1、X+1。规则层按执行时当前位置计算目标，禁止越界、障碍或单位占用；非法枚举值返回 InvalidDirection。
 - 攻击目标必须为相邻敌方单位，曼哈顿距离为 1；固定配置伤害，生命值最低为 0。死亡立即决定胜负。
 - 非法操作不改变玩法状态、不消耗随机数、不产生事件。结束后所有玩法命令均拒绝。
 - 首版玩法不使用随机伤害；独立测试验证随机算法和状态隔离。
@@ -40,7 +40,7 @@ SDK 基线为 10.0.202，global.json 允许同 feature band 的补丁更新；�
 | Advance() → StepResult? | 一次执行一条；空队列返回 null，且不调用规则 |
 | GetState() → TView | 取得隔离视图；故障实例拒绝查询 |
 | GridGameRules.Create(definition) | 先完整校验再创建，复制集合，不保留调用方可变集合 |
-| Move(side, unitId, destination) | 不可变移动命令 |
+| Move(side, unitId, direction) | 不可变方向移动命令 |
 | Attack(side, unitId, targetId) | 不可变攻击命令 |
 | EndTurn(side) | 不可变回合结束命令 |
 | GridGameView | 地图、障碍、单位、当前方、行动点、回合、胜方；集合和元素均不可修改 |
@@ -55,7 +55,7 @@ CommandResult 的 Error 为 null 表示成功，否则为稳定原因代码；�
 
 ### 拒绝优先级
 
-先检查 GameFinished，再检查 NotYourTurn。移动依次检查 UnknownUnit、NotYourUnit、OutOfBounds、Blocked、Occupied、NotAdjacent、NoActionPoints；攻击依次检查 UnknownUnit、NotYourUnit、UnknownTarget、FriendlyTarget、NotAdjacent、NoActionPoints。第一个不满足条件决定拒绝原因。
+先检查 GameFinished，再检查 NotYourTurn。移动依次检查 UnknownUnit、NotYourUnit、InvalidDirection、OutOfBounds、Blocked、Occupied、NoActionPoints；攻击依次检查 UnknownUnit、NotYourUnit、UnknownTarget、FriendlyTarget、NotAdjacent、NoActionPoints。第一个不满足条件决定拒绝原因。
 
 查询和返回的事件均不能修改内部状态。查询时复制集合，单位对象为不可变对象，后续行动通过替换对象提交新状态，先前视图不会随新逻辑步变化。
 
@@ -145,3 +145,9 @@ dotnet run --project src/AiNative.Headless -- src/AiNative.Headless/demo.json
 独立 Reviewer 已只读审查核心、玩法、宿主与测试，并独立运行 55 项测试。审查发现输出 IOException 被误归类为配置错误；修复后新增输出故障回归测试，Reviewer 复核确认无未解决的阻断问题。按非阻断建议去除空项目节点，保留单行自动属性以改善扫描可读性。
 
 当前未验证 Unity、跨平台/跨运行时行为和远端 CI，尚未实现快照或回放文件。没有以第一阶段测试替代这些后续验收。
+
+### 方向命令调整
+
+Move 不再接受目标坐标，此为进程内 API 变更；尚无回放文件协议需要迁移。连续排队的方向命令逐条依据执行时位置计算。移动命令日志只显示行动方、单位 ID 和 direction，以及执行结果，不显示 from/to；位置仍可从初始状态和每步状态输出读取。
+
+方向接口调整后本地 59 项测试通过；覆盖四方向、四边界、非法方向枚举、障碍与占用，以及连续队列按执行时位置移动。只读格式检查和默认演示通过。此前 55 项记录为第一阶段初次验收证据。

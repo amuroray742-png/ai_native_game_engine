@@ -33,15 +33,15 @@ namespace AiNative.Headless
 
             try
             {
+                GridGameView initial = rules.GetState();
+                output.WriteLine("Initial state:");
+                output.WriteLine($"  Map={initial.Width}x{initial.Height} Obstacles=[{string.Join(", ", initial.Obstacles)}] Seed={DemoRunner.Seed}");
+                WriteState(output, initial);
                 IReadOnlyList<DemoStep> trace = DemoRunner.Run(rules);
                 foreach (DemoStep step in trace)
                 {
                     output.WriteLine($"Step {step.Step.Sequence}: {step.Command} => {step.Step.Result.Error ?? "Accepted"}");
-                    foreach (var unit in step.State.Units)
-                    {
-                        output.WriteLine($"  {unit.Side} id={unit.Id} position={unit.Position} health={unit.Health}");
-                    }
-                    output.WriteLine($"  Turn={step.State.TurnIndex} Active={step.State.ActiveSide} AP={step.State.ActionPoints} Winner={step.State.Winner?.ToString() ?? "None"}");
+                    WriteState(output, step.State);
                 }
                 if (!DemoRunner.HasExpectedOutcome(trace))
                 {
@@ -57,6 +57,15 @@ namespace AiNative.Headless
                 error.WriteLine($"Simulation failure: {exception}");
                 return 1;
             }
+        }
+
+        private static void WriteState(TextWriter output, GridGameView state)
+        {
+            foreach (UnitDefinition unit in state.Units)
+            {
+                output.WriteLine($"  {unit.Side} id={unit.Id} position={unit.Position} health={unit.Health}");
+            }
+            output.WriteLine($"  Turn={state.TurnIndex} Active={state.ActiveSide} AP={state.ActionPoints} Winner={state.Winner?.ToString() ?? "None"}");
         }
     }
 }

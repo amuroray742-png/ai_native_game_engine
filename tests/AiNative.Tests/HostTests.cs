@@ -46,7 +46,20 @@ namespace AiNative.Tests
                 var output = new StringWriter();
                 var error = new StringWriter();
                 Assert.Equal(0, Program.Run(args, output, error));
+                string initial = string.Join(Environment.NewLine,
+                    "Initial state:",
+                    "  Map=5x5 Obstacles=[(2,2)] Seed=42",
+                    "  A id=1 position=(0,0) health=4",
+                    "  B id=2 position=(2,0) health=4",
+                    "  Turn=1 Active=A AP=2 Winner=None",
+                    "Step 1:");
+                Assert.StartsWith(initial, output.ToString());
                 Assert.Contains("Demo passed", output.ToString());
+                Assert.Contains("Step 1: Move side=A unit=1 direction=Right => Accepted", output.ToString());
+                Assert.DoesNotContain("from=", output.ToString());
+                Assert.DoesNotContain("to=", output.ToString());
+                Assert.Contains("Step 4: Attack side=B unit=2 target=1 => Accepted", output.ToString());
+                Assert.Contains("Step 5: EndTurn side=B => Accepted", output.ToString());
                 Assert.Equal("", error.ToString());
             }
         }

@@ -1,5 +1,16 @@
+# .NET 构建与测试产物
 **/bin/
 **/obj/
-TestResults/
+**/TestResults/
+*.trx
+
+# 本机 IDE 配置
 .vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# 操作系统临时文件
 .DS_Store
+Thumbs.db

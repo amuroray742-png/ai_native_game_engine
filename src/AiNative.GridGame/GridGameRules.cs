@@ -84,7 +84,24 @@ namespace AiNative.GridGame
             {
                 return CommandResult.Rejected("NotYourUnit");
             }
-            GridPosition destination = command.Destination;
+            GridPosition destination;
+            switch (command.Direction)
+            {
+                case MoveDirection.Up:
+                    destination = new GridPosition(unit.Position.X, unit.Position.Y + 1);
+                    break;
+                case MoveDirection.Down:
+                    destination = new GridPosition(unit.Position.X, unit.Position.Y - 1);
+                    break;
+                case MoveDirection.Left:
+                    destination = new GridPosition(unit.Position.X - 1, unit.Position.Y);
+                    break;
+                case MoveDirection.Right:
+                    destination = new GridPosition(unit.Position.X + 1, unit.Position.Y);
+                    break;
+                default:
+                    return CommandResult.Rejected("InvalidDirection");
+            }
             if (destination.X < 0 || destination.Y < 0 || destination.X >= _width || destination.Y >= _height)
             {
                 return CommandResult.Rejected("OutOfBounds");
@@ -96,10 +113,6 @@ namespace AiNative.GridGame
             if (_units.Any(other => other.Position.Equals(destination)))
             {
                 return CommandResult.Rejected("Occupied");
-            }
-            if (unit.Position.DistanceTo(destination) != 1)
-            {
-                return CommandResult.Rejected("NotAdjacent");
             }
             if (_actionPoints == 0)
             {
