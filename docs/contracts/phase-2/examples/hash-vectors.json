@@ -1,0 +1,35 @@
+{
+  "vectorFormatVersion": 1,
+  "vectors": [
+    {
+      "file": "configuration.canonical.json",
+      "byteLength": 231,
+      "sha256": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f"
+    },
+    {
+      "file": "build-identity.txt",
+      "byteLength": 245,
+      "sha256": "964789b064e8cea5fb7fbbeb6083ed20d0e33eea5a1c5f3bcecc236890837be9"
+    },
+    {
+      "file": "initial-state.canonical.json",
+      "byteLength": 385,
+      "sha256": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323"
+    },
+    {
+      "file": "random-max.canonical.json",
+      "byteLength": 403,
+      "sha256": "8c5790290375e93cd409c6f9ecd6f6d8635d016c3e0e205c38c95bfa08754160"
+    },
+    {
+      "file": "moved-state.canonical.json",
+      "byteLength": 385,
+      "sha256": "98d802e77649e7bd7a8b565ae6e303cf7661ba0a40c4b3baa1e622e22033f3e6"
+    },
+    {
+      "file": "finished-state.canonical.json",
+      "byteLength": 384,
+      "sha256": "48ab762d4d1b9af0ee131a8cafca62fcba18acd01b88ffa07351de6a8a9001b3"
+    }
+  ]
+}

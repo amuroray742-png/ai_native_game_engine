@@ -12,6 +12,17 @@ namespace AiNative.Headless
         /// <summary>文件读取和结构校验仅在宿主发生。领域校验由 GridGameRules.Create 完成。</summary>
         public static ScenarioDefinition Load(string path)
         {
+            (int version, ScenarioDefinition definition) = Parse(File.ReadAllBytes(path));
+            if (version != 1)
+            {
+                throw new JsonException($"formatVersion={version} 不受支持，预期为 1。");
+            }
+            return definition;
+        }
+
+        // 分离结构读取与版本检查，让批处理在读取全部输入后按协议优先级校验。
+        internal static (int Version, ScenarioDefinition Definition) Parse(ReadOnlyMemory<byte> bytes)
+        {
             var options = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -20,23 +31,18 @@ namespace AiNative.Headless
                 AllowDuplicateProperties = false
             };
             options.Converters.Add(new JsonStringEnumConverter<Side>(allowIntegerValues: false));
-            using FileStream stream = File.OpenRead(path);
-            ScenarioJson data = JsonSerializer.Deserialize<ScenarioJson>(stream, options)
+            ScenarioJson data = JsonSerializer.Deserialize<ScenarioJson>(bytes.Span, options)
                 ?? throw new JsonException("场景根节点不能为 null。");
-            if (data.FormatVersion != 1)
-            {
-                throw new JsonException($"formatVersion={data.FormatVersion} 不受支持，预期为 1。");
-            }
             // Nullable 检查不覆盖集合元素，必须明确拒绝 null，不能让映射阶段意外崩溃。
             if (data.Obstacles.Any(position => position == null) || data.Units.Any(unit => unit == null))
             {
                 throw new JsonException("obstacles 或 units 的数组元素不能为 null。");
             }
-            return new ScenarioDefinition(data.Width, data.Height,
+            return (data.FormatVersion, new ScenarioDefinition(data.Width, data.Height,
                 data.Obstacles.Select(position => new GridPosition(position.X, position.Y)).ToArray(),
                 data.Units.Select(unit => new UnitDefinition(unit.Id, unit.Side,
                     new GridPosition(unit.Position.X, unit.Position.Y), unit.Health)).ToArray(),
-                data.ActionPointsPerTurn, data.AttackDamage);
+                data.ActionPointsPerTurn, data.AttackDamage));
         }
 
         private sealed class ScenarioJson

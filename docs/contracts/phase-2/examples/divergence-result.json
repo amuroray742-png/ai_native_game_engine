@@ -1,0 +1,453 @@
+{
+  "protocolVersion": 1,
+  "status": "Failed",
+  "category": "ReplayDivergence",
+  "code": "CheckpointMismatch",
+  "message": "事件载荷不匹配。",
+  "location": {
+    "operationIndex": 5,
+    "sequence": "2",
+    "path": "result.events[0].to.x"
+  },
+  "accepted": 1,
+  "rejected": 1,
+  "comparedCheckpoints": 6,
+  "initialCheckpoint": {
+    "operationIndex": null,
+    "session": {
+      "lastSubmittedSequence": "0",
+      "completedStepCount": "0",
+      "pendingCount": 0
+    },
+    "state": {
+      "digestVersion": 1,
+      "rulesId": "grid-game",
+      "rulesVersion": 1,
+      "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+      "random": {
+        "algorithm": "splitmix64-v1",
+        "state": "42"
+      },
+      "game": {
+        "units": [
+          {
+            "id": 1,
+            "side": "A",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "health": 4
+          },
+          {
+            "id": 2,
+            "side": "B",
+            "position": {
+              "x": 2,
+              "y": 0
+            },
+            "health": 4
+          }
+        ],
+        "activeSide": "A",
+        "actionPoints": 2,
+        "turnIndex": "1",
+        "winner": null
+      }
+    },
+    "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+    "result": {
+      "kind": "initial"
+    }
+  },
+  "checkpoints": [
+    {
+      "operationIndex": 0,
+      "session": {
+        "lastSubmittedSequence": "0",
+        "completedStepCount": "0",
+        "pendingCount": 0
+      },
+      "state": {
+        "digestVersion": 1,
+        "rulesId": "grid-game",
+        "rulesVersion": 1,
+        "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+        "random": {
+          "algorithm": "splitmix64-v1",
+          "state": "42"
+        },
+        "game": {
+          "units": [
+            {
+              "id": 1,
+              "side": "A",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "health": 4
+            },
+            {
+              "id": 2,
+              "side": "B",
+              "position": {
+                "x": 2,
+                "y": 0
+              },
+              "health": 4
+            }
+          ],
+          "activeSide": "A",
+          "actionPoints": 2,
+          "turnIndex": "1",
+          "winner": null
+        }
+      },
+      "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+      "result": {
+        "kind": "empty"
+      }
+    },
+    {
+      "operationIndex": 1,
+      "session": {
+        "lastSubmittedSequence": "1",
+        "completedStepCount": "0",
+        "pendingCount": 1
+      },
+      "state": {
+        "digestVersion": 1,
+        "rulesId": "grid-game",
+        "rulesVersion": 1,
+        "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+        "random": {
+          "algorithm": "splitmix64-v1",
+          "state": "42"
+        },
+        "game": {
+          "units": [
+            {
+              "id": 1,
+              "side": "A",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "health": 4
+            },
+            {
+              "id": 2,
+              "side": "B",
+              "position": {
+                "x": 2,
+                "y": 0
+              },
+              "health": 4
+            }
+          ],
+          "activeSide": "A",
+          "actionPoints": 2,
+          "turnIndex": "1",
+          "winner": null
+        }
+      },
+      "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+      "result": {
+        "kind": "submitted",
+        "sequence": "1"
+      }
+    },
+    {
+      "operationIndex": 2,
+      "session": {
+        "lastSubmittedSequence": "1",
+        "completedStepCount": "1",
+        "pendingCount": 0
+      },
+      "state": {
+        "digestVersion": 1,
+        "rulesId": "grid-game",
+        "rulesVersion": 1,
+        "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+        "random": {
+          "algorithm": "splitmix64-v1",
+          "state": "42"
+        },
+        "game": {
+          "units": [
+            {
+              "id": 1,
+              "side": "A",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "health": 4
+            },
+            {
+              "id": 2,
+              "side": "B",
+              "position": {
+                "x": 2,
+                "y": 0
+              },
+              "health": 4
+            }
+          ],
+          "activeSide": "A",
+          "actionPoints": 2,
+          "turnIndex": "1",
+          "winner": null
+        }
+      },
+      "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+      "result": {
+        "kind": "executed",
+        "sequence": "1",
+        "outcome": "Rejected",
+        "errorCode": "NotYourTurn",
+        "events": []
+      }
+    },
+    {
+      "operationIndex": 3,
+      "session": {
+        "lastSubmittedSequence": "2",
+        "completedStepCount": "1",
+        "pendingCount": 1
+      },
+      "state": {
+        "digestVersion": 1,
+        "rulesId": "grid-game",
+        "rulesVersion": 1,
+        "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+        "random": {
+          "algorithm": "splitmix64-v1",
+          "state": "42"
+        },
+        "game": {
+          "units": [
+            {
+              "id": 1,
+              "side": "A",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "health": 4
+            },
+            {
+              "id": 2,
+              "side": "B",
+              "position": {
+                "x": 2,
+                "y": 0
+              },
+              "health": 4
+            }
+          ],
+          "activeSide": "A",
+          "actionPoints": 2,
+          "turnIndex": "1",
+          "winner": null
+        }
+      },
+      "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+      "result": {
+        "kind": "submitted",
+        "sequence": "2"
+      }
+    },
+    {
+      "operationIndex": 4,
+      "session": {
+        "lastSubmittedSequence": "3",
+        "completedStepCount": "1",
+        "pendingCount": 2
+      },
+      "state": {
+        "digestVersion": 1,
+        "rulesId": "grid-game",
+        "rulesVersion": 1,
+        "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+        "random": {
+          "algorithm": "splitmix64-v1",
+          "state": "42"
+        },
+        "game": {
+          "units": [
+            {
+              "id": 1,
+              "side": "A",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "health": 4
+            },
+            {
+              "id": 2,
+              "side": "B",
+              "position": {
+                "x": 2,
+                "y": 0
+              },
+              "health": 4
+            }
+          ],
+          "activeSide": "A",
+          "actionPoints": 2,
+          "turnIndex": "1",
+          "winner": null
+        }
+      },
+      "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+      "result": {
+        "kind": "submitted",
+        "sequence": "3"
+      }
+    },
+    {
+      "operationIndex": 5,
+      "session": {
+        "lastSubmittedSequence": "3",
+        "completedStepCount": "2",
+        "pendingCount": 1
+      },
+      "state": {
+        "digestVersion": 1,
+        "rulesId": "grid-game",
+        "rulesVersion": 1,
+        "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+        "random": {
+          "algorithm": "splitmix64-v1",
+          "state": "42"
+        },
+        "game": {
+          "units": [
+            {
+              "id": 1,
+              "side": "A",
+              "position": {
+                "x": 1,
+                "y": 0
+              },
+              "health": 4
+            },
+            {
+              "id": 2,
+              "side": "B",
+              "position": {
+                "x": 2,
+                "y": 0
+              },
+              "health": 4
+            }
+          ],
+          "activeSide": "A",
+          "actionPoints": 1,
+          "turnIndex": "1",
+          "winner": null
+        }
+      },
+      "stateHash": "98d802e77649e7bd7a8b565ae6e303cf7661ba0a40c4b3baa1e622e22033f3e6",
+      "result": {
+        "kind": "executed",
+        "sequence": "2",
+        "outcome": "Accepted",
+        "events": [
+          {
+            "type": "UnitMoved",
+            "unitId": 1,
+            "from": {
+              "x": 0,
+              "y": 0
+            },
+            "to": {
+              "x": 1,
+              "y": 0
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "finalCheckpoint": {
+    "operationIndex": 5,
+    "session": {
+      "lastSubmittedSequence": "3",
+      "completedStepCount": "2",
+      "pendingCount": 1
+    },
+    "state": {
+      "digestVersion": 1,
+      "rulesId": "grid-game",
+      "rulesVersion": 1,
+      "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+      "random": {
+        "algorithm": "splitmix64-v1",
+        "state": "42"
+      },
+      "game": {
+        "units": [
+          {
+            "id": 1,
+            "side": "A",
+            "position": {
+              "x": 1,
+              "y": 0
+            },
+            "health": 4
+          },
+          {
+            "id": 2,
+            "side": "B",
+            "position": {
+              "x": 2,
+              "y": 0
+            },
+            "health": 4
+          }
+        ],
+        "activeSide": "A",
+        "actionPoints": 1,
+        "turnIndex": "1",
+        "winner": null
+      }
+    },
+    "stateHash": "98d802e77649e7bd7a8b565ae6e303cf7661ba0a40c4b3baa1e622e22033f3e6",
+    "result": {
+      "kind": "executed",
+      "sequence": "2",
+      "outcome": "Accepted",
+      "events": [
+        {
+          "type": "UnitMoved",
+          "unitId": 1,
+          "from": {
+            "x": 0,
+            "y": 0
+          },
+          "to": {
+            "x": 1,
+            "y": 0
+          }
+        }
+      ]
+    }
+  },
+  "artifacts": [],
+  "divergence": {
+    "expectedHash": "98d802e77649e7bd7a8b565ae6e303cf7661ba0a40c4b3baa1e622e22033f3e6",
+    "actualHash": "98d802e77649e7bd7a8b565ae6e303cf7661ba0a40c4b3baa1e622e22033f3e6",
+    "differences": [
+      {
+        "path": "result.events[0].to.x",
+        "kind": "Changed",
+        "expected": 0,
+        "actual": 1
+      }
+    ]
+  }
+}

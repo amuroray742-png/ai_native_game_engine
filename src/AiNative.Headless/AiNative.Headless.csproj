@@ -8,6 +8,7 @@
     <ProjectReference Include="../AiNative.GridGame/AiNative.GridGame.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="AiNative.Tests" />
     <None Include="demo.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

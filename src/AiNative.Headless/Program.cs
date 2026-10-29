@@ -10,9 +10,14 @@ namespace AiNative.Headless
     {
         public static int Main(string[] args) => Run(args, Console.Out, Console.Error);
 
-        /// <summary>0=演示通过，1=执行或验收失败，2=输入配置错误。输出面向人，不是通用 CLI 协议。</summary>
+        /// <summary>run/inspect 输出协议 JSON；无参数或单场景路径保留原演示。0=完成，1=执行/宿主故障，2=输入错误。</summary>
         public static int Run(string[] args, TextWriter output, TextWriter error)
         {
+            if (args.Length > 0 && (args[0] == "run" || args[0] == "inspect" || args[0] == "replay"
+                || args[0] == "--help"))
+            {
+                return CliRunner.Run(args, output, error);
+            }
             if (args.Length > 1)
             {
                 error.WriteLine("用法: AiNative.Headless [scenario.json]");

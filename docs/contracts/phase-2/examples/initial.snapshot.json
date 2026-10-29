@@ -1,0 +1,83 @@
+{
+  "snapshotFormatVersion": 1,
+  "rulesId": "grid-game",
+  "rulesVersion": 1,
+  "configFormatVersion": 1,
+  "configuration": {
+    "formatVersion": 1,
+    "width": 5,
+    "height": 5,
+    "obstacles": [
+      {
+        "x": 2,
+        "y": 2
+      }
+    ],
+    "units": [
+      {
+        "id": 1,
+        "side": "A",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "health": 4
+      },
+      {
+        "id": 2,
+        "side": "B",
+        "position": {
+          "x": 2,
+          "y": 0
+        },
+        "health": 4
+      }
+    ],
+    "actionPointsPerTurn": 2,
+    "attackDamage": 2
+  },
+  "configHash": "0da3cd673470314822c16cb8156b885a68858212cfbe3b20064fce3db149c38f",
+  "session": {
+    "lastSubmittedSequence": "0",
+    "completedStepCount": "0",
+    "pendingCount": 0
+  },
+  "random": {
+    "algorithm": "splitmix64-v1",
+    "state": "42"
+  },
+  "game": {
+    "units": [
+      {
+        "id": 1,
+        "side": "A",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "health": 4
+      },
+      {
+        "id": 2,
+        "side": "B",
+        "position": {
+          "x": 2,
+          "y": 0
+        },
+        "health": 4
+      }
+    ],
+    "activeSide": "A",
+    "actionPoints": 2,
+    "turnIndex": "1",
+    "winner": null
+  },
+  "digestVersion": 1,
+  "stateHash": "d22b11edb2ee66a21a9840e52abb57c8e2dd75f0db2f9d3cb52b376e23886323",
+  "environment": {
+    "runtimeVersion": "0.0.0",
+    "os": "linux",
+    "architecture": "x64",
+    "buildHash": "964789b064e8cea5fb7fbbeb6083ed20d0e33eea5a1c5f3bcecc236890837be9"
+  }
+}
