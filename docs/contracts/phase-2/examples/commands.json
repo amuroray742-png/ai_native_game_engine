@@ -1,0 +1,86 @@
+{
+  "commandFormatVersion": 1,
+  "operations": [
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "EndTurn",
+        "side": "B"
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Move",
+        "side": "A",
+        "unitId": 1,
+        "direction": "Right"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Attack",
+        "side": "A",
+        "unitId": 1,
+        "targetId": 2
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "EndTurn",
+        "side": "A"
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Attack",
+        "side": "B",
+        "unitId": 2,
+        "targetId": 1
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "EndTurn",
+        "side": "B"
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Attack",
+        "side": "A",
+        "unitId": 1,
+        "targetId": 2
+      }
+    },
+    {
+      "op": "advance"
+    }
+  ]
+}

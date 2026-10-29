@@ -2,7 +2,7 @@
 
 面向 AI Agent 的独立玩法内核与工具链：让游戏状态可观察、操作可控制、问题可复现、改动可验证。
 
-**当前状态：第一阶段无头玩法闭环已验证。** 已实现纯 C# 内核、外部 JSON 场景、网格回合制规则和固定控制台演示。Unity 适配、通用 Agent CLI、快照与回放工具仍在规划中；不宣称已验证 Unity 或跨运行时确定性。
+**当前状态：第一阶段已验证，第二阶段已实现 P2-T5 回放与首个分歧定位。** 已有纯 C# 内核、外部 JSON 场景、网格回合制规则、固定演示、完整状态导出恢复，以及严格快照、规范化摘要、环境检查和单文件发布。`run` / `inspect` 支持外部命令、结构化结果及同一支持环境下的跨进程恢复。`run --replay-out` 可录制回放，`replay` 逐检查点验证并报告首个字段分歧。P2-T6 整体交付验收与 Unity 适配尚未实施，不宣称跨运行时确定性。
 
 ## 快速运行
 
@@ -27,13 +27,26 @@ dotnet run --project src/AiNative.Headless -- src/AiNative.Headless/demo.json
 
 退出码：`0` 为演示通过，`1` 为执行或验收失败，`2` 为参数或配置错误。只有相对的显式场景路径按当前工作目录解析，默认场景不依赖当前工作目录。
 
+## 批处理 CLI
+
+```sh
+dotnet run --project src/AiNative.Headless -- run --scenario src/AiNative.Headless/demo.json --seed 42 --commands docs/contracts/phase-2/examples/commands.json --snapshot-out final.json --replay-out recorded.json
+dotnet run --project src/AiNative.Headless -- replay --input recorded.json
+dotnet run --project src/AiNative.Headless -- inspect --snapshot final.json
+dotnet run --project src/AiNative.Headless -- run --snapshot final.json --commands docs/contracts/phase-2/examples/empty-commands.json
+```
+
+输出目标必须不存在，父目录必须存在；显式路径按当前工作目录解析。新子命令 stdout 输出一份 JSON，stderr 用于诊断；退出码 `0` 为完成，`2` 为输入错误，`1` 为模拟或宿主故障，`3` 为回放分歧。业务拒绝继续执行并出现在检查点中。恢复使用快照内嵌配置；`--expect-config` 可核对配置身份。快照与回放仅支持相同运行时、操作系统、架构与构建内容标识。
+
+`--help` 查看帮助。回放匹配返回 `ReplayMatched`；损坏记录返回输入错误，合法期望与实际执行不符返回 `CheckpointMismatch`，包含首个操作位置、期望/实际摘要及字段差异。完整字段及错误语义见[协议 v1](docs/contracts/phase-2/contract.md)。
+
 ## 项目与验证
 
 | 项目 | 职责 | 目标 |
 | --- | --- | --- |
-| AiNative.Core | FIFO 命令调度、故障状态、SplitMix64 随机源 | .NET Standard 2.1 / C# 9 |
-| AiNative.GridGame | 场景校验、移动、攻击、回合、胜负与只读视图 | .NET Standard 2.1 / C# 9 |
-| AiNative.Headless | JSON 输入、装配、演示和输出 | .NET 10 |
+| AiNative.Core | FIFO 调度、计数、故障隔离、随机状态导出恢复 | .NET Standard 2.1 / C# 9 |
+| AiNative.GridGame | 场景校验、玩法规则、只读视图及完整状态导出恢复 | .NET Standard 2.1 / C# 9 |
+| AiNative.Headless | JSON 输入、快照、run/inspect/replay、装配与演示 | .NET 10 |
 | AiNative.Tests | 核心、玩法、配置及进程行为测试 | .NET 10 / xUnit |
 
 ```sh
@@ -42,12 +55,14 @@ dotnet test
 dotnet format --verify-no-changes --no-restore
 ```
 
-本地已通过 59 项测试、无警告构建、只读格式检查与控制台演示。基础 [GitHub Actions 工作流](.github/workflows/build.yml) 已配置相同检查，尚未在远端运行，不将配置存在视为 CI 已通过。
+本地已通过 332 项测试、无警告构建、只读格式检查与控制台演示。基础 [GitHub Actions 工作流](.github/workflows/build.yml) 已配置相同检查，尚未在远端运行，不将配置存在视为 CI 已通过。
 
 ## 文档
 
 - [设计思路](docs/ai-native-game-engine-design.md)：架构、Agent 工作流与整体路线。
 - [第一阶段实施计划与验收记录](docs/phase-1-headless-gameplay-plan.md)：任务、接口、配置格式、运行证据和独立审查。
+- [第二阶段实施计划](docs/phase-2-reproducibility-plan.md)：快照、回放、结构化 CLI 契约、任务拆分与验收标准，以及 P2-T2–T5 的本地验收记录。
+- [第二阶段公共 API 与协议 v1](docs/contracts/phase-2/contract.md)：P2-T1 已固化的签名、CLI 参数、字段表、样例及固定哈希向量。
 - [架构与代码规范](docs/engineering-guidelines.md)：依赖边界、C# 风格、简洁结构及可读性要求。
 - [Agent 仓库约定](AGENTS.md)：开发与审查入口。
 

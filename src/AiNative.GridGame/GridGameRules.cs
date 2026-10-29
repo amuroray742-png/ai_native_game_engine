@@ -6,6 +6,7 @@ namespace AiNative.GridGame
 {
     public sealed class GridGameRules : IGameRules<GridCommand, GridGameView>
     {
+        private readonly ScenarioDefinition _configuration;
         private readonly int _width;
         private readonly int _height;
         private readonly int _actionPointsPerTurn;
@@ -26,6 +27,9 @@ namespace AiNative.GridGame
             _actionPoints = _actionPointsPerTurn;
             _obstacles = definition.Obstacles.OrderBy(position => position.Y).ThenBy(position => position.X).ToArray();
             _units = definition.Units.OrderBy(unit => unit.Id).ToArray();
+            // 配置保留初始单位，不能与后续替换元素的运行数组共用存储。
+            _configuration = new ScenarioDefinition(_width, _height, Array.AsReadOnly(_obstacles),
+                Array.AsReadOnly((UnitDefinition[])_units.Clone()), _actionPointsPerTurn, _attackDamage);
         }
 
         /// <summary>校验所有领域约束后创建对局。异常表示场景配置无效，不产生可运行实例。</summary>
@@ -37,6 +41,30 @@ namespace AiNative.GridGame
             }
             ScenarioValidator.Validate(definition);
             return new GridGameRules(definition);
+        }
+
+        /// <summary>返回原始配置及当前玩法状态的隔离副本；宿主须在会话调用之间导出。</summary>
+        public GridGameState ExportState() => new GridGameState(_configuration, _units,
+            _activeSide, _actionPoints, _turnIndex, _winner);
+
+        /// <summary>完整校验后创建新规则实例；非法状态抛 ArgumentException，不修改已有对局。</summary>
+        public static GridGameRules Restore(GridGameState state)
+        {
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+            GridGameStateValidator.Validate(state);
+            var rules = new GridGameRules(state.Configuration);
+            for (int index = 0; index < state.Units.Count; index++)
+            {
+                rules._units[index] = state.Units[index];
+            }
+            rules._activeSide = state.ActiveSide;
+            rules._actionPoints = state.ActionPoints;
+            rules._turnIndex = state.TurnIndex;
+            rules._winner = state.Winner;
+            return rules;
         }
 
         /// <summary>返回当前状态的隔离视图；不推进回合或暴露可变集合。</summary>

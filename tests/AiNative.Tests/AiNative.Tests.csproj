@@ -12,4 +12,7 @@
     <ProjectReference Include="../../src/AiNative.GridGame/AiNative.GridGame.csproj" />
     <ProjectReference Include="../../src/AiNative.Headless/AiNative.Headless.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../../docs/contracts/phase-2/examples/*" Link="SnapshotExamples/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

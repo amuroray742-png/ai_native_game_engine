@@ -1,0 +1,16 @@
+{
+  "protocolVersion": 1,
+  "status": "Failed",
+  "category": "InputError",
+  "code": "InvalidArguments",
+  "message": "--scenario 要求 --seed。",
+  "location": null,
+  "accepted": 0,
+  "rejected": 0,
+  "comparedCheckpoints": 0,
+  "initialCheckpoint": null,
+  "checkpoints": [],
+  "finalCheckpoint": null,
+  "artifacts": [],
+  "divergence": null
+}
