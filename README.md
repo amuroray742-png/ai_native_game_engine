@@ -42,7 +42,7 @@ dotnet test
 dotnet format --verify-no-changes --no-restore
 ```
 
-本地已通过 55 项测试、无警告构建、只读格式检查与控制台演示。基础 [GitHub Actions 工作流](.github/workflows/build.yml) 已配置相同检查，尚未在远端运行，不将配置存在视为 CI 已通过。
+本地已通过 59 项测试、无警告构建、只读格式检查与控制台演示。基础 [GitHub Actions 工作流](.github/workflows/build.yml) 已配置相同检查，尚未在远端运行，不将配置存在视为 CI 已通过。
 
 ## 文档
 

@@ -14,7 +14,7 @@ namespace AiNative.Tests
         {
             var session = Fixtures.Session();
             GridGameView before = session.GetState();
-            CommandResult result = Fixtures.Execute(session, new Move(Side.A, 1, new GridPosition(1, 0)));
+            CommandResult result = Fixtures.Execute(session, new Move(Side.A, 1, MoveDirection.Right));
             UnitMoved moved = Assert.IsType<UnitMoved>(Assert.Single(result.Events));
             GridGameView after = session.GetState();
             Assert.True(result.Succeeded);
@@ -31,27 +31,77 @@ namespace AiNative.Tests
         }
 
         [Theory]
-        [InlineData(-1, 0, "OutOfBounds")]
-        [InlineData(5, 0, "OutOfBounds")]
-        [InlineData(0, 5, "OutOfBounds")]
-        [InlineData(2, 2, "Blocked")]
-        [InlineData(2, 0, "Occupied")]
-        [InlineData(0, 0, "Occupied")]
-        [InlineData(1, 1, "NotAdjacent")]
-        [InlineData(0, 2, "NotAdjacent")]
-        [InlineData(int.MaxValue, int.MinValue, "OutOfBounds")]
-        public void Move_WhenDestinationInvalid_LeavesStateUnchanged(int x, int y, string error)
+        [InlineData(MoveDirection.Up, 1, 2)]
+        [InlineData(MoveDirection.Down, 1, 0)]
+        [InlineData(MoveDirection.Left, 0, 1)]
+        [InlineData(MoveDirection.Right, 2, 1)]
+        public void Move_InEachDirection_AdvancesOneGridCell(MoveDirection direction, int x, int y)
         {
-            Fixtures.AssertRejected(Fixtures.Session(), new Move(Side.A, 1, new GridPosition(x, y)), error);
+            var session = CreateSession(new GridPosition(1, 1));
+            CommandResult result = Fixtures.Execute(session, new Move(Side.A, 1, direction));
+            UnitMoved moved = Assert.IsType<UnitMoved>(Assert.Single(result.Events));
+            Assert.Equal(new GridPosition(1, 1), moved.From);
+            Assert.Equal(new GridPosition(x, y), moved.To);
+            Assert.Equal(moved.To, session.GetState().Units[0].Position);
+            Assert.Equal(1, session.GetState().ActionPoints);
+        }
+
+        [Theory]
+        [InlineData(0, 0, MoveDirection.Left)]
+        [InlineData(0, 0, MoveDirection.Down)]
+        [InlineData(4, 4, MoveDirection.Right)]
+        [InlineData(4, 4, MoveDirection.Up)]
+        public void Move_OutsideEachMapEdge_LeavesStateUnchanged(int x, int y, MoveDirection direction)
+        {
+            Fixtures.AssertRejected(CreateSession(new GridPosition(x, y)), new Move(Side.A, 1, direction), "OutOfBounds");
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(4)]
+        [InlineData(int.MaxValue)]
+        public void Move_WithInvalidDirection_LeavesStateUnchanged(int direction)
+        {
+            Fixtures.AssertRejected(Fixtures.Session(), new Move(Side.A, 1, (MoveDirection)direction), "InvalidDirection");
+        }
+
+        [Fact]
+        public void Move_IntoObstacleOrUnit_LeavesStateUnchanged()
+        {
+            Fixtures.AssertRejected(CreateSession(new GridPosition(1, 2)), new Move(Side.A, 1, MoveDirection.Right), "Blocked");
+            Fixtures.AssertRejected(CreateSession(new GridPosition(1, 0)), new Move(Side.A, 1, MoveDirection.Right), "Occupied");
+        }
+
+        [Fact]
+        public void QueuedMoves_UsePositionAtExecutionTime()
+        {
+            var session = Fixtures.Session();
+            session.Submit(new Move(Side.A, 1, MoveDirection.Up));
+            session.Submit(new Move(Side.A, 1, MoveDirection.Up));
+            session.Advance();
+            CommandResult result = Assert.IsType<StepResult>(session.Advance()).Result;
+            UnitMoved moved = Assert.IsType<UnitMoved>(Assert.Single(result.Events));
+            Assert.Equal(new GridPosition(0, 1), moved.From);
+            Assert.Equal(new GridPosition(0, 2), moved.To);
+            Assert.Equal(moved.To, session.GetState().Units[0].Position);
+            Assert.Equal(0, session.GetState().ActionPoints);
+        }
+
+        private static SimulationSession<GridCommand, GridGameView> CreateSession(GridPosition origin)
+        {
+            ScenarioDefinition source = Fixtures.Definition();
+            UnitDefinition[] units = { new UnitDefinition(1, Side.A, origin, 4), source.Units[1] };
+            var definition = new ScenarioDefinition(5, 5, source.Obstacles, units, 2, 2);
+            return new SimulationSession<GridCommand, GridGameView>(GridGameRules.Create(definition), 42);
         }
 
         [Fact]
         public void Commands_WhenSideOrEntityInvalid_LeaveStateUnchanged()
         {
             var session = Fixtures.Session();
-            Fixtures.AssertRejected(session, new Move(Side.B, 2, new GridPosition(3, 0)), "NotYourTurn");
-            Fixtures.AssertRejected(session, new Move(Side.A, 2, new GridPosition(3, 0)), "NotYourUnit");
-            Fixtures.AssertRejected(session, new Move(Side.A, 99, new GridPosition(1, 0)), "UnknownUnit");
+            Fixtures.AssertRejected(session, new Move(Side.B, 2, MoveDirection.Right), "NotYourTurn");
+            Fixtures.AssertRejected(session, new Move(Side.A, 2, MoveDirection.Right), "NotYourUnit");
+            Fixtures.AssertRejected(session, new Move(Side.A, 99, MoveDirection.Right), "UnknownUnit");
             Fixtures.AssertRejected(session, new EndTurn(Side.B), "NotYourTurn");
             Fixtures.AssertRejected(session, new EndTurn((Side)999), "NotYourTurn");
         }
@@ -60,11 +110,11 @@ namespace AiNative.Tests
         public void ActionPoints_WhenExhausted_RequireExplicitEndTurn()
         {
             var session = Fixtures.Session();
-            Fixtures.Execute(session, new Move(Side.A, 1, new GridPosition(1, 0)));
+            Fixtures.Execute(session, new Move(Side.A, 1, MoveDirection.Right));
             Fixtures.Execute(session, new Attack(Side.A, 1, 2));
             Assert.Equal(0, session.GetState().ActionPoints);
             Assert.Equal(Side.A, session.GetState().ActiveSide);
-            Fixtures.AssertRejected(session, new Move(Side.A, 1, new GridPosition(1, 1)), "NoActionPoints");
+            Fixtures.AssertRejected(session, new Move(Side.A, 1, MoveDirection.Up), "NoActionPoints");
             Fixtures.AssertRejected(session, new Attack(Side.A, 1, 2), "NoActionPoints");
             Fixtures.AssertRejected(session, new EndTurn(Side.B), "NotYourTurn");
             CommandResult ended = Fixtures.Execute(session, new EndTurn(Side.A));
@@ -80,8 +130,8 @@ namespace AiNative.Tests
         {
             var session = Fixtures.Session();
             session.Submit(new EndTurn(Side.A));
-            session.Submit(new Move(Side.A, 1, new GridPosition(1, 0)));
-            session.Submit(new Move(Side.B, 2, new GridPosition(3, 0)));
+            session.Submit(new Move(Side.A, 1, MoveDirection.Right));
+            session.Submit(new Move(Side.B, 2, MoveDirection.Right));
             Assert.True(Assert.IsType<StepResult>(session.Advance()).Result.Succeeded);
             Assert.Equal("NotYourTurn", Assert.IsType<StepResult>(session.Advance()).Result.Error);
             Assert.True(Assert.IsType<StepResult>(session.Advance()).Result.Succeeded);
@@ -106,10 +156,10 @@ namespace AiNative.Tests
             ScenarioDefinition source = Fixtures.Definition();
             var definition = new ScenarioDefinition(source.Width, source.Height, source.Obstacles, source.Units, 2, int.MaxValue);
             var session = new SimulationSession<GridCommand, GridGameView>(GridGameRules.Create(definition), 42);
-            Fixtures.Execute(session, new Move(Side.A, 1, new GridPosition(1, 0)));
+            Fixtures.Execute(session, new Move(Side.A, 1, MoveDirection.Right));
             session.Submit(new Attack(Side.A, 1, 2));
             session.Submit(new EndTurn(Side.A));
-            session.Submit(new Move(Side.A, 1, new GridPosition(1, 1)));
+            session.Submit(new Move(Side.A, 1, MoveDirection.Up));
             CommandResult lethal = Assert.IsType<StepResult>(session.Advance()).Result;
             Assert.Collection(lethal.Events,
                 value => { UnitDamaged damaged = Assert.IsType<UnitDamaged>(value); Assert.Equal(0, damaged.Health); Assert.Equal(4, damaged.Damage); },

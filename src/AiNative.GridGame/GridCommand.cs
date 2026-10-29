@@ -11,13 +11,13 @@ namespace AiNative.GridGame
 
     public sealed class Move : GridCommand
     {
-        public Move(Side side, int unitId, GridPosition destination) : base(side)
+        public Move(Side side, int unitId, MoveDirection direction) : base(side)
         {
             UnitId = unitId;
-            Destination = destination;
+            Direction = direction;
         }
         public int UnitId { get; }
-        public GridPosition Destination { get; }
+        public MoveDirection Direction { get; }
     }
 
     public sealed class Attack : GridCommand
