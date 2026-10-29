@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "ainative.core": {
+        "type": "Project"
+      },
+      "ainative.gridgame": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Core": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

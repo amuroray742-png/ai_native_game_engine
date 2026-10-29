@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "width": 5,
+  "height": 5,
+  "obstacles": [{ "x": 2, "y": 2 }],
+  "units": [
+    { "id": 1, "side": "A", "position": { "x": 0, "y": 0 }, "health": 4 },
+    { "id": 2, "side": "B", "position": { "x": 2, "y": 0 }, "health": 4 }
+  ],
+  "actionPointsPerTurn": 2,
+  "attackDamage": 2
+}
