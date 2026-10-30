@@ -2,7 +2,7 @@
 
 面向 AI Agent 的独立玩法内核与工具链：让游戏状态可观察、操作可控制、问题可复现、改动可验证。
 
-**当前状态：第二阶段功能及 P2-T6 本地整体验收已实现，新增 CI 流程待远端验证。** 已有纯 C# 内核、外部 JSON 场景、网格回合制规则、固定演示、完整状态导出恢复，以及严格快照、规范化摘要、环境检查和单文件发布。`run` / `inspect` 支持外部命令、结构化结果及同一支持环境下的跨进程恢复。`run --replay-out` 可录制回放，`replay` 逐检查点验证并报告首个字段分歧。P2-T6 新增可重复验收脚本与证据归档；阶段关闭仍待本轮远端 CI，Unity 适配尚未实施，不宣称跨运行时确定性。
+**当前状态：第二阶段 P2-T1–T6 已完成实现、独立审查、本地及远端验收。** 已有纯 C# 内核、外部 JSON 场景、网格回合制规则、固定演示、完整状态导出恢复，以及严格快照、规范化摘要、环境检查和单文件发布。`run` / `inspect` 支持外部命令、结构化结果及同一支持环境下的跨进程恢复。`run --replay-out` 可录制回放，`replay` 逐检查点验证并报告首个字段分歧。P2-T6 新增可重复验收脚本与证据归档；远端 CI 与证据上传已验证，Unity 适配尚未实施，不宣称跨运行时确定性。
 
 ## 快速运行
 
@@ -55,7 +55,7 @@ dotnet test
 dotnet format --verify-no-changes --no-restore
 ```
 
-本地已通过 332 项测试及 40 次真实 CLI 验收。P2-T1–T5 的 [PR #3 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40880920093) 已通过；本轮 [CI 扩展](.github/workflows/build.yml) 尚未提交并在远端执行。
+本地已通过 332 项测试及 40 次真实 CLI 验收。[P2-T6 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 已通过，上传制品已下载核验，结果同为 332 项测试及 40 次 CLI 验收通过。
 
 构建后可运行下列命令保留输入、快照、回放、stdout/stderr 和检查摘要。需要 Python 3.9+ 标准库；输出目录必须不存在，重复执行请选择新目录。
 

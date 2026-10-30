@@ -1,6 +1,6 @@
 # 第二阶段整体验收入口与证据索引
 
-P2-T6 的实现与本地验收记录见[阶段计划](phase-2-reproducibility-plan.md)。本入口不改变[协议 v1](contracts/phase-2/contract.md)，不承诺跨运行时或跨平台读取同一快照。生产 Core/GridGame/Headless 本轮没有修改；新增 Python 脚本仅用于验证，使用标准库，不增加生产依赖。
+P2-T6 的实现、本地及远端验收记录见[阶段计划](phase-2-reproducibility-plan.md)。本入口不改变[协议 v1](contracts/phase-2/contract.md)，不承诺跨运行时或跨平台读取同一快照。生产 Core/GridGame/Headless 本轮没有修改；新增 Python 脚本仅用于验证，使用标准库，不增加生产依赖。
 
 ## 重复执行
 
@@ -45,10 +45,14 @@ python3 scripts/verify_phase2.py --output TestResults/phase-2
 | V9 重复与进程连续性 | CliTests 重复10次；[CliProcessTests](../tests/AiNative.Tests/CliProcessTests.cs) 删除原输入后新进程恢复/回放；脚本每个保存边界及10次固定运行 | fixed/repeat-1–9、boundary-* 输出及录制文件 |
 | V10 首个分歧/损坏区分 | ReplayTests 固定差异响应、命令/状态/事件变化及损坏变体；脚本分歧定位为 operationIndex=5、sequence=2、已匹配6点 | event-divergence、command-divergence、damaged 输出及输入回放 |
 | V11 严格输入与宿主故障 | SnapshotCodecTests、SnapshotFileTests、[CommandFileTests](../tests/AiNative.Tests/CommandFileTests.cs)、CliTests、ReplayBoundaryTests | TRX：数值边界、字段/编码、部分发布、竞争目标、stdout/stderr 故障 |
-| V12 原行为及持续验证 | 完整测试、只读 format、原演示；[CI 工作流](../.github/workflows/build.yml) 调用同一脚本并保留 TRX/产物 | 本地 TRX 与 legacy 输出；已通过的基线 CI 与新增流程待验证状态见下节 |
+| V12 原行为及持续验证 | 完整测试、只读 format、原演示；[CI 工作流](../.github/workflows/build.yml) 调用同一脚本并保留 TRX/产物 | 本地 TRX 与 legacy 输出；已通过的基线及 P2-T6 CI、制品核验见下节 |
 
 ## CI 证据边界
 
 P2-T1–T5 的提交 `c87e5a82f12b873f950a597250345c60128a10ea` 已在 GitHub Ubuntu runner 运行原有完整检查成功：[PR #3 workflow run](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40880920093)。该结果包含 332 项测试、构建、格式和原演示，不包含本轮新增的独立验收脚本与上传步骤。
 
-本轮工作流增加 TRX 输出、40 次 CLI 验收及 `always()` 证据上传，制品名称含 run ID/attempt，保留 7 天。**本轮扩展尚未提交并在远端运行**；不能以基线 CI 成功代替当前工作流成功。阶段整体关闭前，还须记录本轮提交对应的成功 workflow run 和可下载制品。没有进行 Unity、跨运行时读取同一记录或跨平台快照互通验收。
+P2-T6 提交 `17cdf7b9faf651b6758f31caf65927b6e995a218` 已通过 [PR #4 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 和 [push CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991239106)。PR 作业检出临时合并提交 `2f8c4b1b5745c452946f651e5844bab2c086138a`，环境为 Linux/x64、SDK 10.0.204、runtime 10.0.14；332 项测试全部通过，40 次 CLI 验收全部通过。
+
+`Preserve validation evidence` 步骤成功。已下载 [phase-2-evidence-40991275807-1](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807/artifacts/12949133349)，核验 117 个文件中的 TRX、summary、40 次 stdout/stderr、快照与回放以及分歧材料。持久化的[核验元数据](evidence/phase-2/ci-40991275807.json)记录提交、构建身份、制品 ID/摘要和结果；其中 digest 是 GitHub 报告的归档摘要，文件内容已另行解析检查。
+
+制品保留 7 天，预计在北京时间 2026-11-06 10:23:20 过期；过期后可按本页命令重新生成材料，不能假定原下载链接永久有效。第二阶段 V1–V12 已取得相应本地及远端证据，阶段验收完成；PR 合并仍是独立操作。Linux CI 与 macOS 本地均在各自相同环境内保存恢复，没有进行 Unity、跨运行时读取同一记录或跨平台快照互通验收。

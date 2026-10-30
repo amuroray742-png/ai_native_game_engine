@@ -1,6 +1,6 @@
 # 第二阶段：复现与 Agent 工具实施计划
 
-状态：P2-T1 契约文档及样例已固化（2026-10-29）；P2-T2 已完成进程内状态导出恢复及本地验收，P2-T3 已完成快照文件、摘要与单文件发布的本地验收，P2-T4 已完成批处理 CLI 与跨进程本地验收，P2-T5 已完成回放与首个分歧定位的本地验收，P2-T6 已实现验收入口并通过本地验证，新增 CI 流程仍待提交后远端验证。[公共 API 与协议 v1](contracts/phase-2/contract.md)是具体签名、字段及参数依据，其中 Core 与 GridGame 管理 API 已实现，快照文件内部 API 已实现，run/inspect/replay CLI 已实现。
+状态：P2-T1 契约文档及样例已固化（2026-10-29）；P2-T2 已完成进程内状态导出恢复及本地验收，P2-T3 已完成快照文件、摘要与单文件发布的本地验收，P2-T4 已完成批处理 CLI 与跨进程本地验收，P2-T5 已完成回放与首个分歧定位的本地验收，P2-T6 已完成本地验证、远端 CI 和上传制品核验（2026-10-30），第二阶段验收完成。[公共 API 与协议 v1](contracts/phase-2/contract.md)是具体签名、字段及参数依据，其中 Core 与 GridGame 管理 API 已实现，快照文件内部 API 已实现，run/inspect/replay CLI 已实现。
 
 设计依据见[设计文档](ai-native-game-engine-design.md)，实现约束见[架构与代码规范](engineering-guidelines.md)，现有能力见[第一阶段验收记录](phase-1-headless-gameplay-plan.md)。T1 仅编写契约与样例；T2 在现有项目内实现进程内管理 API，T3 在 Headless 内实现快照边界，T4 实现命令文件与 CLI，T5 实现回放记录和验证；均不新增依赖或项目。
 
@@ -165,7 +165,7 @@ run 默认继续执行业务拒绝后的后续 operations；退出 0 只表示�
 
 ## 8. 任务拆分、依赖与交付
 
-P2-T1 已交付契约文档与数据样例；P2-T2–T5 已实现，P2-T6 已完成本地验收及 CI 配置，远端执行待验证。实现者负责实现与初步验证，独立 Reviewer 负责需求、边界和证据审查；责任分配见 P2-T1 契约第 7 节，写代码者不能承担该代码最终独立审查。默认顺序集成，不预设并行收益。
+P2-T1 已交付契约文档与数据样例；P2-T2–T5 已实现，P2-T6 已完成本地与远端 CI 验收，上传证据已下载核验。实现者负责实现与初步验证，独立 Reviewer 负责需求、边界和证据审查；责任分配见 P2-T1 契约第 7 节，写代码者不能承担该代码最终独立审查。默认顺序集成，不预设并行收益。
 
 | 任务 | 依赖 | 影响模块及交付 | 验收入口 |
 | --- | --- | --- | --- |
@@ -174,7 +174,7 @@ P2-T1 已交付契约文档与数据样例；P2-T2–T5 已实现，P2-T6 已完
 | P2-T3 快照文件与摘要（已完成） | T2 | Headless 严格编码/解码、配置身份、规范化摘要、环境检查、单文件发布 | V3–V6、V11；固定字节与哈希向量独立断言 |
 | P2-T4 通用批处理 CLI（已完成） | T3 | 外部命令 operations、run/inspect、机器输出、兼容原演示 | V7–V9、V11；从另一个工作目录调用真实进程 |
 | P2-T5 回放与首个差异（已完成） | T4 | 记录器、验证器、检查点、字段差异及 replay 入口 | V5、V6、V9、V10；有效拒绝和空推进均能回放 |
-| P2-T6 集成与交付证据（本地已验收，新增 CI 待远端验证） | T2–T5 | 固定案例、进程连续性、独立审查、CI 入口、README 与实际验收记录 | V1–V12 全部取得证据，审查后重跑受影响检查 |
+| P2-T6 集成与交付证据（已完成） | T2–T5 | 固定案例、进程连续性、独立审查、CI 入口、README 与实际验收记录 | V1–V12 全部取得证据，审查后重跑受影响检查 |
 
 各任务只实现本表及所引用契约，不附带玩法扩展或无关重构。沿用设计文档的三轮“假设、修改、验证”预算，保留失败材料。改变状态所有权、兼容策略、退出语义或验收目标须先同步文档并由人决定；常规实现选择由实现者处理。公共类型名和参数拼写已在 T1 固化，不将此项留给多个模块各自决定。
 
@@ -203,7 +203,7 @@ V1 的保存边界使用“提交一条、推进一条”的演示方式；V7 �
 
 实施后记录：提交/构建身份、SDK 与 runtime、OS/架构、执行命令、通过/失败结果、固定输入与输出位置、首个分歧示例、Reviewer 与问题处理结论。协议样例及小型固定案例随实现入库，临时产物不直接堆入仓库；远端 CI 证据仅在实际运行后补充。
 
-本阶段已完成 T1 契约、T2 进程内实现、T3 快照文件边界、T4 批处理 CLI 及 T5 回放验证；P2-T6 的本地行为验收与证据索引已完成，新增 CI 流程须在提交后执行并取得证据才能关闭阶段。继续遵循已固化的 P2-T1 契约；任何后续实际验收另记日期和证据，不改写第一阶段历史记录。
+本阶段已完成 T1 契约、T2 进程内实现、T3 快照文件边界、T4 批处理 CLI 及 T5 回放验证；P2-T6 的本地行为验收、证据索引、远端 CI 与制品核验已完成，第二阶段验收关闭；PR 合并不在本次验收操作之内。继续遵循已固化的 P2-T1 契约；任何后续实际验收另记日期和证据，不改写第一阶段历史记录。
 
 ### P2-T1 契约交付记录（2026-10-29）
 
@@ -328,4 +328,17 @@ CI 保留原有 restore/build/test/format/demo，增加 TRX 输出、相同验�
 - Reviewer 的最终证据位于 `TestResults/p2-t6-review-final/summary.json`；输出目录保护返回 2 且原 summary hash 不变；故意传入非宿主 Core.dll 返回脚本退出码 1，并保留实际宿主失败与输出。
 - Python 语法解析、工作流 YAML 解析、Markdown 本地链接及差异空白检查通过。
 
-远端证据边界：已查询并确认 [PR #3 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40880920093) 成功，日志为 332 项通过、0 失败、0 跳过。它对应 P2-T1–T5，不包含本轮新增流程。P2-T6 的实现和本地验收已完成；本轮改动尚未提交，新 CI 工作流与制品上传尚待远端执行，阶段关闭前仍须补充对应提交的成功 run 与制品证据。不把配置存在、本地脚本通过或旧提交的 CI 成功当成这一步已完成。
+本地验收时的远端证据边界（后续闭环见下节）：已查询并确认 [PR #3 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40880920093) 成功，日志为 332 项通过、0 失败、0 跳过。它对应 P2-T1–T5，不包含本轮新增流程。P2-T6 的实现和本地验收已完成；本轮改动尚未提交，新 CI 工作流与制品上传尚待远端执行，阶段关闭前仍须补充对应提交的成功 run 与制品证据。不把配置存在、本地脚本通过或旧提交的 CI 成功当成这一步已完成。
+
+
+### P2-T6 远端 CI 与阶段验收闭环（2026-10-30）
+
+P2-T6 实现已提交为 `17cdf7b9faf651b6758f31caf65927b6e995a218` 并创建 [PR #4](https://github.com/amuroray742-png/ai_native_game_engine/pull/4)。[PR workflow 40991275807](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 与 [push workflow 40991239106](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991239106) 均为 success，原有 restore/build/test/format/demo、Phase 2 CLI acceptance 和 Preserve validation evidence 全部通过。此次只发布分支和 PR，没有合并。
+
+PR CI 使用 checkout 合并提交 `2f8c4b1b5745c452946f651e5844bab2c086138a`，工作区干净。环境为 SDK 10.0.204、Python 3.14.4、runtime 10.0.14、linux/x64，buildHash 为 `bde6c8f46dd09795ab1b5a5155b27416a3cfd8b94ade8b04071c4a83c353655e`。SDK 按 global.json 的 latestPatch 策略解析；这些环境值来自远端产物，不沿用本地值。
+
+已下载并解析 [制品 12949133349](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807/artifacts/12949133349)：名称 `phase-2-evidence-40991275807-1`，归档 153127 字节，展开 117 个文件。TRX 记录 332 项通过、0 失败、0 跳过；summary 为 Passed，40 次 CLI 调用实际退出码全部符合期望。逐一检查各次 stdout/stderr 文件及最终快照、成功回放、命令/事件分歧和损坏输入材料；事件分歧为 operationIndex=5、sequence=2、path=result.events[0].to.x、comparedCheckpoints=6。
+
+[核验元数据](evidence/phase-2/ci-40991275807.json)随仓库保留；完整下载位于本地 `TestResults/remote-40991275807/`，不提交机器绑定产物。远端制品保留 7 天，预计北京时间 2026-11-06 10:23:20 过期。CI 有 Actions Node 运行时及 ubuntu-latest 镜像迁移提示，均非失败；本轮未借此升级无关依赖。
+
+结合此前独立审查、审查后本地验证与本次远端结果，[V1–V12 证据索引](phase-2-acceptance.md)的阶段退出条件已满足，P2-T1–T6 验收完成。该结论限于文档规定的环境和能力，不等于任意运行时/平台互通、Unity 验收或 PR 已合并。此后仅补写验收记录的提交仍由同一 CI 检查，PR 最终检查状态另行确认。
