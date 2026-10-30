@@ -1,0 +1,79 @@
+{
+  "commandFormatVersion": 1,
+  "operations": [
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Move",
+        "side": "A",
+        "unitId": 1,
+        "direction": "Right"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Move",
+        "side": "A",
+        "unitId": 1,
+        "direction": "Up"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Move",
+        "side": "A",
+        "unitId": 1,
+        "direction": "Down"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Move",
+        "side": "A",
+        "unitId": 1,
+        "direction": "Up"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "EndTurn",
+        "side": "B"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "EndTurn",
+        "side": "A"
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    }
+  ]
+}

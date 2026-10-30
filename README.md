@@ -2,7 +2,7 @@
 
 面向 AI Agent 的独立玩法内核与工具链：让游戏状态可观察、操作可控制、问题可复现、改动可验证。
 
-**当前状态：第一阶段已验证，第二阶段已实现 P2-T5 回放与首个分歧定位。** 已有纯 C# 内核、外部 JSON 场景、网格回合制规则、固定演示、完整状态导出恢复，以及严格快照、规范化摘要、环境检查和单文件发布。`run` / `inspect` 支持外部命令、结构化结果及同一支持环境下的跨进程恢复。`run --replay-out` 可录制回放，`replay` 逐检查点验证并报告首个字段分歧。P2-T6 整体交付验收与 Unity 适配尚未实施，不宣称跨运行时确定性。
+**当前状态：第二阶段 P2-T1–T6 已完成实现、独立审查、本地及远端验收。** 已有纯 C# 内核、外部 JSON 场景、网格回合制规则、固定演示、完整状态导出恢复，以及严格快照、规范化摘要、环境检查和单文件发布。`run` / `inspect` 支持外部命令、结构化结果及同一支持环境下的跨进程恢复。`run --replay-out` 可录制回放，`replay` 逐检查点验证并报告首个字段分歧。P2-T6 新增可重复验收脚本与证据归档；远端 CI 与证据上传已验证，Unity 适配尚未实施，不宣称跨运行时确定性。
 
 ## 快速运行
 
@@ -55,13 +55,21 @@ dotnet test
 dotnet format --verify-no-changes --no-restore
 ```
 
-本地已通过 332 项测试、无警告构建、只读格式检查与控制台演示。基础 [GitHub Actions 工作流](.github/workflows/build.yml) 已配置相同检查，尚未在远端运行，不将配置存在视为 CI 已通过。
+本地已通过 332 项测试及 40 次真实 CLI 验收。[P2-T6 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 已通过，上传制品已下载核验，结果同为 332 项测试及 40 次 CLI 验收通过。
+
+构建后可运行下列命令保留输入、快照、回放、stdout/stderr 和检查摘要。需要 Python 3.9+ 标准库；输出目录必须不存在，重复执行请选择新目录。
+
+```sh
+python3 scripts/verify_phase2.py --output TestResults/phase-2
+```
+
+具体范围、V1–V12 对应测试及产物说明见[第二阶段验收入口与证据索引](docs/phase-2-acceptance.md)。
 
 ## 文档
 
 - [设计思路](docs/ai-native-game-engine-design.md)：架构、Agent 工作流与整体路线。
 - [第一阶段实施计划与验收记录](docs/phase-1-headless-gameplay-plan.md)：任务、接口、配置格式、运行证据和独立审查。
-- [第二阶段实施计划](docs/phase-2-reproducibility-plan.md)：快照、回放、结构化 CLI 契约、任务拆分与验收标准，以及 P2-T2–T5 的本地验收记录。
+- [第二阶段实施计划](docs/phase-2-reproducibility-plan.md)：快照、回放、结构化 CLI 契约、任务拆分与验收标准，以及 P2-T2–T6 的本地验收记录。
 - [第二阶段公共 API 与协议 v1](docs/contracts/phase-2/contract.md)：P2-T1 已固化的签名、CLI 参数、字段表、样例及固定哈希向量。
 - [架构与代码规范](docs/engineering-guidelines.md)：依赖边界、C# 风格、简洁结构及可读性要求。
 - [Agent 仓库约定](AGENTS.md)：开发与审查入口。

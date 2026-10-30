@@ -1,0 +1,52 @@
+{
+  "run": "40991275807",
+  "headSha": "17cdf7b9faf651b6758f31caf65927b6e995a218",
+  "event": "pull_request",
+  "url": "https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807",
+  "artifact": {
+    "id": 12949133349,
+    "name": "phase-2-evidence-40991275807-1",
+    "size_in_bytes": 153127,
+    "expires_at": "2026-11-06T02:23:20Z",
+    "digest": "sha256:808efdfd65fab3263cf5b9295ccb106322cf26a515d663768499ca0b9710b1ac"
+  },
+  "checkoutRevision": "2f8c4b1b5745c452946f651e5844bab2c086138a",
+  "workingTreeChanges": [],
+  "sdk": "10.0.204",
+  "python": "3.14.4",
+  "environment": {
+    "runtimeVersion": "10.0.14",
+    "os": "linux",
+    "architecture": "x64",
+    "buildHash": "bde6c8f46dd09795ab1b5a5155b27416a3cfd8b94ade8b04071c4a83c353655e"
+  },
+  "tests": {
+    "total": "332",
+    "executed": "332",
+    "passed": "332",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "cliCalls": 40,
+  "fileCount": 117,
+  "verifiedOn": "2026-10-30",
+  "artifactUrl": "https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807/artifacts/12949133349",
+  "verifiedContents": [
+    "TRX: 332 passed, 0 failed, 0 skipped",
+    "summary: Passed, 40 CLI calls with matching actual/expected exit codes",
+    "stdout and stderr for all 40 calls",
+    "snapshot, successful replay, command/event divergence and damaged replay inputs",
+    "event divergence: operationIndex=5, sequence=2, result.events[0].to.x, comparedCheckpoints=6"
+  ]
+}
