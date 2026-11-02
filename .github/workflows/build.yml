@@ -9,24 +9,31 @@ permissions:
 
 jobs:
   headless:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - run: dotnet restore --locked-mode
       - run: dotnet build --no-restore
       - run: dotnet test --no-build --no-restore --logger trx --results-directory TestResults/unit
       - run: dotnet format --verify-no-changes --no-restore
       - run: dotnet run --project src/AiNative.Headless --no-build
       - name: Phase 2 CLI acceptance
-        run: python3 scripts/verify_phase2.py --output TestResults/phase-2
+        run: python scripts/verify_phase2.py --output TestResults/phase-2
       - name: Preserve validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase-2-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          name: phase-2-evidence-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: TestResults/
           if-no-files-found: warn
           retention-days: 7

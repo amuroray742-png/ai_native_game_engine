@@ -105,7 +105,6 @@ namespace AiNative.Tests
         [InlineData("rootNull", "InvalidProtocol")]
         [InlineData("unknown", "InvalidProtocol")]
         [InlineData("nestedUnknown", "InvalidProtocol")]
-        [InlineData("missingWinner", "InvalidProtocol")]
         [InlineData("exponent", "InvalidProtocol")]
         [InlineData("decimal", "InvalidProtocol")]
         public void Decode_InvalidJsonStructure_IsRejected(string variant, string code)
@@ -122,13 +121,25 @@ namespace AiNative.Tests
                 "rootNull" => "null",
                 "unknown" => json.Insert(1, "\"unexpected\":1,"),
                 "nestedUnknown" => json.Replace("\"width\": 5", "\"unexpected\":1,\"width\":5"),
-                "missingWinner" => json.Replace(",\n    \"winner\": null", ""),
                 "exponent" => json.Replace("\"width\": 5", "\"width\": 5e0"),
                 "decimal" => json.Replace("\"width\": 5", "\"width\": 5.0"),
                 _ => throw new ArgumentException(variant)
             };
             Assert.Equal(code, Assert.Throws<HostOperationException>(() => SnapshotCodec.Decode(
                 Encoding.UTF8.GetBytes(json), SnapshotFixtures.Environment)).Code);
+        }
+
+        [Fact]
+        public void Decode_MissingWinner_IsRejected()
+        {
+            JsonObject root = SnapshotFixtures.Initial();
+            JsonObject game = Assert.IsType<JsonObject>(root["game"]);
+            Assert.True(game.Remove("winner"));
+
+            HostOperationException error = Assert.Throws<HostOperationException>(() => SnapshotCodec.Decode(
+                Encoding.UTF8.GetBytes(root.ToJsonString()), SnapshotFixtures.Environment));
+            Assert.Equal("InvalidProtocol", error.Code);
+            Assert.Equal("$.game.winner", error.Path);
         }
 
         [Theory]

@@ -11,7 +11,7 @@ dotnet restore --locked-mode
 dotnet build --no-restore
 dotnet test --no-build --no-restore --logger trx --results-directory TestResults/unit
 dotnet format --verify-no-changes --no-restore
-python3 scripts/verify_phase2.py --output TestResults/phase-2
+python scripts/verify_phase2.py --output TestResults/phase-2
 ```
 
 脚本位于 [verify_phase2.py](../scripts/verify_phase2.py)。输出目录必须不存在，每次复核使用新目录；拒绝覆盖已有证据。默认调用 Debug 构建的宿主 DLL，可用 `--host <绝对或相对路径>` 指定其他已构建宿主。脚本从输出目录启动进程，不依赖当前工作目录能找到 demo.json。单次宿主调用超时为 30 秒。
@@ -56,3 +56,24 @@ P2-T6 提交 `17cdf7b9faf651b6758f31caf65927b6e995a218` 已通过 [PR #4 CI](htt
 `Preserve validation evidence` 步骤成功。已下载 [phase-2-evidence-40991275807-1](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807/artifacts/12949133349)，核验 117 个文件中的 TRX、summary、40 次 stdout/stderr、快照与回放以及分歧材料。持久化的[核验元数据](evidence/phase-2/ci-40991275807.json)记录提交、构建身份、制品 ID/摘要和结果；其中 digest 是 GitHub 报告的归档摘要，文件内容已另行解析检查。
 
 制品保留 7 天，预计在北京时间 2026-11-06 10:23:20 过期；过期后可按本页命令重新生成材料，不能假定原下载链接永久有效。第二阶段 V1–V12 已取得相应本地及远端证据，阶段验收完成；PR 合并仍是独立操作。Linux CI 与 macOS 本地均在各自相同环境内保存恢复，没有进行 Unity、跨运行时读取同一记录或跨平台快照互通验收。
+
+## Windows 验证补齐（2026-11-02）
+
+Windows 首次复核构建成功，40 次 CLI 验收通过，但测试为 330/332 通过，只读格式检查报告 CRLF。原因是本机 `core.autocrlf=true` 且仓库未约束检出行尾：固定 `build-identity.txt` 的 LF 被改为 CRLF；缺失 winner 的测试依赖 LF 字符串替换，实际没有删除字段。
+
+本次新增 `.gitattributes` 固定普通文本为 LF，规范化 JSON 向量禁用文本转换，并在 `.editorconfig` 中禁止给这些向量追加结尾换行。现有工作区仅将跟踪文本的 CRLF 恢复为 LF，没有运行整库格式化。缺失 winner 的测试改为通过 JSON 对象删除字段，并断言删除成功、错误码和字段路径；生产存档协议及玩法代码没有修改。
+
+CI 改为 Ubuntu/Windows 矩阵，显式配置 Python 3.12，以 `python` 调用同一验收脚本；两个作业独立执行，制品名增加平台以避免冲突。新增矩阵尚未在远端执行，历史 Ubuntu CI 证据不能替代 Windows CI 结果。
+
+独立 Reviewer Agent `windows_review` 只读审查后未发现阻断问题，独立复核固定向量和检出转换，未代替主 Agent 执行行为测试。本地环境为 Windows/x64、SDK 10.0.202、runtime 10.0.13、Python 3.12.7；基于提交 `334fa8c340bcb52a9fed58d45e46654581711d68` 加本轮未提交改动验证。宿主 buildHash 为 `70fc438d1ae7ee4f091fe0971e7009a7ca79f4991c24d84ef1ef187575bd7e21`，不代表未来 CI 构建身份。
+
+实际检查结果：
+
+- `dotnet restore --locked-mode`、`dotnet build --no-restore` 通过，构建 0 警告、0 错误。
+- 审查后 `dotnet test --no-build --no-restore --logger trx --results-directory TestResults/windows-20261102-unit`：332 项通过，0 失败、0 跳过，TRX 已保存。
+- 审查后 `dotnet format --verify-no-changes --no-restore`：退出 0；日志位于 `TestResults/windows-20261102-format.log`。
+- 审查后 `python scripts/verify_phase2.py --output TestResults/windows-20261102-final`：40 次 CLI 调用全部符合预期；原演示包含在内，summary、stdout/stderr、快照与回放均已保存。
+- 六组固定向量的长度及 SHA-256 与清单匹配；通过 `git -c core.autocrlf=true cat-file --filters` 验证这些样本检出后仍逐字节一致，另检查 C# 文本检出保持 LF。
+- 工作流 YAML 解析、矩阵与制品名称检查、修改文档的本地文件链接检查及 `git diff --check` 通过。
+
+上述材料在本地被忽略的 `TestResults/` 中；其他机器可按本页入口重建，重复执行须选新输出目录。本轮没有执行远端矩阵、Unity 验收或跨平台快照互通。

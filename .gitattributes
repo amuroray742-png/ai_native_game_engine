@@ -1,0 +1,5 @@
+# Keep text checkouts consistent with .editorconfig, including on Windows.
+* text=auto eol=lf
+
+# Canonical JSON fixtures are exact hash input bytes, with no final newline.
+docs/contracts/phase-2/examples/*.canonical.json -text
