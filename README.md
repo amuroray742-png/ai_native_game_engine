@@ -57,10 +57,12 @@ dotnet format --verify-no-changes --no-restore
 
 本地已通过 332 项测试及 40 次真实 CLI 验收。[P2-T6 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 已通过，上传制品已下载核验，结果同为 332 项测试及 40 次 CLI 验收通过。
 
+Windows 检出由 `.gitattributes` 固定文本文件为 LF；规范化 JSON 哈希样本保留原始字节，不追加结尾换行。CI 已配置 Ubuntu/Windows 双平台，分别上传带平台名称的证据；新增 Windows CI 尚待远端执行，本地复核见[Windows 验证记录](docs/phase-2-acceptance.md#windows-验证补齐2026-11-02)。两个平台各自验证保存恢复，不代表同一快照可以跨平台读取。
+
 构建后可运行下列命令保留输入、快照、回放、stdout/stderr 和检查摘要。需要 Python 3.9+ 标准库；输出目录必须不存在，重复执行请选择新目录。
 
 ```sh
-python3 scripts/verify_phase2.py --output TestResults/phase-2
+python scripts/verify_phase2.py --output TestResults/phase-2
 ```
 
 具体范围、V1–V12 对应测试及产物说明见[第二阶段验收入口与证据索引](docs/phase-2-acceptance.md)。
