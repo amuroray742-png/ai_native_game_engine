@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using AiNative.Core;
 using AiNative.GridGame;
-using AiNative.Headless;
+
 using Xunit;
 
 namespace AiNative.Tests
@@ -22,7 +22,7 @@ namespace AiNative.Tests
         public void Restore_AtEveryDemoBoundary_MatchesContinuousExecution(int boundary)
         {
             GridGameRules rules = GridGameRules.Create(Fixtures.Definition());
-            var original = new SimulationSession<GridCommand, GridGameView>(rules, 42);
+            var original = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(() => rules, 42, new SimulationTiming(0));
             GridCommand[] commands =
             {
                 new Move(Side.A, 1, MoveDirection.Right), new Attack(Side.A, 1, 2),
@@ -33,24 +33,24 @@ namespace AiNative.Tests
             {
                 Fixtures.Execute(original, commands[index]);
             }
-            SessionState sessionState = original.ExportState();
+            SimulationSnapshot<GridGameState> sessionState = original.ExportState();
             GridGameState gameState = rules.ExportState();
             string saved = JsonSerializer.Serialize(gameState);
             GridGameRules restoredRules = GridGameRules.Restore(gameState);
-            var restored = SimulationSession<GridCommand, GridGameView>.Restore(restoredRules, sessionState);
+            var restored = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Restore(sessionState, GridGameRules.Restore);
             Assert.Equal(Fixtures.State(original.GetState()), Fixtures.State(restored.GetState()));
-            Assert.Equal(boundary, restored.CompletedStepCount);
+            Assert.Equal(boundary, restored.Tick);
             Assert.Equal(0, restored.PendingCount);
             for (int index = boundary; index < commands.Length; index++)
             {
                 Assert.Equal(index + 1, original.Submit(commands[index]));
                 Assert.Equal(index + 1, restored.Submit(commands[index]));
-                StepResult expected = Assert.IsType<StepResult>(original.Advance());
-                StepResult actual = Assert.IsType<StepResult>(restored.Advance());
-                Assert.Equal(Fixtures.Trace(new DemoStep("command", expected, original.GetState())),
-                    Fixtures.Trace(new DemoStep("command", actual, restored.GetState())));
+                InputResult expected = Assert.Single(original.Advance().Inputs);
+                InputResult actual = Assert.Single(restored.Advance().Inputs);
+                Assert.Equal(Fixtures.Trace(expected, original.GetState()),
+                    Fixtures.Trace(actual, restored.GetState()));
                 Assert.Equal(original.RandomState, restored.RandomState);
-                Assert.Equal(original.CompletedStepCount, restored.CompletedStepCount);
+                Assert.Equal(original.Tick, restored.Tick);
             }
             GridGameView final = restored.GetState();
             Assert.Equal(Side.A, final.Winner);
@@ -59,8 +59,8 @@ namespace AiNative.Tests
             Assert.Equal(2, final.Units[0].Health);
             Assert.Equal(0, final.Units[1].Health);
             Fixtures.AssertRejected(restored, new EndTurn(Side.A), "GameFinished");
-            Assert.Equal(7, restored.CompletedStepCount);
-            Assert.Equal(6, original.CompletedStepCount);
+            Assert.Equal(7, restored.Tick);
+            Assert.Equal(6, original.Tick);
             Assert.Equal(saved, JsonSerializer.Serialize(gameState));
             Assert.Equal(4, restoredRules.ExportState().Configuration.Units[1].Health);
             Assert.Equal(new GridPosition(0, 0), restoredRules.ExportState().Configuration.Units[0].Position);
@@ -74,11 +74,11 @@ namespace AiNative.Tests
                     new UnitDefinition(10, Side.A, new GridPosition(0, 0), 6) },
                 actionPointsPerTurn: 3, attackDamage: 1);
             GridGameRules rules = GridGameRules.Create(configuration);
-            var original = new SimulationSession<GridCommand, GridGameView>(rules, 0);
+            var original = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(() => rules, 0, new SimulationTiming(0));
             Fixtures.Execute(original, new Move(Side.A, 10, MoveDirection.Right));
             Fixtures.Execute(original, new Attack(Side.A, 10, 20));
             GridGameRules restoredRules = GridGameRules.Restore(rules.ExportState());
-            var restored = SimulationSession<GridCommand, GridGameView>.Restore(restoredRules, original.ExportState());
+            var restored = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Restore(original.ExportState(), GridGameRules.Restore);
             Fixtures.Execute(restored, new Attack(Side.A, 10, 20));
             Assert.Equal(5, restored.GetState().Units[1].Health);
             Assert.Equal(6, original.GetState().Units[1].Health);
@@ -108,7 +108,7 @@ namespace AiNative.Tests
             Assert.Throws<NotSupportedException>(() => ((IList<UnitDefinition>)state.Units).Clear());
             Assert.Throws<NotSupportedException>(() => ((IList<UnitDefinition>)state.Configuration.Units).Clear());
             Assert.Throws<NotSupportedException>(() => ((IList<GridPosition>)state.Configuration.Obstacles).Clear());
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, 42);
+            var session = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(() => rules, 42, new SimulationTiming(0));
             string before = JsonSerializer.Serialize(rules.ExportState());
             for (int index = 0; index < 3; index++)
             {
@@ -150,16 +150,16 @@ namespace AiNative.Tests
         public void Restore_InvalidState_IsRejectedWithoutChangingExistingSession(string variant)
         {
             GridGameRules rules = GridGameRules.Create(Fixtures.Definition());
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, 42);
+            var session = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(() => rules, 42, new SimulationTiming(0));
             Fixtures.Execute(session, new Move(Side.A, 1, MoveDirection.Up));
             string before = Fixtures.State(session.GetState());
             GridGameState state = InvalidState(variant);
             Assert.Throws<ArgumentException>(() => GridGameRules.Restore(state));
             Assert.Equal(before, Fixtures.State(session.GetState()));
             Assert.Equal(42UL, session.RandomState);
-            Assert.Equal(1, session.CompletedStepCount);
+            Assert.Equal(1, session.Tick);
             Assert.Equal(2, session.Submit(new EndTurn(Side.A)));
-            Assert.True(Assert.IsType<StepResult>(session.Advance()).Result.Succeeded);
+            Assert.True(Assert.Single(session.Advance().Inputs).Result.Succeeded);
         }
 
         [Fact]

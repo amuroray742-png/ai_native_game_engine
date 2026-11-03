@@ -1,0 +1,778 @@
+{
+  "formatVersion": 2,
+  "operations": [
+    {
+      "op": "submit",
+      "command": {
+        "type": "Spawn",
+        "shape": "Box",
+        "size": [
+          0.4,
+          0.4,
+          0.4
+        ],
+        "position": [
+          2,
+          4,
+          0
+        ]
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Impulse",
+        "id": "2",
+        "impulse": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Remove",
+        "id": "3"
+      }
+    },
+    {
+      "op": "submit",
+      "command": {
+        "type": "Spawn",
+        "shape": "Sphere",
+        "size": [
+          0.4,
+          0.4,
+          0.4
+        ],
+        "position": [
+          3,
+          4,
+          0
+        ]
+      }
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    },
+    {
+      "op": "advance"
+    }
+  ]
+}

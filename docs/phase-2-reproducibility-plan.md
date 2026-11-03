@@ -1,5 +1,6 @@
 # 第二阶段：复现与 Agent 工具实施计划
 
+> 历史记录：本文保留当时的设计与验证证据；当前运行入口及契约已迁移到 [v2](framework-v2.md)，本文旧命令不作为当前验收入口。
 状态：P2-T1 契约文档及样例已固化（2026-10-29）；P2-T2 已完成进程内状态导出恢复及本地验收，P2-T3 已完成快照文件、摘要与单文件发布的本地验收，P2-T4 已完成批处理 CLI 与跨进程本地验收，P2-T5 已完成回放与首个分歧定位的本地验收，P2-T6 已完成本地验证、远端 CI 和上传制品核验（2026-10-30），第二阶段验收完成。[公共 API 与协议 v1](contracts/phase-2/contract.md)是具体签名、字段及参数依据，其中 Core 与 GridGame 管理 API 已实现，快照文件内部 API 已实现，run/inspect/replay CLI 已实现。
 
 设计依据见[设计文档](ai-native-game-engine-design.md)，实现约束见[架构与代码规范](engineering-guidelines.md)，现有能力见[第一阶段验收记录](phase-1-headless-gameplay-plan.md)。T1 仅编写契约与样例；T2 在现有项目内实现进程内管理 API，T3 在 Headless 内实现快照边界，T4 实现命令文件与 CLI，T5 实现回放记录和验证；均不新增依赖或项目。

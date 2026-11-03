@@ -1,246 +1,266 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using AiNative.Core;
-using AiNative.GridGame;
-using AiNative.GridGame.Hosting;
 using AiNative.Headless;
+using AiNative.Hosting;
 using Xunit;
 
 namespace AiNative.Tests
 {
     public sealed class CliTests
     {
-        [Fact]
-        public void Run_FixedCommandFile_MatchesAllDocumentedCheckpointsAndResults()
-        {
-            using var directory = new SnapshotDirectory();
-            string commands = WriteCommands(directory, SnapshotFixtures.Read("commands.json"));
-            (int code, JsonObject result, string errors) = Invoke(RunArgs(commands));
-            Assert.Equal(0, code);
-            Assert.Equal("", errors);
-            JsonObject expected = JsonNode.Parse(SnapshotFixtures.Read("run-result.json"))!.AsObject();
-            Assert.Equal(expected.Select(item => item.Key).OrderBy(key => key), result.Select(item => item.Key).OrderBy(key => key));
-            foreach (var property in expected.Where(property => property.Key != "message"))
-            {
-                Assert.True(JsonNode.DeepEquals(property.Value, result[property.Key]), property.Key);
-            }
-            for (int count = 0; count < 9; count++)
-            {
-                Assert.True(JsonNode.DeepEquals(result, Invoke(RunArgs(commands)).Result));
-            }
-        }
-
         [Theory]
-        [InlineData("run")]
-        [InlineData("inspect")]
-        [InlineData("run --scenario a --commands b")]
-        [InlineData("run --snapshot a --seed 42 --commands b")]
-        [InlineData("run --scenario a --snapshot b --seed 42 --commands c")]
-        [InlineData("run --scenario a --seed 42 --commands b --expect-config c")]
-        [InlineData("run --scenario a --seed 42 --commands b --commands c")]
-        [InlineData("run --scenario a --seed 42 --commands")]
-        [InlineData("run --scenario=a --seed 42 --commands b")]
-        [InlineData("run --scenario a --seed 042 --commands b")]
-        [InlineData("run --scenario a --seed -1 --commands b")]
-        [InlineData("run --scenario a --seed +1 --commands b")]
-        [InlineData("run --scenario a --seed 18446744073709551616 --commands b")]
-        [InlineData("run --scenario a --seed 1e1 --commands b")]
-        [InlineData("run --scenario a --seed 42 --commands b --unknown c")]
-        [InlineData("inspect --snapshot a --commands b")]
-        [InlineData("inspect --snapshot a --snapshot-out b")]
-        [InlineData("inspect --snapshot a --seed 42")]
-        [InlineData("replay --input a --seed 42")]
-        [InlineData("run --help --scenario a")]
-        public void InvalidArguments_ReturnStructuredFailureBeforeReadingFiles(string arguments)
+        [InlineData("")]
+        [InlineData("--help")]
+        [InlineData("run --help")]
+        [InlineData("compare --help")]
+        public void HelpDescribesV2WithoutReadingFilesOrEnvironment(string arguments)
         {
-            (int code, JsonObject result, string errors) = Invoke(arguments.Split(' '));
-            Assert.Equal(2, code);
-            Assert.Equal("InputError", result["category"]!.GetValue<string>());
-            Assert.Equal("InvalidArguments", result["code"]!.GetValue<string>());
-            Assert.Null(result["initialCheckpoint"]);
-            Assert.Empty(result["checkpoints"]!.AsArray());
-            Assert.Contains("InvalidArguments", errors);
-        }
-
-        [Theory]
-        [InlineData("0")]
-        [InlineData("18446744073709551615")]
-        public void EmptyRun_AndInspect_PreserveSeedAndDoNotExecute(string seed)
-        {
-            using var directory = new SnapshotDirectory();
-            string commands = WriteCommands(directory, SnapshotFixtures.Read("empty-commands.json"));
-            string[] args = { "run", "--scenario", Fixtures.DemoPath, "--seed", seed, "--commands", commands, "--snapshot-out", directory.FilePath };
-            var run = Invoke(args);
-            Assert.Equal(0, run.Code);
-            Assert.Empty(run.Result["checkpoints"]!.AsArray());
-            Assert.Equal(seed, run.Result["initialCheckpoint"]!["state"]!["random"]!["state"]!.GetValue<string>());
-            Assert.Equal(directory.FilePath, run.Result["artifacts"]![0]!["path"]!.GetValue<string>());
-            var inspect = Invoke(new[] { "inspect", "--snapshot", directory.FilePath, "--expect-config", Fixtures.DemoPath });
-            Assert.Equal(0, inspect.Code);
-            Assert.Equal("SnapshotInspected", inspect.Result["code"]!.GetValue<string>());
-            Assert.True(JsonNode.DeepEquals(run.Result["initialCheckpoint"], inspect.Result["initialCheckpoint"]));
-            Assert.True(JsonNode.DeepEquals(inspect.Result["initialCheckpoint"], inspect.Result["finalCheckpoint"]));
-            Assert.Empty(inspect.Result["artifacts"]!.AsArray());
-        }
-
-        [Fact]
-        public void Run_RejectsPendingQueueBeforeSimulationOrPublishing()
-        {
-            using var directory = new SnapshotDirectory();
-            string commands = WriteCommands(directory, Encoding.UTF8.GetBytes("""
-                {"commandFormatVersion":1,"operations":[{"op":"submit","command":{"type":"EndTurn","side":"A"}}]}
-                """));
-            var call = Invoke(RunArgs(commands).Concat(new[] { "--snapshot-out", directory.FilePath }).ToArray());
-            Assert.Equal(2, call.Code);
-            Assert.Equal("PendingCommands", call.Result["code"]!.GetValue<string>());
-            Assert.Null(call.Result["initialCheckpoint"]);
-            Assert.False(File.Exists(directory.FilePath));
-        }
-
-        [Fact]
-        public void Run_OutputPreflightFailure_IsHostFailureWithNoExecutedCheckpoint()
-        {
-            using var directory = new SnapshotDirectory();
-            string commands = WriteCommands(directory, SnapshotFixtures.Read("commands.json"));
-            File.WriteAllText(directory.FilePath, "original");
-            var exists = Invoke(RunArgs(commands).Concat(new[] { "--snapshot-out", directory.FilePath }).ToArray());
-            Assert.Equal(1, exists.Code);
-            Assert.Equal("HostFailure", exists.Result["category"]!.GetValue<string>());
-            Assert.Equal("OutputExists", exists.Result["code"]!.GetValue<string>());
-            Assert.Null(exists.Result["initialCheckpoint"]);
-            Assert.Equal("original", File.ReadAllText(directory.FilePath));
-            var missing = Invoke(RunArgs(commands).Concat(new[] { "--snapshot-out", Path.Combine(directory.Path, "missing", "state.json") }).ToArray());
-            Assert.Equal("OutputWriteFailed", missing.Result["code"]!.GetValue<string>());
-        }
-
-        [Fact]
-        public void Run_ValidNegativeEntityId_IsBusinessRejectionAndContinues()
-        {
-            using var directory = new SnapshotDirectory();
-            string commands = WriteCommands(directory, Encoding.UTF8.GetBytes("""
-                {"commandFormatVersion":1,"operations":[
-                  {"op":"submit","command":{"type":"Attack","side":"A","unitId":-1,"targetId":2}},
-                  {"op":"advance"}, {"op":"submit","command":{"type":"EndTurn","side":"A"}}, {"op":"advance"}]}
-                """));
-            var call = Invoke(RunArgs(commands));
-            Assert.Equal(0, call.Code);
-            Assert.Equal(1, call.Result["rejected"]!.GetValue<int>());
-            Assert.Equal(1, call.Result["accepted"]!.GetValue<int>());
-            Assert.Equal("UnknownUnit", call.Result["checkpoints"]![1]!["result"]!["errorCode"]!.GetValue<string>());
-            Assert.Equal(call.Result["initialCheckpoint"]!["stateHash"]!.GetValue<string>(), call.Result["checkpoints"]![1]!["stateHash"]!.GetValue<string>());
-        }
-
-        [Fact]
-        public void Inspect_ExpectedConfigurationMismatch_AndRunStructureBeforeEnvironment_AreInputErrors()
-        {
-            using var directory = new SnapshotDirectory();
-            GridGameRuntime session = GridGameRuntime.Create(Fixtures.Definition(), 42);
-            new SnapshotStore().Save(directory.FilePath, session);
-            JsonObject configuration = JsonNode.Parse(SnapshotFixtures.Read("scenario.json"))!.AsObject();
-            configuration["attackDamage"] = 3;
-            string expected = Path.Combine(directory.Path, "expected.json");
-            File.WriteAllText(expected, configuration.ToJsonString());
-            var inspect = Invoke(new[] { "inspect", "--snapshot", directory.FilePath, "--expect-config", expected });
-            Assert.Equal(2, inspect.Code);
-            Assert.Equal("ExpectedConfigMismatch", inspect.Result["code"]!.GetValue<string>());
-            Assert.Null(inspect.Result["initialCheckpoint"]);
-            File.WriteAllBytes(directory.FilePath, SnapshotFixtures.Read("initial.snapshot.json"));
-            string commands = WriteCommands(directory, Encoding.UTF8.GetBytes("{"));
-            var run = Invoke(new[] { "run", "--snapshot", directory.FilePath, "--commands", commands });
-            Assert.Equal(2, run.Code);
-            Assert.Equal("InvalidJson", run.Result["code"]!.GetValue<string>());
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void Run_SequenceOrRuleOverflow_HasDistinctFailureAndLastTrustedCheckpoint(bool ruleFault)
-        {
-            using var directory = new SnapshotDirectory();
-            ScenarioDefinition config = Fixtures.Definition();
-            GridGameRules rules = ruleFault
-                ? GridGameRules.Restore(new GridGameState(config, config.Units, Side.A, 2, long.MaxValue, null))
-                : GridGameRules.Create(config);
-            long count = ruleFault ? long.MaxValue - 1 : long.MaxValue;
-            GridGameRuntime session = GridGameRuntime.Restore(new GridGameSnapshot(
-                new SessionState(count, count, DeterministicRandom.Algorithm, 42), rules.ExportState()));
-            new SnapshotStore().Save(directory.FilePath, session);
-            string commands = WriteCommands(directory, Encoding.UTF8.GetBytes("""
-                {"commandFormatVersion":1,"operations":[{"op":"submit","command":{"type":"EndTurn","side":"A"}},{"op":"advance"}]}
-                """));
-            string target = Path.Combine(directory.Path, "after.json");
-            string replayTarget = Path.Combine(directory.Path, "after.replay.json");
-            var call = Invoke(new[] { "run", "--snapshot", directory.FilePath, "--commands", commands, "--snapshot-out", target, "--replay-out", replayTarget });
-            Assert.Equal(1, call.Code);
-            Assert.Equal("SimulationFailure", call.Result["category"]!.GetValue<string>());
-            Assert.Equal(ruleFault ? "SessionFaulted" : "SequenceOverflow", call.Result["code"]!.GetValue<string>());
-            Assert.Equal(ruleFault ? 1 : 0, call.Result["location"]!["operationIndex"]!.GetValue<int>());
-            Assert.Equal(ruleFault ? 1 : 0, call.Result["checkpoints"]!.AsArray().Count);
-            Assert.Equal(0, call.Result["accepted"]!.GetValue<int>());
-            Assert.False(File.Exists(target));
-            Assert.False(File.Exists(replayTarget));
-            if (ruleFault)
-            {
-                Assert.Equal(long.MaxValue.ToString(), call.Result["location"]!["sequence"]!.GetValue<string>());
-                Assert.Equal("submitted", call.Result["finalCheckpoint"]!["result"]!["kind"]!.GetValue<string>());
-            }
-        }
-
-        [Fact]
-        public void OutputFailure_DoesNotRollbackPublishedSnapshot_AndBrokenDiagnosticsDoNotEscape()
-        {
-            using var directory = new SnapshotDirectory();
-            string commands = WriteCommands(directory, SnapshotFixtures.Read("empty-commands.json"));
-            var error = new StringWriter();
-            Assert.Equal(1, Program.Run(RunArgs(commands).Concat(new[] { "--snapshot-out", directory.FilePath }).ToArray(), new BrokenWriter(), error));
-            Assert.Contains("StandardOutputFailed", error.ToString());
-            Assert.True(File.Exists(directory.FilePath));
-            var output = new StringWriter();
-            Assert.Equal(2, Program.Run(new[] { "run" }, output, new BrokenWriter()));
-            Assert.Equal("InvalidArguments", JsonNode.Parse(output.ToString())!["code"]!.GetValue<string>());
-            Assert.Equal(1, Program.Run(new[] { "run" }, new BrokenWriter(), new BrokenWriter()));
+            using var output = new StringWriter();
+            string[] args = arguments.Length == 0 ? Array.Empty<string>() : arguments.Split(' ');
+            Assert.Equal(0, new CliRunner(Fixtures.Registry(), _ => throw new Exception("Must not probe")).Run(args, output, TextWriter.Null));
+            Assert.Contains("games", output.ToString());
+            Assert.Contains("compare", output.ToString());
+            Assert.Contains("--snapshot", output.ToString());
+            Assert.Contains("v2", output.ToString());
         }
 
         [Theory]
         [InlineData("--help")]
-        [InlineData("run --help")]
-        [InlineData("inspect --help")]
-        [InlineData("replay --help")]
-        public void Help_DescribesSupportedScopeWithoutReadingFiles(string arguments)
+        [InlineData("run")]
+        [InlineData("--seed")]
+        public void ReservedFileNamesRemainExplicitOptionValues(string commandsName)
         {
-            var output = new StringWriter();
-            var error = new StringWriter();
-            Assert.Equal(0, Program.Run(arguments.Split(' '), output, error));
-            Assert.Contains("run --scenario", output.ToString());
-            Assert.Contains("replay --input", output.ToString());
-            Assert.Contains("--replay-out", output.ToString());
-            Assert.Equal("", error.ToString());
+            using var directory = new TestDirectory();
+            directory.Write("games", Fixtures.Read("grid.scenario.json"));
+            directory.Write(commandsName, Fixtures.Read("empty.commands.json"));
+            string previous = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.SetCurrentDirectory(directory.Path);
+                Assert.Equal(0, Fixtures.Invoke("run", "--scenario", "games", "--seed", "42", "--commands", commandsName).Code);
+            }
+            finally { Directory.SetCurrentDirectory(previous); }
         }
 
-        internal static string[] RunArgs(string commands) => new[] { "run", "--scenario", Fixtures.DemoPath, "--seed", "42", "--commands", commands };
-        internal static string WriteCommands(SnapshotDirectory directory, byte[] bytes)
+        [Fact]
+        public void SecondPublishFailureReportsOnlyTheAlreadyPublishedSnapshot()
         {
-            string path = Path.Combine(directory.Path, "commands.json");
-            File.WriteAllBytes(path, bytes);
-            return path;
+            using var directory = new TestDirectory();
+            string snapshot = directory.File("saved.json"), replay = directory.File("raced.json");
+            var module = new PublishingRaceModule(Fixtures.Registry().Get("grid-game"), () => File.WriteAllText(replay, "racer"));
+            using var output = new StringWriter();
+            int exit = new CliRunner(new GameRegistry(module), _ => Fixtures.Environment()).Run(new[] { "run",
+                "--scenario", Fixtures.Data("grid.scenario.json"), "--seed", "42", "--commands", Fixtures.Data("grid.commands.json"),
+                "--snapshot-out", snapshot, "--replay-out", replay }, output, TextWriter.Null);
+            JsonElement response = Fixtures.Json(output.ToString());
+            Assert.Equal(1, exit);
+            Assert.Equal("OutputExists", response.GetProperty("code").GetString());
+            Assert.Equal(snapshot, Assert.Single(response.GetProperty("artifacts").EnumerateArray()).GetString());
+            Assert.True(File.Exists(snapshot));
+            Assert.Equal("racer", File.ReadAllText(replay));
+            Assert.Equal(6, response.GetProperty("accepted").GetInt32());
+            Assert.Equal(0, Fixtures.Invoke("inspect", "--snapshot", snapshot).Code);
         }
 
-        internal static (int Code, JsonObject Result, string Errors) Invoke(string[] args)
+        [Theory]
+        [InlineData("unknown")]
+        [InlineData("run")]
+        [InlineData("inspect")]
+        [InlineData("replay")]
+        [InlineData("compare")]
+        [InlineData("describe")]
+        [InlineData("--help junk")]
+        [InlineData("games --seed 1")]
+        [InlineData("run --scenario a --seed 01 --commands b")]
+        [InlineData("run --scenario a --seed -1 --commands b")]
+        [InlineData("run --scenario a --seed 18446744073709551616 --commands b")]
+        [InlineData("run --snapshot a --seed 1 --commands b")]
+        [InlineData("run --scenario a --snapshot b --seed 1 --commands c")]
+        [InlineData("run --scenario a --seed 1 --commands b --commands c")]
+        [InlineData("run --scenario a --seed 1 --commands b --expect-config c")]
+        [InlineData("compare --expected a --actual b --extra c")]
+        public void InvalidArgumentsFailBeforeInputReads(string arguments)
         {
-            var output = new StringWriter();
-            var error = new StringWriter();
-            int code = Program.Run(args, output, error);
-            Assert.EndsWith("\n", output.ToString());
-            return (code, JsonNode.Parse(output.ToString())!.AsObject(), error.ToString());
+            var result = Fixtures.Invoke(arguments.Split(' '));
+            Assert.Equal(2, result.Code);
+            Assert.Equal("InvalidArguments", result.Result.GetProperty("code").GetString());
+            Assert.Equal(JsonValueKind.Null, result.Result.GetProperty("initialCheckpoint").ValueKind);
         }
 
-        private sealed class BrokenWriter : StringWriter
+        [Theory]
+        [InlineData("games")]
+        [InlineData("describe --game grid-game")]
+        [InlineData("describe --game physics-sandbox")]
+        public void DiscoveryDoesNotProbeEnvironmentOrCreateWorld(string arguments)
         {
-            public override void Write(string? value) => throw new IOException("Broken stream.");
-            public override void WriteLine(string? value) => throw new IOException("Broken stream.");
+            using var output = new StringWriter();
+            Assert.Equal(0, new CliRunner(Fixtures.Registry(), _ => throw new Exception("Must not probe")).Run(arguments.Split(' '), output, TextWriter.Null));
+            Assert.Equal("Completed", Fixtures.Json(output.ToString()).GetProperty("status").GetString());
+        }
+
+        [Fact]
+        public void FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure()
+        {
+            using var directory = new TestDirectory();
+            string snapshot = directory.File("snapshot.json"), replay = directory.File("replay.json");
+            string[] args = { "run", "--scenario", Fixtures.Data("grid.scenario.json"), "--seed", "42", "--commands", Fixtures.Data("grid.commands.json"),
+                "--snapshot-out", snapshot, "--replay-out", replay };
+            Assert.Equal(1, new CliRunner(Fixtures.Registry(), _ => Fixtures.Environment()).Run(args, new BrokenWriter(), new BrokenWriter()));
+            Assert.True(File.Exists(snapshot));
+            Assert.True(File.Exists(replay));
+            var inspected = Fixtures.Invoke("inspect", "--snapshot", snapshot);
+            Assert.Equal(0, inspected.Code);
+            Assert.Equal(0, inspected.Result.GetProperty("accepted").GetInt32());
+            Assert.Equal("A", inspected.Result.GetProperty("observation").GetProperty("winner").GetString());
+            Assert.Equal(0, Fixtures.Invoke("replay", "--input", replay).Code);
+        }
+
+        [Fact]
+        public void PreflightAndExpectedConfigurationFailWithoutExecution()
+        {
+            using var directory = new TestDirectory();
+            string target = directory.Write("existing.json", JsonData.EmptyObject);
+            var failed = Fixtures.Invoke("run", "--scenario", Fixtures.Data("grid.scenario.json"), "--seed", "42", "--commands", Fixtures.Data("grid.commands.json"), "--snapshot-out", target);
+            Assert.Equal(1, failed.Code);
+            Assert.Equal("OutputExists", failed.Result.GetProperty("code").GetString());
+            Assert.Equal(JsonValueKind.Null, failed.Result.GetProperty("initialCheckpoint").ValueKind);
+            string snapshot = directory.Write("saved.json", Fixtures.Record().Snapshot);
+            string mismatch = directory.Write("scene.json", HostingTests.Change(Fixtures.Read("grid.scenario.json"), node => node["configuration"]!["width"] = 8));
+            Assert.Equal("ExpectedConfigMismatch", Fixtures.Invoke("inspect", "--snapshot", snapshot, "--expect-config", mismatch).Result.GetProperty("code").GetString());
+            var collision = Fixtures.Invoke("run", "--snapshot", snapshot, "--commands", Fixtures.Data("empty.commands.json"),
+                "--snapshot-out", directory.File("same"), "--replay-out", directory.File("same"));
+            Assert.Equal("OutputCollision", collision.Result.GetProperty("code").GetString());
+        }
+
+        [Fact]
+        public void FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic()
+        {
+            using var directory = new TestDirectory();
+            JsonElement initial = Fixtures.Record(commands: Fixtures.Read("empty.commands.json")).Snapshot;
+            JsonElement limit = HostingTests.Change(initial, node =>
+            {
+                node["runtime"]!["tick"] = long.MaxValue.ToString();
+                HostingTests.Rehash(node, initial);
+            });
+            string snapshot = directory.Write("limit.json", limit);
+            string commands = directory.Write("commands.json", Fixtures.Json("{\"formatVersion\":2,\"operations\":[{\"op\":\"submit\",\"command\":{\"type\":\"EndTurn\",\"side\":\"A\"}},{\"op\":\"advance\"}]}"));
+            using var output = new StringWriter();
+            using var error = new StringWriter();
+            Assert.Equal(1, new CliRunner(Fixtures.Registry(), _ => Fixtures.Environment()).Run(
+                new[] { "run", "--snapshot", snapshot, "--commands", commands }, output, error));
+            JsonElement failure = Fixtures.Json(output.ToString());
+            Assert.Equal("SimulationFault", failure.GetProperty("code").GetString());
+            Assert.Equal(1, failure.GetProperty("location").GetProperty("operationIndex").GetInt32());
+            Assert.Single(failure.GetProperty("checkpoints").EnumerateArray());
+            Assert.Equal("1", failure.GetProperty("finalCheckpoint").GetProperty("runtime").GetProperty("submitted").GetString());
+            Assert.Equal(0, failure.GetProperty("accepted").GetInt32());
+            Assert.NotEmpty(error.ToString());
+        }
+
+        [Theory]
+        [InlineData("existing")]
+        [InlineData("partial")]
+        [InlineData("race")]
+        [InlineData("missing-parent")]
+        public void AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile(string variant)
+        {
+            using var directory = new TestDirectory();
+            string target = directory.File("output.json");
+            bool wrote = false;
+            if (variant == "existing")
+            {
+                File.WriteAllText(target, "original");
+            }
+            if (variant == "missing-parent")
+            {
+                target = directory.File("absent/output.json");
+            }
+            Assert.Throws<HostOperationException>(() => AtomicFilePublisher.Publish(target, stream =>
+            {
+                wrote = true;
+                stream.WriteByte(1);
+                if (variant == "partial")
+                {
+                    throw new IOException("injected failure");
+                }
+                if (variant == "race")
+                {
+                    File.WriteAllText(target, "racer");
+                }
+            }));
+            if (variant == "existing")
+            {
+                Assert.False(wrote);
+                Assert.Equal("original", File.ReadAllText(target));
+            }
+            if (variant == "race")
+            {
+                Assert.Equal("racer", File.ReadAllText(target));
+            }
+            if (variant == "partial" || variant == "missing-parent")
+            {
+                Assert.False(File.Exists(target));
+            }
+            Assert.Empty(Directory.GetFiles(directory.Path, "*.tmp"));
+        }
+
+        [Fact]
+        public void BuildIdentityHashesActualAssembliesAndOptionalNativeFiles()
+        {
+            HostEnvironment grid = BuildEnvironment.Current(Fixtures.Registry().Get("grid-game"));
+            HostEnvironment physics = BuildEnvironment.Current(Fixtures.Registry().Get("physics-sandbox"));
+            JsonElement components = grid.ToJson().GetProperty("components");
+            Assert.DoesNotContain(components.EnumerateObject(), item => item.Name.Contains("jolt", StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(physics.ToJson().GetProperty("components").EnumerateObject(), item => item.Name.Contains("jolt", StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(components.EnumerateObject(), item => item.Name.Contains("Core") && item.Value.GetString()!.Length == 64);
+        }
+
+        private sealed class BrokenWriter : TextWriter
+        {
+            public override Encoding Encoding => Encoding.UTF8;
+            public override void WriteLine(string? value) => throw new IOException("closed pipe");
+        }
+
+        private sealed class PublishingRaceModule : IGameModule
+        {
+            private readonly IGameModule _inner;
+            private readonly Action _race;
+            internal PublishingRaceModule(IGameModule inner, Action race) { _inner = inner; _race = race; }
+            public string Id => _inner.Id;
+            public int Version => _inner.Version;
+            public SimulationTiming Timing => _inner.Timing;
+            public JsonElement Description => _inner.Description;
+            public IReadOnlyList<Type> CodeTypes => _inner.CodeTypes;
+            public IReadOnlyList<string> NativeLibraries => _inner.NativeLibraries;
+            public JsonElement ReadConfiguration(JsonElement value) => _inner.ReadConfiguration(value);
+            public JsonElement ReadCommand(JsonElement value) => _inner.ReadCommand(value);
+            public JsonElement ReadState(JsonElement configuration, JsonElement state, long processed) => _inner.ReadState(configuration, state, processed);
+            public void ValidateResult(JsonElement result) => _inner.ValidateResult(result);
+            public IHostedGame Create(JsonElement configuration, ulong seed) => new PublishingRaceGame(_inner.Create(configuration, seed), _race);
+            public IHostedGame Restore(JsonElement configuration, JsonElement state, RuntimeState runtime) => _inner.Restore(configuration, state, runtime);
+        }
+
+        private sealed class PublishingRaceGame : IHostedGame
+        {
+            private readonly IHostedGame _inner;
+            private readonly Action _race;
+            internal PublishingRaceGame(IHostedGame inner, Action race) { _inner = inner; _race = race; }
+            public long Tick => _inner.Tick;
+            public long Submitted => _inner.Submitted;
+            public long Processed => _inner.Processed;
+            public int Pending => _inner.Pending;
+            public ulong RandomState => _inner.RandomState;
+            public SimulationTiming Timing => _inner.Timing;
+            public long Submit(JsonElement command) => _inner.Submit(command);
+            public JsonElement Advance() { _race(); return _inner.Advance(); }
+            public JsonElement Observe() => _inner.Observe();
+            public JsonElement CaptureGameState() => _inner.CaptureGameState();
+            public void Dispose() => _inner.Dispose();
         }
     }
 }

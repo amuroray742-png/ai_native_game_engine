@@ -1,15 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="../AiNative.Core/AiNative.Core.csproj" />
-    <ProjectReference Include="../AiNative.GridGame.Hosting/AiNative.GridGame.Hosting.csproj" />
-    <ProjectReference Include="../AiNative.GridGame/AiNative.GridGame.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <InternalsVisibleTo Include="AiNative.Tests" />
-    <None Include="demo.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../AiNative.Hosting/AiNative.Hosting.csproj"/><InternalsVisibleTo Include="AiNative.Tests"/></ItemGroup>
 </Project>

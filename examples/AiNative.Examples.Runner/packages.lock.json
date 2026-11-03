@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "ainative.core": {
+        "type": "Project"
+      },
+      "ainative.gridgame": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Core": "[1.0.0, )"
+        }
+      },
+      "ainative.gridgame.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.GridGame": "[1.0.0, )",
+          "AiNative.Hosting": "[1.0.0, )"
+        }
+      },
+      "ainative.headless": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Hosting": "[1.0.0, )"
+        }
+      },
+      "ainative.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Core": "[1.0.0, )"
+        }
+      },
+      "ainative.physics": {
+        "type": "Project"
+      },
+      "ainative.physics.jolt": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Physics": "[1.0.0, )"
+        }
+      },
+      "ainative.physicssandbox": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Core": "[1.0.0, )",
+          "AiNative.Physics": "[1.0.0, )"
+        }
+      },
+      "ainative.physicssandbox.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Hosting": "[1.0.0, )",
+          "AiNative.PhysicsSandbox": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

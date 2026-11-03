@@ -1,18 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-  </PropertyGroup>
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><IsPackable>false</IsPackable><IsTestProject>true</IsTestProject><CopyNativeBridge>true</CopyNativeBridge></PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" PrivateAssets="all" />
-    <ProjectReference Include="../../src/AiNative.Core/AiNative.Core.csproj" />
-    <ProjectReference Include="../../src/AiNative.GridGame/AiNative.GridGame.csproj" />
-    <ProjectReference Include="../../src/AiNative.Headless/AiNative.Headless.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="../../docs/contracts/phase-2/examples/*" Link="SnapshotExamples/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../../examples/AiNative.Examples.Runner/AiNative.Examples.Runner.csproj" />
+    <None Include="../../examples/data/*" Link="Data/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

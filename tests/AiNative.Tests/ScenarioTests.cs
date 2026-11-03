@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using AiNative.GridGame;
-using AiNative.Headless;
+using AiNative.Hosting;
 using Xunit;
 
 namespace AiNative.Tests
@@ -23,7 +23,7 @@ namespace AiNative.Tests
         [InlineData("units[1].position.x", 0)]
         public void Create_WhenDomainConfigurationInvalid_ReportsReason(string field, object value)
         {
-            JsonNode root = JsonNode.Parse(File.ReadAllText(Fixtures.DemoPath)) ?? throw new Exception();
+            JsonNode root = JsonNode.Parse(Fixtures.Configuration.GetRawText()) ?? throw new Exception();
             string[] parts = field.Replace("[", ".").Replace("]", "").Split('.');
             JsonNode parent = root;
             for (int index = 0; index < parts.Length - 1; index++)
@@ -33,7 +33,7 @@ namespace AiNative.Tests
             parent[parts[parts.Length - 1]] = JsonSerializer.SerializeToNode(value);
             WithJson(root.ToJsonString(), path =>
             {
-                ArgumentException error = Assert.Throws<ArgumentException>(() => GridGameRules.Create(ScenarioLoader.Load(path)));
+                ProtocolException error = Assert.Throws<ProtocolException>(() => Fixtures.LoadConfiguration(path));
                 Assert.False(string.IsNullOrWhiteSpace(error.Message));
             });
         }
@@ -44,7 +44,7 @@ namespace AiNative.Tests
         [InlineData("{ invalid")]
         public void Load_WhenRootInvalid_ReportsJsonError(string json)
         {
-            WithJson(json, path => Assert.Throws<JsonException>(() => ScenarioLoader.Load(path)));
+            WithJson(json, path => Assert.Throws<ProtocolException>(() => Fixtures.LoadConfiguration(path)));
         }
 
         [Theory]
@@ -61,7 +61,7 @@ namespace AiNative.Tests
         [InlineData("duplicate")]
         public void Load_WhenStructureInvalid_RejectsWithoutDefaults(string variant)
         {
-            JsonNode root = JsonNode.Parse(File.ReadAllText(Fixtures.DemoPath)) ?? throw new Exception();
+            JsonNode root = JsonNode.Parse(Fixtures.Configuration.GetRawText()) ?? throw new Exception();
             switch (variant)
             {
                 case "version":
@@ -100,7 +100,7 @@ namespace AiNative.Tests
             {
                 json = json.Insert(1, "\"width\":5,");
             }
-            WithJson(json, path => Assert.Throws<JsonException>(() => ScenarioLoader.Load(path)));
+            WithJson(json, path => Assert.Throws<ProtocolException>(() => Fixtures.LoadConfiguration(path)));
         }
 
         [Fact]
