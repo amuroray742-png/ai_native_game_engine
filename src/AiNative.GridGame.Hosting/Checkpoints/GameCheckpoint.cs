@@ -4,18 +4,35 @@ using System.Text.Json;
 using AiNative.Core;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
-    internal sealed record CliCheckpoint(int? OperationIndex, long Submitted, long Completed, int Pending,
-        byte[] State, string StateHash, byte[] Result)
+    internal sealed class GameCheckpoint
     {
-        internal static CliCheckpoint Capture(int? index, RestoredGame game, byte[] result)
+        internal GameCheckpoint(int? operationIndex, long submitted, long completed, int pending, byte[] state, string stateHash, byte[] result)
         {
-            // 查询会经过 Session 故障/重入边界，再导出归该会话独占的玩法数据。
-            game.Session.GetState();
-            byte[] state = CanonicalState.StateBytes(game.Rules.ExportState(), DeterministicRandom.Algorithm, game.Session.RandomState);
-            return new CliCheckpoint(index, game.Session.LastSubmittedSequence, game.Session.CompletedStepCount,
-                game.Session.PendingCount, state, CanonicalState.Hash(state), result);
+            OperationIndex = operationIndex;
+            Submitted = submitted;
+            Completed = completed;
+            Pending = pending;
+            State = state;
+            StateHash = stateHash;
+            Result = result;
+        }
+
+        internal int? OperationIndex { get; }
+        internal long Submitted { get; }
+        internal long Completed { get; }
+        internal int Pending { get; }
+        internal byte[] State { get; }
+        internal string StateHash { get; }
+        internal byte[] Result { get; }
+
+        internal static GameCheckpoint Capture(int? index, GridGameRuntime game, byte[] result)
+        {
+            GridObservation observation = game.Capture();
+            byte[] state = CanonicalState.StateBytes(observation.Game, DeterministicRandom.Algorithm, observation.RandomState);
+            return new GameCheckpoint(index, observation.LastSubmittedSequence, observation.CompletedStepCount,
+                observation.PendingCount, state, CanonicalState.Hash(state), result);
         }
 
         internal void Write(Utf8JsonWriter writer)
@@ -108,7 +125,7 @@ namespace AiNative.Headless
                     writer.WriteString("winner", ended.Winner.ToString());
                     break;
                 default:
-                    throw new HostOperationException("HostFailure", "UnexpectedHostFailure", "无法编码未知事件类型。");
+                    throw new InvalidOperationException("无法编码未知事件类型。");
             }
             writer.WriteEndObject();
         }

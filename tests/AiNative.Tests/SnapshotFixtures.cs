@@ -1,13 +1,14 @@
 using System;
 using System.IO;
 using System.Text.Json.Nodes;
+using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 
 namespace AiNative.Tests
 {
     internal static class SnapshotFixtures
     {
-        internal static SnapshotEnvironment Environment => new SnapshotEnvironment("0.0.0", "linux", "x64",
+        internal static HostEnvironment Environment => new HostEnvironment("0.0.0", "linux", "x64",
             "964789b064e8cea5fb7fbbeb6083ed20d0e33eea5a1c5f3bcecc236890837be9");
 
         internal static byte[] Read(string name) => File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "SnapshotExamples", name));

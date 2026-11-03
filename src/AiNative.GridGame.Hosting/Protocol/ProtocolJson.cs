@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text.Json;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
     /// <summary>宿主协议 JSON 的严格原语读取，所有错误保留字段路径。</summary>
     internal static class ProtocolJson
@@ -19,7 +19,7 @@ namespace AiNative.Headless
                     string child = path + "." + property.Name;
                     if (!names.Add(property.Name))
                     {
-                        throw new HostOperationException("InputError", "InvalidJson", "属性重复。", child);
+                        throw new ProtocolException("InvalidJson", "属性重复。", child);
                     }
                     ValidateDocument(property.Value, child);
                 }
@@ -104,18 +104,19 @@ namespace AiNative.Headless
             return value;
         }
 
-        internal static Side SideValue(JsonElement element, string path)
+        internal static Side SideValue(JsonElement element, string path, StringComparison comparison = StringComparison.Ordinal)
         {
             string value = String(element, path);
-            Require(value == "A" || value == "B", path, "阵营必须为 A 或 B。");
-            return value == "A" ? Side.A : Side.B;
+            bool isA = string.Equals(value, "A", comparison);
+            Require(isA || string.Equals(value, "B", comparison), path, "阵营必须为 A 或 B。");
+            return isA ? Side.A : Side.B;
         }
 
         private static void Require(bool condition, string path, string message)
         {
             if (!condition)
             {
-                throw new HostOperationException("InputError", "InvalidProtocol", message, path);
+                throw new ProtocolException("InvalidProtocol", message, path);
             }
         }
     }

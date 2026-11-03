@@ -2,6 +2,8 @@
 
 状态：T1–T6 已实现并完成本地验收（2026-10-29）。本文件记录开发任务、接口与实际证据；完整架构方向见[设计文档](ai-native-game-engine-design.md)，实现约束见[代码规范](engineering-guidelines.md)。
 
+本文件保留第一阶段实施时的模块和依赖事实；第三阶段前的当前边界调整见[宿主边界与表现契约](host-boundary-and-presentation.md)。
+
 ## 1. 目标与范围
 
 不启动 Unity，从外部 JSON 加载场景，按命令完成一局。生产代码分为 Core、GridGame、Headless 三个项目，测试独立；生产库没有第三方依赖，宿主使用 System.Text.Json。

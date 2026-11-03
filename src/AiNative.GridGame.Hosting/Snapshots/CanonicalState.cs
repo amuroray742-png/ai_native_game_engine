@@ -4,21 +4,35 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using AiNative.Core;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
     /// <summary>显式写入协议字段顺序；不依赖反射、文化区域或默认属性排序。</summary>
-    internal static class CanonicalState
+    public static class CanonicalState
     {
-        internal static string Hash(ReadOnlySpan<byte> bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
+        /// <summary>对确切字节计算 SHA-256，小写十六进制；不依赖宿主环境。</summary>
+        public static string Hash(ReadOnlySpan<byte> bytes)
+        {
+            using SHA256 algorithm = SHA256.Create();
+            byte[] hash = algorithm.ComputeHash(bytes.ToArray());
+            var text = new StringBuilder(64);
+            foreach (byte value in hash)
+            {
+                text.Append(value.ToString("x2", CultureInfo.InvariantCulture));
+            }
+            return text.ToString();
+        }
 
-        internal static byte[] ConfigurationBytes(ScenarioDefinition configuration) =>
+        /// <summary>生成协议 v1 配置规范化字节；调用方提供已校验配置。</summary>
+        public static byte[] ConfigurationBytes(ScenarioDefinition configuration) =>
             WriteBytes(writer => WriteConfiguration(writer, configuration));
 
-        internal static byte[] StateBytes(GridGameState game, string algorithm, ulong randomState) =>
+        /// <summary>生成玩法摘要字节，不包含队列、环境和表现状态。</summary>
+        public static byte[] StateBytes(GridGameState game, string algorithm, ulong randomState) =>
             WriteBytes(writer =>
             {
                 writer.WriteStartObject();

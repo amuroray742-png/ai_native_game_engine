@@ -13,12 +13,11 @@ namespace AiNative.Headless
         /// <summary>固定六步演示，配置可替换但必须满足该脚本的起点和验收目标。</summary>
         public static IReadOnlyList<DemoStep> Run(ScenarioDefinition definition)
         {
-            return Run(GridGameRules.Create(definition));
+            return Run(GridGameRuntime.Create(definition, Seed));
         }
 
-        internal static IReadOnlyList<DemoStep> Run(GridGameRules rules)
+        internal static IReadOnlyList<DemoStep> Run(GridGameRuntime session)
         {
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, Seed);
             GridGameView initial = session.GetState();
             int a = initial.Units.Single(unit => unit.Side == Side.A).Id;
             int b = initial.Units.Single(unit => unit.Side == Side.B).Id;
@@ -35,7 +34,7 @@ namespace AiNative.Headless
             foreach (GridCommand command in commands)
             {
                 session.Submit(command);
-                StepResult step = session.Advance() ?? throw new InvalidOperationException("演示命令未被执行。");
+                StepResult step = session.Advance()?.Step ?? throw new InvalidOperationException("演示命令未被执行。");
                 GridGameView state = session.GetState();
                 trace.Add(new DemoStep(DescribeCommand(command), step, state));
                 if (!step.Result.Succeeded)

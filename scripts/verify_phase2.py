@@ -169,6 +169,28 @@ def verify(evidence):
     write(output / "damaged.replay.json", altered)
     damaged = evidence.invoke("damaged", "replay", "--input", "damaged.replay.json", exit_code=2, code="InvalidReplay")
     require(damaged["initialCheckpoint"] is None, "damaged record must not execute")
+    # These labels exercise evidence comparison only; they do not claim a second runtime executed this file.
+    other_source = copy.deepcopy(record)
+    other_source["initialSnapshot"]["environment"] = {
+        "runtimeVersion": "comparison-test-runtime", "os": "comparison-test-os",
+        "architecture": "comparison-test-architecture", "buildHash": "a" * 64,
+    }
+    write(output / "other-source.replay.json", other_source)
+    compared = evidence.invoke("compare-other-source", "compare", "--expected", "recorded.replay.json",
+                               "--actual", "other-source.replay.json", code="HostTracesMatched")
+    require(compared["comparedCheckpoints"] == len(record["checkpoints"]) + 1, "compare all checkpoints")
+    require(compared["initialCheckpoint"] is None and not compared["checkpoints"]
+            and compared["accepted"] == 0 and compared["rejected"] == 0, "compare must not claim execution")
+    evidence.invoke("replay-other-source", "replay", "--input", "other-source.replay.json",
+                    exit_code=2, code="EnvironmentMismatch")
+    compared = evidence.invoke("compare-events", "compare", "--expected", "recorded.replay.json",
+                               "--actual", "event-divergence.replay.json", exit_code=3, code="CheckpointMismatch")
+    require(compared["location"]["operationIndex"] == 5 and compared["comparedCheckpoints"] == 6,
+            "compare first event divergence")
+    evidence.invoke("compare-inputs", "compare", "--expected", "recorded.replay.json",
+                    "--actual", "command-divergence.replay.json", exit_code=2, code="ComparisonInputMismatch")
+    evidence.invoke("compare-damaged", "compare", "--expected", "recorded.replay.json",
+                    "--actual", "damaged.replay.json", exit_code=2, code="InvalidReplay")
     return record["initialSnapshot"]["environment"]
 
 

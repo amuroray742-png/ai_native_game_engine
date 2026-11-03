@@ -3,19 +3,55 @@ using System.Collections.Generic;
 using System.Text.Json;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
-    internal sealed record ReplayData(int Version, SnapshotData Snapshot, CommandFile Commands,
-        ReplayCheckpoint Initial, IReadOnlyList<ReplayCheckpoint> Checkpoints);
+    internal sealed class ReplayData
+    {
+        internal ReplayData(int version, SnapshotData snapshot, CommandFile commands, ReplayCheckpoint initial, IReadOnlyList<ReplayCheckpoint> checkpoints)
+        {
+            Version = version;
+            Snapshot = snapshot;
+            Commands = commands;
+            Initial = initial;
+            Checkpoints = checkpoints;
+        }
 
-    internal sealed record ReplayCheckpoint(CliCheckpoint Value, GridGameState Game, int DigestVersion,
-        string RulesId, int RulesVersion, string ConfigHash, string Algorithm, ulong RandomState);
+        internal int Version { get; }
+        internal SnapshotData Snapshot { get; }
+        internal CommandFile Commands { get; }
+        internal ReplayCheckpoint Initial { get; }
+        internal IReadOnlyList<ReplayCheckpoint> Checkpoints { get; }
+    }
+
+    internal sealed class ReplayCheckpoint
+    {
+        internal ReplayCheckpoint(GameCheckpoint value, GridGameState game, int digestVersion, string rulesId, int rulesVersion, string configHash, string algorithm, ulong randomState)
+        {
+            Value = value;
+            Game = game;
+            DigestVersion = digestVersion;
+            RulesId = rulesId;
+            RulesVersion = rulesVersion;
+            ConfigHash = configHash;
+            Algorithm = algorithm;
+            RandomState = randomState;
+        }
+
+        internal GameCheckpoint Value { get; }
+        internal GridGameState Game { get; }
+        internal int DigestVersion { get; }
+        internal string RulesId { get; }
+        internal int RulesVersion { get; }
+        internal string ConfigHash { get; }
+        internal string Algorithm { get; }
+        internal ulong RandomState { get; }
+    }
 
     internal static class ReplayReader
     {
         internal static ReplayData Read(ReadOnlyMemory<byte> bytes)
         {
-            using JsonDocument document = JsonInput.Parse(bytes);
+            using JsonDocument document = JsonDocumentReader.Parse(bytes);
             JsonElement root = document.RootElement;
             ProtocolJson.Object(root, "$", "replayFormatVersion", "initialSnapshot", "commandFile", "initialCheckpoint", "checkpoints");
             int version = ProtocolJson.Int32(root.GetProperty("replayFormatVersion"), "$.replayFormatVersion");
@@ -25,7 +61,7 @@ namespace AiNative.Headless
             {
                 commands = CommandFileReader.Read(root.GetProperty("commandFile"));
             }
-            catch (HostOperationException error)
+            catch (ProtocolException error)
             {
                 throw Nested(error, "$.commandFile");
             }
@@ -44,14 +80,14 @@ namespace AiNative.Headless
             {
                 return read();
             }
-            catch (HostOperationException error)
+            catch (ProtocolException error)
             {
                 throw Nested(error, "$.initialSnapshot");
             }
         }
 
-        private static HostOperationException Nested(HostOperationException error, string prefix) =>
-            new HostOperationException(error.Category, error.Code, error.Message,
+        private static ProtocolException Nested(ProtocolException error, string prefix) =>
+            new ProtocolException(error.Code, error.Message,
                 error.Path == null ? prefix : prefix + error.Path.Substring(1), error);
 
         private static ReplayCheckpoint ReadCheckpoint(JsonElement item, ScenarioDefinition configuration, string path)
@@ -81,13 +117,13 @@ namespace AiNative.Headless
                 string hash = ProtocolJson.Hash(item.GetProperty("stateHash"), path + ".stateHash");
                 JsonElement result = item.GetProperty("result");
                 ReadResult(result, path + ".result");
-                var value = new CliCheckpoint(operationIndex, submitted, completed, pending,
+                var value = new GameCheckpoint(operationIndex, submitted, completed, pending,
                     CanonicalState.WriteBytes(state.WriteTo), hash, CanonicalState.WriteBytes(result.WriteTo));
                 return new ReplayCheckpoint(value, game, digest, rulesId, rulesVersion, configHash, algorithm, randomState);
             }
-            catch (HostOperationException error) when (error.Code == "InvalidProtocol")
+            catch (ProtocolException error) when (error.Code == "InvalidProtocol")
             {
-                throw new HostOperationException("InputError", "InvalidReplay", error.Message, error.Path, error);
+                throw new ProtocolException("InvalidReplay", error.Message, error.Path, error);
             }
         }
 
@@ -184,7 +220,7 @@ namespace AiNative.Headless
             }
         }
 
-        private static HostOperationException Invalid(string path, string message) =>
-            new HostOperationException("InputError", "InvalidReplay", message, path);
+        private static ProtocolException Invalid(string path, string message) =>
+            new ProtocolException("InvalidReplay", message, path);
     }
 }

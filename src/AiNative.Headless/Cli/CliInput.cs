@@ -2,10 +2,11 @@ using System;
 using System.Text.Json;
 using AiNative.Core;
 using AiNative.GridGame;
+using AiNative.GridGame.Hosting;
 
 namespace AiNative.Headless
 {
-    internal sealed record PreparedRun(RestoredGame Game, CommandFile Commands, SnapshotEnvironment Environment, ReplayData? Replay, byte[]? CommandBytes);
+    internal sealed record PreparedRun(GridGameRuntime Game, CommandFile Commands, HostEnvironment Environment, ReplayData? Replay, byte[]? CommandBytes);
 
     internal static class CliInput
     {
@@ -53,8 +54,8 @@ namespace AiNative.Headless
                 CheckVersion(expected.Value.Version, "$.formatVersion");
             }
             CheckVersion(commands.Version, "$.commandFormatVersion");
-            SnapshotEnvironment environment = SnapshotEnvironment.Current();
-            RestoredGame game;
+            HostEnvironment environment = SnapshotEnvironment.Current();
+            GridGameRuntime game;
             if (snapshot != null)
             {
                 game = replay == null ? SnapshotCodec.Decode(snapshot, environment, expected?.Definition)
@@ -62,17 +63,17 @@ namespace AiNative.Headless
             }
             else
             {
-                GridGameRules rules;
+                GridGameRuntime created;
                 try
                 {
-                    rules = GridGameRules.Create(scene?.Definition ?? throw new InvalidOperationException());
+                    created = GridGameRuntime.Create(scene?.Definition ?? throw new InvalidOperationException(),
+                        options.Seed ?? throw new InvalidOperationException());
                 }
                 catch (ArgumentException error)
                 {
                     throw new HostOperationException("InputError", "InvalidConfiguration", error.Message, "$.configuration", error);
                 }
-                game = new RestoredGame(rules, new SimulationSession<GridCommand, GridGameView>(rules,
-                    options.Seed ?? throw new InvalidOperationException()));
+                game = created;
             }
             if (replay != null)
             {
@@ -99,30 +100,7 @@ namespace AiNative.Headless
             return new PreparedRun(game, commands, environment, replay, commandBytes);
         }
 
-        private static (int Version, ScenarioDefinition Definition) ParseScene(byte[] bytes)
-        {
-            using JsonDocument document = JsonInput.Parse(bytes);
-            try
-            {
-                var scene = ScenarioLoader.Parse(bytes);
-                int index = 0;
-                foreach (JsonElement unit in document.RootElement.GetProperty("units").EnumerateArray())
-                {
-                    string? side = unit.GetProperty("side").GetString();
-                    if (!string.Equals(side, "A", StringComparison.OrdinalIgnoreCase)
-                        && !string.Equals(side, "B", StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new HostOperationException("InputError", "InvalidProtocol", "场景阵营必须为 A 或 B。", $"$.units[{index}].side");
-                    }
-                    index++;
-                }
-                return scene;
-            }
-            catch (JsonException error)
-            {
-                throw new HostOperationException("InputError", "InvalidProtocol", error.Message, error.Path ?? "$", error);
-            }
-        }
+        private static (int Version, ScenarioDefinition Definition) ParseScene(byte[] bytes) => ScenarioCodec.Read(bytes);
 
         private static void CheckVersion(int version, string path)
         {

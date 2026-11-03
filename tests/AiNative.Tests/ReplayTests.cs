@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
+using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 using Xunit;
 
@@ -258,7 +259,7 @@ namespace AiNative.Tests
         internal static JsonObject Fixture(string file = "replay.json")
         {
             JsonObject record = JsonNode.Parse(SnapshotFixtures.Read(file))!.AsObject();
-            SnapshotEnvironment environment = SnapshotEnvironment.Current();
+            HostEnvironment environment = SnapshotEnvironment.Current();
             JsonNode target = record["initialSnapshot"]!["environment"]!;
             target["runtimeVersion"] = environment.RuntimeVersion;
             target["os"] = environment.Os;

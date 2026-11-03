@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using AiNative.Core;
 using AiNative.GridGame;
+using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 using Xunit;
 
@@ -199,9 +200,9 @@ namespace AiNative.Tests
             using var directory = new SnapshotDirectory();
             ScenarioDefinition config = Fixtures.Definition();
             GridGameRules rules = GridGameRules.Restore(new GridGameState(config, config.Units, Side.A, 2, long.MaxValue, null));
-            var session = SimulationSession<GridCommand, GridGameView>.Restore(rules,
-                new SessionState(long.MaxValue - 1, long.MaxValue - 1, DeterministicRandom.Algorithm, 42));
-            new SnapshotStore().Save(directory.FilePath, session, rules);
+            GridGameRuntime session = GridGameRuntime.Restore(new GridGameSnapshot(
+                new SessionState(long.MaxValue - 1, long.MaxValue - 1, DeterministicRandom.Algorithm, 42), rules.ExportState()));
+            new SnapshotStore().Save(directory.FilePath, session);
             string commands = CliTests.WriteCommands(directory, SnapshotFixtures.Read("empty-commands.json"));
             string recordPath = Path.Combine(directory.Path, "recorded.json");
             Assert.Equal(0, CliTests.Invoke(new[] { "run", "--snapshot", directory.FilePath, "--commands", commands, "--replay-out", recordPath }).Code);
@@ -247,8 +248,8 @@ namespace AiNative.Tests
         [Fact]
         public void DifferenceIncludesSessionCounters_EvenWhenStateHashMatches()
         {
-            CliCheckpoint initial = ReplayReader.Read(SnapshotFixtures.Read("replay.json")).Initial.Value;
-            CliCheckpoint changed = initial with { Submitted = 1, Pending = 1 };
+            GameCheckpoint initial = ReplayReader.Read(SnapshotFixtures.Read("replay.json")).Initial.Value;
+            var changed = new GameCheckpoint(initial.OperationIndex, 1, initial.Completed, 1, initial.State, initial.StateHash, initial.Result);
             ReplayDivergence difference = Assert.IsType<ReplayDivergence>(CheckpointDifference.Compare(initial, changed));
             Assert.Equal(difference.ExpectedHash, difference.ActualHash);
             Assert.Equal(new[] { "session.lastSubmittedSequence", "session.pendingCount" }, difference.Differences.Select(item => item.Path));

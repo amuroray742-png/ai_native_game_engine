@@ -8,7 +8,7 @@ namespace AiNative.Headless
         string? Commands, string? ExpectedConfiguration, string? SnapshotOutput, string? ReplayOutput, string? ReplayInput)
     {
         internal static bool IsHelp(string[] args) => (args.Length == 1 && args[0] == "--help")
-            || (args.Length == 2 && (args[0] == "run" || args[0] == "inspect" || args[0] == "replay") && args[1] == "--help");
+            || (args.Length == 2 && (args[0] == "run" || args[0] == "inspect" || args[0] == "replay" || args[0] == "compare") && args[1] == "--help");
 
         internal static CliOptions Parse(string[] args)
         {

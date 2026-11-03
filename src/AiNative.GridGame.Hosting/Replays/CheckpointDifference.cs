@@ -3,12 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
-    internal sealed record FieldDifference(string Path, string Kind, JsonElement? Expected, JsonElement? Actual);
-
-    internal sealed record ReplayDivergence(string ExpectedHash, string ActualHash, IReadOnlyList<FieldDifference> Differences)
+    public sealed class FieldDifference
     {
+        internal FieldDifference(string path, string kind, JsonElement? expected, JsonElement? actual)
+        {
+            Path = path;
+            Kind = kind;
+            Expected = expected;
+            Actual = actual;
+        }
+
+        public string Path { get; }
+        public string Kind { get; }
+        public JsonElement? Expected { get; }
+        public JsonElement? Actual { get; }
+    }
+
+    internal sealed class ReplayDivergence
+    {
+        internal ReplayDivergence(string expectedHash, string actualHash, IReadOnlyList<FieldDifference> differences)
+        {
+            ExpectedHash = expectedHash;
+            ActualHash = actualHash;
+            Differences = new List<FieldDifference>(differences).AsReadOnly();
+        }
+
+        internal string ExpectedHash { get; }
+        internal string ActualHash { get; }
+        internal IReadOnlyList<FieldDifference> Differences { get; }
+
         internal void Write(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
@@ -45,7 +70,7 @@ namespace AiNative.Headless
 
     internal static class CheckpointDifference
     {
-        internal static ReplayDivergence? Compare(CliCheckpoint expected, CliCheckpoint actual)
+        internal static ReplayDivergence? Compare(GameCheckpoint expected, GameCheckpoint actual)
         {
             using JsonDocument left = JsonDocument.Parse(CanonicalState.WriteBytes(expected.Write));
             using JsonDocument right = JsonDocument.Parse(CanonicalState.WriteBytes(actual.Write));

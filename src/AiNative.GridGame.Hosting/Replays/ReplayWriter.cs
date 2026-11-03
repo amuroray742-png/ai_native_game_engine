@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
     internal static class ReplayWriter
     {
         // 只接受本次已完成的实际检查点；调用者在执行成功且队列为空后发布。
-        internal static byte[] Encode(byte[] initialSnapshot, byte[] commands, CliCheckpoint initial, IReadOnlyList<CliCheckpoint> checkpoints) =>
+        internal static byte[] Encode(byte[] initialSnapshot, byte[] commands, GameCheckpoint initial, IReadOnlyList<GameCheckpoint> checkpoints) =>
             CanonicalState.WriteBytes(writer =>
             {
                 writer.WriteStartObject();
@@ -17,7 +17,7 @@ namespace AiNative.Headless
                 writer.WritePropertyName("initialCheckpoint");
                 initial.Write(writer);
                 writer.WriteStartArray("checkpoints");
-                foreach (CliCheckpoint checkpoint in checkpoints)
+                foreach (GameCheckpoint checkpoint in checkpoints)
                 {
                     checkpoint.Write(writer);
                 }

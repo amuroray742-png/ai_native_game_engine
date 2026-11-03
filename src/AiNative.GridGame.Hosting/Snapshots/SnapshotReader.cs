@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text.Json;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
     internal static class SnapshotReader
     {
         internal static SnapshotData Read(ReadOnlyMemory<byte> bytes)
         {
-            using JsonDocument document = JsonInput.Parse(bytes);
+            using JsonDocument document = JsonDocumentReader.Parse(bytes);
             return Read(document.RootElement);
         }
 
@@ -21,7 +21,7 @@ namespace AiNative.Headless
             string rulesId = ProtocolJson.String(root.GetProperty("rulesId"), "$.rulesId");
             int rulesVersion = ProtocolJson.Int32(root.GetProperty("rulesVersion"), "$.rulesVersion");
             int configVersion = ProtocolJson.Int32(root.GetProperty("configFormatVersion"), "$.configFormatVersion");
-            (int sceneVersion, ScenarioDefinition configuration) = ReadConfiguration(root.GetProperty("configuration"));
+            (int sceneVersion, ScenarioDefinition configuration) = ReadConfiguration(root.GetProperty("configuration"), "$.configuration");
             string configHash = ProtocolJson.Hash(root.GetProperty("configHash"), "$.configHash");
             JsonElement session = root.GetProperty("session");
             ProtocolJson.Object(session, "$.session", "lastSubmittedSequence", "completedStepCount", "pendingCount");
@@ -35,14 +35,14 @@ namespace AiNative.Headless
             GridGameState game = ReadGame(root.GetProperty("game"), configuration);
             int digestVersion = ProtocolJson.Int32(root.GetProperty("digestVersion"), "$.digestVersion");
             string stateHash = ProtocolJson.Hash(root.GetProperty("stateHash"), "$.stateHash");
-            SnapshotEnvironment environment = ReadEnvironment(root.GetProperty("environment"));
+            HostEnvironment environment = ReadEnvironment(root.GetProperty("environment"));
             return new SnapshotData(format, rulesId, rulesVersion, configVersion, sceneVersion, configHash,
                 submitted, completed, pending, algorithm, randomState, game, digestVersion, stateHash, environment);
         }
 
-        private static (int Version, ScenarioDefinition Configuration) ReadConfiguration(JsonElement element)
+        internal static (int Version, ScenarioDefinition Configuration) ReadConfiguration(JsonElement element,
+            string path, StringComparison sideComparison = StringComparison.Ordinal)
         {
-            const string path = "$.configuration";
             ProtocolJson.Object(element, path, "formatVersion", "width", "height", "obstacles", "units", "actionPointsPerTurn", "attackDamage");
             int version = ProtocolJson.Int32(element.GetProperty("formatVersion"), path + ".formatVersion");
             int width = ProtocolJson.Int32(element.GetProperty("width"), path + ".width");
@@ -52,7 +52,7 @@ namespace AiNative.Headless
             {
                 obstacles.Add(ReadPosition(item, $"{path}.obstacles[{obstacles.Count}]"));
             }
-            List<UnitDefinition> units = ReadUnits(element.GetProperty("units"), path + ".units");
+            List<UnitDefinition> units = ReadUnits(element.GetProperty("units"), path + ".units", sideComparison);
             int actionPoints = ProtocolJson.Int32(element.GetProperty("actionPointsPerTurn"), path + ".actionPointsPerTurn");
             int attackDamage = ProtocolJson.Int32(element.GetProperty("attackDamage"), path + ".attackDamage");
             return (version, new ScenarioDefinition(width, height, obstacles, units, actionPoints, attackDamage));
@@ -70,7 +70,8 @@ namespace AiNative.Headless
             return new GridGameState(configuration, units, activeSide, actionPoints, turnIndex, winnerSide);
         }
 
-        private static List<UnitDefinition> ReadUnits(JsonElement element, string path)
+        private static List<UnitDefinition> ReadUnits(JsonElement element, string path,
+            StringComparison sideComparison = StringComparison.Ordinal)
         {
             var units = new List<UnitDefinition>();
             foreach (JsonElement item in ProtocolJson.Array(element, path))
@@ -78,7 +79,7 @@ namespace AiNative.Headless
                 string itemPath = $"{path}[{units.Count}]";
                 ProtocolJson.Object(item, itemPath, "id", "side", "position", "health");
                 int id = ProtocolJson.Int32(item.GetProperty("id"), itemPath + ".id");
-                Side side = ProtocolJson.SideValue(item.GetProperty("side"), itemPath + ".side");
+                Side side = ProtocolJson.SideValue(item.GetProperty("side"), itemPath + ".side", sideComparison);
                 GridPosition position = ReadPosition(item.GetProperty("position"), itemPath + ".position");
                 int health = ProtocolJson.Int32(item.GetProperty("health"), itemPath + ".health");
                 units.Add(new UnitDefinition(id, side, position, health));
@@ -93,11 +94,11 @@ namespace AiNative.Headless
                 ProtocolJson.Int32(element.GetProperty("y"), path + ".y"));
         }
 
-        private static SnapshotEnvironment ReadEnvironment(JsonElement element)
+        private static HostEnvironment ReadEnvironment(JsonElement element)
         {
             const string path = "$.environment";
             ProtocolJson.Object(element, path, "runtimeVersion", "os", "architecture", "buildHash");
-            return new SnapshotEnvironment(
+            return new HostEnvironment(
                 ProtocolJson.String(element.GetProperty("runtimeVersion"), path + ".runtimeVersion"),
                 ProtocolJson.String(element.GetProperty("os"), path + ".os"),
                 ProtocolJson.String(element.GetProperty("architecture"), path + ".architecture"),
@@ -106,8 +107,41 @@ namespace AiNative.Headless
     }
 
     // 仅在宿主内传递已完成结构读取、尚待兼容性及领域校验的数据。
-    internal sealed record SnapshotData(int FormatVersion, string RulesId, int RulesVersion,
-        int ConfigFormatVersion, int SceneFormatVersion, string ConfigHash,
-        long Submitted, long Completed, int Pending, string Algorithm, ulong RandomState,
-        GridGameState Game, int DigestVersion, string StateHash, SnapshotEnvironment Environment);
+    internal sealed class SnapshotData
+    {
+        internal SnapshotData(int formatVersion, string rulesId, int rulesVersion, int configFormatVersion, int sceneFormatVersion, string configHash, long submitted, long completed, int pending, string algorithm, ulong randomState, GridGameState game, int digestVersion, string stateHash, HostEnvironment environment)
+        {
+            FormatVersion = formatVersion;
+            RulesId = rulesId;
+            RulesVersion = rulesVersion;
+            ConfigFormatVersion = configFormatVersion;
+            SceneFormatVersion = sceneFormatVersion;
+            ConfigHash = configHash;
+            Submitted = submitted;
+            Completed = completed;
+            Pending = pending;
+            Algorithm = algorithm;
+            RandomState = randomState;
+            Game = game;
+            DigestVersion = digestVersion;
+            StateHash = stateHash;
+            Environment = environment;
+        }
+
+        internal int FormatVersion { get; }
+        internal string RulesId { get; }
+        internal int RulesVersion { get; }
+        internal int ConfigFormatVersion { get; }
+        internal int SceneFormatVersion { get; }
+        internal string ConfigHash { get; }
+        internal long Submitted { get; }
+        internal long Completed { get; }
+        internal int Pending { get; }
+        internal string Algorithm { get; }
+        internal ulong RandomState { get; }
+        internal GridGameState Game { get; }
+        internal int DigestVersion { get; }
+        internal string StateHash { get; }
+        internal HostEnvironment Environment { get; }
+    }
 }
