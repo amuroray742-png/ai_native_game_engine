@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using AiNative.Core;
 using AiNative.GridGame;
+using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 using Xunit;
 
@@ -136,9 +137,8 @@ namespace AiNative.Tests
         public void Inspect_ExpectedConfigurationMismatch_AndRunStructureBeforeEnvironment_AreInputErrors()
         {
             using var directory = new SnapshotDirectory();
-            GridGameRules rules = GridGameRules.Create(Fixtures.Definition());
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, 42);
-            new SnapshotStore().Save(directory.FilePath, session, rules);
+            GridGameRuntime session = GridGameRuntime.Create(Fixtures.Definition(), 42);
+            new SnapshotStore().Save(directory.FilePath, session);
             JsonObject configuration = JsonNode.Parse(SnapshotFixtures.Read("scenario.json"))!.AsObject();
             configuration["attackDamage"] = 3;
             string expected = Path.Combine(directory.Path, "expected.json");
@@ -165,9 +165,9 @@ namespace AiNative.Tests
                 ? GridGameRules.Restore(new GridGameState(config, config.Units, Side.A, 2, long.MaxValue, null))
                 : GridGameRules.Create(config);
             long count = ruleFault ? long.MaxValue - 1 : long.MaxValue;
-            var session = SimulationSession<GridCommand, GridGameView>.Restore(rules,
-                new SessionState(count, count, DeterministicRandom.Algorithm, 42));
-            new SnapshotStore().Save(directory.FilePath, session, rules);
+            GridGameRuntime session = GridGameRuntime.Restore(new GridGameSnapshot(
+                new SessionState(count, count, DeterministicRandom.Algorithm, 42), rules.ExportState()));
+            new SnapshotStore().Save(directory.FilePath, session);
             string commands = WriteCommands(directory, Encoding.UTF8.GetBytes("""
                 {"commandFormatVersion":1,"operations":[{"op":"submit","command":{"type":"EndTurn","side":"A"}},{"op":"advance"}]}
                 """));

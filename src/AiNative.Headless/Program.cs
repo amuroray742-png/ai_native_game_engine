@@ -14,7 +14,7 @@ namespace AiNative.Headless
         public static int Run(string[] args, TextWriter output, TextWriter error)
         {
             if (args.Length > 0 && (args[0] == "run" || args[0] == "inspect" || args[0] == "replay"
-                || args[0] == "--help"))
+                || args[0] == "compare" || args[0] == "--help"))
             {
                 return CliRunner.Run(args, output, error);
             }
@@ -24,10 +24,10 @@ namespace AiNative.Headless
                 return 2;
             }
             string path = args.Length == 0 ? Path.Combine(AppContext.BaseDirectory, "demo.json") : args[0];
-            GridGameRules rules;
+            GridGameRuntime game;
             try
             {
-                rules = GridGameRules.Create(ScenarioLoader.Load(path));
+                game = GridGameRuntime.Create(ScenarioLoader.Load(path), DemoRunner.Seed);
             }
             catch (Exception exception) when (exception is JsonException || exception is ArgumentException
                 || exception is IOException || exception is UnauthorizedAccessException)
@@ -38,11 +38,11 @@ namespace AiNative.Headless
 
             try
             {
-                GridGameView initial = rules.GetState();
+                GridGameView initial = game.GetState();
                 output.WriteLine("Initial state:");
                 output.WriteLine($"  Map={initial.Width}x{initial.Height} Obstacles=[{string.Join(", ", initial.Obstacles)}] Seed={DemoRunner.Seed}");
                 WriteState(output, initial);
-                IReadOnlyList<DemoStep> trace = DemoRunner.Run(rules);
+                IReadOnlyList<DemoStep> trace = DemoRunner.Run(game);
                 foreach (DemoStep step in trace)
                 {
                     output.WriteLine($"Step {step.Step.Sequence}: {step.Command} => {step.Step.Result.Error ?? "Accepted"}");

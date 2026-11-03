@@ -3,14 +3,14 @@ using System.Text.Json;
 using AiNative.Core;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
     internal static class ReplayValidator
     {
         // 只推导调度，不执行玩法，也不根据命令重建或修正期望结果。
         internal static void Validate(ReplayData replay)
         {
-            CliCheckpoint initial = replay.Initial.Value;
+            GameCheckpoint initial = replay.Initial.Value;
             ReplayReader.Require(initial.OperationIndex == null, "$.initialCheckpoint.operationIndex");
             ReplayReader.Require(initial.Submitted == replay.Snapshot.Submitted && initial.Completed == replay.Snapshot.Completed
                 && initial.Pending == 0, "$.initialCheckpoint.session");
@@ -29,7 +29,7 @@ namespace AiNative.Headless
             {
                 ReplayCheckpoint checkpoint = replay.Checkpoints[index];
                 string path = $"$.checkpoints[{index}]";
-                CliCheckpoint value = checkpoint.Value;
+                GameCheckpoint value = checkpoint.Value;
                 ReplayReader.Require(value.OperationIndex == index, path + ".operationIndex");
                 string kind;
                 long? sequence = null;
@@ -81,7 +81,7 @@ namespace AiNative.Headless
             }
             catch (ArgumentException error)
             {
-                throw new HostOperationException("InputError", "InvalidReplay", error.Message, path + ".state.game", error);
+                throw new ProtocolException("InvalidReplay", error.Message, path + ".state.game", error);
             }
             ReplayReader.Require(checkpoint.Game.TurnIndex - 1 <= checkpoint.Value.Completed, path + ".state.game.turnIndex");
             string hash = CanonicalState.Hash(CanonicalState.StateBytes(checkpoint.Game, checkpoint.Algorithm, checkpoint.RandomState));

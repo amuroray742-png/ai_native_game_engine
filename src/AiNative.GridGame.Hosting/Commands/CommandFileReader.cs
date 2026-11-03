@@ -3,16 +3,47 @@ using System.Collections.Generic;
 using System.Text.Json;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
-    internal sealed record CommandOperation(GridCommand? Command);
-    internal sealed record CommandFile(int Version, IReadOnlyList<CommandOperation> Operations);
+    public sealed class CommandOperation
+    {
+        internal CommandOperation(GridCommand? command)
+        {
+            Command = command;
+        }
+
+        /// <summary>非 null 表示提交该命令；null 表示显式推进一次。</summary>
+        public GridCommand? Command { get; }
+    }
+    public sealed class CommandFile
+    {
+        internal CommandFile(int version, IReadOnlyList<CommandOperation> operations)
+        {
+            Version = version;
+            Operations = operations;
+        }
+
+        public int Version { get; }
+        public IReadOnlyList<CommandOperation> Operations { get; }
+
+        /// <summary>读取完整 v1 操作序列并校验队列平衡；不执行规则，非法输入抛 ProtocolException。</summary>
+        public static CommandFile Decode(ReadOnlyMemory<byte> bytes)
+        {
+            CommandFile file = CommandFileReader.Read(bytes);
+            if (file.Version != 1)
+            {
+                throw new ProtocolException("UnsupportedVersion", "不支持的命令文件版本。", "$.commandFormatVersion");
+            }
+            CommandFileReader.ValidateBalance(file);
+            return file;
+        }
+    }
 
     internal static class CommandFileReader
     {
         internal static CommandFile Read(ReadOnlyMemory<byte> bytes)
         {
-            using JsonDocument document = JsonInput.Parse(bytes);
+            using JsonDocument document = JsonDocumentReader.Parse(bytes);
             return Read(document.RootElement);
         }
 
@@ -63,7 +94,7 @@ namespace AiNative.Headless
             }
             if (pending != 0)
             {
-                throw new HostOperationException("InputError", "PendingCommands", "命令文件结束时仍有待执行命令。", path);
+                throw new ProtocolException("PendingCommands", "命令文件结束时仍有待执行命令。", path);
             }
         }
 
@@ -104,7 +135,7 @@ namespace AiNative.Headless
             return new Move(side, unit, moveDirection);
         }
 
-        private static HostOperationException Invalid(string path, string message) =>
-            new HostOperationException("InputError", "InvalidProtocol", message, path);
+        private static ProtocolException Invalid(string path, string message) =>
+            new ProtocolException("InvalidProtocol", message, path);
     }
 }

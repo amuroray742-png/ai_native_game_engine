@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using AiNative.Core;
+using AiNative.GridGame;
+using AiNative.GridGame.Hosting;
 
 namespace AiNative.Headless
 {
@@ -11,7 +13,8 @@ namespace AiNative.Headless
             + "AiNative.Headless run --snapshot <path> --commands <path> [--expect-config <path>] [--snapshot-out <path>] [--replay-out <path>]\n"
             + "AiNative.Headless inspect --snapshot <path> [--expect-config <path>]\n"
             + "AiNative.Headless replay --input <path> [--expect-config <path>]\n"
-            + "--help 或 <run|inspect|replay> --help：显示帮助。\n";
+            + "AiNative.Headless compare --expected <replay> --actual <replay>\n"
+            + "--help 或 <run|inspect|replay|compare> --help：显示帮助。\n";
 
         internal static int Run(string[] args, TextWriter output, TextWriter error)
         {
@@ -22,98 +25,18 @@ namespace AiNative.Headless
             var response = new CliResponse();
             try
             {
-                CliOptions options = CliOptions.Parse(args);
-                PreparedRun prepared = CliInput.Prepare(options);
-                response.Initial = Capture(null, prepared.Game, OperationOutput.Initial());
-                byte[]? initialSnapshot = options.ReplayOutput == null ? null
-                    : SnapshotCodec.Encode(prepared.Game.Session.ExportState(), prepared.Game.Rules.ExportState(), prepared.Environment);
-                response.Code = options.Mode switch
+                if (args[0] == "compare")
                 {
-                    "inspect" => "SnapshotInspected",
-                    "replay" => "ReplayMatched",
-                    _ => "RunCompleted"
-                };
-                if (prepared.Replay != null)
-                {
-                    Compare(response, prepared.Replay.Initial.Value, response.Initial);
+                    HostComparisonCommand.Execute(args, response);
                 }
-                for (int index = 0; index < prepared.Commands.Operations.Count; index++)
+                else
                 {
-                    CommandOperation operation = prepared.Commands.Operations[index];
-                    response.OperationIndex = index;
-                    response.Sequence = operation.Command == null && prepared.Game.Session.PendingCount > 0
-                        ? prepared.Game.Session.CompletedStepCount + 1 : null;
-                    long? submitted = null;
-                    StepResult? step = null;
-                    try
-                    {
-                        if (operation.Command != null)
-                        {
-                            submitted = prepared.Game.Session.Submit(operation.Command);
-                            response.Sequence = submitted;
-                        }
-                        else
-                        {
-                            step = prepared.Game.Session.Advance();
-                        }
-                    }
-                    catch (OverflowException failure) when (operation.Command != null && !prepared.Game.Session.IsFaulted)
-                    {
-                        throw new HostOperationException("SimulationFailure", "SequenceOverflow", failure.Message, inner: failure);
-                    }
-                    catch (Exception failure)
-                    {
-                        throw new HostOperationException("SimulationFailure", "SessionFaulted", failure.Message, inner: failure);
-                    }
-                    if (step != null)
-                    {
-                        if (step.Result.Succeeded)
-                        {
-                            response.Accepted++;
-                        }
-                        else
-                        {
-                            response.Rejected++;
-                        }
-                    }
-                    byte[] result;
-                    if (submitted.HasValue)
-                    {
-                        result = OperationOutput.Submitted(submitted.Value);
-                    }
-                    else if (step == null)
-                    {
-                        result = OperationOutput.Empty();
-                    }
-                    else
-                    {
-                        result = OperationOutput.Executed(step);
-                    }
-                    CliCheckpoint actual = Capture(index, prepared.Game, result);
-                    response.Checkpoints.Add(actual);
-                    if (prepared.Replay != null)
-                    {
-                        Compare(response, prepared.Replay.Checkpoints[index].Value, actual);
-                    }
+                    Execute(args, response);
                 }
-                response.OperationIndex = null;
-                response.Sequence = null;
-                if (prepared.Game.Session.PendingCount != 0)
-                {
-                    throw new HostOperationException("InputError", "PendingCommands", "执行结束仍有待执行命令。", "$.operations");
-                }
-                if (options.SnapshotOutput != null)
-                {
-                    string path = new SnapshotStore(prepared.Environment).Save(options.SnapshotOutput, prepared.Game.Session, prepared.Game.Rules);
-                    response.SnapshotArtifacts.Add(path);
-                }
-                if (options.ReplayOutput != null)
-                {
-                    byte[] bytes = ReplayWriter.Encode(initialSnapshot ?? throw new InvalidOperationException(),
-                        prepared.CommandBytes ?? throw new InvalidOperationException(), response.Initial, response.Checkpoints);
-                    string path = AtomicFilePublisher.Publish(options.ReplayOutput, stream => stream.Write(bytes));
-                    response.ReplayArtifacts.Add(path);
-                }
+            }
+            catch (ProtocolException failure)
+            {
+                response.Fail(new HostOperationException("InputError", failure.Code, failure.Message, failure.Path, failure));
             }
             catch (HostOperationException failure)
             {
@@ -140,7 +63,103 @@ namespace AiNative.Headless
             return WriteOutput(output, error, json, response.ExitCode);
         }
 
-        private static void Compare(CliResponse response, CliCheckpoint expected, CliCheckpoint actual)
+        private static void Execute(string[] args, CliResponse response)
+        {
+            CliOptions options = CliOptions.Parse(args);
+            PreparedRun prepared = CliInput.Prepare(options);
+            response.Initial = Capture(null, prepared.Game, OperationOutput.Initial());
+            byte[]? initialSnapshot = options.ReplayOutput == null ? null
+                : SnapshotCodec.Encode(prepared.Game.ExportState(), prepared.Environment);
+            response.Code = options.Mode switch
+            {
+                "inspect" => "SnapshotInspected",
+                "replay" => "ReplayMatched",
+                _ => "RunCompleted"
+            };
+            if (prepared.Replay != null)
+            {
+                Compare(response, prepared.Replay.Initial.Value, response.Initial);
+            }
+            for (int index = 0; index < prepared.Commands.Operations.Count; index++)
+            {
+                CommandOperation operation = prepared.Commands.Operations[index];
+                response.OperationIndex = index;
+                response.Sequence = operation.Command == null && prepared.Game.PendingCount > 0
+                    ? prepared.Game.CompletedStepCount + 1 : null;
+                long? submitted = null;
+                StepResult? step = null;
+                try
+                {
+                    if (operation.Command != null)
+                    {
+                        submitted = prepared.Game.Submit(operation.Command);
+                        response.Sequence = submitted;
+                    }
+                    else
+                    {
+                        step = prepared.Game.Advance()?.Step;
+                    }
+                }
+                catch (OverflowException failure) when (operation.Command != null && !prepared.Game.IsFaulted)
+                {
+                    throw new HostOperationException("SimulationFailure", "SequenceOverflow", failure.Message, inner: failure);
+                }
+                catch (Exception failure)
+                {
+                    throw new HostOperationException("SimulationFailure", "SessionFaulted", failure.Message, inner: failure);
+                }
+                if (step != null)
+                {
+                    if (step.Result.Succeeded)
+                    {
+                        response.Accepted++;
+                    }
+                    else
+                    {
+                        response.Rejected++;
+                    }
+                }
+                byte[] result;
+                if (submitted.HasValue)
+                {
+                    result = OperationOutput.Submitted(submitted.Value);
+                }
+                else if (step == null)
+                {
+                    result = OperationOutput.Empty();
+                }
+                else
+                {
+                    result = OperationOutput.Executed(step);
+                }
+                GameCheckpoint actual = Capture(index, prepared.Game, result);
+                response.Checkpoints.Add(actual);
+                if (prepared.Replay != null)
+                {
+                    Compare(response, prepared.Replay.Checkpoints[index].Value, actual);
+                }
+            }
+            response.OperationIndex = null;
+            response.Sequence = null;
+            if (prepared.Game.PendingCount != 0)
+            {
+                throw new HostOperationException("InputError", "PendingCommands", "执行结束仍有待执行命令。", "$.operations");
+            }
+            if (options.SnapshotOutput != null)
+            {
+                string path = new SnapshotStore(prepared.Environment).Save(options.SnapshotOutput, prepared.Game);
+                response.SnapshotArtifacts.Add(path);
+            }
+            if (options.ReplayOutput != null)
+            {
+                byte[] bytes = ReplayWriter.Encode(initialSnapshot ?? throw new InvalidOperationException(),
+                    prepared.CommandBytes ?? throw new InvalidOperationException(), response.Initial, response.Checkpoints);
+                string path = AtomicFilePublisher.Publish(options.ReplayOutput, stream => stream.Write(bytes));
+                response.ReplayArtifacts.Add(path);
+            }
+        }
+
+        private static void Compare(CliResponse response, GameCheckpoint expected, GameCheckpoint actual)
         {
             response.Divergence = CheckpointDifference.Compare(expected, actual);
             if (response.Divergence != null)
@@ -151,13 +170,13 @@ namespace AiNative.Headless
             response.ComparedCheckpoints++;
         }
 
-        private static CliCheckpoint Capture(int? index, RestoredGame game, byte[] result)
+        private static GameCheckpoint Capture(int? index, GridGameRuntime game, byte[] result)
         {
             try
             {
-                return CliCheckpoint.Capture(index, game, result);
+                return GameCheckpoint.Capture(index, game, result);
             }
-            catch (Exception failure) when (game.Session.IsFaulted)
+            catch (Exception failure) when (game.IsFaulted)
             {
                 throw new HostOperationException("SimulationFailure", "SessionFaulted", failure.Message, inner: failure);
             }

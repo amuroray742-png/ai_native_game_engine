@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using AiNative.Core;
 using AiNative.GridGame;
+using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 using Xunit;
 
@@ -46,7 +47,7 @@ namespace AiNative.Tests
             byte[] actual = file switch
             {
                 "configuration.canonical.json" => CanonicalState.ConfigurationBytes(config),
-                "build-identity.txt" => SnapshotEnvironment.BuildIdentityBytes(new string('0', 64), new string('1', 64), new string('2', 64)),
+                "build-identity.txt" => SnapshotEnvironment.BuildIdentityBytes(new[] { ("AiNative.Core", new string('0', 64)), ("AiNative.GridGame", new string('1', 64)), ("AiNative.Headless", new string('2', 64)) }),
                 _ => CanonicalState.StateBytes(new GridGameState(config, units, Side.A, actionPoints, turn, winner),
                     DeterministicRandom.Algorithm, random)
             };
@@ -91,10 +92,13 @@ namespace AiNative.Tests
         [Fact]
         public void CurrentEnvironment_UsesActualAssemblyContentAndRuntime()
         {
-            SnapshotEnvironment environment = SnapshotEnvironment.Current();
-            string[] paths = { typeof(SessionState).Assembly.Location, typeof(GridGameRules).Assembly.Location, typeof(Program).Assembly.Location };
+            HostEnvironment environment = SnapshotEnvironment.Current();
+            Type[] types = { typeof(SessionState), typeof(GridGameRules), typeof(HostEnvironment), typeof(Program),
+                typeof(JsonDocument), typeof(System.Text.Encodings.Web.JavaScriptEncoder), typeof(System.IO.Pipelines.PipeReader) };
+            string[] paths = types.Select(type => type.Assembly.Location).ToArray();
             string[] hashes = paths.Select(path => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)))).ToArray();
-            string combined = $"AiNative.Core={hashes[0]}\nAiNative.GridGame={hashes[1]}\nAiNative.Headless={hashes[2]}\n";
+            string combined = $"AiNative.Core={hashes[0]}\nAiNative.GridGame={hashes[1]}\nAiNative.GridGame.Hosting={hashes[2]}\nAiNative.Headless={hashes[3]}\n"
+                + $"System.Text.Json={hashes[4]}\nSystem.Text.Encodings.Web={hashes[5]}\nSystem.IO.Pipelines={hashes[6]}\n";
             Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(combined))), environment.BuildHash);
             Assert.Equal(Environment.Version.ToString(), environment.RuntimeVersion);
             Assert.Equal(System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant(), environment.Architecture);

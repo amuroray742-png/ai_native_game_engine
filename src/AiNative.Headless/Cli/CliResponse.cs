@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using AiNative.GridGame.Hosting;
 
 namespace AiNative.Headless
 {
@@ -17,8 +18,8 @@ namespace AiNative.Headless
         internal int Rejected { get; set; }
         internal int ComparedCheckpoints { get; set; }
         internal ReplayDivergence? Divergence { get; set; }
-        internal CliCheckpoint? Initial { get; set; }
-        internal List<CliCheckpoint> Checkpoints { get; } = new List<CliCheckpoint>();
+        internal GameCheckpoint? Initial { get; set; }
+        internal List<GameCheckpoint> Checkpoints { get; } = new List<GameCheckpoint>();
         internal List<string> SnapshotArtifacts { get; } = new List<string>();
         internal List<string> ReplayArtifacts { get; } = new List<string>();
         internal int ExitCode => Category switch
@@ -86,13 +87,13 @@ namespace AiNative.Headless
                 Initial.Write(writer);
             }
             writer.WriteStartArray("checkpoints");
-            foreach (CliCheckpoint checkpoint in Checkpoints)
+            foreach (GameCheckpoint checkpoint in Checkpoints)
             {
                 checkpoint.Write(writer);
             }
             writer.WriteEndArray();
             writer.WritePropertyName("finalCheckpoint");
-            CliCheckpoint? final = Checkpoints.Count == 0 ? Initial : Checkpoints[Checkpoints.Count - 1];
+            GameCheckpoint? final = Checkpoints.Count == 0 ? Initial : Checkpoints[Checkpoints.Count - 1];
             if (final == null)
             {
                 writer.WriteNullValue();

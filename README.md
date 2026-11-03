@@ -4,6 +4,8 @@
 
 **当前状态：第二阶段 P2-T1–T6 已完成实现、独立审查、本地及远端验收。** 已有纯 C# 内核、外部 JSON 场景、网格回合制规则、固定演示、完整状态导出恢复，以及严格快照、规范化摘要、环境检查和单文件发布。`run` / `inspect` 支持外部命令、结构化结果及同一支持环境下的跨进程恢复。`run --replay-out` 可录制回放，`replay` 逐检查点验证并报告首个字段分歧。P2-T6 新增可重复验收脚本与证据归档；远端 CI 与证据上传已验证，Unity 适配尚未实施，不宣称跨运行时确定性。
 
+第三阶段前的五项架构修复已完成独立审查与本地验证（355 项测试、45 次 CLI 验收），当前边界与公共 API 见[宿主边界与表现契约](docs/host-boundary-and-presentation.md)。共享库目标为 netstandard2.1；Unity/IL2CPP 接入仍待第三阶段验证。
+
 ## 快速运行
 
 需要 .NET SDK 10.0.202（允许同 feature band 的后续补丁）。在仓库根目录执行：
@@ -40,13 +42,22 @@ dotnet run --project src/AiNative.Headless -- run --snapshot final.json --comman
 
 `--help` 查看帮助。回放匹配返回 `ReplayMatched`；损坏记录返回输入错误，合法期望与实际执行不符返回 `CheckpointMismatch`，包含首个操作位置、期望/实际摘要及字段差异。完整字段及错误语义见[协议 v1](docs/contracts/phase-2/contract.md)。
 
+跨宿主比较两份独立录制、起点与操作相同的回放：
+
+```sh
+dotnet run --project src/AiNative.Headless -- compare --expected headless.replay.json --actual other-host.replay.json
+```
+
+compare 校验并比较已有证据，不执行模拟；允许来源环境不同，不放宽快照恢复门禁。输入不同返回 `ComparisonInputMismatch`，结果分歧退出 3，匹配返回 `HostTracesMatched`。
+
 ## 项目与验证
 
 | 项目 | 职责 | 目标 |
 | --- | --- | --- |
 | AiNative.Core | FIFO 调度、计数、故障隔离、随机状态导出恢复 | .NET Standard 2.1 / C# 9 |
-| AiNative.GridGame | 场景校验、玩法规则、只读视图及完整状态导出恢复 | .NET Standard 2.1 / C# 9 |
-| AiNative.Headless | JSON 输入、快照、run/inspect/replay、装配与演示 | .NET 10 |
+| AiNative.GridGame | 场景校验、玩法规则、完整对局所有权及隔离状态 | .NET Standard 2.1 / C# 9 |
+| AiNative.GridGame.Hosting | 共享内存协议、摘要、快照/回放、宿主比较、表现队列 | .NET Standard 2.1 / C# 9 |
+| AiNative.Headless | 文件、环境、run/inspect/replay/compare、装配与演示 | .NET 10 |
 | AiNative.Tests | 核心、玩法、配置及进程行为测试 | .NET 10 / xUnit |
 
 ```sh
@@ -55,7 +66,7 @@ dotnet test
 dotnet format --verify-no-changes --no-restore
 ```
 
-本地已通过 332 项测试及 40 次真实 CLI 验收。[P2-T6 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 已通过，上传制品已下载核验，结果同为 332 项测试及 40 次 CLI 验收通过。
+第二阶段基线本地已通过 332 项测试及 40 次真实 CLI 验收。[P2-T6 CI](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/40991275807) 已通过，上传制品已下载核验，结果同为 332 项测试及 40 次 CLI 验收通过。
 
 Windows 检出由 `.gitattributes` 固定文本文件为 LF；规范化 JSON 哈希样本保留原始字节，不追加结尾换行。CI 已配置 Ubuntu/Windows 双平台，分别上传带平台名称的证据；新增 Windows CI 尚待远端执行，本地复核见[Windows 验证记录](docs/phase-2-acceptance.md#windows-验证补齐2026-11-02)。两个平台各自验证保存恢复，不代表同一快照可以跨平台读取。
 
@@ -65,7 +76,7 @@ Windows 检出由 `.gitattributes` 固定文本文件为 LF；规范化 JSON 哈
 python scripts/verify_phase2.py --output TestResults/phase-2
 ```
 
-具体范围、V1–V12 对应测试及产物说明见[第二阶段验收入口与证据索引](docs/phase-2-acceptance.md)。
+当前脚本另含 5 次宿主对比/严格恢复检查，共 45 次 CLI 调用；原 40 次验收保持。具体范围、V1–V12 对应测试及产物说明见[第二阶段验收入口与证据索引](docs/phase-2-acceptance.md)。
 
 ## 文档
 

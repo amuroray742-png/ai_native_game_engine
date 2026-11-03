@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using AiNative.Core;
 using AiNative.GridGame;
+using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 using Xunit;
 
@@ -23,9 +24,9 @@ namespace AiNative.Tests
             using var directory = new SnapshotDirectory();
             string scenarioPath = Path.Combine(directory.Path, "scenario.json");
             File.WriteAllBytes(scenarioPath, SnapshotFixtures.Read("scenario.json"));
-            GridGameRules rules = GridGameRules.Create(ScenarioLoader.Load(scenarioPath));
+            ScenarioDefinition configuration = ScenarioLoader.Load(scenarioPath);
             File.Delete(scenarioPath);
-            var original = new SimulationSession<GridCommand, GridGameView>(rules, 42);
+            GridGameRuntime original = GridGameRuntime.Create(configuration, 42);
             GridCommand[] commands =
             {
                 new Move(Side.A, 1, MoveDirection.Right), new Attack(Side.A, 1, 2), new EndTurn(Side.A),
@@ -33,29 +34,30 @@ namespace AiNative.Tests
             };
             for (int index = 0; index < boundary; index++)
             {
-                Fixtures.Execute(original, commands[index]);
+                original.Submit(commands[index]);
+                original.Advance();
             }
             var store = new SnapshotStore();
             string before = Fixtures.State(original.GetState());
-            Assert.Equal(directory.FilePath, store.Save(directory.FilePath, original, rules));
+            Assert.Equal(directory.FilePath, store.Save(directory.FilePath, original));
             Assert.Equal(before, Fixtures.State(original.GetState()));
             Assert.Equal(boundary, original.CompletedStepCount);
-            RestoredGame restored = new SnapshotStore().Load(directory.FilePath);
-            Assert.Equal(before, Fixtures.State(restored.Session.GetState()));
-            Assert.Equal(boundary, restored.Session.CompletedStepCount);
+            GridGameRuntime restored = new SnapshotStore().Load(directory.FilePath);
+            Assert.Equal(before, Fixtures.State(restored.GetState()));
+            Assert.Equal(boundary, restored.CompletedStepCount);
             for (int index = boundary; index < commands.Length; index++)
             {
                 original.Submit(commands[index]);
-                restored.Session.Submit(commands[index]);
-                StepResult expected = Assert.IsType<StepResult>(original.Advance());
-                StepResult actual = Assert.IsType<StepResult>(restored.Session.Advance());
+                restored.Submit(commands[index]);
+                StepResult expected = Assert.IsType<GridStep>(original.Advance()).Step;
+                StepResult actual = Assert.IsType<GridStep>(restored.Advance()).Step;
                 Assert.Equal(Fixtures.Trace(new DemoStep("command", expected, original.GetState())),
-                    Fixtures.Trace(new DemoStep("command", actual, restored.Session.GetState())));
-                Assert.Equal(original.RandomState, restored.Session.RandomState);
+                    Fixtures.Trace(new DemoStep("command", actual, restored.GetState())));
+                Assert.Equal(original.RandomState, restored.RandomState);
             }
-            Assert.Equal(Side.A, restored.Session.GetState().Winner);
-            Assert.Equal(2, restored.Session.GetState().Units[0].Health);
-            Assert.Equal(0, restored.Session.GetState().Units[1].Health);
+            Assert.Equal(Side.A, restored.GetState().Winner);
+            Assert.Equal(2, restored.GetState().Units[0].Health);
+            Assert.Equal(0, restored.GetState().Units[1].Health);
             Assert.Single(Directory.GetFiles(directory.Path));
         }
 
@@ -63,23 +65,22 @@ namespace AiNative.Tests
         public void Save_NonemptyOrFaultedSession_DoesNotPublishOrChangeQueue()
         {
             using var directory = new SnapshotDirectory();
-            GridGameRules rules = GridGameRules.Create(Fixtures.Definition());
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, 42);
+            GridGameRuntime session = GridGameRuntime.Create(Fixtures.Definition(), 42);
             session.Submit(new EndTurn(Side.A));
             var store = new SnapshotStore();
-            Assert.Throws<InvalidOperationException>(() => store.Save(directory.FilePath, session, rules));
+            Assert.Throws<InvalidOperationException>(() => store.Save(directory.FilePath, session));
             Assert.Equal(1, session.PendingCount);
             Assert.Equal(0, session.CompletedStepCount);
             Assert.Empty(Directory.GetFiles(directory.Path));
 
             ScenarioDefinition config = Fixtures.Definition();
-            rules = GridGameRules.Restore(new GridGameState(config, config.Units, Side.A, 2, long.MaxValue, null));
-            session = SimulationSession<GridCommand, GridGameView>.Restore(rules,
-                new SessionState(long.MaxValue - 1, long.MaxValue - 1, DeterministicRandom.Algorithm, 42));
+            session = GridGameRuntime.Restore(new GridGameSnapshot(
+                new SessionState(long.MaxValue - 1, long.MaxValue - 1, DeterministicRandom.Algorithm, 42),
+                new GridGameState(config, config.Units, Side.A, 2, long.MaxValue, null)));
             session.Submit(new EndTurn(Side.A));
             Assert.Throws<OverflowException>(() => session.Advance());
             Assert.True(session.IsFaulted);
-            Assert.Throws<InvalidOperationException>(() => store.Save(directory.FilePath, session, rules));
+            Assert.Throws<InvalidOperationException>(() => store.Save(directory.FilePath, session));
             Assert.Empty(Directory.GetFiles(directory.Path));
         }
 
@@ -92,7 +93,7 @@ namespace AiNative.Tests
             Assert.Equal("InputError", missing.Category);
             Assert.Equal("InputReadFailed", missing.Code);
             File.WriteAllBytes(directory.FilePath, SnapshotFixtures.Read("initial.snapshot.json"));
-            Assert.Equal("EnvironmentMismatch", Assert.Throws<HostOperationException>(() => store.Load(directory.FilePath)).Code);
+            Assert.Equal("EnvironmentMismatch", Assert.Throws<ProtocolException>(() => store.Load(directory.FilePath)).Code);
         }
 
         [Fact]
@@ -153,12 +154,12 @@ namespace AiNative.Tests
         public void Save_OutputFailure_LeavesSimulationUnchanged()
         {
             using var directory = new SnapshotDirectory();
-            GridGameRules rules = GridGameRules.Create(Fixtures.Definition());
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, 42);
-            Fixtures.Execute(session, new Move(Side.A, 1, MoveDirection.Up));
+            GridGameRuntime session = GridGameRuntime.Create(Fixtures.Definition(), 42);
+            session.Submit(new Move(Side.A, 1, MoveDirection.Up));
+            session.Advance();
             string before = Fixtures.State(session.GetState());
             var store = new SnapshotStore();
-            Assert.Throws<HostOperationException>(() => store.Save(Path.Combine(directory.Path, "missing", "state.json"), session, rules));
+            Assert.Throws<HostOperationException>(() => store.Save(Path.Combine(directory.Path, "missing", "state.json"), session));
             Assert.Equal(before, Fixtures.State(session.GetState()));
             Assert.Equal(42UL, session.RandomState);
             Assert.Equal(1, session.CompletedStepCount);

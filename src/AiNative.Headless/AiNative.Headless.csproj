@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../AiNative.Core/AiNative.Core.csproj" />
+    <ProjectReference Include="../AiNative.GridGame.Hosting/AiNative.GridGame.Hosting.csproj" />
     <ProjectReference Include="../AiNative.GridGame/AiNative.GridGame.csproj" />
   </ItemGroup>
   <ItemGroup>

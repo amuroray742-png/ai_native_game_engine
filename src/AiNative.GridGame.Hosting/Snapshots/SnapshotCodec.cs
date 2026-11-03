@@ -2,13 +2,19 @@ using System;
 using AiNative.Core;
 using AiNative.GridGame;
 
-namespace AiNative.Headless
+namespace AiNative.GridGame.Hosting
 {
-    internal static class SnapshotCodec
+    public static class SnapshotCodec
     {
         /// <summary>输入必须来自同一个会话的空队列边界；编码不访问文件或修改模拟。</summary>
-        internal static byte[] Encode(SessionState session, GridGameState game, SnapshotEnvironment environment)
+        public static byte[] Encode(GridGameSnapshot snapshot, HostEnvironment environment)
         {
+            if (snapshot == null || environment == null)
+            {
+                throw new ArgumentNullException(snapshot == null ? nameof(snapshot) : nameof(environment));
+            }
+            SessionState session = snapshot.Session;
+            GridGameState game = snapshot.Game;
             ValidateConfiguration(game.Configuration);
             ValidateState(session.LastSubmittedSequence, session.CompletedStepCount, 0, session.RandomAlgorithm,
                 session.RandomState, game);
@@ -43,7 +49,7 @@ namespace AiNative.Headless
         }
 
         /// <summary>全部校验通过后才返回候选实例；调用方自行替换旧引用。</summary>
-        internal static RestoredGame Decode(ReadOnlyMemory<byte> bytes, SnapshotEnvironment currentEnvironment,
+        public static GridGameRuntime Decode(ReadOnlyMemory<byte> bytes, HostEnvironment currentEnvironment,
             ScenarioDefinition? expectedConfiguration = null)
         {
             return Decode(SnapshotReader.Read(bytes), currentEnvironment, expectedConfiguration);
@@ -60,14 +66,25 @@ namespace AiNative.Headless
             Check(data.Algorithm == DeterministicRandom.Algorithm, "UnsupportedRandomAlgorithm", "$.random.algorithm");
         }
 
-        internal static RestoredGame Decode(SnapshotData data, SnapshotEnvironment currentEnvironment,
+        internal static GridGameRuntime Decode(SnapshotData data, HostEnvironment currentEnvironment,
             ScenarioDefinition? expectedConfiguration = null)
         {
+            if (currentEnvironment == null)
+            {
+                throw new ArgumentNullException(nameof(currentEnvironment));
+            }
             ValidateVersions(data);
             Check(data.Environment.RuntimeVersion == currentEnvironment.RuntimeVersion, "EnvironmentMismatch", "$.environment.runtimeVersion");
             Check(data.Environment.Os == currentEnvironment.Os, "EnvironmentMismatch", "$.environment.os");
             Check(data.Environment.Architecture == currentEnvironment.Architecture, "EnvironmentMismatch", "$.environment.architecture");
             Check(data.Environment.BuildHash == currentEnvironment.BuildHash, "EnvironmentMismatch", "$.environment.buildHash");
+            return GridGameRuntime.Restore(ValidateContent(data, expectedConfiguration));
+        }
+
+        // 比较已有证据仅校验内容，不加载其来源环境、不执行命令、不安装一个对局。
+        internal static GridGameSnapshot ValidateContent(SnapshotData data, ScenarioDefinition? expectedConfiguration = null)
+        {
+            ValidateVersions(data);
             ValidateConfiguration(data.Game.Configuration);
             string configHash = CanonicalState.Hash(CanonicalState.ConfigurationBytes(data.Game.Configuration));
             Check(configHash == data.ConfigHash, "ConfigHashMismatch", "$.configHash");
@@ -77,8 +94,8 @@ namespace AiNative.Headless
                 Check(CanonicalState.Hash(CanonicalState.ConfigurationBytes(expectedConfiguration)) == configHash,
                     "ExpectedConfigMismatch", "$.configuration");
             }
-            RestoredGame restored = ValidateState(data.Submitted, data.Completed, data.Pending, data.Algorithm, data.RandomState, data.Game);
-            string restoredHash = CanonicalState.Hash(CanonicalState.StateBytes(restored.Rules.ExportState(),
+            GridGameSnapshot restored = ValidateState(data.Submitted, data.Completed, data.Pending, data.Algorithm, data.RandomState, data.Game);
+            string restoredHash = CanonicalState.Hash(CanonicalState.StateBytes(restored.Game,
                 DeterministicRandom.Algorithm, restored.Session.RandomState));
             Check(restoredHash == data.StateHash, "InvalidSnapshot", "$.stateHash");
             return restored;
@@ -93,11 +110,11 @@ namespace AiNative.Headless
             }
             catch (ArgumentException error)
             {
-                throw new HostOperationException("InputError", "InvalidConfiguration", error.Message, "$.configuration", error);
+                throw new ProtocolException("InvalidConfiguration", error.Message, "$.configuration", error);
             }
         }
 
-        private static RestoredGame ValidateState(long submitted, long completed, int pending,
+        private static GridGameSnapshot ValidateState(long submitted, long completed, int pending,
             string algorithm, ulong randomState, GridGameState game)
         {
             Check(pending == 0, "InvalidSnapshot", "$.session.pendingCount");
@@ -108,30 +125,28 @@ namespace AiNative.Headless
             }
             catch (ArgumentException error)
             {
-                throw new HostOperationException("InputError", "InvalidSnapshot", error.Message, "$.session", error);
+                throw new ProtocolException("InvalidSnapshot", error.Message, "$.session", error);
             }
-            GridGameRules rules;
             try
             {
-                rules = GridGameRules.Restore(game);
+                GridGameRules.Restore(game);
             }
             catch (ArgumentException error)
             {
-                throw new HostOperationException("InputError", "InvalidSnapshot", error.Message, "$.game", error);
+                throw new ProtocolException("InvalidSnapshot", error.Message, "$.game", error);
             }
             // 玩法已保证 turnIndex >= 1，使用减法避免 completed + 1 溢出。
             Check(game.TurnIndex - 1 <= completed, "InvalidSnapshot", "$.game.turnIndex");
-            return new RestoredGame(rules, SimulationSession<GridCommand, GridGameView>.Restore(rules, sessionState));
+            return new GridGameSnapshot(sessionState, game);
         }
 
         private static void Check(bool condition, string code, string path)
         {
             if (!condition)
             {
-                throw new HostOperationException("InputError", code, $"快照校验失败：{code}。", path);
+                throw new ProtocolException(code, $"快照校验失败：{code}。", path);
             }
         }
     }
 
-    internal sealed record RestoredGame(GridGameRules Rules, SimulationSession<GridCommand, GridGameView> Session);
 }

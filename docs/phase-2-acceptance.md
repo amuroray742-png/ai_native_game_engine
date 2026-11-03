@@ -1,6 +1,6 @@
 # 第二阶段整体验收入口与证据索引
 
-P2-T6 的实现、本地及远端验收记录见[阶段计划](phase-2-reproducibility-plan.md)。本入口不改变[协议 v1](contracts/phase-2/contract.md)，不承诺跨运行时或跨平台读取同一快照。生产 Core/GridGame/Headless 本轮没有修改；新增 Python 脚本仅用于验证，使用标准库，不增加生产依赖。
+P2-T6 的实现、本地及远端验收记录见[阶段计划](phase-2-reproducibility-plan.md)。本入口不改变[协议 v1](contracts/phase-2/contract.md)，不承诺跨运行时或跨平台读取同一快照。第二阶段 P2-T6 当时没有修改生产 Core/GridGame/Headless；Python 脚本仅用于验证，使用标准库。后续宿主边界修复及其新增依赖、测试见[交付记录](host-boundary-and-presentation.md)。
 
 ## 重复执行
 
@@ -20,13 +20,15 @@ python scripts/verify_phase2.py --output TestResults/phase-2
 
 ## 固定案例和保存材料
 
-40 次真实 CLI 调用覆盖：原演示；固定输入重复 10 次；快照 inspect；完整回放；原六步演示从 0–6 步每个空队列边界保存、删除原场景、恢复并逐点比较，再回放剩余操作；连续入队后逐条推进的拒绝案例；命令分歧、事件分歧和损坏记录。
+原 40 次真实 CLI 调用覆盖：原演示；固定输入重复 10 次；快照 inspect；完整回放；原六步演示从 0–6 步每个空队列边界保存、删除原场景、恢复并逐点比较，再回放剩余操作；连续入队后逐条推进的拒绝案例；命令分歧、事件分歧和损坏记录。
 
 - 原场景与独立期望来自 [T1 固定样例](contracts/phase-2/examples/README.md)。脚本对照固定 run/divergence 响应，忽略只供人阅读的 message 和本轮新增的发布路径，不使用执行器重建固定期望。
 - [拒绝场景](../tests/fixtures/phase-2/rejections.scenario.json)在 (1,0) 放置障碍；[命令文件](../tests/fixtures/phase-2/rejections.commands.json)先空推进，再连续提交六条命令，随后推进并再次空推进。期望三个拒绝依次为 Blocked、NoActionPoints、NotYourTurn，另三个成功；拒绝无事件、不改变玩法或随机摘要，空推进不增加计数。
 - `summary.json` 保存基准提交、工作区状态、Python/SDK/宿主环境、构建 hash、每次调用参数与实际/期望退出码。它记录本次使用的二进制身份；仅运行脚本不会重新构建，必须遵循上面的先构建顺序。
 - 每次调用保存 `<case>.stdout.txt` 与 `<case>.stderr.txt`，包括失败/超时输出；JSON 结果中包含实际检查点与字段差异。保存生成的命令、快照和回放，便于用同一构建复查。已删除的临时原场景可从固定样例恢复，恢复所需配置本身也在快照中。
 - 输出到被 Git 忽略的 `TestResults/`，不提交当前机器绑定的回放或二进制。脚本输出失败时查看 summary 的 error、最后一次调用及对应 stdout/stderr，不用成功的旧报告替代失败报告。
+
+当前脚本另增加 5 次真实调用：不同来源标签的记录比较匹配、相同记录严格恢复拒绝、事件结果分歧、不同操作输入拒绝、损坏记录拒绝。共 45 次。来源差异案例使用显式测试标签，不代表已在另一个运行时或 Unity 执行；比较输出不得冒充执行检查点。
 
 ## V1–V12 证据映射
 

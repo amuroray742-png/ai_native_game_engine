@@ -10,6 +10,12 @@
         "dependencies": {
           "AiNative.Core": "[1.0.0, )"
         }
+      },
+      "ainative.gridgame.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.GridGame": "[1.0.0, )"
+        }
       }
     }
   }

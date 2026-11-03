@@ -2,9 +2,11 @@
 
 状态：契约已固化；第 1 节 Core 与 GridGame 管理 API 已在 P2-T2 实现，P2-T3 已实现快照文件、摘要及环境校验，P2-T4 已实现 run/inspect CLI，P2-T5 已实现回放记录与验证。编写日期：2026-10-29。本文是[第二阶段计划](../../phase-2-reproducibility-plan.md)第 3–7 节的具体字段与接口依据；变更本契约须同步计划。第 1 节签名已落地；快照文件协议已落地；run/inspect 和命令文件协议已落地；回放协议已在 P2-T5 落地，P2-T6 已完成本地验收、远端 CI 及上传证据核验。
 
+第三阶段前的公共对局入口、共享库与表现契约见[宿主边界调整](../../host-boundary-and-presentation.md)。文件形状和玩法摘要仍为 v1，构建身份清单按第 4 节更新；增加 compare 命令，不放宽恢复兼容性。
+
 ## 1. 公共 API 与状态所有权
 
-继续使用现有项目、C# 9 和同步调用，不增加生产依赖。以下为声明清单，不是实现代码；未列出的既有公开成员保持行为不变。文件协议 DTO 留在 Headless 内部，不为文件字段创建 Core 抽象。
+以下记录第二阶段建立的底层管理 API，继续保持行为。当前宿主使用 GridGameRuntime 统一持有会话与规则；文件协议实现位于新增 GridGame.Hosting，共享库使用 C# 9 和同步调用，不为文件字段创建 Core 抽象。
 
 ### Core
 
@@ -62,13 +64,13 @@ Configuration 是原始场景的深度隔离副本，含初始生命值与位置
 
 Restore 先调用配置领域校验，再执行计划第 4.2 节的运行状态校验；不重置当前方、AP、回合或 winner。ExportState 只读且隔离；只允许宿主在会话调用之间使用其持有的规则引用导出，不绕过 Session 执行规则。
 
-跨模块的 `turnIndex - 1 <= completedStepCount` 检查由 Headless 装配时完成。空队列快照捕获顺序为 Session.ExportState → rules.ExportState → 编码，全程在宿主同一同步调用内，不插入 Submit/Advance/外部回调。恢复顺序为文件校验 → GridGameRules.Restore → Session.Restore → 重算摘要 → 返回候选实例；拥有旧实例的调用方仅在全部成功后替换引用。
+跨模块的 `turnIndex - 1 <= completedStepCount` 检查由 GridGameRuntime.Restore 与共享快照校验完成。空队列快照捕获顺序为 Session.ExportState → rules.ExportState → 编码，全程在宿主同一同步调用内，不插入 Submit/Advance/外部回调。恢复顺序为文件校验 → GridGameRules.Restore → Session.Restore → 重算摘要 → 返回候选实例；拥有旧实例的调用方仅在全部成功后替换引用。
 
 公开 API 的 null 参数抛 ArgumentNullException；状态参数非法或不支持的随机算法抛 ArgumentException。这些只在宿主的输入/恢复边界映射为 InputError，不能在运行规则外围把任意 ArgumentException 当作输入错误。没有新增通用异常基类或 Result 框架。
 
 ### Headless
 
-外部公共入口继续为 `Program.Run(string[] args, TextWriter output, TextWriter error)`；新增协议解析、规范化、文件发布和回放类型均为 internal。无需为未来宿主提前公开文件 DTO。Core 与 GridGame 的管理 API 已足以供后续宿主装配。
+Headless 外部公共入口继续为 `Program.Run(string[] args, TextWriter output, TextWriter error)`；文件发布和 CLI 编排保持 internal。共享输入、规范化、快照及宿主证据接口已公开于 GridGame.Hosting，具体签名见[公共入口](../../host-boundary-and-presentation.md#2-对局所有权与公共入口)。
 
 ## 2. CLI 参数
 
@@ -81,8 +83,9 @@ AiNative.Headless run --snapshot <path> --commands <path>
     [--expect-config <scenario-path>] [--snapshot-out <path>] [--replay-out <path>]
 AiNative.Headless inspect --snapshot <path> [--expect-config <scenario-path>]
 AiNative.Headless replay --input <path> [--expect-config <scenario-path>]
+AiNative.Headless compare --expected <replay-path> --actual <replay-path>
 AiNative.Headless --help
-AiNative.Headless <run|inspect|replay> --help
+AiNative.Headless <run|inspect|replay|compare> --help
 ```
 
 help 独占调用，stdout 为人类可读帮助，退出 0；不属于 JSON 结果协议。所有新子命令的其余输出遵循第 5 节。run 的场景与快照严格二选一；场景必须带 seed，快照禁止 seed；commands 必填，空操作文件合法。expect-config 只验证配置内容身份，不能替换快照内配置。inspect 和 replay 不接受 seed 或输出路径选项。
@@ -159,15 +162,19 @@ RuleError 穷举：GameFinished、NotYourTurn、UnknownUnit、NotYourUnit、Inva
 
 runtimeVersion 取 `Environment.Version.ToString()`，os 为 windows/linux/macos，architecture 为 `RuntimeInformation.ProcessArchitecture` 名称转小写（如 x64、arm64）。不支持的 OS 明确失败，不猜测归类。runtimeVersion、os、architecture 和 buildHash 必须与当前宿主逐项相等。
 
-分别计算实际加载的 AiNative.Core.dll、AiNative.GridGame.dll、AiNative.Headless.dll 完整文件字节的 SHA-256。再按如下固定顺序拼接 UTF-8 文本，各行以单个 LF 结束（包括最后一行），取 SHA-256 得到 buildHash：
+分别计算以下七项实际加载程序集完整文件字节的 SHA-256。按如下固定顺序拼接 UTF-8 文本，各行以单个 LF 结束（包括最后一行），取 SHA-256 得到 buildHash：
 
 ```text
 AiNative.Core=<coreHash>\n
 AiNative.GridGame=<gridHash>\n
+AiNative.GridGame.Hosting=<hostingHash>\n
 AiNative.Headless=<headlessHash>\n
+System.Text.Json=<jsonHash>\n
+System.Text.Encodings.Web=<encodingHash>\n
+System.IO.Pipelines=<pipelinesHash>\n
 ```
 
-上面的 `\n` 表示一个 LF 字节，不是反斜杠和字母 n，也不额外加入代码块的展示换行。缺少程序集文件/无法读取时为 HostFailure/BuildIdentityUnavailable。首版不支持单文件打包。构建身份仅用于严格兼容匹配，不是安全签名。
+上面的 `\n` 表示一个 LF 字节，不是反斜杠和字母 n，也不额外加入代码块的展示换行。缺少程序集文件/无法读取时为 HostFailure/BuildIdentityUnavailable。首版不支持单文件打包。构建身份仅用于严格兼容匹配，不是安全签名。此清单扩充覆盖共享库与实际 JSON 依赖；旧构建身份不相等，按原策略拒绝恢复，不迁移历史快照。
 
 ## 5. CLI JSON 结果与错误码
 
@@ -194,8 +201,8 @@ Divergence 字段：`expectedHash: hash`、`actualHash: hash`、`differences: Di
 
 | category / 退出码 | code 穷举及触发 |
 | --- | --- |
-| Completed / 0 | RunCompleted、SnapshotInspected、ReplayMatched |
-| InputError / 2 | InvalidArguments（参数）、InputReadFailed（读取）、InvalidJson（语法/重复字段）、InvalidProtocol（字段/类型/枚举/数字表示）、UnsupportedVersion（文件/规则/摘要版本或 rulesId）、UnsupportedRandomAlgorithm、EnvironmentMismatch、InvalidConfiguration、ConfigHashMismatch、ExpectedConfigMismatch、InvalidSnapshot（状态/计数/hash）、InvalidReplay（检查点完整性及内容/hash）、PendingCommands（结束队列非空） |
+| Completed / 0 | RunCompleted、SnapshotInspected、ReplayMatched、HostTracesMatched |
+| InputError / 2 | InvalidArguments（参数）、InputReadFailed（读取）、InvalidJson（语法/重复字段）、InvalidProtocol（字段/类型/枚举/数字表示）、UnsupportedVersion（文件/规则/摘要版本或 rulesId）、UnsupportedRandomAlgorithm、EnvironmentMismatch、InvalidConfiguration、ConfigHashMismatch、ExpectedConfigMismatch、InvalidSnapshot（状态/计数/hash）、InvalidReplay（检查点完整性及内容/hash）、PendingCommands（结束队列非空）、ComparisonInputMismatch（compare 的起点或操作不同） |
 | SimulationFailure / 1 | SessionFaulted（执行/查询故障，包括规则返回 null 或拒绝消耗随机）、SequenceOverflow（健康实例提交序号耗尽） |
 | HostFailure / 1 | OutputExists、OutputPathConflict、OutputWriteFailed、BuildIdentityUnavailable、StandardOutputFailed、UnexpectedHostFailure |
 | ReplayDivergence / 3 | CheckpointMismatch |
@@ -204,13 +211,15 @@ Divergence 字段：`expectedHash: hash`、`actualHash: hash`、`differences: Di
 
 inspect 验证成功返回一个初始点，checkpoints 为空；replay 的统计、checkpoints 均为实际执行记录，不能返回期望冒充实际。规则事件序列化失败属于 HostFailure，保存最后可信检查点，不将不完整记录发布为完整回放。stderr 不可写时尽力保留退出码；stdout 写失败可能没有 JSON，此例外不得被包装为成功。
 
+compare 只校验并比较两份证据，允许来源环境不同；不会调用严格恢复入口执行命令。两份记录必须具有相同配置、初始玩法/随机状态、调度位置和操作序列。结果匹配返回 HostTracesMatched，分歧使用已有 location/divergence；accepted/rejected=0，initialCheckpoint/finalCheckpoint=null，checkpoints=[]。来源环境保留在输入回放中。详细语义见[宿主对比](../../host-boundary-and-presentation.md#3-严格恢复与宿主证据比较)。
+
 ## 6. 样例、向量与复核方法
 
 [样例索引](examples/README.md)包含默认场景、队列提交/推进、空推进、业务拒绝、初始及结束快照、完整回放、成功和失败响应。样例环境是显式虚构的协议夹具，不能据此声称可在当前二进制恢复；生产环境匹配没有绕过选项。
 
 [hash-vectors.json](examples/hash-vectors.json) 固定保存规范化字节文件名、字节数和 SHA-256。`.canonical.json` 文件故意无结尾 LF，这是哈希输入而非普通格式化 JSON。包含配置、初始状态、移动后、结束状态、随机 state=UInt64.MaxValue 的状态，以及构建身份组合向量。数值与规则结果人工推导，哈希以 Python 标准库计算并用系统 shasum 独立复算，不使用本工程实现生成期望。
 
-未来测试须读取固定字节/固定摘要，分别断言生产规范化器的字节相等和 hash 相等；不得在测试准备阶段用被测规范化器重新生成期望。随机极值向量验证数字编码及 hash 覆盖，不代表 GridGame 已使用随机伤害。构建向量用固定的三组 64 字符虚拟程序集哈希验证组合编码，真实文件哈希另测。
+未来测试须读取固定字节/固定摘要，分别断言生产规范化器的字节相等和 hash 相等；不得在测试准备阶段用被测规范化器重新生成期望。随机极值向量验证数字编码及 hash 覆盖，不代表 GridGame 已使用随机伤害。历史构建向量继续用固定的三组 64 字符虚拟程序集哈希验证组合编码，不代表当前生产程序集清单；七项真实文件哈希另测。
 
 ## 7. T1 完成边界
 
