@@ -11,7 +11,6 @@ namespace AiNative.Physics.Jolt
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         internal struct Definition
         {
-            internal ulong Entity;
             internal int Shape, Dynamic;
             internal Vector3 Size, Position;
             internal Quaternion Rotation;
@@ -20,7 +19,7 @@ namespace AiNative.Physics.Jolt
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         internal struct BodyView
         {
-            internal ulong Entity;
+            internal uint BodyId;
             internal Vector3 Position;
             internal Quaternion Rotation;
             internal Vector3 Velocity, AngularVelocity;
@@ -29,7 +28,7 @@ namespace AiNative.Physics.Jolt
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         internal struct Contact
         {
-            internal ulong First, Second;
+            internal uint First, Second;
             internal uint FirstShape, SecondShape;
             internal int Kind;
         }
@@ -40,14 +39,14 @@ namespace AiNative.Physics.Jolt
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern ulong aj_worker_contact_count();
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_create(int workerThreads, out WorldHandle result);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern void aj_destroy(IntPtr handle);
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_add(WorldHandle handle, in Definition definition);
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_remove(WorldHandle handle, ulong id);
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_impulse(WorldHandle handle, ulong id, Vector3 impulse);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_add(WorldHandle handle, uint bodyId, in Definition definition);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_remove(WorldHandle handle, uint bodyId);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_impulse(WorldHandle handle, uint bodyId, Vector3 impulse);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_step(WorldHandle handle, float seconds);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_contacts(WorldHandle handle, [Out] Contact[]? items, int capacity, out int count);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_bodies(WorldHandle handle, [Out] BodyView[]? items, int capacity, out int count);
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_save(WorldHandle handle, [Out] byte[]? bytes, int capacity, out int length);
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_restore(byte[] bytes, int length, out WorldHandle result);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_capture_state(WorldHandle handle, [Out] byte[]? bytes, int capacity, out int length);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int aj_restore_state(WorldHandle handle, byte[] bytes, int length);
 
         internal static void Check(int status)
         {

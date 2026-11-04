@@ -1,13 +1,11 @@
 #include <Jolt/Jolt.h>
 #include "joltc_extensions.h"
-#include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/StateRecorderImpl.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
 #include <atomic>
 #include <thread>
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstring>
 #include <map>
@@ -31,7 +29,6 @@ struct Vec { float x, y, z; };
 struct Rotation { float x, y, z, w; };
 struct Definition
 {
-    uint64_t entity;
     int32_t shape, dynamic;
     Vec size, position;
     Rotation rotation;
@@ -39,7 +36,7 @@ struct Definition
 };
 struct BodyView
 {
-    uint64_t entity;
+    uint32_t bodyId;
     Vec position;
     Rotation rotation;
     Vec velocity, angularVelocity;
@@ -47,13 +44,12 @@ struct BodyView
 };
 struct Contact
 {
-    uint64_t first, second;
+    uint32_t first, second;
     uint32_t firstShape, secondShape;
     int32_t kind;
-    auto Key() const { return std::tie(first, second, firstShape, secondShape, kind); }
 };
 #pragma pack(pop)
-static_assert(sizeof(Definition) == 68 && sizeof(BodyView) == 68 && sizeof(Contact) == 28);
+static_assert(sizeof(Definition) == 60 && sizeof(BodyView) == 64 && sizeof(Contact) == 20);
 
 namespace
 {
@@ -99,25 +95,26 @@ void DestroySystem(JPH_PhysicsSystem *system)
 }
 template<class T, void (*Destroy)(T *)> using Owner = std::unique_ptr<T, decltype(Destroy)>;
 
-struct Entry { Definition definition; BodyID body; };
 struct World;
 struct World
 {
-    TempAllocatorImpl temporary { 16 * 1024 * 1024 };
+    Owner<JPH_TempAllocator, JPH_TempAllocator_Destroy> temporary {
+        JPH_TempAllocator_Create(16 * 1024 * 1024), JPH_TempAllocator_Destroy };
     Owner<JPH_JobSystem, JPH_JobSystem_Destroy> jobs { nullptr, JPH_JobSystem_Destroy };
     Owner<JPH_ContactListener, JPH_ContactListener_Destroy> listener { nullptr, JPH_ContactListener_Destroy };
     Owner<JPH_PhysicsSystem, DestroySystem> system { nullptr, DestroySystem };
-    std::map<uint64_t, Entry> bodies;
-    std::map<uint32_t, uint64_t> identities;
-    std::array<uint8_t, capacity> generations {};
-    std::array<bool, capacity> occupied {};
+    // Native ownership only: entity identity and ID allocation belong to C#.
+    std::set<uint32_t> bodies;
+    bool pendingRemoval = false;
+    bool restoreAttempted = false;
+    bool advanced = false;
+    bool faulted = false;
     std::vector<Contact> contacts;
     std::mutex contactsMutex;
     std::atomic<bool> contactFault { false };
-    const uint32_t workerThreads;
     std::thread::id stepThread;
 
-    explicit World(uint32_t workers) : workerThreads(workers)
+    explicit World(uint32_t workers)
     {
         Require(workers <= 16, "workerThreads must be between 0 and 16");
         Owner<JPH_BroadPhaseLayerInterface, JPH_BroadPhaseLayerInterface_Destroy> layers(
@@ -139,7 +136,10 @@ struct World
         layers.release(); pairs.release(); broad.release();
         JPH_Vec3 gravity { 0, -9.81f, 0 };
         JPH_PhysicsSystem_SetGravity(system.get(), &gravity);
-        AJ_EnableDeterminism(system.get());
+        JPH_PhysicsSettings physicsSettings {};
+        JPH_PhysicsSystem_GetPhysicsSettings(system.get(), &physicsSettings);
+        physicsSettings.deterministicSimulation = true;
+        JPH_PhysicsSystem_SetPhysicsSettings(system.get(), &physicsSettings);
         listener.reset(JPH_ContactListener_Create(this));
         JPH_PhysicsSystem_SetContactListener(system.get(), listener.get());
         if (workers == 0) jobs.reset(AJ_CreateSingleThreadedJobs());
@@ -153,9 +153,8 @@ struct World
     {
         JPH_PhysicsSystem_SetContactListener(system.get(), nullptr);
         auto *interface = JPH_PhysicsSystem_GetBodyInterface(system.get());
-        for (const auto &item : bodies)
+        for (uint32_t id : bodies)
         {
-            auto id = item.second.body.GetIndexAndSequenceNumber();
             JPH_BodyInterface_RemoveBody(interface, id);
             JPH_BodyInterface_DestroyBody(interface, id);
         }
@@ -163,24 +162,18 @@ struct World
         jobs.reset();
     }
 
-    void AddContact(uint64_t a, uint64_t b, uint32_t sa, uint32_t sb, int kind)
+    void AddContact(uint32_t a, uint32_t b, uint32_t sa, uint32_t sb, int kind)
     {
-        if (b < a) { std::swap(a, b); std::swap(sa, sb); }
         std::lock_guard<std::mutex> lock(contactsMutex);
         contacts.push_back({ a, b, sa, sb, kind });
     }
 
-    BodyID Find(uint64_t entity) const
+    void Add(const Definition &definition, uint32_t rawId)
     {
-        auto found = bodies.find(entity);
-        Require(found != bodies.end(), "Unknown physics entity");
-        return found->second.body;
-    }
-
-    void Add(const Definition &definition, BodyID id)
-    {
-        Require(definition.entity != 0 && bodies.find(definition.entity) == bodies.end(), "Duplicate or zero entity");
-        Require(id.GetIndex() < capacity && !occupied[id.GetIndex()], "Invalid body slot");
+        BodyID id(rawId);
+        Require(!faulted, "Physics world is faulted");
+        Require((rawId & BodyID::cBroadPhaseBit) == 0 && id.GetIndex() < capacity
+            && !bodies.count(rawId), "Invalid or duplicate body ID");
         Require(definition.shape == 0 || definition.shape == 1, "Unsupported shape");
         Require(definition.dynamic == 0 || definition.dynamic == 1, "Unsupported motion");
         const float values[] = { definition.size.x, definition.size.y, definition.size.z,
@@ -201,7 +194,6 @@ struct World
         Owner<JPH_BodyCreationSettings, JPH_BodyCreationSettings_Destroy> settings(
             JPH_BodyCreationSettings_Create3(shape.get(), &position, &orientation,
                 definition.dynamic ? JPH_MotionType_Dynamic : JPH_MotionType_Static, definition.dynamic), JPH_BodyCreationSettings_Destroy);
-        JPH_BodyCreationSettings_SetUserData(settings.get(), definition.entity);
         JPH_BodyCreationSettings_SetFriction(settings.get(), definition.friction);
         JPH_BodyCreationSettings_SetRestitution(settings.get(), definition.restitution);
         JPH_BodyCreationSettings_SetOverrideMassProperties(settings.get(), JPH_OverrideMassProperties_CalculateInertia);
@@ -213,8 +205,7 @@ struct World
         Require(body != nullptr, "Could not create body");
         try
         {
-            bodies.emplace(definition.entity, Entry { definition, id });
-            identities.emplace(id.GetIndexAndSequenceNumber(), definition.entity);
+            bodies.insert(rawId);
             JPH_BodyInterface_AddBody(interface, id.GetIndexAndSequenceNumber(), definition.dynamic ? JPH_Activation_Activate : JPH_Activation_DontActivate);
         }
         catch (...)
@@ -222,12 +213,9 @@ struct World
             if (JPH_BodyInterface_IsAdded(interface, id.GetIndexAndSequenceNumber()))
                 JPH_BodyInterface_RemoveBody(interface, id.GetIndexAndSequenceNumber());
             JPH_BodyInterface_DestroyBody(interface, id.GetIndexAndSequenceNumber());
-            bodies.erase(definition.entity);
-            identities.erase(id.GetIndexAndSequenceNumber());
+            bodies.erase(rawId);
             throw;
         }
-        occupied[id.GetIndex()] = true;
-        generations[id.GetIndex()] = id.GetSequenceNumber();
     }
 };
 
@@ -236,17 +224,14 @@ void OnContactAdded(void *context, const JPH_Body *a, const JPH_Body *b,
 {
     auto &owner = *static_cast<World *>(context);
     if (std::this_thread::get_id() != owner.stepThread) ++workerContactCount;
-    try { owner.AddContact(JPH_Body_GetUserData(const_cast<JPH_Body *>(a)), JPH_Body_GetUserData(const_cast<JPH_Body *>(b)),
+    try { owner.AddContact(JPH_Body_GetID(a), JPH_Body_GetID(b),
         JPH_ContactManifold_GetSubShapeID1(manifold), JPH_ContactManifold_GetSubShapeID2(manifold), 1); }
     catch (...) { owner.contactFault = true; }
 }
 void OnContactRemoved(void *context, const JPH_SubShapeIDPair *pair)
 {
     auto &owner = *static_cast<World *>(context);
-    auto a = owner.identities.find(pair->Body1ID);
-    auto b = owner.identities.find(pair->Body2ID);
-    if (a == owner.identities.end() || b == owner.identities.end()) { owner.contactFault = true; return; }
-    try { owner.AddContact(a->second, b->second, pair->subShapeID1, pair->subShapeID2, 2); }
+    try { owner.AddContact(pair->Body1ID, pair->Body2ID, pair->subShapeID1, pair->subShapeID2, 2); }
     catch (...) { owner.contactFault = true; }
 }
 const JPH_ContactListener_Procs contactProcs { nullptr, OnContactAdded, nullptr, OnContactRemoved };
@@ -271,7 +256,13 @@ private:
 
 #include "validate_state.h"
 
-World &Get(void *handle) { Require(handle != nullptr, "Null physics world"); return *static_cast<World *>(handle); }
+World &Get(void *handle)
+{
+    Require(handle != nullptr, "Null physics world");
+    auto &world = *static_cast<World *>(handle);
+    Require(!world.faulted, "Physics world is faulted");
+    return world;
+}
 template<class F> int Guard(F action)
 {
     try { action(); lastError.clear(); return 0; }
@@ -281,7 +272,7 @@ template<class F> int Guard(F action)
 }
 
 API const char *aj_error() { return lastError.c_str(); }
-API const char *aj_version() { return "jolt-5.6.0;e77f175;joltc=2bbcf73;abi=3;float32;workers=0..16;deterministic;sse4;capacity=1024"; }
+API const char *aj_version() { return "jolt-5.6.0;e77f175;joltc=2bbcf73;abi=4;float32;workers=0..16;deterministic;sse4;capacity=1024"; }
 API uint64_t aj_worker_contact_count() { return workerContactCount.load(); }
 API uint32_t aj_world_count() { std::lock_guard<std::mutex> lock(foundationMutex); return worldCount; }
 API int aj_create(uint32_t workerThreads, void **result)
@@ -299,40 +290,35 @@ API void aj_destroy(void *handle)
 {
     if (handle) { delete static_cast<World *>(handle); ReleaseFoundation(); }
 }
-API int aj_add(void *handle, const Definition *definition)
+API int aj_add(void *handle, uint32_t bodyId, const Definition *definition)
 {
     return Guard([&] {
-        auto &world = Get(handle);
         Require(definition != nullptr, "Null definition");
-        uint32_t index = 0;
-        while (index < capacity && (world.occupied[index]
-            || world.identities.count(BodyID(index, world.generations[index]).GetIndexAndSequenceNumber()) != 0)) ++index;
-        Require(index < capacity, "Body capacity exceeded");
-        world.Add(*definition, BodyID(index, world.generations[index]));
+        Get(handle).Add(*definition, bodyId);
     });
 }
-API int aj_remove(void *handle, uint64_t entity)
+API int aj_remove(void *handle, uint32_t bodyId)
 {
     return Guard([&] {
         auto &world = Get(handle);
-        BodyID body = world.Find(entity);
-        JPH_BodyInterface_RemoveBody(JPH_PhysicsSystem_GetBodyInterface(world.system.get()), body.GetIndexAndSequenceNumber());
-        JPH_BodyInterface_DestroyBody(JPH_PhysicsSystem_GetBodyInterface(world.system.get()), body.GetIndexAndSequenceNumber());
-        world.bodies.erase(entity);
-        world.occupied[body.GetIndex()] = false;
-        ++world.generations[body.GetIndex()];
-        // Keep identity until the next update has reported removed contacts.
+        Require(world.bodies.count(bodyId) != 0, "Unknown body ID");
+        auto *interface = JPH_PhysicsSystem_GetBodyInterface(world.system.get());
+        JPH_BodyInterface_RemoveBody(interface, bodyId);
+        JPH_BodyInterface_DestroyBody(interface, bodyId);
+        world.bodies.erase(bodyId);
+        world.pendingRemoval = true;
     });
 }
-API int aj_impulse(void *handle, uint64_t entity, Vec impulse)
+API int aj_impulse(void *handle, uint32_t bodyId, Vec impulse)
 {
     return Guard([&] {
         Require(std::isfinite(impulse.x) && std::isfinite(impulse.y) && std::isfinite(impulse.z), "Invalid impulse");
         auto &world = Get(handle);
-        BodyID body = world.Find(entity);
-        Require(world.bodies.at(entity).definition.dynamic != 0, "Static body cannot receive impulse");
+        Require(world.bodies.count(bodyId) != 0, "Unknown body ID");
+        auto *interface = JPH_PhysicsSystem_GetBodyInterface(world.system.get());
+        Require(JPH_BodyInterface_GetMotionType(interface, bodyId) == JPH_MotionType_Dynamic, "Static body cannot receive impulse");
         JPH_Vec3 value { impulse.x, impulse.y, impulse.z };
-        JPH_BodyInterface_AddImpulse(JPH_PhysicsSystem_GetBodyInterface(world.system.get()), body.GetIndexAndSequenceNumber(), &value);
+        JPH_BodyInterface_AddImpulse(interface, bodyId, &value);
     });
 }
 API int aj_step(void *handle, float seconds)
@@ -341,12 +327,15 @@ API int aj_step(void *handle, float seconds)
         Require(std::isfinite(seconds) && seconds > 0 && seconds <= 1, "Invalid step duration");
         auto &world = Get(handle);
         world.stepThread = std::this_thread::get_id();
-        Require(AJ_Update(world.system.get(), seconds, &world.temporary, world.jobs.get()) == JPH_PhysicsUpdateError_None, "Physics capacity exhausted");
-        Require(!world.contactFault, "Contact collection failed");
-        std::sort(world.contacts.begin(), world.contacts.end(), [](const Contact &a, const Contact &b) { return a.Key() < b.Key(); });
-        world.contacts.erase(std::unique(world.contacts.begin(), world.contacts.end(), [](const Contact &a, const Contact &b) { return a.Key() == b.Key(); }), world.contacts.end());
-        world.identities.clear();
-        for (const auto &entry : world.bodies) world.identities[entry.second.body.GetIndexAndSequenceNumber()] = entry.first;
+        world.advanced = true;
+        try
+        {
+            Require(JPH_PhysicsSystem_Update2(world.system.get(), seconds, 1, world.temporary.get(), world.jobs.get())
+                == JPH_PhysicsUpdateError_None, "Physics capacity exhausted");
+            Require(!world.contactFault, "Contact collection failed");
+            world.pendingRemoval = false;
+        }
+        catch (...) { world.faulted = true; throw; }
     });
 }
 API int aj_contacts(void *handle, Contact *destination, int capacityValue, int *count)
@@ -373,35 +362,25 @@ API int aj_bodies(void *handle, BodyView *destination, int capacityValue, int *c
         Require(capacityValue >= *count, "Body buffer too small");
         auto *interface = JPH_PhysicsSystem_GetBodyInterface(world.system.get());
         int index = 0;
-        for (const auto &entry : world.bodies)
+        for (uint32_t id : world.bodies)
         {
-            uint32_t id = entry.second.body.GetIndexAndSequenceNumber();
             JPH_RVec3 p; JPH_Quat q; JPH_Vec3 v, a;
             JPH_BodyInterface_GetPositionAndRotation(interface, id, &p, &q);
             JPH_BodyInterface_GetLinearAndAngularVelocity(interface, id, &v, &a);
-            destination[index++] = { entry.first, { p.x, p.y, p.z }, { q.x, q.y, q.z, q.w },
+            destination[index++] = { id, { p.x, p.y, p.z }, { q.x, q.y, q.z, q.w },
                 { v.x, v.y, v.z }, { a.x, a.y, a.z }, JPH_BodyInterface_IsActive(interface, id) ? 1 : 0,
-                entry.second.definition.dynamic };
+                JPH_BodyInterface_GetMotionType(interface, id) == JPH_MotionType_Dynamic ? 1 : 0 };
         }
     });
 }
-API int aj_save(void *handle, uint8_t *destination, int capacityValue, int *length)
+// Only Jolt's internal stream crosses this boundary. C# owns the snapshot envelope.
+API int aj_capture_state(void *handle, uint8_t *destination, int capacityValue, int *length)
 {
     return Guard([&] {
         auto &world = Get(handle);
         Require(world.contacts.empty(), "Drain contacts before saving");
-        Require(world.identities.size() == world.bodies.size(), "Advance removed bodies before saving");
+        Require(!world.pendingRemoval, "Advance removed bodies before saving");
         StateRecorderImpl recorder;
-        uint32_t magic = 0x334a4e41, count = uint32_t(world.bodies.size());
-        recorder.Write(magic);
-        recorder.Write(world.workerThreads);
-        recorder.WriteBytes(world.generations.data(), world.generations.size());
-        recorder.Write(count);
-        for (const auto &entry : world.bodies)
-        {
-            recorder.WriteBytes(&entry.second.definition, sizeof(Definition));
-            recorder.Write(entry.second.body.GetIndexAndSequenceNumber());
-        }
         AJ_SaveState(world.system.get(), recorder);
         auto data = recorder.GetData();
         Require(length != nullptr && data.size() < 64 * 1024 * 1024, "Invalid snapshot size");
@@ -413,42 +392,21 @@ API int aj_save(void *handle, uint8_t *destination, int capacityValue, int *leng
         }
     });
 }
-API int aj_restore(const uint8_t *bytes, int length, void **result)
+API int aj_restore_state(void *handle, const uint8_t *bytes, int length)
 {
     return Guard([&] {
-        Require(result != nullptr, "Null result");
-        *result = nullptr;
-        Require(bytes != nullptr && length > 0 && length < 64 * 1024 * 1024, "Invalid snapshot size");
-        AcquireFoundation();
+        auto &world = Get(handle);
+        Require(!world.restoreAttempted && !world.advanced && !world.pendingRemoval && world.contacts.empty(),
+            "Restore requires a newly reconstructed candidate");
+        world.restoreAttempted = true;
         try
         {
+            Require(bytes != nullptr && length > 0 && length < 64 * 1024 * 1024, "Invalid snapshot size");
             Reader recorder(bytes, size_t(length));
-            uint32_t magic, count;
-            recorder.Read(magic);
-            Require(magic == 0x334a4e41, "Unsupported physics state");
-            uint32_t workers;
-            recorder.Read(workers);
-            Require(workers <= 16, "Invalid worker count");
-            auto world = std::make_unique<World>(workers);
-            recorder.ReadBytes(world->generations.data(), world->generations.size());
-            recorder.Read(count);
-            Require(count <= capacity, "Invalid body count");
-            for (uint32_t index = 0; index < count; ++index)
-            {
-                Definition definition {};
-                uint32_t rawId;
-                recorder.ReadBytes(&definition, sizeof(definition));
-                recorder.Read(rawId);
-                Require((rawId & BodyID::cBroadPhaseBit) == 0, "Invalid BodyID");
-                BodyID id(rawId);
-                Require(id.GetIndex() < capacity && world->generations[id.GetIndex()] == id.GetSequenceNumber(), "Invalid body generation");
-                world->Add(definition, id);
-            }
-            ValidateJoltState(recorder, *world);
+            ValidateJoltState(recorder, world);
             recorder.SetValidating(true);
-            Require(AJ_RestoreState(world->system.get(), recorder) && recorder.IsEOF(), "Invalid Jolt state");
-            *result = world.release();
+            Require(AJ_RestoreState(world.system.get(), recorder) && recorder.IsEOF(), "Invalid Jolt state");
         }
-        catch (...) { ReleaseFoundation(); throw; }
+        catch (...) { world.faulted = true; throw; }
     });
 }

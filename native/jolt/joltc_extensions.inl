@@ -38,22 +38,6 @@ JPH_JobSystem *AJ_CreateSingleThreadedJobs()
     return reinterpret_cast<JPH_JobSystem *>(new JPH::JobSystemSingleThreaded(2048));
 }
 
-void AJ_EnableDeterminism(JPH_PhysicsSystem *system)
-{
-    auto settings = system->physicsSystem->GetPhysicsSettings();
-    settings.mDeterministicSimulation = true;
-    system->physicsSystem->SetPhysicsSettings(settings);
-}
-
-JPH_PhysicsUpdateError AJ_Update(JPH_PhysicsSystem *system, float seconds,
-    JPH::TempAllocator *allocator, JPH_JobSystem *jobs)
-{
-    // joltc's normal Update uses a process-wide allocator. Each AiNative world
-    // owns an allocator so separate worlds can update concurrently.
-    return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(
-        seconds, 1, allocator, reinterpret_cast<JPH::JobSystem *>(jobs)));
-}
-
 void AJ_SaveState(JPH_PhysicsSystem *system, JPH::StateRecorder &recorder)
 {
     system->physicsSystem->SaveState(recorder);

@@ -1,5 +1,7 @@
 # joltc 后端与多线程验收
 
+本页保留 ABI 3 的迁移设计和历史证据；当前 ABI 4 的职责与验证见[物理分层迁移](managed-physics-migration.md)。当前实现复用上游 Update2 和物理设置接口，已移除本页历史方案中的 AJ_Update / AJ_EnableDeterminism。
+
 ## 边界与版本
 
 基础物理绑定使用 [joltc](https://github.com/amerkoleci/joltc/tree/2bbcf73b1bec261e0351814662922f1b4784454c)，固定提交 `2bbcf73b1bec261e0351814662922f1b4784454c`。Jolt 仍固定5.6.0提交 `e77f175595e64cb44218cc9d9d56fc365ad0e36a`。两者源码由 `scripts/build_native.py` 获取至被忽略的 `third_party/JoltPhysics/` 与 `third_party/joltc/`，校验提交和clean状态；不追踪main、不使用隐式系统安装版本。
