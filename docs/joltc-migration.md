@@ -33,7 +33,25 @@
 
 迁移前基线为[v2验收](v2-acceptance.md)。现有222项测试保留；新增并行测试覆盖0/1/2/4工作线程、128刚体碰撞、睡眠、刚体增删/冲量后的恢复连续性、逐Tick事件和完整blob一致、4世界并行更新、设置损坏及资源回收。CLI原80项全部保留，增加28项：0/2/4线程64刚体的独立进程重复/重放/保存恢复、不同配置比较拒绝、非法线程设置与旧游戏版本拒绝。
 
-2026-11-04本地迁移初检：229项测试、108次CLI通过；后续独立审查补充了系统创建与线程池启动失败清理。独立Reviewer已复核异常安全修复和独立线程启动故障探针，未发现剩余代码阻断项。审查后本地重新构建与229项测试通过（`TestResults/joltc-unit-delivery`）；最终真实进程和Windows/Linux CI证据在完成后追加，初检结果不替代最终检查。
+2026-11-04审查后的本地原生构建、故障探针、229项测试和108次CLI全部通过，证据为`TestResults/joltc-unit-rtti`与`TestResults/joltc-windows-rtti`。独立Reviewer复核了原生生命周期、多线程边界和异常路径，独立执行线程启动故障探针，未发现剩余代码阻断项。
+
+最终代码提交 `f6e155614715da958474f964951984f671251680` 的[双平台CI 41826261281](https://github.com/rayss1/ai_native_game_engine/actions/runs/41826261281)全部通过；已下载并核验制品，而非仅查看作业状态。
+
+| 平台 / .NET运行时 | 单元测试 | 真实CLI | 制品ID |
+| --- | --- | --- | --- |
+| Windows x64 / 10.0.14 | 229通过，无失败/跳过 | 108通过 | 13318674448 |
+| Linux x64 / 10.0.14 | 229通过，无失败/跳过 | 108通过 | 13319222959 |
+
+两边均通过1585个截断位置和1586个单字节变异的独立原生进程探针，worlds=0。线程启动探针分别注入第0/1/3线程启动失败，3次候选创建均清理，旧世界仍可推进，随后2工作线程创建成功；liveWorkers/liveAllocations/worlds均为0。首轮Linux探针链接暴露RTTI不一致，最终提交已对Jolt、joltc、桥接与探针统一关闭RTTI，并在两平台重新验收。
+
+平台比较制品 `13318389010` 的GridGame、普通PhysicsSandbox、0/2/4线程密集场景共5组均为`HostTracesMatched`。该结果不扩大跨平台或不同线程配置的恢复兼容承诺。
+
+下载与核验索引：`TestResults/joltc-ci-41826261281/verified-summary.json`。核验TRX计数、每条CLI实际/预期退出码与stdout code、两类原生探针、两个源码pin及ABI，并确认制品库和Runner实际库的SHA-256均等于native-build.json记录。原生库SHA-256：
+
+- Windows：`f2b2ce18a04199002daa9b982627d8b2bc5d14e0b7e2838da33466c4575c4fe1`
+- Linux：`7f5e8f3949fabca119729262102e50eda88529cc1d19cba026a2b64a8eccbd5b`
+
+平台制品保留7天；过期后按上述代码提交及README命令重新生成。最终证据追加仅修改文档，不重复声明引擎测试已在文档提交上执行。
 
 复现仍使用README中的 `python scripts/build_native.py`、`dotnet build`、`dotnet test` 和 `python scripts/verify_v2.py --output <新目录>`。CI分别构建两个平台的真实原生库，并比较GridGame、普通物理示例和0/2/4线程密集场景的证据。
 
