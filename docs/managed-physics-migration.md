@@ -26,4 +26,24 @@
 
 新增回归还覆盖空世界、删除最后刚体后保存、实体排序与 BodyID 排序不同、UInt64 高位实体、退役碰撞身份、非法操作不改变分配状态、跨 Step generation 绕回及中途恢复、旧后端和旧 magic 拒绝。未通过注入模拟原生 Add 内存耗尽，不将普通非法输入测试描述为该失败路径的执行证据。
 
-证据：`TestResults/managed-native-final.log`、`TestResults/managed-build-final.log`、`TestResults/managed-unit-final/`、`TestResults/managed-process-final/`。只读格式检查、文档链接、Python 语法和 `git diff --check` 通过。独立源码审查未发现阻断项，复核了托管预留/回滚、退役映射、恢复候选所有权及上游 allocator 行为。远端双平台验证待本分支 CI 执行；Unity Editor、Player、IL2CPP 和性能收益仍未验收。
+证据：`TestResults/managed-native-final.log`、`TestResults/managed-build-final.log`、`TestResults/managed-unit-final/`、`TestResults/managed-process-final/`。只读格式检查、文档链接、Python 语法和 `git diff --check` 通过。独立源码审查未发现阻断项，复核了托管预留/回滚、退役映射、恢复候选所有权及上游 allocator 行为。远端双平台结果见下节；Unity Editor、Player、IL2CPP 和性能收益仍未验收。
+
+## 双平台 CI 与制品核验
+
+2026-11-04，代码提交 `f746ead912ebb160643c9939e9ce838d11ee344f` 的 [CI 41837315399](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399) 全部通过。两平台分别从固定源码构建原生库，执行依赖锁定恢复、构建、单元测试、只读格式检查与真实进程验收。
+
+| 平台 / .NET 运行时 | 单元测试 | CLI | 平台制品 ID |
+| --- | --- | --- | --- |
+| Windows x64 / 10.0.14 | 236 通过，无失败/跳过 | 108 通过 | 13327387171 |
+| Linux x64 / 10.0.14 | 236 通过，无失败/跳过 | 108 通过 | 13327517010 |
+
+两边原生内部流探针均为 334 个截断长度和 334 个逐字节变异；恢复失败的候选禁止继续 Step，销毁后 worlds=0。线程探针分别在索引 0/1/3 注入启动失败，随后成功创建 2 线程世界；liveWorkers/liveAllocations/worlds 均归零。
+
+已下载并逐项核对 TRX、108 条 CLI 退出码与 stdout code、两类探针、ABI 4、源码 pin、allocator 配置及编译命令摘要。确认发布目录与 Runner 实际库均匹配 native-build.json 的 binaryHash，并核对制品中框架/示例程序集和原生材料的摘要与两个游戏的 environment.components 一致。三个 System.* 共享运行时组件只记录环境摘要，框架依赖部署未将这些运行时文件上传，未声称对其进行独立文件核验。
+
+- Windows 原生库 SHA-256：`463617231d5299beaf2a817f67421970584acbc8c93debaf0546226df5b0fd22`。
+- Linux 原生库 SHA-256：`01ffc7f50816c2ad0495b0c2ee6bab25ba8bc1c9117827710603bed0c839d92f`。
+
+平台比较制品 `13325868693` 的 GridGame、普通 PhysicsSandbox、0/2/4 线程密集场景共 5 组均为 `HostTracesMatched`；不扩大跨平台恢复或不同线程配置的兼容承诺。
+
+下载与核验摘要：`TestResults/managed-ci-41837315399/verified-summary.json`。平台制品保留 7 天，过期后使用上述代码提交和 README 命令重新生成。此处追加证据只修改文档，测试结果对应上述代码提交。

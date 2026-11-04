@@ -2,7 +2,7 @@
 
 可复用的纯 C# 玩法内核与工具链。GridGame（手动回合制）和 PhysicsSandbox（60 Hz 真实 Jolt 刚体）作为独立 Example，共用输入、快照、回放、比较和 CLI。
 
-此前的通用框架 v2 与 joltc ABI 3 后端已完成独立审查及[Windows/Linux双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41826261281)：各229项测试、108次真实CLI通过，快照损坏与线程启动失败探针通过，并核验上传制品。当前运行入口统一为 **v2**。旧阶段文档保留历史证据，旧格式明确拒绝；Unity 编辑器、Player、IL2CPP 尚待第三阶段验收。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [验收索引](docs/v2-acceptance.md)。
+通用框架 v2 与当前 joltc ABI 4 分层适配已完成独立审查及[Windows/Linux双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399)：各236项测试、108次真实CLI通过，完整快照损坏、原生内部状态与线程启动失败探针通过，并核验上传制品；5组平台比较一致。当前运行入口统一为 **v2**。旧阶段文档保留历史证据，旧格式明确拒绝；Unity 编辑器、Player、IL2CPP 尚待第三阶段验收。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [验收索引](docs/v2-acceptance.md)。
 
 物理后端现已迁移至固定版本 **joltc + 项目扩展**，支持显式0..16工作线程、完整状态恢复与同线程配置确定性回放。PhysicsSandbox场景使用游戏版本2和必填`configuration.workerThreads`（示例为2）。当前 ABI 4 将实体映射、快照元数据及恢复编排迁到 C#，原生层保留资源清理、事件收集和内部状态能力；旧物理记录需要重新生成。当前验证见[物理分层迁移](docs/managed-physics-migration.md)，此前记录见[joltc迁移](docs/joltc-migration.md)。
 
