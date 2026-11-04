@@ -5,7 +5,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(NOT DEFINED JOLT_SOURCE_DIR)
   message(FATAL_ERROR "Pass pinned JOLT_SOURCE_DIR from scripts/build_native.py")
 endif()
-foreach(flag INTERPROCEDURAL_OPTIMIZATION DOUBLE_PRECISION USE_ASSERTS GENERATE_DEBUG_SYMBOLS
+foreach(flag INTERPROCEDURAL_OPTIMIZATION DOUBLE_PRECISION USE_ASSERTS GENERATE_DEBUG_SYMBOLS CPP_RTTI_ENABLED
     FLOATING_POINT_EXCEPTIONS_ENABLED ENABLE_ALL_WARNINGS ENABLE_INSTALL ENABLE_OBJECT_STREAM
     DEBUG_RENDERER_IN_DEBUG_AND_RELEASE PROFILER_IN_DEBUG_AND_RELEASE
     JPH_USE_DX12 JPH_USE_VK JPH_USE_MTL JPH_USE_CPU_COMPUTE
@@ -42,8 +42,10 @@ if(MSVC)
   # joltc C entry points may throw before our outer C ABI catches the error.
   # /EHsc assumes extern C calls cannot throw and can omit required unwinding.
   foreach(target ainative_jolt joltc thread_start_probe)
-    target_compile_options(${target} PRIVATE /fp:precise /EHs /EHc-)
+    target_compile_options(${target} PRIVATE /fp:precise /EHs /EHc- /GR-)
   endforeach()
 else()
-  target_compile_options(ainative_jolt PRIVATE -ffp-contract=off)
+  foreach(target ainative_jolt joltc thread_start_probe)
+    target_compile_options(${target} PRIVATE -ffp-contract=off -fno-rtti)
+  endforeach()
 endif()
