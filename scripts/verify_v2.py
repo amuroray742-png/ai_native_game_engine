@@ -173,6 +173,59 @@ def validate(host, output):
             resumed, _, resumed_record = evidence.run(f"physics-{tick}-resume", pscene, suffix, snapshot=checkpoint)
             require(resumed["finalCheckpoint"]["stateHash"] == physics["finalCheckpoint"]["stateHash"], "physics continuation differs")
             evidence.invoke(f"physics-{tick}-replay", "replay", "--input", resumed_record, code="ReplayMatched")
+        # Repeat dense contact scenes in fresh processes for explicit execution settings.
+        threaded_records = {}
+        for workers in (0, 2, 4):
+            threaded = copy.deepcopy(read(pscene))
+            threaded["configuration"]["workerThreads"] = workers
+            template = threaded["configuration"]["bodies"][1]
+            threaded["configuration"]["bodies"] = [threaded["configuration"]["bodies"][0]]
+            for index in range(64):
+                body = copy.deepcopy(template)
+                body["id"] = str(index + 2)
+                body["position"] = [index % 8 - 4, 0.5 + index // 32 * 1.1, index // 8 % 4 - 2]
+                threaded["configuration"]["bodies"].append(body)
+            worker_scene = write(inputs / f"workers-{workers}.scenario.json", threaded)
+            worker_ops = []
+            for tick in range(150):
+                if tick == 30:
+                    worker_ops.append({"op": "submit", "command": {"type": "Impulse", "id": "2", "impulse": [2, 6, 0]}})
+                if tick == 70:
+                    worker_ops.append({"op": "submit", "command": {"type": "Remove", "id": "3"}})
+                    worker_ops.append({"op": "submit", "command": {"type": "Spawn", "shape": "Box", "size": [0.5, 0.5, 0.5], "position": [0, 5, 0]}})
+                worker_ops.append({"op": "advance"})
+            worker_commands = write(inputs / f"workers-{workers}.commands.json", {"formatVersion": 2, "operations": worker_ops})
+            expected, _, worker_record = evidence.run(f"workers-{workers}", worker_scene, worker_commands)
+            actual, _, repeated_record = evidence.run(f"workers-{workers}-repeat", worker_scene, worker_commands)
+            require(expected["checkpoints"] == actual["checkpoints"], "threaded process replay differs")
+            require(expected["finalCheckpoint"]["state"]["physics"]["workerThreads"] == workers, "thread setting not recorded")
+            threaded_records[workers] = worker_record
+            evidence.invoke(f"workers-{workers}-replay", "replay", "--input", worker_record, code="ReplayMatched")
+            evidence.invoke(f"workers-{workers}-compare", "compare", "--expected", worker_record, "--actual", repeated_record, code="HostTracesMatched")
+            boundary = next(index + 1 for index, operation in enumerate(worker_ops)
+                            if operation["op"] == "advance" and sum(op["op"] == "advance" for op in worker_ops[:index + 1]) == 60)
+            prefix = write(inputs / f"workers-{workers}-prefix.json", {"formatVersion": 2, "operations": worker_ops[:boundary]})
+            suffix = write(inputs / f"workers-{workers}-suffix.json", {"formatVersion": 2, "operations": worker_ops[boundary:]})
+            _, worker_snapshot, _ = evidence.run(f"workers-{workers}-save", worker_scene, prefix)
+            resumed, _, resumed_record = evidence.run(f"workers-{workers}-resume", worker_scene, suffix, snapshot=worker_snapshot)
+            require(resumed["finalCheckpoint"]["stateHash"] == expected["finalCheckpoint"]["stateHash"], "threaded continuation differs")
+            evidence.invoke(f"workers-{workers}-resume-replay", "replay", "--input", resumed_record, code="ReplayMatched")
+        evidence.invoke("compare-worker-settings", "compare", "--expected", threaded_records[0], "--actual", threaded_records[2],
+                        exit_code=2, code="ComparisonInputMismatch")
+        for index, value in enumerate((-1, 17, 1.5, "2", None)):
+            invalid = copy.deepcopy(read(pscene))
+            if value is None:
+                del invalid["configuration"]["workerThreads"]
+            else:
+                invalid["configuration"]["workerThreads"] = value
+            invalid_scene = write(inputs / f"invalid-workers-{index}.json", invalid)
+            evidence.invoke(f"invalid-workers-{index}", "run", "--scenario", invalid_scene, "--seed", "42",
+                            "--commands", inputs / "empty.commands.json", exit_code=2)
+        old_physics = copy.deepcopy(read(pscene))
+        old_physics["gameVersion"] = 1
+        old_physics_scene = write(inputs / "old-physics-version.json", old_physics)
+        evidence.invoke("old-physics-version", "run", "--scenario", old_physics_scene, "--seed", "42",
+                        "--commands", inputs / "empty.commands.json", exit_code=2)
         # A separate process copy proves optional native loading and actual native version rejection.
         isolated = output / "isolated-runner"
         shutil.copytree(host.parent, isolated, ignore=shutil.ignore_patterns("ainative_jolt.dll", "libainative_jolt.so"))
@@ -181,7 +234,7 @@ def validate(host, output):
         evidence.invoke("compare-without-native", "compare", "--expected", precord, "--actual", precord2, host=isolated_host)
         native_name = "ainative_jolt.dll" if platform.system() == "Windows" else "libainative_jolt.so"
         library = host.parent / native_name
-        altered_library = library.read_bytes().replace(b"jolt-5.6.0;e77f175;abi=2", b"jolt-0.0.0;e77f175;abi=2")
+        altered_library = library.read_bytes().replace(b"jolt-5.6.0;e77f175;joltc=2bbcf73;abi=3", b"jolt-0.0.0;e77f175;joltc=2bbcf73;abi=3")
         require(altered_library != library.read_bytes(), "native identity vector missing")
         (isolated / native_name).write_bytes(altered_library)
         wrong_version = evidence.invoke("wrong-native-version", "run", "--scenario", pscene, "--seed", "42", "--commands", inputs / "empty.commands.json", exit_code=1, code="NativeLibraryIncompatible", host=isolated_host)

@@ -17,7 +17,7 @@ namespace AiNative.PhysicsSandbox.Hosting
             NativeLibraries = Array.AsReadOnly((string[])nativeLibraries.Clone());
         }
         public string Id => "physics-sandbox";
-        public int Version => 1;
+        public int Version => 2;
         public SimulationTiming Timing { get; } = new SimulationTiming(60);
         public IReadOnlyList<Type> CodeTypes { get; }
         public IReadOnlyList<string> NativeLibraries { get; }
@@ -29,6 +29,7 @@ namespace AiNative.PhysicsSandbox.Hosting
             writer.WriteString("timing", "fixed");
             writer.WriteNumber("ticksPerSecond", 60);
             writer.WriteString("physics", _factory.Backend);
+            writer.WriteString("workerThreads", "explicit integer 0..16; 0 runs on the calling thread");
             writer.WriteStartArray("commands");
             writer.WriteStringValue("Spawn(shape: Sphere|Box, size[3], position[3])");
             writer.WriteStringValue("Remove(id)");
@@ -41,7 +42,7 @@ namespace AiNative.PhysicsSandbox.Hosting
         public JsonElement ReadConfiguration(JsonElement value) => Input(() =>
         {
             IReadOnlyList<BodyDefinition> bodies = SandboxData.ReadConfiguration(value);
-            return JsonData.Write(writer => SandboxData.WriteConfiguration(writer, bodies));
+            return JsonData.Write(writer => SandboxData.WriteConfiguration(writer, bodies, SandboxData.ReadWorkerThreads(value)));
         }, "InvalidConfiguration");
 
         public JsonElement ReadCommand(JsonElement value) => Input(() =>
@@ -56,6 +57,8 @@ namespace AiNative.PhysicsSandbox.Hosting
             {
                 SandboxData.ReadConfiguration(configuration);
                 SandboxState snapshot = SandboxData.ReadState(state, _factory.Backend);
+                JsonData.Require(snapshot.Physics.WorkerThreads == SandboxData.ReadWorkerThreads(configuration),
+                    "PhysicsSettingsMismatch", "$.state.physics.workerThreads");
                 _factory.ValidateSnapshot(snapshot.Physics, snapshot.Bodies);
                 return JsonData.Write(writer => SandboxData.WriteState(writer, snapshot));
             }, "InvalidState");
@@ -67,7 +70,7 @@ namespace AiNative.PhysicsSandbox.Hosting
         {
             IReadOnlyList<BodyDefinition> bodies = SandboxData.ReadConfiguration(ReadConfiguration(configuration));
             return new SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<BodyState>, SandboxState>.Create(
-                () => SandboxSimulation.Create(_factory, bodies), seed, Timing));
+                () => SandboxSimulation.Create(_factory, bodies, SandboxData.ReadWorkerThreads(configuration)), seed, Timing));
         }
 
         public IHostedGame Restore(JsonElement configuration, JsonElement state, RuntimeState runtime)

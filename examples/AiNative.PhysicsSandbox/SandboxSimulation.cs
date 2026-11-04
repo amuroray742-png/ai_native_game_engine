@@ -92,14 +92,14 @@ namespace AiNative.PhysicsSandbox
             _nextId = nextId;
         }
 
-        public static SandboxSimulation Create(IPhysicsWorldFactory factory, IReadOnlyList<BodyDefinition> definitions)
+        public static SandboxSimulation Create(IPhysicsWorldFactory factory, IReadOnlyList<BodyDefinition> definitions, int workerThreads = 0)
         {
             if (definitions.Count > 1024 || definitions.Select(item => item.Id).Distinct().Count() != definitions.Count)
             {
                 throw new ArgumentException("刚体数量或标识无效。");
             }
             ulong nextId = checked((definitions.Count == 0 ? 0 : definitions.Max(item => item.Id)) + 1);
-            IPhysicsWorld world = factory.Create();
+            IPhysicsWorld world = factory.Create(workerThreads);
             try
             {
                 foreach (BodyDefinition body in definitions.OrderBy(item => item.Id))

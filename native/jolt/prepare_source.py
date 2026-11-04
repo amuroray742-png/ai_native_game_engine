@@ -19,3 +19,46 @@ def prepare(source: Path, destination: Path):
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(patched, encoding="utf-8")
     return hashlib.sha256(destination.read_bytes()).hexdigest()
+
+
+def prepare_thread_pool(source: Path, destination: Path):
+    original = (source / "Jolt/Core/JobSystemThreadPool.cpp").read_text(encoding="utf-8")
+    old = "\tmThreads.reserve(inNumThreads);\n\tfor (int i = 0; i < inNumThreads; ++i)\n\t\tmThreads.emplace_back([this, i] { ThreadMain(i); });"
+    if original.count(old) != 1:
+        raise RuntimeError("Pinned Jolt thread startup changed; review patch before building")
+    new = """	try
+	{
+		mThreads.reserve(inNumThreads);
+		for (int i = 0; i < inNumThreads; ++i)
+		{
+#ifdef AINATIVE_THREAD_START_TEST
+			::AJ_TestBeforeThreadStart(i);
+#endif
+			mThreads.emplace_back([this, i] {
+#ifdef AINATIVE_THREAD_START_TEST
+				::AJ_TestWorkerStarted();
+#endif
+				ThreadMain(i);
+#ifdef AINATIVE_THREAD_START_TEST
+				::AJ_TestWorkerFinished();
+#endif
+			});
+		}
+	}
+	catch (...)
+	{
+		// A constructor cannot leave joinable workers for member destruction.
+		StopThreads();
+		// StopThreads returns early if even the first worker could not start.
+		if (mHeads != nullptr) { Free(mHeads); mHeads = nullptr; }
+		throw;
+	}"""
+    declarations = """#ifdef AINATIVE_THREAD_START_TEST
+extern void AJ_TestBeforeThreadStart(int);
+extern void AJ_TestWorkerStarted();
+extern void AJ_TestWorkerFinished();
+#endif
+"""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(declarations + original.replace(old, new), encoding="utf-8", newline="\n")
+    return hashlib.sha256(destination.read_bytes()).hexdigest()

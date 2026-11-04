@@ -14,7 +14,8 @@ namespace AiNative.PhysicsSandbox.Hosting
     {
         internal static IReadOnlyList<BodyDefinition> ReadConfiguration(JsonElement value)
         {
-            ProtocolJson.Object(value, "$.configuration", "bodies");
+            ProtocolJson.Object(value, "$.configuration", "bodies", "workerThreads");
+            ReadWorkerThreads(value);
             var bodies = new List<BodyDefinition>();
             foreach (JsonElement body in ProtocolJson.Array(value.GetProperty("bodies"), "$.configuration.bodies"))
             {
@@ -28,9 +29,17 @@ namespace AiNative.PhysicsSandbox.Hosting
             return Array.AsReadOnly(bodies.OrderBy(body => body.Id).ToArray());
         }
 
-        internal static void WriteConfiguration(Utf8JsonWriter writer, IReadOnlyList<BodyDefinition> bodies)
+        internal static int ReadWorkerThreads(JsonElement value)
+        {
+            int workers = ProtocolJson.Int32(value.GetProperty("workerThreads"), "$.configuration.workerThreads");
+            JsonData.Require(workers >= 0 && workers <= 16, "InvalidConfiguration", "$.configuration.workerThreads");
+            return workers;
+        }
+
+        internal static void WriteConfiguration(Utf8JsonWriter writer, IReadOnlyList<BodyDefinition> bodies, int workerThreads)
         {
             writer.WriteStartObject();
+            writer.WriteNumber("workerThreads", workerThreads);
             writer.WriteStartArray("bodies");
             foreach (BodyDefinition body in bodies)
             {
@@ -107,7 +116,7 @@ namespace AiNative.PhysicsSandbox.Hosting
         {
             ProtocolJson.Object(value, "$.state", "nextId", "physics", "bodies");
             JsonElement physics = value.GetProperty("physics");
-            ProtocolJson.Object(physics, "$.state.physics", "backend", "data", "hash");
+            ProtocolJson.Object(physics, "$.state.physics", "backend", "data", "hash", "workerThreads");
             JsonData.Require(ProtocolJson.String(physics.GetProperty("backend"), "$.physics.backend") == backend, "PhysicsBackendMismatch", "$.state.physics.backend");
             byte[] bytes;
             try
@@ -126,7 +135,7 @@ namespace AiNative.PhysicsSandbox.Hosting
             }
             JsonData.Require(bodies.Count <= 1024 && bodies.Select(body => body.Id).SequenceEqual(bodies.Select(body => body.Id).OrderBy(id => id)),
                 "InvalidState", "$.state.bodies");
-            return new SandboxState(ProtocolJson.UInt64(value.GetProperty("nextId"), "$.state.nextId"), new PhysicsSnapshot(backend, bytes), bodies);
+            return new SandboxState(ProtocolJson.UInt64(value.GetProperty("nextId"), "$.state.nextId"), new PhysicsSnapshot(backend, bytes, ProtocolJson.Int32(physics.GetProperty("workerThreads"), "$.state.physics.workerThreads")), bodies);
         }
 
         internal static void WriteState(Utf8JsonWriter writer, SandboxState state)
@@ -136,6 +145,7 @@ namespace AiNative.PhysicsSandbox.Hosting
             writer.WriteString("nextId", Text(state.NextId));
             writer.WriteStartObject("physics");
             writer.WriteString("backend", state.Physics.Backend);
+            writer.WriteNumber("workerThreads", state.Physics.WorkerThreads);
             writer.WriteBase64String("data", bytes);
             writer.WriteString("hash", JsonData.Hash(bytes));
             writer.WriteEndObject();

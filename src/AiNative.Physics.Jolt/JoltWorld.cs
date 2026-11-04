@@ -9,8 +9,10 @@ namespace AiNative.Physics.Jolt
 {
     public sealed class JoltWorldFactory : IPhysicsWorldFactory
     {
-        public const string Identity = "jolt-5.6.0;e77f175;abi=2;float32;single-thread;deterministic;sse4;capacity=1024";
+        public const string Identity = "jolt-5.6.0;e77f175;joltc=2bbcf73;abi=3;float32;workers=0..16;deterministic;sse4;capacity=1024";
         public string Backend => Identity;
+        /// <summary>进程累计的工作线程碰撞回调数，仅用于诊断，不进入模拟状态。</summary>
+        public static ulong WorkerContactCount => JoltNative.aj_worker_contact_count();
         public static uint ActiveWorldCount => JoltNative.aj_world_count();
 
         private static void CheckVersion()
@@ -22,11 +24,15 @@ namespace AiNative.Physics.Jolt
             }
         }
 
-        public IPhysicsWorld Create()
+        public IPhysicsWorld Create(int workerThreads = 0)
         {
+            if (workerThreads < 0 || workerThreads > 16)
+            {
+                throw new ArgumentOutOfRangeException(nameof(workerThreads));
+            }
             CheckVersion();
-            JoltNative.Check(JoltNative.aj_create(out WorldHandle handle));
-            return new JoltWorld(handle);
+            JoltNative.Check(JoltNative.aj_create(workerThreads, out WorldHandle handle));
+            return new JoltWorld(handle, workerThreads);
         }
 
         public IPhysicsWorld Restore(PhysicsSnapshot snapshot)
@@ -35,7 +41,7 @@ namespace AiNative.Physics.Jolt
             CheckVersion();
             byte[] data = snapshot.GetData();
             JoltNative.Check(JoltNative.aj_restore(data, data.Length, out WorldHandle handle));
-            return new JoltWorld(handle);
+            return new JoltWorld(handle, snapshot.WorkerThreads);
         }
 
         /// <summary>只检查自包含元数据，不加载原生库；完整内部状态由候选世界恢复验证。</summary>
@@ -53,13 +59,17 @@ namespace AiNative.Physics.Jolt
             try
             {
                 using var reader = new BinaryReader(new MemoryStream(bytes, false));
-                if (reader.ReadUInt32() != 0x324a4e41)
+                if (reader.ReadUInt32() != 0x334a4e41)
                 {
                     throw new ArgumentException("物理格式不匹配。");
                 }
+                if (reader.ReadUInt32() != snapshot.WorkerThreads)
+                {
+                    throw new ArgumentException("Physics worker count mismatch.");
+                }
                 byte[] generations = reader.ReadBytes(1024);
                 uint count = reader.ReadUInt32();
-                if (generations.Length != 1024 || count > 1024 || bytes.Length <= 1032 + count * 72)
+                if (generations.Length != 1024 || count > 1024 || bytes.Length <= 1036 + count * 72)
                 {
                     throw new ArgumentException("物理状态长度无效。");
                 }
@@ -97,9 +107,11 @@ namespace AiNative.Physics.Jolt
     internal sealed class JoltWorld : IPhysicsWorld
     {
         private readonly WorldHandle _handle;
-        internal JoltWorld(WorldHandle handle)
+        private readonly int _workerThreads;
+        internal JoltWorld(WorldHandle handle, int workerThreads)
         {
             _handle = handle;
+            _workerThreads = workerThreads;
         }
 
         public void Add(BodyDefinition definition)
@@ -167,7 +179,7 @@ namespace AiNative.Physics.Jolt
             JoltNative.Check(JoltNative.aj_save(_handle, null, 0, out int length));
             var bytes = new byte[length];
             JoltNative.Check(JoltNative.aj_save(_handle, bytes, length, out _));
-            return new PhysicsSnapshot(JoltWorldFactory.Identity, bytes);
+            return new PhysicsSnapshot(JoltWorldFactory.Identity, bytes, _workerThreads);
         }
 
         private void EnsureAlive()
