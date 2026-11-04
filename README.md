@@ -2,7 +2,7 @@
 
 可复用的纯 C# 玩法内核与工具链。GridGame（手动回合制）和 PhysicsSandbox（60 Hz 真实 Jolt 刚体）作为独立 Example，共用输入、快照、回放、比较和 CLI。
 
-当前运行入口统一为 **v2**。旧阶段文档保留历史证据，旧格式明确拒绝；Unity 编辑器、Player、IL2CPP 尚待第三阶段验收。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [验收索引](docs/v2-acceptance.md)。
+通用框架 v2 已完成独立审查及[Windows/Linux双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41689668666)：各222项测试、80次真实CLI通过，并核验上传制品。当前运行入口统一为 **v2**。旧阶段文档保留历史证据，旧格式明确拒绝；Unity 编辑器、Player、IL2CPP 尚待第三阶段验收。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [验收索引](docs/v2-acceptance.md)。
 
 ## 运行
 
