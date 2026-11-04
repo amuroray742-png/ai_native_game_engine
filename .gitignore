@@ -5,6 +5,11 @@
 *.trx
 artifacts/
 
+# 下载的第三方依赖；版本声明与目录说明仍纳入版本控制
+/third_party/JoltPhysics/
+/third_party/joltc/
+/third_party/nuget/
+
 # 本机 IDE 配置
 .vs/
 .vscode/

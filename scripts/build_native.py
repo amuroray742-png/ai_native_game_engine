@@ -20,8 +20,8 @@ def run(args, **kwargs):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--jolt-source", type=Path, default=ROOT / "TestResults/native-deps/JoltPhysics")
-    parser.add_argument("--joltc-source", type=Path, default=ROOT / "TestResults/native-deps/joltc")
+    parser.add_argument("--jolt-source", type=Path, default=ROOT / "third_party/JoltPhysics")
+    parser.add_argument("--joltc-source", type=Path, default=ROOT / "third_party/joltc")
     args = parser.parse_args()
     if platform.machine().lower() not in ("amd64", "x86_64"):
         raise RuntimeError("This bridge build currently supports x64 only")

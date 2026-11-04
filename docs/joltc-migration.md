@@ -2,7 +2,7 @@
 
 ## 边界与版本
 
-基础物理绑定使用 [joltc](https://github.com/amerkoleci/joltc/tree/2bbcf73b1bec261e0351814662922f1b4784454c)，固定提交 `2bbcf73b1bec261e0351814662922f1b4784454c`。Jolt 仍固定5.6.0提交 `e77f175595e64cb44218cc9d9d56fc365ad0e36a`。两者源码由 `scripts/build_native.py` 获取至被忽略的 `TestResults/native-deps/`，校验提交和clean状态；不追踪main、不使用隐式系统安装版本。
+基础物理绑定使用 [joltc](https://github.com/amerkoleci/joltc/tree/2bbcf73b1bec261e0351814662922f1b4784454c)，固定提交 `2bbcf73b1bec261e0351814662922f1b4784454c`。Jolt 仍固定5.6.0提交 `e77f175595e64cb44218cc9d9d56fc365ad0e36a`。两者源码由 `scripts/build_native.py` 获取至被忽略的 `third_party/JoltPhysics/` 与 `third_party/joltc/`，校验提交和clean状态；不追踪main、不使用隐式系统安装版本。
 
 `IPhysicsWorld`、Core和GridGame规则边界保持。`IPhysicsWorldFactory.Create(int workerThreads = 0)` 创建固定线程配置的世界；`PhysicsSnapshot.WorkerThreads` 携带同一设置。C#继续使用netstandard2.1/C#9与DllImport，没有引入JoltPhysicsSharp或反向托管碰撞回调。
 
@@ -56,3 +56,11 @@
 复现仍使用README中的 `python scripts/build_native.py`、`dotnet build`、`dotnet test` 和 `python scripts/verify_v2.py --output <新目录>`。CI分别构建两个平台的真实原生库，并比较GridGame、普通物理示例和0/2/4线程密集场景的证据。
 
 Unity Editor、Player、IL2CPP与性能收益未在本次声明完成；多线程能力通过正确性和实际工作线程回调验证，不据此宣称性能提升。
+
+## 第三方目录整理
+
+2026-11-04将默认依赖目录集中至 [`third_party/`](../third_party/README.md)。Jolt与joltc源码从 `TestResults/native-deps/` 移至对应子目录；所有当前项目通过 `Directory.Build.props` 将NuGet包恢复到 `third_party/nuget/`。固定源码提交、包版本与锁文件保持不变，下载内容由Git忽略，项目扩展及构建产物仍分别位于 `native/jolt/` 与 `artifacts/`。旧路径迁移和构建身份影响见目录说明。
+
+新路径已在本地Windows x64验证：原生构建与线程启动故障探针通过；`dotnet restore --locked-mode`、`dotnet build --no-restore`成功；229项测试通过，无失败或跳过。核对11个当前项目的包恢复目录及21个已解析包版本均位于 `third_party/nuget/`，源码固定提交和clean状态正确。独立Reviewer复核了路径、忽略规则、版本锁与CI入口，未发现阻断项。
+
+本地证据为 `TestResults/third-party-native.log`、`TestResults/third-party-restore-retry.log`、`TestResults/third-party-build.log` 和 `TestResults/third-party-unit/`。首次新缓存恢复遇到NuGet文件已存在错误，重试成功。此目录整理后尚未重跑108次CLI及远端双平台CI；前述CI记录仍对应提交 `f6e1556`，不将旧构建证据视为新目录的双平台验收。

@@ -6,6 +6,8 @@
 
 物理后端现已迁移至固定版本 **joltc + 项目扩展**，支持显式0..16工作线程、完整状态恢复与同线程配置确定性回放。PhysicsSandbox场景使用游戏版本2和必填`configuration.workerThreads`（示例为2）。迁移范围与当前验证记录见[joltc迁移](docs/joltc-migration.md)。
 
+第三方依赖统一存放在 [`third_party/`](third_party/README.md)：Jolt/joltc源码由原生构建脚本获取，NuGet包由`dotnet restore --locked-mode`恢复到`third_party/nuget/`。
+
 ## 运行
 
 需要 global.json 指定的 .NET 10 SDK。GridGame 不需要原生库：
@@ -19,7 +21,7 @@ dotnet run --project examples/AiNative.Examples.Runner -- replay --input grid.re
 dotnet run --project examples/AiNative.Examples.Runner -- inspect --snapshot grid.snapshot.json
 ```
 
-物理示例先构建原生桥接。Windows x64 需要 MSVC C++ 工具（支持 VS 安装的 CMake/Ninja）；Linux x64 需要 C++17 编译器、CMake、Ninja、Git。Python 3.9+ 脚本会取得并检查固定 Jolt 与 joltc 源码提交，不安装全局软件：
+物理示例先构建原生桥接。Windows x64 需要 MSVC C++ 工具（支持 VS 安装的 CMake/Ninja）；Linux x64 需要 C++17 编译器、CMake、Ninja、Git。Python 3.10+ 脚本会取得并检查固定 Jolt 与 joltc 源码提交，不安装全局软件：
 
 ```sh
 python scripts/build_native.py
@@ -43,7 +45,8 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.GridGame / GridGame.Hosting | 网格规则与专属协议 |
 | examples/AiNative.PhysicsSandbox / PhysicsSandbox.Hosting | 实时物理规则与专属协议 |
 | examples/AiNative.Examples.Runner | 唯一示例可执行入口，显式注册游戏与物理工厂 |
-| native/jolt | 固定 joltc/Jolt 5.6.0、项目扩展、异常安全补丁与完整状态验证 |
+| native/jolt | 项目维护的物理服务、joltc 扩展、异常安全补丁与完整状态验证 |
+| third_party | 下载的 Jolt/joltc 源码与 NuGet 包；版本锁定，下载内容不提交 Git |
 
 Core 和可移植库保持 netstandard2.1 / C# 9；Headless、Runner、测试使用 .NET 10。框架没有 Example 引用，也没有反射插件发现或通用 ECS。
 
