@@ -78,8 +78,8 @@ namespace AiNative.Tests
             var session = Fixtures.Session();
             session.Submit(new Move(Side.A, 1, MoveDirection.Up));
             session.Submit(new Move(Side.A, 1, MoveDirection.Up));
-            session.Advance();
-            CommandResult result = Assert.IsType<StepResult>(session.Advance()).Result;
+            TickResult<GridGameView> frame = session.Advance();
+            CommandResult result = frame.Inputs[1].Result;
             UnitMoved moved = Assert.IsType<UnitMoved>(Assert.Single(result.Events));
             Assert.Equal(new GridPosition(0, 1), moved.From);
             Assert.Equal(new GridPosition(0, 2), moved.To);
@@ -87,12 +87,12 @@ namespace AiNative.Tests
             Assert.Equal(0, session.GetState().ActionPoints);
         }
 
-        private static SimulationSession<GridCommand, GridGameView> CreateSession(GridPosition origin)
+        private static SimulationRuntime<GridCommand, GridGameView, GridGameState> CreateSession(GridPosition origin)
         {
             ScenarioDefinition source = Fixtures.Definition();
             UnitDefinition[] units = { new UnitDefinition(1, Side.A, origin, 4), source.Units[1] };
             var definition = new ScenarioDefinition(5, 5, source.Obstacles, units, 2, 2);
-            return new SimulationSession<GridCommand, GridGameView>(GridGameRules.Create(definition), 42);
+            return Fixtures.Session(definition);
         }
 
         [Fact]
@@ -132,9 +132,10 @@ namespace AiNative.Tests
             session.Submit(new EndTurn(Side.A));
             session.Submit(new Move(Side.A, 1, MoveDirection.Right));
             session.Submit(new Move(Side.B, 2, MoveDirection.Right));
-            Assert.True(Assert.IsType<StepResult>(session.Advance()).Result.Succeeded);
-            Assert.Equal("NotYourTurn", Assert.IsType<StepResult>(session.Advance()).Result.Error);
-            Assert.True(Assert.IsType<StepResult>(session.Advance()).Result.Succeeded);
+            TickResult<GridGameView> frame = session.Advance();
+            Assert.True(frame.Inputs[0].Result.Succeeded);
+            Assert.Equal("NotYourTurn", frame.Inputs[1].Result.Error);
+            Assert.True(frame.Inputs[2].Result.Succeeded);
             Assert.Equal(new GridPosition(3, 0), session.GetState().Units[1].Position);
         }
 
@@ -155,18 +156,19 @@ namespace AiNative.Tests
         {
             ScenarioDefinition source = Fixtures.Definition();
             var definition = new ScenarioDefinition(source.Width, source.Height, source.Obstacles, source.Units, 2, int.MaxValue);
-            var session = new SimulationSession<GridCommand, GridGameView>(GridGameRules.Create(definition), 42);
+            var session = Fixtures.Session(definition);
             Fixtures.Execute(session, new Move(Side.A, 1, MoveDirection.Right));
             session.Submit(new Attack(Side.A, 1, 2));
             session.Submit(new EndTurn(Side.A));
             session.Submit(new Move(Side.A, 1, MoveDirection.Up));
-            CommandResult lethal = Assert.IsType<StepResult>(session.Advance()).Result;
+            TickResult<GridGameView> frame = session.Advance();
+            CommandResult lethal = frame.Inputs[0].Result;
             Assert.Collection(lethal.Events,
                 value => { UnitDamaged damaged = Assert.IsType<UnitDamaged>(value); Assert.Equal(0, damaged.Health); Assert.Equal(4, damaged.Damage); },
                 value => Assert.Equal(Side.A, Assert.IsType<GameEnded>(value).Winner));
             string final = Fixtures.State(session.GetState());
-            Assert.Equal("GameFinished", Assert.IsType<StepResult>(session.Advance()).Result.Error);
-            Assert.Equal("GameFinished", Assert.IsType<StepResult>(session.Advance()).Result.Error);
+            Assert.Equal("GameFinished", frame.Inputs[1].Result.Error);
+            Assert.Equal("GameFinished", frame.Inputs[2].Result.Error);
             Assert.Equal(final, Fixtures.State(session.GetState()));
         }
 
@@ -177,7 +179,7 @@ namespace AiNative.Tests
             var units = source.Units.ToList();
             var obstacles = source.Obstacles.ToList();
             GridGameRules rules = GridGameRules.Create(new ScenarioDefinition(5, 5, obstacles, units, 2, 2));
-            var session = new SimulationSession<GridCommand, GridGameView>(rules, 42);
+            var session = SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(() => rules, 42, new SimulationTiming(0));
             string before = Fixtures.State(session.GetState());
             units.Clear();
             obstacles.Clear();

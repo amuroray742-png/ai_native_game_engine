@@ -1,5 +1,6 @@
 # 第一阶段：无头网格回合制玩法闭环
 
+> 历史记录：本文保留当时的设计与验证证据；当前运行入口及契约已迁移到 [v2](framework-v2.md)，本文旧命令不作为当前验收入口。
 状态：T1–T6 已实现并完成本地验收（2026-10-29）。本文件记录开发任务、接口与实际证据；完整架构方向见[设计文档](ai-native-game-engine-design.md)，实现约束见[代码规范](engineering-guidelines.md)。
 
 本文件保留第一阶段实施时的模块和依赖事实；第三阶段前的当前边界调整见[宿主边界与表现契约](host-boundary-and-presentation.md)。
@@ -84,7 +85,7 @@ CommandResult 的 Error 为 null 表示成功，否则为稳定原因代码；�
 
 ### T3 的场景格式
 
-示例见 [demo.json](../src/AiNative.Headless/demo.json)。根对象必填字段：
+示例见 [demo.json](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/src/AiNative.Headless/demo.json)。根对象必填字段：
 
 | 字段 | 类型与约束 |
 | --- | --- |

@@ -12,10 +12,7 @@ namespace AiNative.Core
             State = seed;
         }
 
-        public ulong State
-        {
-            get; private set;
-        }
+        public ulong State { get; private set; }
 
         public ulong NextUInt64()
         {

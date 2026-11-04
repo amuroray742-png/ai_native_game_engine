@@ -3,6 +3,7 @@
 **/obj/
 **/TestResults/
 *.trx
+artifacts/
 
 # 本机 IDE 配置
 .vs/
@@ -14,3 +15,6 @@
 # 操作系统临时文件
 .DS_Store
 Thumbs.db
+
+# Python build helper cache
+__pycache__/

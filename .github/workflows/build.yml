@@ -3,6 +3,7 @@ name: Build and test
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,18 +23,47 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Build pinned native bridge
+        run: python scripts/build_native.py
       - run: dotnet restore --locked-mode
       - run: dotnet build --no-restore
       - run: dotnet test --no-build --no-restore --logger trx --results-directory TestResults/unit
       - run: dotnet format --verify-no-changes --no-restore
-      - run: dotnet run --project src/AiNative.Headless --no-build
-      - name: Phase 2 CLI acceptance
-        run: python scripts/verify_phase2.py --output TestResults/phase-2
+      - name: V2 real process acceptance
+        run: python scripts/verify_v2.py --output TestResults/v2
       - name: Preserve validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase-2-evidence-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: TestResults/
+          name: v2-evidence-${{ matrix.os }}
+          path: |
+            TestResults/unit/
+            TestResults/v2/
+            artifacts/native/
+            examples/AiNative.Examples.Runner/bin/Debug/net10.0/
           if-no-files-found: warn
           retention-days: 7
+
+  platform-comparison:
+    needs: headless
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: v2-evidence-ubuntu-latest
+          path: evidence/linux
+      - uses: actions/download-artifact@v4
+        with:
+          name: v2-evidence-windows-latest
+          path: evidence/windows
+      - name: Record cross-platform comparison without expanding compatibility
+        run: python scripts/compare_platforms.py evidence/linux evidence/windows TestResults/platform-comparison
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v2-platform-comparison
+          path: TestResults/platform-comparison/

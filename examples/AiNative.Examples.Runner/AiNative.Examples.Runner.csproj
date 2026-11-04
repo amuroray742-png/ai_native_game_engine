@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><OutputType>Exe</OutputType><CopyNativeBridge>true</CopyNativeBridge></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/AiNative.Headless/AiNative.Headless.csproj" />
+    <ProjectReference Include="../../src/AiNative.Physics.Jolt/AiNative.Physics.Jolt.csproj" />
+    <ProjectReference Include="../AiNative.GridGame.Hosting/AiNative.GridGame.Hosting.csproj" />
+    <ProjectReference Include="../AiNative.PhysicsSandbox.Hosting/AiNative.PhysicsSandbox.Hosting.csproj" />
+  </ItemGroup>
+</Project>

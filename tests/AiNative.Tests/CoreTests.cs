@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AiNative.Core;
 using Xunit;
 
@@ -8,100 +9,227 @@ namespace AiNative.Tests
     public sealed class CoreTests
     {
         [Fact]
-        public void Submit_ThenAdvance_ExecutesOneCommandInFifoOrder()
+        public void EmptyTickAndBatchedInputs_HaveIndependentCountersAndStableOrder()
         {
-            var rules = new RecordingRules();
-            var session = new SimulationSession<string, string[]>(rules, 0);
-            Assert.Null(session.Advance());
-            Assert.Equal(1, session.Submit("first"));
-            Assert.Equal(2, session.Submit("second"));
-            Assert.Empty(session.GetState());
-            Assert.Equal(1, Assert.IsType<StepResult>(session.Advance()).Sequence);
-            Assert.Equal(new[] { "first" }, session.GetState());
-            Assert.Equal(1, session.PendingCount);
-            Assert.Equal(2, Assert.IsType<StepResult>(session.Advance()).Sequence);
-            Assert.Equal(new[] { "first", "second" }, session.GetState());
-            Assert.Null(session.Advance());
-            Assert.Equal(2, rules.Executions);
+            using var runtime = Create();
+            Assert.Equal(1, runtime.Advance().Tick);
+            Assert.Equal(0, runtime.Processed);
+            Assert.Equal(1, runtime.Submit("first"));
+            Assert.Equal(2, runtime.Submit("reject"));
+            Assert.Equal(3, runtime.Submit("second"));
+            Assert.Throws<InvalidOperationException>(() => runtime.ExportState());
+            Assert.Equal(3, runtime.PendingCount);
+            TickResult<string[]> frame = runtime.Advance();
+            Assert.Equal(2, frame.Tick);
+            Assert.Equal(new long[] { 1, 2, 3 }, frame.Inputs.Select(input => input.Sequence));
+            Assert.Equal(new[] { "first", "second" }, frame.Observation.State);
+            Assert.Equal("Rejected", frame.Inputs[1].Result.Error);
+            Assert.Equal(3, runtime.Processed);
+            Assert.Equal(0, runtime.PendingCount);
+            runtime.Submit("later");
+            runtime.Advance();
+            Assert.Equal(new[] { "first", "second" }, frame.Observation.State);
         }
 
         [Theory]
         [InlineData("throw")]
         [InlineData("consumeThenReject")]
-        public void Advance_WhenRulesBreakContract_FaultsAndStopsSession(string command)
+        [InlineData("null")]
+        public void InvalidRuleResult_FaultsAndPreventsFurtherUse(string command)
         {
-            var session = new SimulationSession<string, string[]>(new RecordingRules(), 0);
-            session.Submit(command);
-            session.Submit("later");
-            Assert.Throws<InvalidOperationException>(() => session.Advance());
-            Assert.True(session.IsFaulted);
-            Assert.Throws<InvalidOperationException>(() => session.Advance());
-            Assert.Throws<InvalidOperationException>(() => session.Submit("new"));
-            Assert.Throws<InvalidOperationException>(() => session.GetState());
+            var simulation = new RecordingSimulation();
+            using var runtime = Create(simulation);
+            runtime.Submit(command);
+            runtime.Submit("later");
+            Assert.Throws<InvalidOperationException>(() => runtime.Advance());
+            Assert.True(runtime.IsFaulted);
+            Assert.Equal(0, runtime.Tick);
+            Assert.Throws<InvalidOperationException>(() => runtime.Advance());
+            Assert.Throws<InvalidOperationException>(() => runtime.Capture());
+            Assert.Throws<InvalidOperationException>(() => runtime.CaptureGameState());
+            Assert.Throws<InvalidOperationException>(() => runtime.ExportState());
+            Assert.Throws<InvalidOperationException>(() => runtime.Submit("new"));
+            runtime.Dispose();
+            runtime.Dispose();
+            Assert.Equal(1, simulation.Disposals);
+            Assert.Throws<ObjectDisposedException>(() => runtime.Advance());
+        }
+
+        [Theory]
+        [InlineData("input")]
+        [InlineData("tick")]
+        [InlineData("query")]
+        [InlineData("export")]
+        public void Reentry_IsRejectedAtEverySimulationCallback(string phase)
+        {
+            var simulation = new RecordingSimulation();
+            using var runtime = Create(simulation);
+            simulation.Callback = current =>
+            {
+                if (current != phase)
+                {
+                    return;
+                }
+                Assert.Throws<InvalidOperationException>(() => runtime.Advance());
+                Assert.Throws<InvalidOperationException>(() => runtime.Submit("nested"));
+                Assert.Throws<InvalidOperationException>(() => runtime.GetState());
+                Assert.Throws<InvalidOperationException>(() => runtime.Dispose());
+            };
+            runtime.Submit("first");
+            runtime.Advance();
+            runtime.ExportState();
+            Assert.False(runtime.IsFaulted);
+            Assert.Equal(1, runtime.Processed);
+        }
+
+        [Theory]
+        [InlineData(0UL)]
+        [InlineData(42UL)]
+        [InlineData(9223372036854775808UL)]
+        [InlineData(ulong.MaxValue)]
+        public void Restore_PreservesRandomBitsAndContinuesWithoutReseeding(ulong seed)
+        {
+            using var original = Create(seed: seed);
+            original.Submit("random");
+            original.Advance();
+            original.Advance();
+            SimulationSnapshot<string[]> snapshot = original.ExportState();
+            using var restored = SimulationRuntime<string, string[], string[]>.Restore(snapshot, data => new RecordingSimulation(data));
+            Assert.Equal(original.RandomState, restored.RandomState);
+            Assert.Equal(2, restored.Tick);
+            original.Submit("random");
+            restored.Submit("random");
+            original.Advance();
+            restored.Advance();
+            Assert.Equal(original.GetState(), restored.GetState());
+            Assert.Equal(original.RandomState, restored.RandomState);
+            Assert.Equal(2, restored.Processed);
+            Assert.Equal(3, restored.Tick);
+            using var independent = Create(seed: seed);
+            Assert.Equal(seed, independent.RandomState);
         }
 
         [Fact]
-        public void Random_SeedZero_MatchesPublishedSplitMix64Sequence()
+        public void Random_HasIndependentFixedVectors()
         {
-            // 固定向量，不能通过被测实现现场计算期望值。
-            ulong[] expected = { 0xE220A8397B1DCDAFUL, 0x6E789E6AA1B965F4UL, 0x06C45D188009454FUL };
             var random = new DeterministicRandom(0);
-            Assert.Equal("splitmix64-v1", DeterministicRandom.Algorithm);
-            foreach (ulong value in expected)
+            foreach (ulong expected in new[] { 0xE220A8397B1DCDAFUL, 0x6E789E6AA1B965F4UL, 0x06C45D188009454FUL })
             {
-                Assert.Equal(value, random.NextUInt64());
+                Assert.Equal(expected, random.NextUInt64());
             }
             Assert.Equal(unchecked(3UL * 0x9E3779B97F4A7C15UL), random.State);
         }
 
-        [Fact]
-        public void Sessions_WithSameSeed_HaveIndependentRandomStates()
-        {
-            var first = new SimulationSession<string, string[]>(new RecordingRules(), ulong.MaxValue);
-            var second = new SimulationSession<string, string[]>(new RecordingRules(), ulong.MaxValue);
-            first.Submit("random");
-            first.Advance();
-            Assert.Equal(ulong.MaxValue, second.RandomState);
-            second.Submit("random");
-            second.Advance();
-            Assert.Equal(first.GetState(), second.GetState());
-            Assert.Equal(first.RandomState, second.RandomState);
-        }
+        [Theory]
+        [InlineData(-1, 0, 0)]
+        [InlineData(0, 1, 1)]
+        [InlineData(1, 2, 1)]
+        [InlineData(1, -1, -1)]
+        [InlineData(1, 0, 1)]
+        public void InvalidSaveCounters_AreRejected(long tick, long submitted, long processed) =>
+            Assert.Throws<ArgumentException>(() => new RuntimeState(tick, submitted, processed, 0, new SimulationTiming(0)));
 
         [Fact]
-        public void Submit_Null_DoesNotEnqueueOrFault()
+        public void LimitsAndNullInput_DoNotSilentlyWrap()
         {
-            var session = new SimulationSession<string, string[]>(new RecordingRules(), 0);
-            Assert.Throws<ArgumentNullException>(() => session.Submit(null!));
-            Assert.Equal(0, session.PendingCount);
-            Assert.False(session.IsFaulted);
+            using var runtime = Create();
+            Assert.Throws<ArgumentNullException>(() => runtime.Submit(null!));
+            Assert.Equal(0, runtime.Submitted);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new SimulationTiming(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new SimulationTiming(1001));
+            var state = new SimulationSnapshot<string[]>(new RuntimeState(1, long.MaxValue, long.MaxValue, 0, new SimulationTiming(0)), Array.Empty<string>());
+            using var full = SimulationRuntime<string, string[], string[]>.Restore(state, data => new RecordingSimulation(data));
+            Assert.Throws<OverflowException>(() => full.Submit("next"));
+            Assert.False(full.IsFaulted);
+            Assert.Equal(0, full.PendingCount);
+            var end = new SimulationSnapshot<string[]>(new RuntimeState(long.MaxValue, 0, 0, 0, new SimulationTiming(0)), Array.Empty<string>());
+            using var last = SimulationRuntime<string, string[], string[]>.Restore(end, data => new RecordingSimulation(data));
+            Assert.Throws<OverflowException>(() => last.Advance());
+            Assert.True(last.IsFaulted);
         }
 
-        private sealed class RecordingRules : IGameRules<string, string[]>
+        [Theory]
+        [InlineData("tick")]
+        [InlineData("query")]
+        [InlineData("export")]
+        public void UnexpectedCallbackFailure_FaultsInstance(string phase)
         {
-            private readonly List<string> _values = new List<string>();
-            public int Executions
+            var simulation = new RecordingSimulation();
+            using var runtime = Create(simulation);
+            simulation.Callback = current => { if (current == phase) { throw new InvalidOperationException("injected"); } };
+            if (phase == "export")
             {
-                get; private set;
+                Assert.Throws<InvalidOperationException>(() => runtime.ExportState());
             }
-
-            public CommandResult Execute(string command, DeterministicRandom random)
+            else
             {
-                Executions++;
-                if (command == "throw")
-                {
-                    throw new InvalidOperationException("test failure");
-                }
-                if (command == "consumeThenReject")
-                {
-                    random.NextUInt64();
-                    return CommandResult.Rejected("Invalid");
-                }
-                _values.Add(command == "random" ? random.NextUInt64().ToString() : command);
-                return CommandResult.Accepted();
+                Assert.Throws<InvalidOperationException>(() => runtime.Advance());
             }
-
-            public string[] GetState() => _values.ToArray();
+            Assert.True(runtime.IsFaulted);
         }
+
+        internal static SimulationRuntime<string, string[], string[]> Create(RecordingSimulation? simulation = null, ulong seed = 0) =>
+            SimulationRuntime<string, string[], string[]>.Create(() => simulation ?? new RecordingSimulation(), seed, new SimulationTiming(60));
+    }
+
+    internal sealed class RecordingSimulation : IGameSimulation<string, string[], string[]>
+    {
+        private readonly List<string> _values;
+        internal RecordingSimulation(string[]? values = null)
+        {
+            _values = new List<string>(values ?? Array.Empty<string>());
+        }
+        internal Action<string>? Callback { get; set; }
+        internal int Disposals { get; private set; }
+        public CommandResult Execute(string command, DeterministicRandom random)
+        {
+            Callback?.Invoke("input");
+            if (command == "throw")
+            {
+                throw new InvalidOperationException("injected");
+            }
+            if (command == "null")
+            {
+                return null!;
+            }
+            if (command == "consumeThenReject")
+            {
+                random.NextUInt64();
+                return CommandResult.Rejected("Rejected");
+            }
+            if (command == "reject")
+            {
+                return CommandResult.Rejected("Rejected");
+            }
+            _values.Add(command == "random" ? random.NextUInt64().ToString(System.Globalization.CultureInfo.InvariantCulture) : command);
+            return CommandResult.Accepted(new RecordedEvent(command));
+        }
+        public IReadOnlyList<GameEvent> Advance(StepContext context)
+        {
+            Callback?.Invoke("tick");
+            return Array.Empty<GameEvent>();
+        }
+        public string[] GetState()
+        {
+            Callback?.Invoke("query");
+            return _values.ToArray();
+        }
+        public string[] ExportState()
+        {
+            Callback?.Invoke("export");
+            return _values.ToArray();
+        }
+        public void Dispose()
+        {
+            Disposals++;
+        }
+    }
+    internal sealed class RecordedEvent : GameEvent
+    {
+        internal RecordedEvent(string value)
+        {
+            Value = value;
+        }
+        internal string Value { get; }
     }
 }

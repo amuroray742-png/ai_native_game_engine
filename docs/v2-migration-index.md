@@ -1,0 +1,175 @@
+# v1 行为迁移索引
+
+原基线355个测试用例由下列测试方法及Theory参数产生。v2按行为迁移与合并，数量不作为目标。下表每个历史方法均有对应入口；路径均相对 tests/AiNative.Tests，进程项见 scripts/verify_v2.py。
+
+明确改变的语义：每次Advance处理全部输入并推进一个Tick（包括空输入）；原CompletedStep约束删除。旧默认演示/位置参数入口退役，改显式run。错误优先级改为逐文件完整验证，保持执行前拒绝。v1固定字节/摘要不再兼容，用v2规范化、随机固定向量与独立Tick状态向量验证。
+
+| 历史方法 | v2验证入口 |
+| --- | --- |
+| CanonicalStateTests.CanonicalBytes_MatchIndependentFixedVectors | HostingTests.InvalidUtf8IsRejectedAndCanonicalBytesAreCultureIndependent; CliTests.BuildIdentityHashesActualAssembliesAndOptionalNativeFiles; verify_v2 fixed tick vectors |
+| CanonicalStateTests.CanonicalBytes_IgnoreInputOrderAndCultureButCoverStateAndConfiguration | HostingTests.InvalidUtf8IsRejectedAndCanonicalBytesAreCultureIndependent; CliTests.BuildIdentityHashesActualAssembliesAndOptionalNativeFiles; verify_v2 fixed tick vectors |
+| CanonicalStateTests.CurrentEnvironment_UsesActualAssemblyContentAndRuntime | HostingTests.InvalidUtf8IsRejectedAndCanonicalBytesAreCultureIndependent; CliTests.BuildIdentityHashesActualAssembliesAndOptionalNativeFiles; verify_v2 fixed tick vectors |
+| CliProcessTests.Run_Save_Resume_AndInspect_WorkAcrossProcessesAndWorkingDirectories | verify_v2 fixed/inspect/boundary-*-resume/boundary-*-replay; CliTests.InvalidArgumentsFailBeforeInputReads |
+| CliProcessTests.ReservedAndOptionLikeFileNames_AreExplicitValuesOrLegacyPaths | CliTests.ReservedFileNamesRemainExplicitOptionValues；旧位置参数入口退役 |
+| CliProcessTests.Inspect_ReportsStructuredInputErrorsWithExitTwo | verify_v2 fixed/inspect/boundary-*-resume/boundary-*-replay; CliTests.InvalidArgumentsFailBeforeInputReads |
+| CliProcessTests.RecordedReplay_IsSelfContainedAcrossProcesses_FromNewOrMidGame | verify_v2 fixed/inspect/boundary-*-resume/boundary-*-replay; CliTests.InvalidArgumentsFailBeforeInputReads |
+| CliTests.Run_FixedCommandFile_MatchesAllDocumentedCheckpointsAndResults | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.InvalidArguments_ReturnStructuredFailureBeforeReadingFiles | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.EmptyRun_AndInspect_PreserveSeedAndDoNotExecute | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.Run_RejectsPendingQueueBeforeSimulationOrPublishing | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.Run_OutputPreflightFailure_IsHostFailureWithNoExecutedCheckpoint | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.Run_ValidNegativeEntityId_IsBusinessRejectionAndContinues | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.Inspect_ExpectedConfigurationMismatch_AndRunStructureBeforeEnvironment_AreInputErrors | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.Run_SequenceOrRuleOverflow_HasDistinctFailureAndLastTrustedCheckpoint | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.OutputFailure_DoesNotRollbackPublishedSnapshot_AndBrokenDiagnosticsDoNotEscape | CliTests; HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; verify_v2 fixed/rejections |
+| CliTests.Help_DescribesSupportedScopeWithoutReadingFiles | CliTests.HelpDescribesV2WithoutReadingFilesOrEnvironment |
+| CommandFileTests.InvalidFile_IsRejectedBeforeAnyOperation | HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; ScenarioTests; CliTests.PreflightAndExpectedConfigurationFailWithoutExecution |
+| CommandFileTests.InvalidCommand_LaterInFile_DoesNotExecuteValidPrefix | HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; ScenarioTests; CliTests.PreflightAndExpectedConfigurationFailWithoutExecution |
+| CommandFileTests.Scenario_CompositeOrPaddedSide_IsNotAcceptedByEnumCoercion | HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; ScenarioTests; CliTests.PreflightAndExpectedConfigurationFailWithoutExecution |
+| CommandFileTests.InputPriority_ReadAllThenStructureThenVersionsThenDomain | HostingTests.CommandPrevalidationRejectsInvalidOrUnbalancedSuffix; ScenarioTests; CliTests.PreflightAndExpectedConfigurationFailWithoutExecution；错误优先级按v2契约重新定义 |
+| CoreTests.Submit_ThenAdvance_ExecutesOneCommandInFifoOrder | CoreTests |
+| CoreTests.Advance_WhenRulesBreakContract_FaultsAndStopsSession | CoreTests |
+| CoreTests.Random_SeedZero_MatchesPublishedSplitMix64Sequence | CoreTests |
+| CoreTests.Sessions_WithSameSeed_HaveIndependentRandomStates | CoreTests |
+| CoreTests.Submit_Null_DoesNotEnqueueOrFault | CoreTests |
+| GameplayTests.Move_WhenValid_ChangesOnlyPositionAndActionPoints | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Move_InEachDirection_AdvancesOneGridCell | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Move_OutsideEachMapEdge_LeavesStateUnchanged | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Move_WithInvalidDirection_LeavesStateUnchanged | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Move_IntoObstacleOrUnit_LeavesStateUnchanged | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.QueuedMoves_UsePositionAtExecutionTime | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Commands_WhenSideOrEntityInvalid_LeaveStateUnchanged | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.ActionPoints_WhenExhausted_RequireExplicitEndTurn | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.QueuedCommands_AreValidatedAgainstExecutionTimeState | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Attack_WhenInvalid_LeavesStateUnchanged | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Attack_WhenLethal_ClampsHealthAndRejectsRemainingQueue | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GameplayTests.Create_CopiesCollectionsAndViewsCannotMutateState | GameplayTests（原同名规则断言，批输入改用同 Tick 的 Inputs） |
+| GridGameStateTests.Restore_AtEveryDemoBoundary_MatchesContinuousExecution | GridGameStateTests（原同名状态/恢复断言） |
+| GridGameStateTests.Restore_PreservesNonDefaultConfigurationAndIndependentInstances | GridGameStateTests（原同名状态/恢复断言） |
+| GridGameStateTests.State_CopiesInputCollectionsAndExposesOnlyReadOnlyCollections | GridGameStateTests（原同名状态/恢复断言） |
+| GridGameStateTests.Restore_InvalidState_IsRejectedWithoutChangingExistingSession | GridGameStateTests（原同名状态/恢复断言） |
+| GridGameStateTests.Restore_BWinnerAndLargeTurn_ArePreserved | GridGameStateTests（原同名状态/恢复断言） |
+| GridGameStateTests.State_NullInputs_AreRejectedBeforeCopying | GridGameStateTests（原同名状态/恢复断言） |
+| HostBoundaryTests.InvalidSide_IsRejectedBySharedLegacyAndBatchReaders | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.LowercaseScenario_IsAcceptedAndCanonicalizedByAllReaders | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.Runtime_StepAndSnapshotStayIsolatedFromFurtherPlay | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.Runtime_InvalidRestoreCannotReplaceOrChangeExistingGame | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.PortableRecord_MatchesIndependentCliRunAcrossDifferentSourceLabels | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.Compare_ValidEventDeviationReportsFirstDifferenceWithoutRestoringEnvironment | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.Compare_DifferentExperimentInputsAreNotReportedAsRuleDivergences | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.Compare_DamagedCheckpointIsRejectedBeforeComparison | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.CompareCli_ReportsEvidenceComparisonWithoutClaimingExecution | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.CompareCli_InvalidArgumentsFailBeforeReadingFiles | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostBoundaryTests.PortableLibraries_HaveNoHostOrUnityAssemblyDependency | HostingTests; PresentationTests; verify_v2 compare-* / grid-without-native |
+| HostTests.Demo_CompletesWithExpectedEventsAndOutcome | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-* |
+| HostTests.Demo_WhenRepeated_ProducesIdenticalStatesAndEvents | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-* |
+| HostTests.Run_DefaultAndExplicitPath_Succeed | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-*；旧默认/位置参数已退役，明确选项值仍支持 |
+| HostTests.Run_InvalidInput_ReturnsConfigurationFailure | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-* |
+| HostTests.Run_UnexpectedOutcomeOrRejectedCommand_ReturnsFailure | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-* |
+| HostTests.Run_WhenOutputFails_ReturnsExecutionFailure | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-* |
+| HostTests.Executable_FromAnotherWorkingDirectory_ReturnsSuccess | CliTests.FixedRunReportsDocumentedOutcomeAndPreservesPublishedArtifactsOnStdoutFailure; verify_v2 legacy-demo-explicit/fixed/repeat-* |
+| PresentationTests.FastOrDelayedPlayback_UsesEachStepsOwnStateAndDoesNotDriveSimulation | PresentationTests（顺序策略同类行为，并新增实时策略） |
+| PresentationTests.ResetDuringAnimation_InvalidatesOldCallbacksAndForeignSteps | PresentationTests（顺序策略同类行为，并新增实时策略） |
+| PresentationTests.Queue_RejectsMissingDuplicateStepsAndPendingSimulationScreenshot | PresentationTests（顺序策略同类行为，并新增实时策略） |
+| ReplayBoundaryTests.EmptyRecording_PreservesRandomExtreme_AndComparesOnlyInitialPoint | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.CheckpointFieldPriority_PrecedesStateHash | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile；错误优先级按v2契约重新定义 |
+| ReplayBoundaryTests.SubmitStateContinuity_PrecedesResultKind | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile；错误优先级按v2契约重新定义 |
+| ReplayBoundaryTests.UnbalancedButInternallyConsistentReplay_UsesNestedCommandPath | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.CompatibilityAndContentErrors_HaveDistinctCodes | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.AllStructuresPrecedeVersions_AndEnvironmentPrecedesCheckpointSemantics | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile；错误优先级按v2契约重新定义 |
+| ReplayBoundaryTests.ExpectedConfiguration_IsReadAndValidatedWithoutReplacingEmbeddedConfiguration | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.OutputConflictOrExistingReplay_IsRejectedBeforeExecution | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.ReplayPublishFailure_PreservesEarlierSnapshotAndReportsOnlyPublishedArtifact | CliTests.SecondPublishFailureReportsOnlyTheAlreadyPublishedSnapshot |
+| ReplayBoundaryTests.StdoutFailure_DoesNotRollbackSnapshotOrReplay | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.ValidReplayWhoseRuleFaults_ReportsSimulationFailureWithoutCountingFaultyStep | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.InvalidReplayEnvelope_IsClassifiedBeforeExecution | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayBoundaryTests.DifferenceIncludesSessionCounters_EvenWhenStateHashMatches | HostingTests.EmptyRecordAndSnapshotPreserveAllRandomBits/CorruptReplayFailsPrevalidation; CliTests.FaultPreservesOnlyTrustedPrefixAndWritesDiagnostic/PreflightAndExpectedConfigurationFailWithoutExecution/AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile |
+| ReplayTests.Recording_MatchesFixedReplay_AndVerificationReportsActualCheckpoints | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ReplayTests.EventDeviation_MatchesFixedDivergenceResponse_AndStopsAtFirstMismatch | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ReplayTests.ChangedCommand_KeepsExistingExpectations_AndReportsStateAndEventDifferences | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ReplayTests.ValidButIncorrectExpectations_AreDivergences | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ReplayTests.DamagedRecord_IsRejectedBeforeAnyExecution | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ReplayTests.PermutedUnits_StillMatchSemanticState | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ReplayTests.ReplayArguments_AreStrict | HostingTests.ReplayStopsAtFirstValidEventDivergenceAndKeepsActualPrefix/CorruptReplayFailsPrevalidation/ConfigAndStateNormalizationPreservesPermutedEntitySemantics; verify_v2 event-divergence/command-divergence |
+| ScenarioTests.Create_WhenDomainConfigurationInvalid_ReportsReason | ScenarioTests（原同名配置/集合断言） |
+| ScenarioTests.Load_WhenRootInvalid_ReportsJsonError | ScenarioTests（原同名配置/集合断言） |
+| ScenarioTests.Load_WhenStructureInvalid_RejectsWithoutDefaults | ScenarioTests（原同名配置/集合断言） |
+| ScenarioTests.Create_RejectsInvalidCollectionsAndSides | ScenarioTests（原同名配置/集合断言） |
+| SessionStateTests.Counters_TrackSubmissionCompletionRejectionAndEmptyAdvance | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.Restore_AfterRandomConsumption_ContinuesWithoutReseeding | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.Restore_AllRandomStateBitsArePreserved | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.State_InvalidCounters_AreRejected | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.State_UnsupportedAlgorithm_IsRejected | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.Restore_NullArguments_AreRejected | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.Submit_AtSequenceLimit_LeavesHealthyStateAndQueueUnchanged | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.Advance_WhenFaulted_DoesNotCompleteStepOrAllowExport | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SessionStateTests.ReentrantCalls_AreRejectedWithoutExecutingNestedOperations | CoreTests; HostingTests.InvalidSnapshotRuntimeIsRejected |
+| SnapshotCodecTests.Decode_FixedSnapshots_PreserveStateAndRoundTrip | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_InvalidIdentityOrState_ReportsStableCodeAndPreservesOldSession | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_InvalidFieldRepresentation_RejectsWithoutCoercion | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_InvalidJsonStructure_IsRejected | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_MissingWinner_IsRejected | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_UnpairedUnicodeEscape_IsReportedAsJsonFailure | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_InvalidUtf8_IsReportedAsJsonFailure | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotCodecTests.Decode_ErrorPriorityAndExpectedConfiguration_AreExplicit | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits；错误优先级按v2契约重新定义 |
+| SnapshotCodecTests.Decode_LargeIntegersAndReorderedInput_RemainExact | HostingTests.InvalidSnapshotEnvelopeFailsBeforeRestoration/InvalidSnapshotRuntimeIsRejected/EveryRequiredSnapshotFieldIsValidatedBeforeRestore/JsonParserRejectsAmbiguousOrInvalidDocuments/WideIntegersRequireCanonicalDecimalStrings/EmptyRecordAndSnapshotPreserveAllRandomBits |
+| SnapshotFileTests.SaveLoad_EveryDemoBoundary_ContinuesWithMatchingResults | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Save_NonemptyOrFaultedSession_DoesNotPublishOrChangeQueue | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Load_FixtureEnvironmentMismatchAndMissingFile_AreDistinct | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Publish_ExistingTarget_IsPreservedAndWriterIsNotCalled | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Publish_PartialWriteFailure_LeavesNoDestinationOrTemporaryFile | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Publish_TargetCreatedDuringWrite_IsNotOverwritten | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Publish_MissingParent_IsReportedWithoutCreatingDirectories | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+| SnapshotFileTests.Save_OutputFailure_LeavesSimulationUnchanged | CliTests.AtomicPublisherNeverOverwritesAndCleansItsTemporaryFile/PreflightAndExpectedConfigurationFailWithoutExecution; verify_v2 boundary-*; PhysicsTests.RejectedInputDoesNotPreventLaterInputsOrPhysics |
+
+## 历史45次CLI对应关系
+
+每行映射一个原进程用例；v2另外增加空Tick边界、发现命令、物理例子、无原生依赖和错误原生版本。
+
+| 原用例 | v2 process-index 名称 |
+| --- | --- |
+| legacy-default-demo | legacy-demo-explicit |
+| fixed | fixed |
+| repeat-1 | repeat-1 |
+| repeat-2 | repeat-2 |
+| repeat-3 | repeat-3 |
+| repeat-4 | repeat-4 |
+| repeat-5 | repeat-5 |
+| repeat-6 | repeat-6 |
+| repeat-7 | repeat-7 |
+| repeat-8 | repeat-8 |
+| repeat-9 | repeat-9 |
+| matched-replay | matched-replay |
+| inspect | inspect |
+| continuous | continuous |
+| boundary-0-save | boundary-0-save |
+| boundary-0-resume | boundary-0-resume |
+| boundary-0-replay | boundary-0-replay |
+| boundary-1-save | boundary-1-save |
+| boundary-1-resume | boundary-1-resume |
+| boundary-1-replay | boundary-1-replay |
+| boundary-2-save | boundary-2-save |
+| boundary-2-resume | boundary-2-resume |
+| boundary-2-replay | boundary-2-replay |
+| boundary-3-save | boundary-3-save |
+| boundary-3-resume | boundary-3-resume |
+| boundary-3-replay | boundary-3-replay |
+| boundary-4-save | boundary-4-save |
+| boundary-4-resume | boundary-4-resume |
+| boundary-4-replay | boundary-4-replay |
+| boundary-5-save | boundary-5-save |
+| boundary-5-resume | boundary-5-resume |
+| boundary-5-replay | boundary-5-replay |
+| boundary-6-save | boundary-6-save |
+| boundary-6-resume | boundary-6-resume |
+| boundary-6-replay | boundary-6-replay |
+| rejections | rejections |
+| rejections-replay | rejections-replay |
+| event-divergence | event-divergence |
+| command-divergence | command-divergence |
+| damaged | damaged |
+| compare-other-source | compare-other-source |
+| replay-other-source | replay-other-source |
+| compare-events | compare-events |
+| compare-inputs | compare-inputs |
+| compare-damaged | compare-damaged |

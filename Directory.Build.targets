@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <NativeBridgeRid Condition="$([MSBuild]::IsOSPlatform('Windows'))">win-x64</NativeBridgeRid>
+    <NativeBridgeRid Condition="$([MSBuild]::IsOSPlatform('Linux'))">linux-x64</NativeBridgeRid>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(CopyNativeBridge)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)artifacts/native/$(NativeBridgeRid)/*" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

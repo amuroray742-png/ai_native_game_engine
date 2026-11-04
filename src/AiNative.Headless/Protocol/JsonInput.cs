@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using AiNative.GridGame.Hosting;
+using AiNative.Hosting;
 
 namespace AiNative.Headless
 {

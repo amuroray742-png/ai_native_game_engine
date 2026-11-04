@@ -1,0 +1,57 @@
+{
+  "formatVersion": 2,
+  "gameId": "physics-sandbox",
+  "gameVersion": 1,
+  "configuration": {
+    "bodies": [
+      {
+        "id": "1",
+        "shape": "Box",
+        "dynamic": false,
+        "size": [
+          10,
+          0.5,
+          10
+        ],
+        "position": [
+          0,
+          -0.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "mass": 1,
+        "friction": 0.5,
+        "restitution": 0
+      },
+      {
+        "id": "2",
+        "shape": "Sphere",
+        "dynamic": true,
+        "size": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "position": [
+          0,
+          3,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "mass": 1,
+        "friction": 0.5,
+        "restitution": 0
+      }
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 # 第二阶段整体验收入口与证据索引
 
+> 历史记录：本文保留当时的设计与验证证据；当前运行入口及契约已迁移到 [v2](framework-v2.md)，本文旧命令不作为当前验收入口。
 P2-T6 的实现、本地及远端验收记录见[阶段计划](phase-2-reproducibility-plan.md)。本入口不改变[协议 v1](contracts/phase-2/contract.md)，不承诺跨运行时或跨平台读取同一快照。第二阶段 P2-T6 当时没有修改生产 Core/GridGame/Headless；Python 脚本仅用于验证，使用标准库。后续宿主边界修复及其新增依赖、测试见[交付记录](host-boundary-and-presentation.md)。
 
 ## 重复执行
@@ -36,17 +37,17 @@ python scripts/verify_phase2.py --output TestResults/phase-2
 
 | 验收项 | 固定检查入口与断言 | 可查看的证据 |
 | --- | --- | --- |
-| V1 全部保存边界 | [SnapshotFileTests](../tests/AiNative.Tests/SnapshotFileTests.cs) 的 SaveLoad_EveryDemoBoundary；脚本直接对照 continuous 的对应边界、前缀及后续每个检查点 | TRX；continuous、boundary-0–6 的 save/resume/replay 输出和快照 |
-| V2 随机连续性 | [SessionStateTests](../tests/AiNative.Tests/SessionStateTests.cs) 的 Restore_AfterRandomConsumption：0/UInt64.MaxValue 种子，消费三次后恢复、继续五次并验证实例隔离；[CoreTests](../tests/AiNative.Tests/CoreTests.cs) 固定向量 | TRX。GridGame 固定伤害不消费随机，不把 CLI 的 seed 保持当成随机消费证据 |
+| V1 全部保存边界 | [SnapshotFileTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/SnapshotFileTests.cs) 的 SaveLoad_EveryDemoBoundary；脚本直接对照 continuous 的对应边界、前缀及后续每个检查点 | TRX；continuous、boundary-0–6 的 save/resume/replay 输出和快照 |
+| V2 随机连续性 | [SessionStateTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/SessionStateTests.cs) 的 Restore_AfterRandomConsumption：0/UInt64.MaxValue 种子，消费三次后恢复、继续五次并验证实例隔离；[CoreTests](../tests/AiNative.Tests/CoreTests.cs) 固定向量 | TRX。GridGame 固定伤害不消费随机，不把 CLI 的 seed 保持当成随机消费证据 |
 | V3 可保存边界/拒绝 | SnapshotFileTests 全部边界及 Save_NonemptyOrFaultedSession；[CliTests](../tests/AiNative.Tests/CliTests.cs) 的队列/故障不发布断言 | TRX；boundary-0/2/6 对应新局/AP耗尽/已结束 |
-| V4 非法恢复不污染旧实例 | [GridGameStateTests](../tests/AiNative.Tests/GridGameStateTests.cs) 的 Restore_InvalidState；[SnapshotCodecTests](../tests/AiNative.Tests/SnapshotCodecTests.cs) 的 Decode_InvalidIdentityOrState | TRX：状态、随机数、下一提交序号保持 |
-| V5 版本/身份/环境 | SnapshotCodecTests、[ReplayBoundaryTests](../tests/AiNative.Tests/ReplayBoundaryTests.cs) 的 CompatibilityAndContentErrors、ExpectedConfiguration | TRX：准确 InputError 代码，无初始执行检查点 |
-| V6 规范化与覆盖范围 | [CanonicalStateTests](../tests/AiNative.Tests/CanonicalStateTests.cs) 固定字节/hash、排列/文化无关；SnapshotCodecTests 重排；[ReplayTests](../tests/AiNative.Tests/ReplayTests.cs) 的有效状态/随机变体 | TRX；[固定向量](contracts/phase-2/examples/hash-vectors.json) |
+| V4 非法恢复不污染旧实例 | [GridGameStateTests](../tests/AiNative.Tests/GridGameStateTests.cs) 的 Restore_InvalidState；[SnapshotCodecTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/SnapshotCodecTests.cs) 的 Decode_InvalidIdentityOrState | TRX：状态、随机数、下一提交序号保持 |
+| V5 版本/身份/环境 | SnapshotCodecTests、[ReplayBoundaryTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/ReplayBoundaryTests.cs) 的 CompatibilityAndContentErrors、ExpectedConfiguration | TRX：准确 InputError 代码，无初始执行检查点 |
+| V6 规范化与覆盖范围 | [CanonicalStateTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/CanonicalStateTests.cs) 固定字节/hash、排列/文化无关；SnapshotCodecTests 重排；[ReplayTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/ReplayTests.cs) 的有效状态/随机变体 | TRX；[固定向量](contracts/phase-2/examples/hash-vectors.json) |
 | V7 队列、空推进和业务拒绝 | SessionStateTests 调度计数；CliTests 固定结果；脚本六命令入队及三种拒绝 | rejections/rejections-replay 输出、固定输入与录制文件 |
 | V8 只读与隔离 | GridGameStateTests 的 State_CopiesInputCollectionsAndExposesOnlyReadOnlyCollections；[GameplayTests](../tests/AiNative.Tests/GameplayTests.cs) 历史视图；SessionStateTests 导出/恢复 | TRX；不通过宿主修改权威状态 |
-| V9 重复与进程连续性 | CliTests 重复10次；[CliProcessTests](../tests/AiNative.Tests/CliProcessTests.cs) 删除原输入后新进程恢复/回放；脚本每个保存边界及10次固定运行 | fixed/repeat-1–9、boundary-* 输出及录制文件 |
+| V9 重复与进程连续性 | CliTests 重复10次；[CliProcessTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/CliProcessTests.cs) 删除原输入后新进程恢复/回放；脚本每个保存边界及10次固定运行 | fixed/repeat-1–9、boundary-* 输出及录制文件 |
 | V10 首个分歧/损坏区分 | ReplayTests 固定差异响应、命令/状态/事件变化及损坏变体；脚本分歧定位为 operationIndex=5、sequence=2、已匹配6点 | event-divergence、command-divergence、damaged 输出及输入回放 |
-| V11 严格输入与宿主故障 | SnapshotCodecTests、SnapshotFileTests、[CommandFileTests](../tests/AiNative.Tests/CommandFileTests.cs)、CliTests、ReplayBoundaryTests | TRX：数值边界、字段/编码、部分发布、竞争目标、stdout/stderr 故障 |
+| V11 严格输入与宿主故障 | SnapshotCodecTests、SnapshotFileTests、[CommandFileTests](https://github.com/rayss1/ai_native_game_engine/blob/f28b20470828446eb7e1190951a15951944a8f54/tests/AiNative.Tests/CommandFileTests.cs)、CliTests、ReplayBoundaryTests | TRX：数值边界、字段/编码、部分发布、竞争目标、stdout/stderr 故障 |
 | V12 原行为及持续验证 | 完整测试、只读 format、原演示；[CI 工作流](../.github/workflows/build.yml) 调用同一脚本并保留 TRX/产物 | 本地 TRX 与 legacy 输出；已通过的基线及 P2-T6 CI、制品核验见下节 |
 
 ## CI 证据边界
