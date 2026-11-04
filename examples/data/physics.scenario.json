@@ -1,7 +1,7 @@
 {
   "formatVersion": 2,
   "gameId": "physics-sandbox",
-  "gameVersion": 1,
+  "gameVersion": 2,
   "configuration": {
     "bodies": [
       {
@@ -52,6 +52,7 @@
         "friction": 0.5,
         "restitution": 0
       }
-    ]
+    ],
+    "workerThreads": 2
   }
 }

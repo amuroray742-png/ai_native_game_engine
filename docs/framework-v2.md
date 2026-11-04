@@ -29,15 +29,15 @@ ExportState/StateCodec.Encode 只在健康、无待处理输入时成功。物�
 
 ## Jolt 最小范围
 
-固定 Jolt 5.6.0，提交 e77f175595e64cb44218cc9d9d56fc365ad0e36a。C ABI 2，单精度、单线程、每 Tick 一次更新。支持球体/盒体、静态/动态刚体、创建/删除、冲量、位姿/线速度/角速度/休眠查询、接触开始/结束。size 是盒体半尺寸，球体使用 size.x 作为半径。上限1024刚体、4096刚体对/接触约束；容量不足明确失败。没有角色控制器、车辆、关节、软体、CCD 或 GPU 物理。
+固定 Jolt 5.6.0，提交 e77f175595e64cb44218cc9d9d56fc365ad0e36a。项目 C ABI 3，单精度、每 Tick 一次更新。基础接口迁移至 joltc 提交 `2bbcf73b1bec261e0351814662922f1b4784454c`，专用扩展与验收见 [joltc 迁移](joltc-migration.md)。`IPhysicsWorldFactory.Create(int workerThreads = 0)` 显式指定 0..16 个工作线程，0 在调用线程执行；PhysicsSandbox 场景必填 `workerThreads`，示例取2。单个世界仍要求宿主串行调用；独立世界可并发推进，每世界拥有临时内存与任务系统。支持球体/盒体、静态/动态刚体、创建/删除、冲量、位姿/线速度/角速度/休眠查询、接触开始/结束。size 是盒体半尺寸，球体使用 size.x 作为半径。上限1024刚体、4096刚体对/接触约束；容量不足明确失败。没有角色控制器、车辆、关节、软体、CCD 或 GPU 物理。
 
 CMake 关闭示例、测试、调试渲染、profiler、GPU/CPU compute 扩展、LTO、double；启用受控浮点和异常边界。所有有效 BOOL、编译/链接 flags、编译器识别、实际 compile_commands、源提交、恢复补丁与二进制摘要进入原生构建材料。Runner 注册延迟的绝对路径 DllImport resolver，实际加载与哈希均来自 AppContext.BaseDirectory；仅注册不加载原生库。其他宿主必须保证同样的身份与加载位置一致性。运行身份包含 native-build.json 与实际原生库内容摘要；Windows/Linux 的构建身份分别记录。
 
-原生世界拥有刚体、临时分配器、任务系统与接触缓存；全局 Jolt 类型初始化受世界引用计数保护。原生回调只收集事件，异常延迟到 Update 返回后报告，不穿过 Jolt 更新锁执行 C#。更新后按稳定实体ID、子形状ID和事件类型归并排序。已删除 BodyID 映射保留到接触消费，分配时避开未消费ID，防8位generation绕回串实体。
+原生世界拥有刚体、临时分配器、任务系统与接触缓存；并行碰撞回调通过互斥锁收集，更新完成后才读取；全局 Jolt 类型初始化受世界引用计数保护。原生回调只收集事件，异常延迟到 Update 返回后报告，不穿过 Jolt 更新锁执行 C#。更新后按稳定实体ID、子形状ID和事件类型归并排序。已删除 BodyID 映射保留到接触消费，分配时避开未消费ID，防8位generation绕回串实体。
 
-物理恢复 blob 保存对象定义/材质/质量、ID分配generation、实体与BodyID映射，以及 Jolt 的全局、刚体、休眠与接触缓存。先重建对象再恢复内部状态。固定版本的结构预读验证 All 标志、有限数、活体引用、重复ID、数量、合法接触/子形状、禁止CCD/约束、完整EOF。仅恢复位姿速度不符合此契约。
+物理恢复 blob 保存格式标识、固定 workerThreads、对象定义/材质/质量、ID分配generation、实体与BodyID映射，以及 Jolt 的全局、刚体、休眠与接触缓存。`state.physics.workerThreads`、blob 内线程数和场景配置必须一致，均进入状态或配置摘要；同构建同环境复现以同线程配置为边界。先重建对象再恢复内部状态。固定版本的结构预读验证 All 标志、有限数、活体引用、重复ID、数量、合法接触/子形状、禁止CCD/约束、完整EOF。仅恢复位姿速度不符合此契约。
 
-Jolt 原始 BodyManager::RestoreState 使用手动锁，不保证读取异常时解锁。构建脚本在 build 目录生成单一翻译单元副本，将该作用域改为 RAII 解锁；原始源码 checkout 保持精确固定提交和 clean。补丁脚本与生成源摘要进入构建身份。升级 Jolt 必须重新审查结构布局与补丁，不能只改版本字符串。
+Jolt 原始 BodyManager::RestoreState 使用手动锁，不保证读取异常时解锁。构建脚本在 build 目录生成单一翻译单元副本，将该作用域改为 RAII 解锁；原始源码 checkout 保持精确固定提交和 clean。补丁脚本与生成源摘要进入构建身份。同时对线程池启动失败增加停止和回收补丁，并用独立子进程故障注入验证。MSVC 对 joltc 与项目边界使用 `/EHs /EHc-`，避免假设所有 C 接口均不抛异常而省略清理。升级 Jolt/joltc 必须重新审查结构布局与补丁，不能只改版本字符串。
 
 ## v2 文件协议
 
@@ -49,7 +49,7 @@ Jolt 原始 BodyManager::RestoreState 使用手动锁，不保证读取异常时
 {"formatVersion":2,"gameId":"grid-game","gameVersion":1,"configuration":{"width":5,"height":5,"obstacles":[],"units":[{"id":1,"side":"A","position":{"x":0,"y":0},"health":4},{"id":2,"side":"B","position":{"x":2,"y":0},"health":4}],"actionPointsPerTurn":2,"attackDamage":2}}
 ```
 
-具体配置与操作以[GridGame](../examples/data/grid.scenario.json)、[PhysicsSandbox](../examples/data/physics.scenario.json)为可执行材料，games/describe 提供模块与能力描述。协议版本2与游戏版本1是两个不同维度。
+具体配置与操作以[GridGame](../examples/data/grid.scenario.json)、[PhysicsSandbox](../examples/data/physics.scenario.json)为可执行材料，games/describe 提供模块与能力描述。协议版本与游戏版本是两个不同维度：外层保持2，GridGame为1，PhysicsSandbox因新增必填线程配置和快照ABI升为2。旧物理记录明确拒绝，按新场景重新生成。
 
 命令文件：
 

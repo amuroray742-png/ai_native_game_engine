@@ -90,8 +90,13 @@ namespace AiNative.Physics
     public sealed class PhysicsSnapshot
     {
         private readonly byte[] _data;
-        public PhysicsSnapshot(string backend, byte[] data)
+        public PhysicsSnapshot(string backend, byte[] data, int workerThreads = 0)
         {
+            if (workerThreads < 0 || workerThreads > 16)
+            {
+                throw new ArgumentOutOfRangeException(nameof(workerThreads));
+            }
+            WorkerThreads = workerThreads;
             Backend = backend ?? throw new ArgumentNullException(nameof(backend));
             _data = (byte[])(data ?? throw new ArgumentNullException(nameof(data))).Clone();
             if (_data.Length == 0 || _data.Length >= 64 * 1024 * 1024)
@@ -99,6 +104,7 @@ namespace AiNative.Physics
                 throw new ArgumentException("无效物理状态长度。");
             }
         }
+        public int WorkerThreads { get; }
         public string Backend { get; }
         public byte[] GetData() => (byte[])_data.Clone();
     }
@@ -117,7 +123,7 @@ namespace AiNative.Physics
     {
         string Backend { get; }
         void ValidateSnapshot(PhysicsSnapshot snapshot, IReadOnlyList<BodyState>? expectedBodies = null);
-        IPhysicsWorld Create();
+        IPhysicsWorld Create(int workerThreads = 0);
         IPhysicsWorld Restore(PhysicsSnapshot snapshot);
     }
 }

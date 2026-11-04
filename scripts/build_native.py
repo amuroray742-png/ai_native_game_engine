@@ -10,6 +10,7 @@ import subprocess
 import importlib.util
 
 ROOT = Path(__file__).resolve().parents[1]
+JOLTC_COMMIT = "2bbcf73b1bec261e0351814662922f1b4784454c"
 JOLT_COMMIT = "e77f175595e64cb44218cc9d9d56fc365ad0e36a"
 
 
@@ -20,6 +21,7 @@ def run(args, **kwargs):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--jolt-source", type=Path, default=ROOT / "TestResults/native-deps/JoltPhysics")
+    parser.add_argument("--joltc-source", type=Path, default=ROOT / "TestResults/native-deps/joltc")
     args = parser.parse_args()
     if platform.machine().lower() not in ("amd64", "x86_64"):
         raise RuntimeError("This bridge build currently supports x64 only")
@@ -37,6 +39,15 @@ def main():
         raise RuntimeError("Jolt source must match the pinned commit")
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"], text=True).strip():
         raise RuntimeError("Jolt source has local changes")
+    joltc = args.joltc_source.resolve()
+    if not joltc.exists():
+        joltc.parent.mkdir(parents=True, exist_ok=True)
+        run(["git", "clone", "https://github.com/amerkoleci/joltc.git", joltc])
+        run(["git", "-C", joltc, "checkout", "--detach", JOLTC_COMMIT])
+    if subprocess.check_output(["git", "-C", str(joltc), "rev-parse", "HEAD"], text=True).strip() != JOLTC_COMMIT:
+        raise RuntimeError("joltc source must match the pinned commit")
+    if subprocess.check_output(["git", "-C", str(joltc), "status", "--porcelain"], text=True).strip():
+        raise RuntimeError("joltc source has local changes")
     environment = os.environ.copy()
     cmake = shutil.which("cmake")
     ninja = shutil.which("ninja")
@@ -67,10 +78,21 @@ def main():
     spec.loader.exec_module(patch)
     patched_body_manager = build / "patched/BodyManager.cpp"
     patched_hash = patch.prepare(source, patched_body_manager)
+    patched_thread_pool = build / "patched/JobSystemThreadPool.cpp"
+    thread_patch_hash = patch.prepare_thread_pool(source, patched_thread_pool)
+    patched_joltc = build / "patched/joltc.cpp"
+    patched_joltc.write_text((joltc / "src/joltc.cpp").read_text(encoding="utf-8") +
+                            '\n#include "joltc_extensions.inl"\n', encoding="utf-8", newline="\n")
     run([cmake, "-S", ROOT / "native/jolt", "-B", build, "-G", "Ninja",
-         f"-DCMAKE_MAKE_PROGRAM={ninja}", "-DCMAKE_BUILD_TYPE=Release", f"-DJOLT_SOURCE_DIR={source}",
-         f"-DJOLT_BODY_MANAGER={patched_body_manager}", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"], env=environment)
-    run([cmake, "--build", build, "--target", "ainative_jolt", "--parallel", "8"], env=environment)
+         f"-DCMAKE_MAKE_PROGRAM={ninja}", "-DCMAKE_BUILD_TYPE=Release", f"-DJOLT_SOURCE_DIR={source.as_posix()}",
+         f"-DJOLT_BODY_MANAGER={patched_body_manager.as_posix()}", f"-DJOLTC_SOURCE_DIR={joltc.as_posix()}",
+         f"-DJOLTC_EXTENDED_SOURCE={patched_joltc.as_posix()}", f"-DJOLT_THREAD_POOL={patched_thread_pool.as_posix()}", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"], env=environment)
+    run([cmake, "--build", build, "--target", "ainative_jolt", "thread_start_probe", "--parallel", "8"], env=environment)
+    probe_name = "thread_start_probe.exe" if system == "Windows" else "thread_start_probe"
+    probe = subprocess.run([str(build / probe_name)], capture_output=True, timeout=30)
+    (destination / "thread-start-probe.json").write_bytes(probe.stdout)
+    (destination / "thread-start-probe.stderr.txt").write_bytes(probe.stderr)
+    probe.check_returncode()
     name = "ainative_jolt.dll" if system == "Windows" else "libainative_jolt.so"
     shutil.copy2(build / name, destination / name)
     cache = (build / "CMakeCache.txt").read_text(encoding="utf-8")
@@ -80,14 +102,18 @@ def main():
     shutil.copy2(compile_commands, destination / "compile_commands.json")
     compiler_files = sorted((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
     compiler = compiler_files[-1].read_text(encoding="utf-8")
-    manifest = {"joltCommit": commit, "rid": rid, "abi": 2, "settings": settings,
+    manifest = {"joltCommit": commit, "rid": rid, "abi": 3, "joltcCommit": JOLTC_COMMIT, "workerThreads": {"min": 0, "max": 16},
+                "joltcExtensionHash": hashlib.sha256((ROOT / "native/jolt/joltc_extensions.inl").read_bytes()).hexdigest(),
+                "joltcExtensionHeaderHash": hashlib.sha256((ROOT / "native/jolt/joltc_extensions.h").read_bytes()).hexdigest(),
+                "extendedJoltcHash": hashlib.sha256(patched_joltc.read_bytes()).hexdigest(), "settings": settings,
                 "restorePatchHash": hashlib.sha256(patch_path.read_bytes()).hexdigest(),
-                "patchedBodyManagerHash": patched_hash,
+                "patchedBodyManagerHash": patched_hash, "patchedThreadPoolHash": thread_patch_hash,
                 "compilerIdentification": compiler,
                 "compileCommandsHash": hashlib.sha256(compile_commands.read_bytes()).hexdigest(),
                 "binaryHash": hashlib.sha256((destination / name).read_bytes()).hexdigest()}
     (destination / "native-build.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     shutil.copy2(source / "LICENSE", destination / "Jolt-LICENSE.txt")
+    shutil.copy2(joltc / "LICENSE", destination / "joltc-LICENSE.txt")
     print(f"Native bridge ready: {destination / name}")
 
 
