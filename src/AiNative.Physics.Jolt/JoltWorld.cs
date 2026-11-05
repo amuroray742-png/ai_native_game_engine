@@ -1,129 +1,36 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace AiNative.Physics.Jolt
 {
-    public sealed class JoltWorldFactory : IPhysicsWorldFactory
-    {
-        public const string Identity = "jolt-5.6.0;e77f175;joltc=2bbcf73;abi=3;float32;workers=0..16;deterministic;sse4;capacity=1024";
-        public string Backend => Identity;
-        /// <summary>进程累计的工作线程碰撞回调数，仅用于诊断，不进入模拟状态。</summary>
-        public static ulong WorkerContactCount => JoltNative.aj_worker_contact_count();
-        public static uint ActiveWorldCount => JoltNative.aj_world_count();
-
-        private static void CheckVersion()
-        {
-            string? actual = Marshal.PtrToStringAnsi(JoltNative.aj_version());
-            if (actual != Identity)
-            {
-                throw new BadImageFormatException("NativeLibraryVersionMismatch: expected " + Identity + "; actual " + actual);
-            }
-        }
-
-        public IPhysicsWorld Create(int workerThreads = 0)
-        {
-            if (workerThreads < 0 || workerThreads > 16)
-            {
-                throw new ArgumentOutOfRangeException(nameof(workerThreads));
-            }
-            CheckVersion();
-            JoltNative.Check(JoltNative.aj_create(workerThreads, out WorldHandle handle));
-            return new JoltWorld(handle, workerThreads);
-        }
-
-        public IPhysicsWorld Restore(PhysicsSnapshot snapshot)
-        {
-            ValidateSnapshot(snapshot);
-            CheckVersion();
-            byte[] data = snapshot.GetData();
-            JoltNative.Check(JoltNative.aj_restore(data, data.Length, out WorldHandle handle));
-            return new JoltWorld(handle, snapshot.WorkerThreads);
-        }
-
-        /// <summary>只检查自包含元数据，不加载原生库；完整内部状态由候选世界恢复验证。</summary>
-        public void ValidateSnapshot(PhysicsSnapshot snapshot, IReadOnlyList<BodyState>? expectedBodies = null)
-        {
-            if (snapshot == null)
-            {
-                throw new ArgumentNullException(nameof(snapshot));
-            }
-            if (snapshot.Backend != Identity)
-            {
-                throw new ArgumentException("物理快照后端不匹配。");
-            }
-            byte[] bytes = snapshot.GetData();
-            try
-            {
-                using var reader = new BinaryReader(new MemoryStream(bytes, false));
-                if (reader.ReadUInt32() != 0x334a4e41)
-                {
-                    throw new ArgumentException("物理格式不匹配。");
-                }
-                if (reader.ReadUInt32() != snapshot.WorkerThreads)
-                {
-                    throw new ArgumentException("Physics worker count mismatch.");
-                }
-                byte[] generations = reader.ReadBytes(1024);
-                uint count = reader.ReadUInt32();
-                if (generations.Length != 1024 || count > 1024 || bytes.Length <= 1036 + count * 72)
-                {
-                    throw new ArgumentException("物理状态长度无效。");
-                }
-                var entities = new HashSet<ulong>();
-                var slots = new HashSet<uint>();
-                if (expectedBodies != null && expectedBodies.Count != count)
-                {
-                    throw new ArgumentException("物理诊断对象数量不一致。");
-                }
-                for (uint index = 0; index < count; index++)
-                {
-                    ulong id = reader.ReadUInt64();
-                    int shape = reader.ReadInt32(), motion = reader.ReadInt32();
-                    Vector3 size = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    Vector3 position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    var rotation = new Quaternion(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    _ = new BodyDefinition(id, (ShapeKind)shape, motion == 1, size, position, rotation,
-                        reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-                    uint bodyId = reader.ReadUInt32(), slot = bodyId & 0x7fffff;
-                    if (expectedBodies != null && !expectedBodies.Any(body => body.Id == id && body.Dynamic == (motion == 1)))
-                    {
-                        throw new ArgumentException("物理诊断对象标识或运动类型不一致。");
-                    }
-                    if ((motion != 0 && motion != 1) || !entities.Add(id) || slot >= 1024 || !slots.Add(slot)
-                        || (bodyId & 0x80000000) != 0 || generations[slot] != (byte)(bodyId >> 23))
-                    {
-                        throw new ArgumentException("物理 ID 或运动类型无效。");
-                    }
-                }
-            }
-            catch (EndOfStreamException error) { throw new ArgumentException("物理状态截断。", nameof(snapshot), error); }
-        }
-    }
-
     internal sealed class JoltWorld : IPhysicsWorld
     {
         private readonly WorldHandle _handle;
         private readonly int _workerThreads;
-        internal JoltWorld(WorldHandle handle, int workerThreads)
+        private readonly BodyRegistry _bodies;
+        private bool _faulted;
+
+        internal JoltWorld(WorldHandle handle, int workerThreads, BodyRegistry bodies)
         {
             _handle = handle;
             _workerThreads = workerThreads;
+            _bodies = bodies;
         }
 
-        public void Add(BodyDefinition definition)
+        public void Add(BodyDefinition definition) => AddBody(definition, null);
+        internal void AddRestored(BodyEntry entry) => AddBody(entry.Definition, entry.BodyId);
+
+        private void AddBody(BodyDefinition definition, uint? restoredId)
         {
-            EnsureAlive();
+            EnsureAvailable();
             if (definition == null)
             {
                 throw new ArgumentNullException(nameof(definition));
             }
             var native = new JoltNative.Definition
             {
-                Entity = definition.Id,
                 Shape = (int)definition.Shape,
                 Dynamic = definition.Dynamic ? 1 : 0,
                 Size = definition.Size,
@@ -133,62 +40,145 @@ namespace AiNative.Physics.Jolt
                 Friction = definition.Friction,
                 Restitution = definition.Restitution
             };
-            JoltNative.Check(JoltNative.aj_add(_handle, in native));
+            // Reserve managed storage first; native add rolls back its own resources on failure.
+            BodyEntry entry = _bodies.Reserve(definition, restoredId);
+            try
+            {
+                JoltNative.Check(JoltNative.aj_add(_handle, entry.BodyId, in native));
+            }
+            catch
+            {
+                _bodies.CancelReservation(entry);
+                throw;
+            }
         }
 
         public void Remove(ulong id)
         {
-            EnsureAlive();
-            JoltNative.Check(JoltNative.aj_remove(_handle, id));
+            EnsureAvailable();
+            BodyEntry entry = _bodies.Find(id);
+            JoltNative.Check(JoltNative.aj_remove(_handle, entry.BodyId));
+            _bodies.Remove(entry);
         }
+
         public void ApplyImpulse(ulong id, Vector3 impulse)
         {
-            EnsureAlive();
+            EnsureAvailable();
             if (!BodyDefinition.Finite(impulse))
             {
                 throw new ArgumentException("冲量必须有限。");
             }
-            JoltNative.Check(JoltNative.aj_impulse(_handle, id, impulse));
+            BodyEntry entry = _bodies.Find(id);
+            if (!entry.Definition.Dynamic)
+            {
+                throw new InvalidOperationException("Static body cannot receive impulse.");
+            }
+            JoltNative.Check(JoltNative.aj_impulse(_handle, entry.BodyId, impulse));
         }
 
         public IReadOnlyList<BodyState> GetBodies()
         {
-            EnsureAlive();
-            JoltNative.Check(JoltNative.aj_bodies(_handle, null, 0, out int count));
-            var bodies = new JoltNative.BodyView[count];
-            JoltNative.Check(JoltNative.aj_bodies(_handle, bodies, count, out _));
-            return Array.AsReadOnly(bodies.Select(body => new BodyState(body.Entity, body.Position, body.Rotation,
-                body.Velocity, body.AngularVelocity, body.Active != 0, body.Dynamic != 0)).ToArray());
+            EnsureAvailable();
+            var native = new JoltNative.BodyView[_bodies.Count];
+            JoltNative.Check(JoltNative.aj_bodies(_handle, native, native.Length, out int count));
+            if (count != native.Length)
+            {
+                throw new InvalidOperationException("Native body count differs from managed ownership.");
+            }
+            var result = new BodyState[count];
+            for (int index = 0; index < count; index++)
+            {
+                JoltNative.BodyView body = native[index];
+                result[index] = new BodyState(_bodies.EntityFor(body.BodyId), body.Position, body.Rotation,
+                    body.Velocity, body.AngularVelocity, body.Active != 0, body.Dynamic != 0);
+            }
+            Array.Sort(result, (first, second) => first.Id.CompareTo(second.Id));
+            return Array.AsReadOnly(result);
         }
 
         public IReadOnlyList<PhysicsContact> Step(float seconds)
         {
-            EnsureAlive();
-            JoltNative.Check(JoltNative.aj_step(_handle, seconds));
-            JoltNative.Check(JoltNative.aj_contacts(_handle, null, 0, out int count));
-            // A non-null buffer also drains an empty contact batch.
-            var contacts = new JoltNative.Contact[Math.Max(1, count)];
-            JoltNative.Check(JoltNative.aj_contacts(_handle, contacts, contacts.Length, out _));
-            return Array.AsReadOnly(contacts.Take(count).Select(contact => new PhysicsContact(contact.First,
-                contact.Second, contact.FirstShape, contact.SecondShape, contact.Kind == 1)).ToArray());
+            EnsureAvailable();
+            if (!BodyDefinition.Finite(seconds) || seconds <= 0 || seconds > 1)
+            {
+                throw new InvalidOperationException("Invalid step duration.");
+            }
+            try
+            {
+                JoltNative.Check(JoltNative.aj_step(_handle, seconds));
+                JoltNative.Check(JoltNative.aj_contacts(_handle, null, 0, out int count));
+                var native = new JoltNative.Contact[Math.Max(1, count)];
+                JoltNative.Check(JoltNative.aj_contacts(_handle, native, native.Length, out _));
+                IReadOnlyList<PhysicsContact> contacts = ConvertContacts(native, count);
+                _bodies.CompleteStep();
+                return contacts;
+            }
+            catch
+            {
+                // Update or event consumption may already have changed native state.
+                _faulted = true;
+                throw;
+            }
+        }
+
+        private IReadOnlyList<PhysicsContact> ConvertContacts(JoltNative.Contact[] contacts, int count)
+        {
+            var ordered = new SortedSet<(ulong First, ulong Second, uint FirstShape, uint SecondShape, int Kind)>();
+            for (int index = 0; index < count; index++)
+            {
+                JoltNative.Contact contact = contacts[index];
+                ulong first = _bodies.EntityFor(contact.First), second = _bodies.EntityFor(contact.Second);
+                uint firstShape = contact.FirstShape, secondShape = contact.SecondShape;
+                if (second < first)
+                {
+                    (first, second) = (second, first);
+                    (firstShape, secondShape) = (secondShape, firstShape);
+                }
+                ordered.Add((first, second, firstShape, secondShape, contact.Kind));
+            }
+            return Array.AsReadOnly(ordered.Select(contact => new PhysicsContact(contact.First, contact.Second,
+                contact.FirstShape, contact.SecondShape, contact.Kind == 1)).ToArray());
         }
 
         public PhysicsSnapshot Capture()
         {
-            EnsureAlive();
-            JoltNative.Check(JoltNative.aj_save(_handle, null, 0, out int length));
-            var bytes = new byte[length];
-            JoltNative.Check(JoltNative.aj_save(_handle, bytes, length, out _));
-            return new PhysicsSnapshot(JoltWorldFactory.Identity, bytes, _workerThreads);
+            EnsureAvailable();
+            if (_bodies.HasRetiredBodies)
+            {
+                throw new InvalidOperationException("Advance removed bodies before saving.");
+            }
+            JoltNative.Check(JoltNative.aj_capture_state(_handle, null, 0, out int length));
+            var nativeState = new byte[length];
+            JoltNative.Check(JoltNative.aj_capture_state(_handle, nativeState, nativeState.Length, out _));
+            return PhysicsSnapshotCodec.Write(_bodies, _workerThreads, nativeState);
         }
 
-        private void EnsureAlive()
+        internal void RestoreInternalState(byte[] nativeState)
+        {
+            EnsureAvailable();
+            try
+            {
+                JoltNative.Check(JoltNative.aj_restore_state(_handle, nativeState, nativeState.Length));
+            }
+            catch
+            {
+                _faulted = true;
+                throw;
+            }
+        }
+
+        private void EnsureAvailable()
         {
             if (_handle.IsClosed || _handle.IsInvalid)
             {
                 throw new ObjectDisposedException(nameof(JoltWorld));
             }
+            if (_faulted)
+            {
+                throw new InvalidOperationException("Physics world is faulted; dispose it before continuing.");
+            }
         }
+
         public void Dispose() => _handle.Dispose();
     }
 }

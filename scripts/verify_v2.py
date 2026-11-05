@@ -9,6 +9,7 @@ from pathlib import Path
 import platform
 import shutil
 import subprocess
+import struct
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,29 +60,61 @@ class Evidence:
 
 
 def native_probe(library, snapshot):
-    """Child process: all truncation offsets must fail promptly and release candidate worlds."""
+    """Child process: reconstruct native candidates and corrupt only Jolt's internal stream."""
     native = ctypes.CDLL(str(library))
-    native.aj_restore.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
-    native.aj_restore.restype = ctypes.c_int
+    native.aj_create.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_void_p)]
+    native.aj_add.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p]
+    native.aj_restore_state.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int]
+    native.aj_step.argtypes = [ctypes.c_void_p, ctypes.c_float]
     native.aj_destroy.argtypes = [ctypes.c_void_p]
+    native.aj_destroy.restype = None
     native.aj_world_count.restype = ctypes.c_uint32
     state = read(snapshot)["state"]["physics"]
-    data = base64.b64decode(state["data"])
-    buffer = ctypes.create_string_buffer(data)
-    for length in range(1, len(data)):
+    envelope = base64.b64decode(state["data"])
+    magic, workers = struct.unpack_from("<II", envelope)
+    require(magic == 0x344A4E41 and workers == state["workerThreads"], "invalid managed envelope")
+    count = struct.unpack_from("<I", envelope, 1032)[0]
+    definitions = []
+    for index in range(count):
+        offset = 1036 + index * 72
+        body_id = struct.unpack_from("<I", envelope, offset + 68)[0]
+        definitions.append((body_id, ctypes.create_string_buffer(envelope[offset + 8:offset + 68])))
+    data = envelope[1036 + count * 72:]
+
+    def create_candidate():
         candidate = ctypes.c_void_p()
-        require(native.aj_restore(buffer, length, ctypes.byref(candidate)) == -1, f"truncation {length} accepted")
-        require(not candidate.value and native.aj_world_count() == 0, f"resource leak at {length}")
-    # Every single-byte mutation is either rejected cleanly or yields a disposable complete world.
+        require(native.aj_create(workers, ctypes.byref(candidate)) == 0, "candidate creation failed")
+        try:
+            for body_id, definition in definitions:
+                require(native.aj_add(candidate, body_id, definition) == 0, "body reconstruction failed")
+            return candidate
+        except BaseException:
+            native.aj_destroy(candidate)
+            raise
+
+    buffer = ctypes.create_string_buffer(data)
+    # The managed test suite covers the entire envelope; this process isolates unsafe native reads.
+    for length in range(len(data)):
+        candidate = create_candidate()
+        try:
+            require(native.aj_restore_state(candidate, buffer, length) == -1, f"truncation {length} accepted")
+            require(native.aj_step(candidate, 1 / 60) == -1, "failed native candidate remained usable")
+        finally:
+            native.aj_destroy(candidate)
+        require(native.aj_world_count() == 0, f"resource leak at {length}")
     for offset in range(len(data)):
         changed = bytearray(data)
         changed[offset] ^= 0xFF
-        candidate = ctypes.c_void_p()
-        status = native.aj_restore(ctypes.create_string_buffer(bytes(changed)), len(changed), ctypes.byref(candidate))
-        if status == 0:
+        candidate = create_candidate()
+        try:
+            status = native.aj_restore_state(candidate, ctypes.create_string_buffer(bytes(changed)), len(changed))
+            require(status in (0, -1), "unexpected restore status")
+            if status == -1:
+                require(native.aj_step(candidate, 1 / 60) == -1, "failed mutation remained usable")
+        finally:
             native.aj_destroy(candidate)
         require(native.aj_world_count() == 0, f"mutation leak at {offset}")
-    print(json.dumps({"truncationOffsets": len(data) - 1, "mutationOffsets": len(data), "worlds": 0}))
+    print(json.dumps({"scope": "native-internal-state", "truncationOffsets": len(data), "mutationOffsets": len(data), "worlds": 0}))
 
 
 def validate(host, output):
@@ -234,7 +267,7 @@ def validate(host, output):
         evidence.invoke("compare-without-native", "compare", "--expected", precord, "--actual", precord2, host=isolated_host)
         native_name = "ainative_jolt.dll" if platform.system() == "Windows" else "libainative_jolt.so"
         library = host.parent / native_name
-        altered_library = library.read_bytes().replace(b"jolt-5.6.0;e77f175;joltc=2bbcf73;abi=3", b"jolt-0.0.0;e77f175;joltc=2bbcf73;abi=3")
+        altered_library = library.read_bytes().replace(b"jolt-5.6.0;e77f175;joltc=2bbcf73;abi=4", b"jolt-0.0.0;e77f175;joltc=2bbcf73;abi=4")
         require(altered_library != library.read_bytes(), "native identity vector missing")
         (isolated / native_name).write_bytes(altered_library)
         wrong_version = evidence.invoke("wrong-native-version", "run", "--scenario", pscene, "--seed", "42", "--commands", inputs / "empty.commands.json", exit_code=1, code="NativeLibraryIncompatible", host=isolated_host)

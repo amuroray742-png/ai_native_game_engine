@@ -22,8 +22,10 @@ void ValidateJoltState(Reader reader, const World &world)
     const float gravity[] = { 0, -9.81f, 0 };
     for (float value : gravity) Require(ReadValue<float>(reader) == value, "Physics gravity mismatch");
     Require(ReadValue<uint32_t>(reader) == world.bodies.size(), "Internal body count mismatch");
-    std::map<uint32_t, const Definition *> definitions;
-    for (const auto &body : world.bodies) definitions.emplace(body.second.body.GetIndexAndSequenceNumber(), &body.second.definition);
+    std::map<uint32_t, bool> definitions;
+    auto *interface = JPH_PhysicsSystem_GetBodyInterface(world.system.get());
+    for (uint32_t id : world.bodies)
+        definitions.emplace(id, JPH_BodyInterface_GetMotionType(interface, id) == JPH_MotionType_Dynamic);
     std::set<uint32_t> seenBodies;
     for (size_t index = 0; index < world.bodies.size(); ++index)
     {
@@ -31,12 +33,12 @@ void ValidateJoltState(Reader reader, const World &world)
         auto body = definitions.find(id);
         Require(body != definitions.end() && seenBodies.insert(id).second, "Invalid internal body identity");
         uint8_t active = ReadValue<uint8_t>(reader);
-        Require(active <= 1 && (body->second->dynamic || active == 0), "Invalid body activation");
+        Require(active <= 1 && (body->second || active == 0), "Invalid body activation");
         ReadFinite(reader, 3);
         Quat rotation;
         reader.Read(rotation);
         Require(rotation.IsNormalized(), "Invalid internal rotation");
-        if (body->second->dynamic)
+        if (body->second)
         {
             // Linear/angular velocity, force/torque, three sleep spheres, sleep timer.
             ReadFinite(reader, 25);
@@ -51,7 +53,7 @@ void ValidateJoltState(Reader reader, const World &world)
         uint32_t first = ReadValue<uint32_t>(reader), second = ReadValue<uint32_t>(reader);
         Require(first != second && definitions.count(first) && definitions.count(second)
             && seenPairs.emplace(std::min(first, second), std::max(first, second)).second, "Invalid cached body pair");
-        Require(definitions.at(first)->dynamic || definitions.at(second)->dynamic, "Static bodies cannot contact each other");
+        Require(definitions.at(first) || definitions.at(second), "Static bodies cannot contact each other");
         ReadFinite(reader, 6);
         uint32_t count = ReadValue<uint32_t>(reader);
         Require(count <= 4096 - manifoldTotal, "Too many cached manifolds");

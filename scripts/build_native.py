@@ -102,9 +102,10 @@ def main():
     shutil.copy2(compile_commands, destination / "compile_commands.json")
     compiler_files = sorted((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
     compiler = compiler_files[-1].read_text(encoding="utf-8")
-    manifest = {"joltCommit": commit, "rid": rid, "abi": 3, "joltcCommit": JOLTC_COMMIT, "workerThreads": {"min": 0, "max": 16},
+    manifest = {"joltCommit": commit, "rid": rid, "abi": 4, "joltcCommit": JOLTC_COMMIT, "workerThreads": {"min": 0, "max": 16},
                 "joltcExtensionHash": hashlib.sha256((ROOT / "native/jolt/joltc_extensions.inl").read_bytes()).hexdigest(),
                 "joltcExtensionHeaderHash": hashlib.sha256((ROOT / "native/jolt/joltc_extensions.h").read_bytes()).hexdigest(),
+                "allocator": {"initialBytes": 16777216, "mallocFallback": True},
                 "extendedJoltcHash": hashlib.sha256(patched_joltc.read_bytes()).hexdigest(), "settings": settings,
                 "restorePatchHash": hashlib.sha256(patch_path.read_bytes()).hexdigest(),
                 "patchedBodyManagerHash": patched_hash, "patchedThreadPoolHash": thread_patch_hash,
