@@ -1,0 +1,78 @@
+{
+  "inputs": {
+    "grid.scenario.json": "a888f7ed5d204d4ffad523a352da11e6a1365d9921d190858810ff19bacba320",
+    "grid.commands.json": "4b1fea6956852402b8a77c95db7922b6b0a1d91de78f106eca03d1a61ba48acd"
+  },
+  "seed": 42,
+  "accepted": 6,
+  "rejected": 1,
+  "winner": "A",
+  "comparisons": {
+    "fast": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16
+    },
+    "slow": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16
+    }
+  },
+  "tickHashes": {
+    "1": "ca1ed95acd6e8f3b0c5ae96c9acf55025a65f7b2907feb72b37cb16cb166d631",
+    "2": "27c026eb12ae35292a310e0c8f9ee0a912ce5977ab10613cdbcec76af5246425",
+    "3": "a643499b8bb6533a223e7258ab4cb8151a5d051666224b405c54fcba91499377",
+    "4": "ebe45b4539dc9d0e96d394b54f883cb3dde01970e765f6f25e5df4a28e8c65de",
+    "5": "0afe51811a184b1720cedabf045269b8000e835c6e4d6bb2a16592e3a12c9e66",
+    "6": "e9887c06af4639a96bd6ddb84af8401e7f36f12cfff59981d334c0af006f8de3",
+    "7": "673f9eac08cbadae642d16eb13522fb0f14ac912c96a789d30fc98bd188806cd",
+    "8": "d5ba0ae55780a643f527af84b8e8a1d4f51abf6ed7452543e2da3d5648d839bf"
+  },
+  "unityEnvironment": {
+    "architecture": "x64",
+    "buildHash": "92ec227ff50a0f9075d7a7c620dd64f1fe61bfdfa9cd75a40534dd4609e4eb4c",
+    "components": {
+      "AiNative.Core": "a90008e1d21775a4002a80f45eb399d866307f2d4600e4f151368ce846b9f80a",
+      "AiNative.GridGame": "13f3c0029a3b2dd5105925a8091384bb878233035a37abca519e3192bed30b79",
+      "AiNative.GridGame.Hosting": "49818811d2b6cff9bec826db1175699cb5d9ef315fe63677c3c0fb7ff5b1165a",
+      "AiNative.Hosting": "5ede84d4c6903e689ec66d99200404c77254d304ce3b28f9c834fcfb32cfcc98",
+      "Assembly-CSharp-Editor": "7cf8a255337d5b07ce6c28e012fe8f4ad9c5b1efd05aa1b9233622245e0582ba",
+      "Microsoft.Bcl.AsyncInterfaces": "82c3eb14261e9eda644d66abebc7a57530ea062c0b0813dc36b0681546d26e49",
+      "System.IO.Pipelines": "9f5514995fc52aad781a2f7fc8ef999ecc78e8ccacaa15a6491d550de7f55bcf",
+      "System.Runtime.CompilerServices.Unsafe": "fd67abc4c4af10affbcd42fd68a2a7bc361b26714afe6965d4d0d139459d8297",
+      "System.Text.Encodings.Web": "6630388e3573f1d6500891723b30f21d8545e14370707b4d4328e6f61aaca233",
+      "System.Text.Json": "136262fc12b3473cf408a4f5a3e604c73019b8baa0d3593205a87df67c7c4228",
+      "UnityEditor.CoreModule": "a39ad4c38cef4246592ca28da5cc9ae460ae9da9530ba83b52570153197d0363",
+      "UnityEngine.CoreModule": "0fa704172fa3538d85d16ee8c0aba3912b23cee3db7f6aa7081b91bc69034207",
+      "UnityEngine.IMGUIModule": "38786c66470549f989562c7780c581485e2791687c4005c145132dbb6f13cc9a"
+    },
+    "os": "WindowsEditor",
+    "runtime": "Unity Editor 6000.3.23f1 / Mono 4.0.30319.42000"
+  },
+  "cliEnvironment": {
+    "architecture": "x64",
+    "buildHash": "8664e0829ff1f62434dc197b5b80c7e3015170bbbbc80f84699bcf33d3e12711",
+    "components": {
+      "AiNative.Core": "a90008e1d21775a4002a80f45eb399d866307f2d4600e4f151368ce846b9f80a",
+      "AiNative.Examples.Runner": "d0bf29bd0b43406de417457bc5e7b5b3c2c43071b4b824f5315852419c0311c6",
+      "AiNative.GridGame": "13f3c0029a3b2dd5105925a8091384bb878233035a37abca519e3192bed30b79",
+      "AiNative.GridGame.Hosting": "49818811d2b6cff9bec826db1175699cb5d9ef315fe63677c3c0fb7ff5b1165a",
+      "AiNative.Headless": "81f5cbb1522bed2591973af0826c98c4cc4d4cdae27dd08253221d25c80d9f5a",
+      "AiNative.Hosting": "5ede84d4c6903e689ec66d99200404c77254d304ce3b28f9c834fcfb32cfcc98",
+      "System.IO.Pipelines": "7875941c62c402cbb1f3505883bf87ed74088f18171ff3a66d8c8fa06e511836",
+      "System.Text.Encodings.Web": "a2c7ef05abc665de9c07dcb600914889d501c8cfa13973bbe3c60c45367bc291",
+      "System.Text.Json": "9f4fd55056a3ccd6aa5f204933f9b8e3da412b060238cbeb8bb2be2fe4046f2a"
+    },
+    "os": "windows",
+    "runtime": "10.0.13"
+  },
+  "negativeControl": {
+    "code": "CheckpointMismatch",
+    "operationIndex": 2,
+    "tick": "2",
+    "difference": {
+      "path": "$.result.inputs[0].error",
+      "expected": "\"NotYourTurn\"",
+      "actual": "\"Blocked\""
+    }
+  }
+}

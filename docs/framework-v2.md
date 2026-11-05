@@ -99,6 +99,8 @@ replay重新执行且在首个分歧处停止，保留实际可信前缀；compa
 
 SequentialPresentationQueue要求同实例连续Tick，BeginNext→检查IsActive→应用UI/动画→Complete。只使用该帧自带观察。Reset后旧帧无法Complete或继续写新对局。
 
+[GridGame Editor](phase-3-grid-editor.md) 与 CLI 共用 `GameRegistry.ReadScenario`。Editor 通过 `GridGameModule.CreateWithPresentation` 取得同一对局的 `IHostedGame` 和初始观察绑定的顺序队列。每次 `Advance` 完成编码后将该 Tick 的原始不可变帧交给队列。CLI 继续使用 `IGameModule.Create`。Editor 的时钟只驱动绘制与动画。
+
 RealtimePresentationBuffer保留Previous/Current两个观察，插值由表现适配按时间设置完成。PresentationEvents独立FIFO，含输入结果和事件，不附带历史完整观察。TakeEvents只取一次，延迟回调执行前检查IsActive；Reset清空旧批次并更换generation。IsAt检查当前指定Tick及该Tick事件已取出，宿主仍负责应用完成与相机/UI刷新。不会无限保存历史画面，也不会为截图清空未来所有表现。
 
 ## 重新生成与兼容

@@ -2,7 +2,7 @@
 
 可复用的纯 C# 玩法内核与工具链。GridGame（手动回合制）和 PhysicsSandbox（60 Hz 真实 Jolt 刚体）作为独立 Example，共用输入、快照、回放、比较和 CLI。
 
-通用框架 v2 与当前 joltc ABI 4 分层适配已完成独立审查及[Windows/Linux双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399)：各236项测试、108次真实CLI通过，完整快照损坏、原生内部状态与线程启动失败探针通过，并核验上传制品；5组平台比较一致。当前运行入口统一为 **v2**。旧阶段文档保留历史证据，旧格式明确拒绝；Unity 编辑器、Player、IL2CPP 尚待第三阶段验收。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [验收索引](docs/v2-acceptance.md)。
+通用框架 v2 与当前 joltc ABI 4 分层适配已完成独立审查及[Windows/Linux双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399)：各236项测试、108次真实CLI通过，完整快照损坏、原生内部状态与线程启动失败探针通过，并核验上传制品；5组平台比较一致。当前运行入口统一为 **v2**。第三阶段已在 Windows x64 验证 GridGame Editor 与 CLI 逐 Tick 一致。PhysicsSandbox 的 Unity 接入、Player 与 IL2CPP 留给后续 PR。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [Editor 验收](docs/phase-3-grid-editor.md)。
 
 物理后端现已迁移至固定版本 **joltc + 项目扩展**，支持显式0..16工作线程、完整状态恢复与同线程配置确定性回放。PhysicsSandbox场景使用游戏版本2和必填`configuration.workerThreads`（示例为2）。当前 ABI 4 将实体映射、快照元数据及恢复编排迁到 C#，原生层保留资源清理、事件收集和内部状态能力；旧物理记录需要重新生成。当前验证见[物理分层迁移](docs/managed-physics-migration.md)，此前记录见[joltc迁移](docs/joltc-migration.md)。
 
@@ -44,13 +44,23 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | src/AiNative.Physics / Physics.Jolt | 可选物理接口、托管实体映射/快照/恢复及 netstandard2.1 DllImport 适配 |
 | examples/AiNative.GridGame / GridGame.Hosting | 网格规则与专属协议 |
 | examples/AiNative.PhysicsSandbox / PhysicsSandbox.Hosting | 实时物理规则与专属协议 |
-| examples/AiNative.Examples.Runner | 唯一示例可执行入口，显式注册游戏与物理工厂 |
+| examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
+| examples/UnityEditor | GridGame 的 Unity Editor 窗口、点击输入和逐 Tick 比较入口 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |
 | third_party | 下载的 Jolt/joltc 源码与 NuGet 包；版本锁定，下载内容不提交 Git |
 
 Core 和可移植库保持 netstandard2.1 / C# 9；Headless、Runner、测试使用 .NET 10。框架没有 Example 引用，也没有反射插件发现或通用 ECS。
 
 ## 验证
+
+**在 Unity Editor 里玩 GridGame**。安装并授权 Unity 6000.3.23f1，在仓库根目录准备 DLL，再打开项目。在菜单选择 `Window > AI Native > GridGame`。点击己方单位，再点相邻格移动或点敌方攻击。`End turn` 结束回合。
+
+```sh
+python scripts/unity_grid.py prepare
+unity open examples/UnityEditor
+```
+
+关闭这个项目的 Editor 后，使用 `python scripts/unity_grid.py verify --output TestResults/grid-editor` 启动真实 Editor 和 CLI 并保存逐 Tick 比较证据。[复现条件和验收结果](docs/phase-3-grid-editor.md)
 
 ```sh
 python scripts/build_native.py

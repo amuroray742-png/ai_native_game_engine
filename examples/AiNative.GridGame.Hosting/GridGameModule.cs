@@ -91,9 +91,29 @@ namespace AiNative.GridGame.Hosting
 
         public IHostedGame Create(JsonElement configuration, ulong seed)
         {
+            return new GridHost(CreateRuntime(configuration, seed));
+        }
+
+        /// <summary>创建一个对局和它的顺序表现队列。每次 Advance 推送同一 Tick 的隔离观察，宿主按自己的节奏消费。</summary>
+        public IHostedGame CreateWithPresentation(JsonElement configuration, ulong seed, out SequentialPresentationQueue<GridGameView> frames)
+        {
+            var runtime = CreateRuntime(configuration, seed);
+            try
+            {
+                frames = new SequentialPresentationQueue<GridGameView>(runtime.Capture());
+                return new GridHost(runtime, frames);
+            }
+            catch
+            {
+                runtime.Dispose();
+                throw;
+            }
+        }
+
+        private SimulationRuntime<GridCommand, GridGameView, GridGameState> CreateRuntime(JsonElement configuration, ulong seed)
+        {
             ScenarioDefinition definition = GridData.ReadConfiguration(ReadConfiguration(configuration), "$.configuration");
-            return new GridHost(SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(
-                () => GridGameRules.Create(definition), seed, Timing));
+            return SimulationRuntime<GridCommand, GridGameView, GridGameState>.Create(() => GridGameRules.Create(definition), seed, Timing);
         }
 
         public IHostedGame Restore(JsonElement configuration, JsonElement state, RuntimeState runtime)
@@ -108,7 +128,8 @@ namespace AiNative.GridGame.Hosting
 
     internal sealed class GridHost : HostedGame<GridCommand, GridGameView, GridGameState>
     {
-        internal GridHost(SimulationRuntime<GridCommand, GridGameView, GridGameState> runtime) : base(runtime) { }
+        internal GridHost(SimulationRuntime<GridCommand, GridGameView, GridGameState> runtime, SequentialPresentationQueue<GridGameView>? frames = null)
+            : base(runtime, frames) { }
         protected override GridCommand ReadCommand(JsonElement command) => GridData.ReadCommand(command, "$.command");
         protected override void WriteState(Utf8JsonWriter writer, GridGameState state) => GridData.WriteGame(writer, state);
         protected override void WriteEvent(Utf8JsonWriter writer, GameEvent value) => GridData.WriteEvent(writer, value);
