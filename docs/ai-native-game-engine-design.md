@@ -1,6 +1,6 @@
 # AI Native 游戏引擎设计思路
 
-当前设计基线为通用框架 v2，详细签名、协议和物理边界见 [v2 契约](framework-v2.md)，实际验证见 [v2 验收](v2-acceptance.md)。第一、第二阶段与原宿主边界文档是历史证据，不再定义当前运行 API。Unity 编辑器、Player、IL2CPP 仍待第三阶段实施。
+当前设计基线为通用框架 v2，详细签名、协议和物理边界见 [v2 契约](framework-v2.md)，实际验证见 [v2 验收](v2-acceptance.md)。第一、第二阶段与原宿主边界文档是历史证据。第三阶段首个宿主已接入 GridGame，记录见 [Unity Editor 验收](phase-3-grid-editor.md)。PhysicsSandbox 的 Unity 集成、Player 和 IL2CPP 仍待实施。
 
 实现同时遵循[架构与代码规范](engineering-guidelines.md)。边界变化必须同步契约、验证与验收说明。
 
@@ -20,6 +20,8 @@ flowchart TD
     Headless --> Hosting[Hosting 协议与验证]
     Hosting --> Core[Core 泛型运行时]
     Runner --> GridAdapter[GridGame.Hosting]
+    Editor[Unity Editor GridGame 窗口] --> GridAdapter
+    Editor --> Hosting
     Runner --> PhysicsAdapter[PhysicsSandbox.Hosting]
     GridAdapter --> Hosting
     GridAdapter --> Grid[GridGame 规则]
@@ -34,6 +36,8 @@ flowchart TD
 ```
 
 游戏模块创建/恢复完整运行时，宿主不自行配对会话和规则。运行时独占游戏实例，物理示例独占物理世界。Dispose 幂等，释放后操作失败；候选恢复完全验证后才可替换旧对局。没有跨对局的可变玩法静态状态；Jolt 全局类型注册仅由原生世界引用计数管理。
+
+每个接入 Unity 的 Example Game 拥有独立工程，位于 `examples/unity/<Game>/`。该游戏独立维护 `Assets/`、`Packages/`、`ProjectSettings/` 和插件集合。GridGame 工程只装配 GridGame，PhysicsSandbox 接入时新建自己的工程并引入 Jolt。两者复用 Core、Hosting 和无头验收工具，玩法及表现代码归各自示例。
 
 ### 2.1 时间、输入与故障
 
@@ -61,7 +65,7 @@ Jolt 锁定 5.6.0 提交 e77f175595e64cb44218cc9d9d56fc365ad0e36a，单精度、
 
 ## 3. Agent 能力与验证
 
-CLI 提供 games / describe / run / inspect / replay / compare。输入先严格校验；协议错误、业务拒绝、模拟故障和比较分歧有独立语义。文件发布禁止覆盖已有目标，失败保留已发布制品并报告准确清单。环境和文件操作留在 Headless，Hosting 可由未来 Unity 宿主直接复用。
+CLI 提供 games / describe / run / inspect / replay / compare。输入先严格校验；协议错误、业务拒绝、模拟故障和比较分歧有独立语义。文件发布禁止覆盖已有目标，失败保留已发布制品并报告准确清单。各宿主自行读取文件和环境，Editor 和 Headless 共用 Hosting 的场景校验、记录与比较协议。
 
 测试覆盖模块引用、原玩法、时间语义、状态与随机、物理连续性、生命周期、错误协议、表现与真实进程。完整证据由验收脚本和 CI 归档，历史测试与45次CLI逐项映射见验收索引。截图与性能不能代替规则断言；Unity 与人工体验验证须在第三阶段单独完成。
 
@@ -138,7 +142,7 @@ CLI 提供 games / describe / run / inspect / replay / compare。输入先严格
 
 ## 6. 验收场景与收益测量
 
-以下是各阶段实现必须验证的行为；已完成项与测试证据见阶段验收记录。快照、跨进程恢复和回放的本地证据见第二阶段 P2-T3–T5 记录；P2-T6 的[验收入口与证据索引](phase-2-acceptance.md)已有本地及远端 CI 证据，上传制品已核验；Unity 相关项目仍待完成。
+以下是各阶段实现必须验证的行为；已完成项与测试证据见阶段验收记录。快照、跨进程恢复和回放的本地证据见第二阶段 P2-T3–T5 记录；P2-T6 的[验收入口与证据索引](phase-2-acceptance.md)已有本地及远端 CI 证据，上传制品已核验。GridGame 的宿主一致性与表现独立性见[第三阶段首项记录](phase-3-grid-editor.md)。
 
 | 场景 | 预期结果 |
 | --- | --- |

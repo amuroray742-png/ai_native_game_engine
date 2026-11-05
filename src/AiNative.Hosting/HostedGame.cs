@@ -8,9 +8,15 @@ namespace AiNative.Hosting
     /// <summary>通用运行时到工具协议的薄适配；具体类型的编解码由游戏提供。</summary>
     public abstract class HostedGame<TCommand, TObservation, TState> : IHostedGame where TCommand : class
     {
-        protected HostedGame(SimulationRuntime<TCommand, TObservation, TState> runtime)
+        private readonly SequentialPresentationQueue<TObservation>? _frames;
+
+        protected HostedGame(SimulationRuntime<TCommand, TObservation, TState> runtime) : this(runtime, null) { }
+
+        /// <summary>传入顺序队列时，Advance 完成结果编码后将同一 Tick 入队。表现消费由宿主驱动。</summary>
+        protected HostedGame(SimulationRuntime<TCommand, TObservation, TState> runtime, SequentialPresentationQueue<TObservation>? frames)
         {
             Runtime = runtime;
+            _frames = frames;
         }
         protected SimulationRuntime<TCommand, TObservation, TState> Runtime { get; }
         public long Tick => Runtime.Tick;
@@ -32,7 +38,7 @@ namespace AiNative.Hosting
         public JsonElement Advance()
         {
             TickResult<TObservation> result = Runtime.Advance();
-            return JsonData.Write(writer =>
+            JsonElement encoded = JsonData.Write(writer =>
             {
                 writer.WriteStartObject();
                 writer.WriteString("kind", "tick");
@@ -62,6 +68,8 @@ namespace AiNative.Hosting
                 writer.WriteEndArray();
                 writer.WriteEndObject();
             });
+            _frames?.Enqueue(result);
+            return encoded;
         }
 
         public void Dispose() => Runtime.Dispose();

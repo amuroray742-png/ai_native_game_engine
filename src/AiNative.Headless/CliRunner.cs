@@ -197,15 +197,7 @@ namespace AiNative.Headless
             }
         }
 
-        private (IGameModule Module, JsonElement Configuration) ReadScene(string path)
-        {
-            JsonElement root = Read(path);
-            JsonData.Version(root);
-            ProtocolJson.Object(root, "$", "formatVersion", "gameId", "gameVersion", "configuration");
-            IGameModule module = _registry.Get(ProtocolJson.String(root.GetProperty("gameId"), "$.gameId"));
-            JsonData.Require(ProtocolJson.Int32(root.GetProperty("gameVersion"), "$.gameVersion") == module.Version, "UnsupportedGameVersion", "$.gameVersion");
-            return (module, module.ReadConfiguration(root.GetProperty("configuration")));
-        }
+        private (IGameModule Module, JsonElement Configuration) ReadScene(string path) => _registry.ReadScenario(Read(path));
 
         private static JsonElement Read(string path) => JsonData.Parse(JsonInput.ReadFile(path));
         private static string? Preflight(string? path) => path == null ? null : AtomicFilePublisher.Preflight(path);
