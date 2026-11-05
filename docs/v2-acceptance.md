@@ -6,7 +6,7 @@
 
 后续 C#/原生分层迁移的契约和实际检查见[物理分层迁移](managed-physics-migration.md)。
 
-第三阶段 GridGame 在真实 Unity Editor 与 CLI 的逐 Tick 对照，以及两档表现速度的证据，见[GridGame Editor 验收](phase-3-grid-editor.md)。
+第三阶段当前入口与逐 Tick 对照见[Unity Play 宿主](unity-play-host.md)。上一版 Editor 窗口的证据保存在[历史验收](phase-3-grid-editor.md)。
 
 ## 验收入口与范围
 

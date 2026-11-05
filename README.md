@@ -2,7 +2,7 @@
 
 可复用的纯 C# 玩法内核与工具链。GridGame（手动回合制）和 PhysicsSandbox（60 Hz 真实 Jolt 刚体）作为独立 Example，共用输入、快照、回放、比较和 CLI。
 
-通用框架 v2 与当前 joltc ABI 4 分层适配已完成独立审查及[Windows/Linux双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399)：各236项测试、108次真实CLI通过，完整快照损坏、原生内部状态与线程启动失败探针通过，并核验上传制品；5组平台比较一致。当前运行入口统一为 **v2**。第三阶段已在 Windows x64 验证 GridGame Editor 与 CLI 逐 Tick 一致。PhysicsSandbox 的 Unity 接入、Player 与 IL2CPP 留给后续 PR。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [Editor 验收](docs/phase-3-grid-editor.md)。
+通用框架 v2 与当前 joltc ABI 4 分层适配已通过[Windows/Linux 双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399)。GridGame 的 Unity 入口是独立工程里的 Play 场景。PhysicsSandbox 的 Unity 接入、Player 与 IL2CPP 留给后续阶段。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [Play 宿主与验收](docs/unity-play-host.md)
 
 物理后端现已迁移至固定版本 **joltc + 项目扩展**，支持显式0..16工作线程、完整状态恢复与同线程配置确定性回放。PhysicsSandbox场景使用游戏版本2和必填`configuration.workerThreads`（示例为2）。当前 ABI 4 将实体映射、快照元数据及恢复编排迁到 C#，原生层保留资源清理、事件收集和内部状态能力；旧物理记录需要重新生成。当前验证见[物理分层迁移](docs/managed-physics-migration.md)，此前记录见[joltc迁移](docs/joltc-migration.md)。
 
@@ -45,7 +45,8 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.GridGame / GridGame.Hosting | 网格规则与专属协议 |
 | examples/AiNative.PhysicsSandbox / PhysicsSandbox.Hosting | 实时物理规则与专属协议 |
 | examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
-| examples/unity/GridGame | GridGame 独立 Unity 工程，包含 Editor 窗口、点击输入和逐 Tick 比较入口 |
+| packages/com.ainative.unity | 场景生命周期、手动与固定步长推进、类型化 Tick 交付 |
+| examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |
 | third_party | 下载的 Jolt/joltc 源码与 NuGet 包；版本锁定，下载内容不提交 Git |
 
@@ -53,14 +54,16 @@ Core 和可移植库保持 netstandard2.1 / C# 9；Headless、Runner、测试使
 
 ## 验证
 
-**在 Unity Editor 里玩 GridGame**。每个接入 Unity 的示例都有自己的工程根目录、包清单和项目设置。安装并授权 Unity 6000.3.23f1，在仓库根目录为 GridGame 准备 DLL 和场景，再打开它的工程。在菜单选择 `Window > AI Native > GridGame`。点击己方单位，再点相邻格移动或点敌方攻击。`End turn` 结束回合。
+**试玩 GridGame**。安装并授权 Unity 6000.3.23f1，在仓库根目录准备公共包、DLL 和场景数据，再打开 GridGame 工程。
 
 ```sh
 python scripts/unity_grid.py prepare
 unity open examples/unity/GridGame
 ```
 
-关闭这个项目的 Editor 后，使用 `python scripts/unity_grid.py verify --output TestResults/grid-editor` 启动真实 Editor 和 CLI 并保存逐 Tick 比较证据。[复现条件和验收结果](docs/phase-3-grid-editor.md)
+在 Project 窗口双击 [Assets/Scenes/GridGame.unity](examples/unity/GridGame/Assets/Scenes/GridGame.unity)，点击工具栏 **Play**，在 **Game** 视图点击左下角的薄荷色棋子，再点右边一格移动，点珊瑚色棋子攻击。`End turn` 切换行动方，`New match` 重开。
+
+使用 `python scripts/unity_grid.py verify --output TestResults/grid-play` 执行 PlayMode 和 CLI 对照。脚本使用临时工程副本，分别验证开启和关闭 Domain Reload 的情况，输出目录必须是新的。[验收方式与证据](docs/unity-play-host.md)
 
 ```sh
 python scripts/build_native.py

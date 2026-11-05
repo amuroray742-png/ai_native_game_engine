@@ -1,0 +1,11 @@
+{
+  "name": "GridGame.PlayTests",
+  "references": ["GridGame.Play", "AiNative.Unity", "UnityEngine.UI"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll", "AiNative.Core.dll", "AiNative.Hosting.dll",
+    "AiNative.GridGame.dll", "AiNative.GridGame.Hosting.dll",
+    "System.Text.Json.dll", "System.Text.Encodings.Web.dll", "System.IO.Pipelines.dll"
+  ]
+}

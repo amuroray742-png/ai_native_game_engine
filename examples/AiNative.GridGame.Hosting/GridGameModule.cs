@@ -91,8 +91,11 @@ namespace AiNative.GridGame.Hosting
 
         public IHostedGame Create(JsonElement configuration, ulong seed)
         {
-            return new GridHost(CreateRuntime(configuration, seed));
+            return CreatePlay(configuration, seed);
         }
+
+        public GridHost CreatePlay(JsonElement configuration, ulong seed) => new GridHost(CreateRuntime(configuration, seed));
+        public GridCommand DecodePlayCommand(JsonElement value) => GridData.ReadCommand(value, "$.command");
 
         /// <summary>创建一个对局和它的顺序表现队列。每次 Advance 推送同一 Tick 的隔离观察，宿主按自己的节奏消费。</summary>
         public IHostedGame CreateWithPresentation(JsonElement configuration, ulong seed, out SequentialPresentationQueue<GridGameView> frames)
@@ -126,7 +129,7 @@ namespace AiNative.GridGame.Hosting
         }
     }
 
-    internal sealed class GridHost : HostedGame<GridCommand, GridGameView, GridGameState>
+    public sealed class GridHost : HostedGame<GridCommand, GridGameView, GridGameState>
     {
         internal GridHost(SimulationRuntime<GridCommand, GridGameView, GridGameState> runtime, SequentialPresentationQueue<GridGameView>? frames = null)
             : base(runtime, frames) { }

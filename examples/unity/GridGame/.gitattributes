@@ -1,2 +1,3 @@
 # Unity serializes empty YAML values with a trailing space.
 ProjectSettings/*.asset whitespace=-blank-at-eol
+Assets/Scenes/*.unity whitespace=-blank-at-eol
