@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using AiNative.Core;
+using AiNative.GridGame;
 using AiNative.GridGame.Hosting;
 using AiNative.Headless;
 using AiNative.Hosting;
@@ -16,6 +17,47 @@ namespace AiNative.Tests
 {
     public sealed class HostingTests
     {
+        [Fact]
+        public void TypedAndProtocolViewsShareQueueTickAndLifetime()
+        {
+            using GridHost session = new GridGameModule().CreatePlay(Fixtures.Configuration, 42);
+            IPlaySession<GridCommand, GridGameView> play = session;
+            IHostedGame protocol = session;
+            play.Submit(new Move(Side.A, 1, MoveDirection.Right));
+            protocol.Submit(Fixtures.Json("""{"type":"Attack","side":"A","unitId":1,"targetId":2}"""));
+            var frame = play.AdvanceTick();
+            Assert.Equal(2, frame.Inputs.Count);
+            Assert.Equal(1, protocol.Tick);
+            Assert.Equal(2, session.EncodeTick(frame).GetProperty("events").GetArrayLength());
+            protocol.Advance();
+            Assert.Equal(2, play.CaptureObservation().Tick);
+            protocol.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => play.AdvanceTick());
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RecordingFreezesSnapshotBeforeYieldingLastCheckpoint(bool advance)
+        {
+            var module = new GridGameModule();
+            using var game = module.CreatePlay(Fixtures.Configuration, 42);
+            string operations = advance ? """[{"op":"advance"}]""" : "[]";
+            var commands = CommandFile.Read(Fixtures.Json("""{"formatVersion":2,"operations":""" + operations + "}"), module);
+            RecordedRun? result = null;
+            using var steps = HostVerification.RecordSteps(module, Fixtures.Configuration, game, commands, Fixtures.Environment(),
+                game.Submit, game.Advance, run => result = run).GetEnumerator();
+            Assert.True(steps.MoveNext());
+            if (advance)
+            {
+                Assert.True(steps.MoveNext());
+            }
+            game.AdvanceTick();
+            Assert.False(steps.MoveNext());
+            Assert.NotNull(result);
+            Assert.Equal(advance ? "1" : "0", result!.Snapshot.GetProperty("runtime").GetProperty("tick").GetString());
+        }
+
         [Fact]
         public void EveryRequiredSnapshotFieldIsValidatedBeforeRestore()
         {

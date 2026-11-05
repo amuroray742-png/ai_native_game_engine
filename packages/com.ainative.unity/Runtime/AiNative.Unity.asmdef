@@ -1,0 +1,5 @@
+{
+  "name": "AiNative.Unity",
+  "overrideReferences": true,
+  "precompiledReferences": ["AiNative.Core.dll", "AiNative.Hosting.dll"]
+}

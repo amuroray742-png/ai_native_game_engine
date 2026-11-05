@@ -1,5 +1,7 @@
 # 第三阶段 · GridGame 接入 Unity Editor
 
+> 历史验收，适用于提交 `f2e6989`。当前工程的试玩和验收入口见 [Unity Play 宿主](unity-play-host.md)。
+
 Windows x64 上，Unity Editor 和无头 CLI 各自执行同一场 GridGame。8 个 Tick 的输入结果、有序事件、权威状态和摘要逐项相同。不同表现速度各通过 16 个检查点的比较。固定操作的最后一击在 Tick 8 结束对局，A 方获胜。[机器验收摘要](evidence/phase-3/grid-editor/summary.json)
 
 ## 打开示例

@@ -6,7 +6,7 @@ using AiNative.Core;
 namespace AiNative.Hosting
 {
     /// <summary>通用运行时到工具协议的薄适配；具体类型的编解码由游戏提供。</summary>
-    public abstract class HostedGame<TCommand, TObservation, TState> : IHostedGame where TCommand : class
+    public abstract class HostedGame<TCommand, TObservation, TState> : IHostedGame, IPlaySession<TCommand, TObservation> where TCommand : class
     {
         private readonly SequentialPresentationQueue<TObservation>? _frames;
 
@@ -31,14 +31,29 @@ namespace AiNative.Hosting
         protected abstract void WriteState(Utf8JsonWriter writer, TState state);
         protected abstract void WriteEvent(Utf8JsonWriter writer, GameEvent value);
 
-        public long Submit(JsonElement command) => Runtime.Submit(ReadCommand(command));
+        public long Submit(TCommand command) => Runtime.Submit(command);
+        public long Submit(JsonElement command) => Submit(ReadCommand(command));
+        public Observation<TObservation> CaptureObservation() => Runtime.Capture();
         public JsonElement Observe() => JsonData.Write(writer => WriteObservation(writer, Runtime.GetState()));
         public JsonElement CaptureGameState() => JsonData.Write(writer => WriteState(writer, Runtime.CaptureGameState()));
 
-        public JsonElement Advance()
+        public TickResult<TObservation> AdvanceTick()
         {
             TickResult<TObservation> result = Runtime.Advance();
-            JsonElement encoded = JsonData.Write(writer =>
+            _frames?.Enqueue(result);
+            return result;
+        }
+
+        public JsonElement Advance()
+        {
+            TickResult<TObservation> frame = Runtime.Advance();
+            JsonElement encoded = EncodeTick(frame);
+            _frames?.Enqueue(frame);
+            return encoded;
+        }
+
+        /// <summary>为记录器编码已完成的帧，不再次推进。</summary>
+        public JsonElement EncodeTick(TickResult<TObservation> result) => JsonData.Write(writer =>
             {
                 writer.WriteStartObject();
                 writer.WriteString("kind", "tick");
@@ -68,9 +83,6 @@ namespace AiNative.Hosting
                 writer.WriteEndArray();
                 writer.WriteEndObject();
             });
-            _frames?.Enqueue(result);
-            return encoded;
-        }
 
         public void Dispose() => Runtime.Dispose();
     }

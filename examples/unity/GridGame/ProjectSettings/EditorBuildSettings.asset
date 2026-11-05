@@ -4,6 +4,9 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/GridGame.unity
+    guid: dd6a5b25c99a7874fbe3476f8b5f4f87
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

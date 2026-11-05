@@ -75,6 +75,21 @@ namespace AiNative.Hosting
             CommandFile commands, HostEnvironment environment, ReplayRecord? expected = null,
             Action<JsonElement, int, int>? checkpointCompleted = null, Action<int>? operationStarting = null)
         {
+            RecordedRun? run = null;
+            foreach (JsonElement _ in RecordSteps(module, configuration, game, commands, environment,
+                game.Submit, game.Advance, completed => run = completed, expected, checkpointCompleted, operationStarting))
+            {
+                // CLI 驱动到结束；Unity 验收每个渲染帧仅驱动一次。
+            }
+            return run ?? throw new InvalidOperationException("记录未完成。");
+        }
+
+        /// <summary>惰性执行给定宿主的输入入口，每次枚举只发布一个检查点。game 是同一局的借用协议视图。</summary>
+        public static IEnumerable<JsonElement> RecordSteps(IGameModule module, JsonElement configuration, IHostedGame game,
+            CommandFile commands, HostEnvironment environment, Func<JsonElement, long> submit, Func<JsonElement> advance,
+            Action<RecordedRun> completed, ReplayRecord? expected = null, Action<JsonElement, int, int>? checkpointCompleted = null,
+            Action<int>? operationStarting = null)
+        {
             JsonElement initial = StateCodec.Encode(module, configuration, game, environment);
             JsonElement first = Checkpoint(module, configuration, game, null, Kind("initial"));
             if (expected != null)
@@ -86,13 +101,17 @@ namespace AiNative.Hosting
             var checkpoints = new List<JsonElement>();
             int accepted = 0, rejected = 0;
             checkpointCompleted?.Invoke(first, accepted, rejected);
+            if (commands.Operations.Count != 0)
+            {
+                yield return first;
+            }
             foreach (CommandOperation operation in commands.Operations)
             {
                 operationStarting?.Invoke(checkpoints.Count);
                 JsonElement result;
                 if (operation.Command.HasValue)
                 {
-                    long sequence = game.Submit(operation.Command.Value);
+                    long sequence = submit(operation.Command.Value);
                     result = JsonData.Write(writer =>
                     {
                         writer.WriteStartObject();
@@ -103,7 +122,7 @@ namespace AiNative.Hosting
                 }
                 else
                 {
-                    result = game.Advance();
+                    result = advance();
                     foreach (JsonElement input in result.GetProperty("inputs").EnumerateArray())
                     {
                         if (input.GetProperty("accepted").GetBoolean())
@@ -128,6 +147,10 @@ namespace AiNative.Hosting
                     }
                 }
                 checkpoints.Add(checkpoint);
+                if (checkpoints.Count < commands.Operations.Count)
+                {
+                    yield return checkpoint;
+                }
             }
             JsonElement replay = JsonData.Write(writer =>
             {
@@ -147,7 +170,9 @@ namespace AiNative.Hosting
                 writer.WriteEndArray();
                 writer.WriteEndObject();
             });
-            return new RecordedRun(replay, StateCodec.Encode(module, configuration, game, environment), game.Observe(), accepted, rejected);
+            completed(new RecordedRun(replay, StateCodec.Encode(module, configuration, game, environment), game.Observe(), accepted, rejected));
+            // Freeze the terminal snapshot before returning control to the scene's next frame.
+            yield return checkpoints.Count == 0 ? first : checkpoints[checkpoints.Count - 1];
         }
 
         public static HostComparison Compare(ReplayRecord expected, ReplayRecord actual)
