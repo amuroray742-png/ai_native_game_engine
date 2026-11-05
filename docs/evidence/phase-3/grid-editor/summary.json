@@ -1,4 +1,5 @@
 {
+  "unityProject": "examples/unity/GridGame",
   "inputs": {
     "grid.scenario.json": "a888f7ed5d204d4ffad523a352da11e6a1365d9921d190858810ff19bacba320",
     "grid.commands.json": "4b1fea6956852402b8a77c95db7922b6b0a1d91de78f106eca03d1a61ba48acd"
@@ -29,13 +30,13 @@
   },
   "unityEnvironment": {
     "architecture": "x64",
-    "buildHash": "92ec227ff50a0f9075d7a7c620dd64f1fe61bfdfa9cd75a40534dd4609e4eb4c",
+    "buildHash": "641ce892cd9c61b62a9a45bfb09675d53b34c34fee1bb6225c392d8a772d415b",
     "components": {
-      "AiNative.Core": "a90008e1d21775a4002a80f45eb399d866307f2d4600e4f151368ce846b9f80a",
-      "AiNative.GridGame": "13f3c0029a3b2dd5105925a8091384bb878233035a37abca519e3192bed30b79",
-      "AiNative.GridGame.Hosting": "49818811d2b6cff9bec826db1175699cb5d9ef315fe63677c3c0fb7ff5b1165a",
-      "AiNative.Hosting": "5ede84d4c6903e689ec66d99200404c77254d304ce3b28f9c834fcfb32cfcc98",
-      "Assembly-CSharp-Editor": "7cf8a255337d5b07ce6c28e012fe8f4ad9c5b1efd05aa1b9233622245e0582ba",
+      "AiNative.Core": "c8ec12fa5087168bee5ca72ae5e8b5cb25166bb06f3ff67fa8db68c083546cef",
+      "AiNative.GridGame": "49ab39790a71c19235171d549cd31b5256ab2d2b468ff298c0c9c64493c4d105",
+      "AiNative.GridGame.Hosting": "b1baab6ea61adbe0b8246c9d815af31e95b067bd26afef48313f6176f6581810",
+      "AiNative.Hosting": "e479837eb9bb664c09e1074592858a59f32bbccac05951ddf1cb928dcf5ed357",
+      "Assembly-CSharp-Editor": "d3ce483c52f22e3ec3fb0455245c1954fdea653e8dfdf4440f17900e987f0cd4",
       "Microsoft.Bcl.AsyncInterfaces": "82c3eb14261e9eda644d66abebc7a57530ea062c0b0813dc36b0681546d26e49",
       "System.IO.Pipelines": "9f5514995fc52aad781a2f7fc8ef999ecc78e8ccacaa15a6491d550de7f55bcf",
       "System.Runtime.CompilerServices.Unsafe": "fd67abc4c4af10affbcd42fd68a2a7bc361b26714afe6965d4d0d139459d8297",
@@ -50,14 +51,14 @@
   },
   "cliEnvironment": {
     "architecture": "x64",
-    "buildHash": "8664e0829ff1f62434dc197b5b80c7e3015170bbbbc80f84699bcf33d3e12711",
+    "buildHash": "375e0077136492e26e13d19c9fa853ff164c62c66599c821c966a72025438b64",
     "components": {
-      "AiNative.Core": "a90008e1d21775a4002a80f45eb399d866307f2d4600e4f151368ce846b9f80a",
-      "AiNative.Examples.Runner": "d0bf29bd0b43406de417457bc5e7b5b3c2c43071b4b824f5315852419c0311c6",
-      "AiNative.GridGame": "13f3c0029a3b2dd5105925a8091384bb878233035a37abca519e3192bed30b79",
-      "AiNative.GridGame.Hosting": "49818811d2b6cff9bec826db1175699cb5d9ef315fe63677c3c0fb7ff5b1165a",
-      "AiNative.Headless": "81f5cbb1522bed2591973af0826c98c4cc4d4cdae27dd08253221d25c80d9f5a",
-      "AiNative.Hosting": "5ede84d4c6903e689ec66d99200404c77254d304ce3b28f9c834fcfb32cfcc98",
+      "AiNative.Core": "c8ec12fa5087168bee5ca72ae5e8b5cb25166bb06f3ff67fa8db68c083546cef",
+      "AiNative.Examples.Runner": "16afb5d04f6f9d70f2bf4acc5d24cde888560a0b49393e94067ca9e40366fd2a",
+      "AiNative.GridGame": "49ab39790a71c19235171d549cd31b5256ab2d2b468ff298c0c9c64493c4d105",
+      "AiNative.GridGame.Hosting": "b1baab6ea61adbe0b8246c9d815af31e95b067bd26afef48313f6176f6581810",
+      "AiNative.Headless": "facfe69f654c7fb4cb2c6ef06ede009741c9c5d838453491cd2c25c97781e430",
+      "AiNative.Hosting": "e479837eb9bb664c09e1074592858a59f32bbccac05951ddf1cb928dcf5ed357",
       "System.IO.Pipelines": "7875941c62c402cbb1f3505883bf87ed74088f18171ff3a66d8c8fa06e511836",
       "System.Text.Encodings.Web": "a2c7ef05abc665de9c07dcb600914889d501c8cfa13973bbe3c60c45367bc291",
       "System.Text.Json": "9f4fd55056a3ccd6aa5f204933f9b8e3da412b060238cbeb8bb2be2fe4046f2a"

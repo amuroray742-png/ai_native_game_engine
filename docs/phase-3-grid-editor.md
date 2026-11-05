@@ -4,11 +4,11 @@ Windows x64 上，Unity Editor 和无头 CLI 各自执行同一场 GridGame。8 
 
 ## 打开示例
 
-需要 Python 3.10+、仓库指定的 .NET 10 SDK、Unity CLI 和已授权的 **Unity Editor 6000.3.23f1**。在仓库根目录运行：
+GridGame 的独立 Unity 工程根目录是 [examples/unity/GridGame](../examples/unity/GridGame)。`examples/unity/` 仅用于归类，Unity Hub 或 CLI 应打开具体游戏的目录。`Packages/` 和 `ProjectSettings/` 随 GridGame 提交，保存它的产品身份、Editor 版本和工程设置。需要 Python 3.10+、仓库指定的 .NET 10 SDK、Unity CLI 和已授权的 **Unity Editor 6000.3.23f1**。在仓库根目录运行：
 
 ```sh
 python scripts/unity_grid.py prepare
-unity open examples/UnityEditor
+unity open examples/unity/GridGame
 ```
 
 打开菜单 **Window > AI Native > GridGame**，直接在编辑模式操作。点击己方单位，再点击相邻格移动，或点击敌人攻击。`End turn` 切换阵营，`New match` 开新局。滑块调节每个事件的动画时长。窗口展示已完成表现的 Tick、行动方、行动点、单位生命和规则反馈。
@@ -19,7 +19,7 @@ unity open examples/UnityEditor
 
 ## 两个宿主如何复用一套规则
 
-- `prepare` 按仓库 lock 文件恢复并发布 GridGame 适配器的 netstandard2.1 程序集，将四个项目 DLL 和五个 JSON 运行依赖复制到 Editor 插件目录。NuGet 源包集中于 `third_party/nuget`。项目只提交源码、资源元数据、包清单和 Editor 版本，构建产物由脚本生成。
+- `prepare` 按仓库 lock 文件恢复并发布 GridGame 适配器的 netstandard2.1 程序集，将四个项目 DLL 和五个 JSON 运行依赖复制到该游戏工程的 Editor 插件目录。它同时将 CLI 使用的场景复制到该工程的 `Assets/StreamingAssets/grid.scenario.json`。窗口和批处理都从本工程读取场景，验收先核对这份文件与 CLI 输入逐字节一致。NuGet 源包集中于 `third_party/nuget`。
 - Editor 显式注册 `GridGameModule`。两个宿主共用 `GameRegistry.ReadScenario` 和同一个游戏模块创建对局。Editor 额外取得以该对局初始观察建立的顺序表现队列。真正的移动、攻击、业务拒绝和胜负都由 GridGame 在 `Advance` 中裁定。
 - 窗口将点击翻译成 `Move`、`Attack` 或 `EndTurn`。每帧绘制读取当前表现帧自带的观察和事件，主线程时钟只控制插值和命中反馈。关闭或重开窗口会清空旧队列、使旧帧失效并释放旧对局。
 - 批处理通过同一个 Editor 会话和 `HostVerification.Record` 生成 v2 记录。环境身份含实际加载的插件、窗口代码、Unity 模块和 Editor 版本。验收脚本逐个核对九个插件的 SHA-256。Editor 不引用 Runner、Headless 或 Jolt。
@@ -48,6 +48,6 @@ python scripts/unity_grid.py verify --output TestResults/grid-editor
 | 桌面窗口 | 向实际 Editor 窗口发送 MouseDown/MouseUp，驱动选择、移动、攻击；核对 Tick 2 窗口截图 |
 | 无头回归 | .NET 构建、236 项测试、108 次真实 CLI 验收、原生损坏探针及只读格式检查通过 |
 
-独立审查另从干净项目副本首次导入，使用相同版本的 Editor 复验快慢两份记录，均匹配 CLI 的 16 个检查点。
+独立审查将准备好的 GridGame 单独复制到仓库外，使用相同版本的 Editor 首次导入并运行，快慢两份记录均匹配 CLI 的 16 个检查点。该副本只从工程的 StreamingAssets 读取默认场景。
 
 本轮验收范围为 Windows x64 上的 GridGame Editor。PhysicsSandbox 的 Unity 接入、独立 Player、IL2CPP 和其他平台的 Editor 属于后续工作。现有云端 CI 执行无头回归，本页的 Unity 证据来自本地授权的真实 Editor。

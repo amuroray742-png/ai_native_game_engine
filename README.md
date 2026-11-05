@@ -45,7 +45,7 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.GridGame / GridGame.Hosting | 网格规则与专属协议 |
 | examples/AiNative.PhysicsSandbox / PhysicsSandbox.Hosting | 实时物理规则与专属协议 |
 | examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
-| examples/UnityEditor | GridGame 的 Unity Editor 窗口、点击输入和逐 Tick 比较入口 |
+| examples/unity/GridGame | GridGame 独立 Unity 工程，包含 Editor 窗口、点击输入和逐 Tick 比较入口 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |
 | third_party | 下载的 Jolt/joltc 源码与 NuGet 包；版本锁定，下载内容不提交 Git |
 
@@ -53,11 +53,11 @@ Core 和可移植库保持 netstandard2.1 / C# 9；Headless、Runner、测试使
 
 ## 验证
 
-**在 Unity Editor 里玩 GridGame**。安装并授权 Unity 6000.3.23f1，在仓库根目录准备 DLL，再打开项目。在菜单选择 `Window > AI Native > GridGame`。点击己方单位，再点相邻格移动或点敌方攻击。`End turn` 结束回合。
+**在 Unity Editor 里玩 GridGame**。每个接入 Unity 的示例都有自己的工程根目录、包清单和项目设置。安装并授权 Unity 6000.3.23f1，在仓库根目录为 GridGame 准备 DLL 和场景，再打开它的工程。在菜单选择 `Window > AI Native > GridGame`。点击己方单位，再点相邻格移动或点敌方攻击。`End turn` 结束回合。
 
 ```sh
 python scripts/unity_grid.py prepare
-unity open examples/UnityEditor
+unity open examples/unity/GridGame
 ```
 
 关闭这个项目的 Editor 后，使用 `python scripts/unity_grid.py verify --output TestResults/grid-editor` 启动真实 Editor 和 CLI 并保存逐 Tick 比较证据。[复现条件和验收结果](docs/phase-3-grid-editor.md)

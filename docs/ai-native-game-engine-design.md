@@ -37,6 +37,8 @@ flowchart TD
 
 游戏模块创建/恢复完整运行时，宿主不自行配对会话和规则。运行时独占游戏实例，物理示例独占物理世界。Dispose 幂等，释放后操作失败；候选恢复完全验证后才可替换旧对局。没有跨对局的可变玩法静态状态；Jolt 全局类型注册仅由原生世界引用计数管理。
 
+每个接入 Unity 的 Example Game 拥有独立工程，位于 `examples/unity/<Game>/`。该游戏独立维护 `Assets/`、`Packages/`、`ProjectSettings/` 和插件集合。GridGame 工程只装配 GridGame，PhysicsSandbox 接入时新建自己的工程并引入 Jolt。两者复用 Core、Hosting 和无头验收工具，玩法及表现代码归各自示例。
+
 ### 2.1 时间、输入与故障
 
 输入序号、已处理输入数、模拟 Tick、玩法回合相互独立。Submit 只排队。Advance 按序消费调用开始时全部输入，然后调用游戏推进一次，再发布绑定 Tick 的不可变观察、有序输入结果和事件。空输入也推进；调用期间不可重入。Core 不读系统时间。

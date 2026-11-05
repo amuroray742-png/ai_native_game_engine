@@ -10,7 +10,7 @@ import tempfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECT = ROOT / "examples/UnityEditor"
+PROJECT = ROOT / "examples/unity/GridGame"
 DATA = ROOT / "examples/data"
 ADAPTER = ROOT / "examples/AiNative.GridGame.Hosting"
 RUNNER = ROOT / "examples/AiNative.Examples.Runner"
@@ -38,6 +38,11 @@ def prepare():
             source, dest = Path(publish) / filename, target / filename
             if not dest.exists() or source.read_bytes() != dest.read_bytes():
                 shutil.copyfile(source, dest)
+    scenario = DATA / "grid.scenario.json"
+    bundled = PROJECT / "Assets/StreamingAssets" / scenario.name
+    bundled.parent.mkdir(parents=True, exist_ok=True)
+    if not bundled.exists() or bundled.read_bytes() != scenario.read_bytes():
+        shutil.copyfile(scenario, bundled)
 
 
 def verify(output):
@@ -60,11 +65,12 @@ def verify(output):
 
     # The Editor receives only the input files. It cannot read a CLI baseline that does not yet exist.
     subprocess.run(["unity", "run", str(PROJECT), "--timeout", "300", "--no-tail", "--log-file",
-                    str(output / "editor.log"), "--", "-executeMethod", "AiNative.Examples.UnityEditor.GridEditorAcceptance.Run"],
+                    str(output / "editor.log"), "--", "-executeMethod", "AiNative.Examples.GridGame.Editor.GridEditorAcceptance.Run"],
                    cwd=ROOT, env={**os.environ, "AINATIVE_GRID_EVIDENCE": str(output)}, check=True)
     baseline = output / "cli.replay.json"
     run = cli("run", ["run", "--scenario", scene, "--seed", "42", "--commands", commands, "--replay-out", baseline], "RunCompleted")
-    summary = {"inputs": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (scene, commands)},
+    summary = {"unityProject": PROJECT.relative_to(ROOT).as_posix(),
+               "inputs": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (scene, commands)},
                "seed": 42, "accepted": run["accepted"], "rejected": run["rejected"],
                "winner": run["observation"]["winner"], "comparisons": {}}
     ticks = [cp for cp in run["checkpoints"] if cp["result"]["kind"] == "tick"]

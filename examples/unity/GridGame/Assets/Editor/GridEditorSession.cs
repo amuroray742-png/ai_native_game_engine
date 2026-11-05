@@ -9,7 +9,7 @@ using AiNative.GridGame.Hosting;
 using AiNative.Hosting;
 using UnityEngine;
 
-namespace AiNative.Examples.UnityEditor
+namespace AiNative.Examples.GridGame.Editor
 {
     internal sealed class GridEditorSession : IDisposable
     {
@@ -26,7 +26,7 @@ namespace AiNative.Examples.UnityEditor
             Frames = frames;
         }
 
-        internal static string ExampleFile(string name) => Path.GetFullPath(Path.Combine(Application.dataPath, "../../data", name));
+        internal static string ScenarioPath => Path.Combine(Application.streamingAssetsPath, "grid.scenario.json");
         internal GridGameModule Module { get; }
         internal JsonElement Configuration { get; }
         internal IHostedGame Game { get; }

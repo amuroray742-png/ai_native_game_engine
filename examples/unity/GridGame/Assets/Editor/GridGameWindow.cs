@@ -4,7 +4,7 @@ using AiNative.GridGame;
 using UnityEditor;
 using UnityEngine;
 
-namespace AiNative.Examples.UnityEditor
+namespace AiNative.Examples.GridGame.Editor
 {
     public sealed class GridGameWindow : EditorWindow
     {
@@ -26,7 +26,7 @@ namespace AiNative.Examples.UnityEditor
         {
             try
             {
-                var candidate = new GridEditorSession(GridEditorSession.ExampleFile("grid.scenario.json"), GridEditorSession.ExampleSeed);
+                var candidate = new GridEditorSession(GridEditorSession.ScenarioPath, GridEditorSession.ExampleSeed);
                 _session?.Dispose();
                 _session = candidate;
                 _failure = null;

@@ -12,7 +12,7 @@ using AiNative.Hosting;
 using UnityEditor;
 using UnityEngine;
 
-namespace AiNative.Examples.UnityEditor
+namespace AiNative.Examples.GridGame.Editor
 {
     // Batch entry point for scripts/unity_grid.py. Errors must produce a non-zero Editor exit.
     public static class GridEditorAcceptance
@@ -23,6 +23,8 @@ namespace AiNative.Examples.UnityEditor
             {
                 string output = Environment.GetEnvironmentVariable("AINATIVE_GRID_EVIDENCE")
                     ?? throw new ArgumentException("Missing AINATIVE_GRID_EVIDENCE");
+                Require(File.ReadAllBytes(GridEditorSession.ScenarioPath).SequenceEqual(File.ReadAllBytes(Path.Combine(output, "grid.scenario.json"))),
+                    "Editor and CLI must start from identical scenario files");
                 Record(output, "fast", false);
                 Record(output, "slow", true);
                 VerifyClicks();
@@ -37,7 +39,7 @@ namespace AiNative.Examples.UnityEditor
 
         private static void Record(string output, string speed, bool slow)
         {
-            using var session = new GridEditorSession(Path.Combine(output, "grid.scenario.json"), GridEditorSession.ExampleSeed);
+            using var session = new GridEditorSession(GridEditorSession.ScenarioPath, GridEditorSession.ExampleSeed);
             var commands = CommandFile.Read(JsonData.Parse(File.ReadAllBytes(Path.Combine(output, "grid.commands.json"))), session.Module);
             RecordedRun run = HostVerification.Record(session.Module, session.Configuration, session.Game, commands, EnvironmentIdentity(session),
                 checkpointCompleted: (checkpoint, accepted, rejected) =>
@@ -94,7 +96,7 @@ namespace AiNative.Examples.UnityEditor
 
         private static void VerifyClicks()
         {
-            using var session = new GridEditorSession(GridEditorSession.ExampleFile("grid.scenario.json"), GridEditorSession.ExampleSeed);
+            using var session = new GridEditorSession(GridEditorSession.ScenarioPath, GridEditorSession.ExampleSeed);
             session.ClickCell(new GridPosition(0, 0));
             session.ClickCell(new GridPosition(1, 0));
             session.Present(0, 1);

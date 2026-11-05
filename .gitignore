@@ -23,16 +23,3 @@ Thumbs.db
 
 # Python build helper cache
 __pycache__/
-
-# GridGame Editor project. Unity generates the default settings on first import.
-/examples/UnityEditor/Library/
-/examples/UnityEditor/Temp/
-/examples/UnityEditor/Logs/
-/examples/UnityEditor/UserSettings/
-/examples/UnityEditor/obj/
-/examples/UnityEditor/*.csproj
-/examples/UnityEditor/*.sln*
-/examples/UnityEditor/ProjectSettings/*
-!/examples/UnityEditor/ProjectSettings/ProjectVersion.txt
-/examples/UnityEditor/Assets/Editor/Plugins/
-/examples/UnityEditor/Assets/Editor/Plugins.meta
