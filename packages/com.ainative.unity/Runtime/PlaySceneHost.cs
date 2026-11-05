@@ -12,6 +12,7 @@ namespace AiNative.Unity
         protected abstract void DisconnectScene();
         protected virtual void SampleInput() { }
         protected abstract void PresentFrame();
+        protected virtual void PumpFrame() => Host.Pump(Time.deltaTime, Time.timeScale == 0);
 
         protected void OnEnable()
         {
@@ -36,7 +37,7 @@ namespace AiNative.Unity
             try
             {
                 SampleInput();
-                Host.Pump(Time.deltaTime, Time.timeScale == 0);
+                PumpFrame();
                 PresentFrame();
             }
             catch

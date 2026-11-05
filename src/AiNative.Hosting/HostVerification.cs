@@ -90,89 +90,42 @@ namespace AiNative.Hosting
             Action<RecordedRun> completed, ReplayRecord? expected = null, Action<JsonElement, int, int>? checkpointCompleted = null,
             Action<int>? operationStarting = null)
         {
-            JsonElement initial = StateCodec.Encode(module, configuration, game, environment);
-            JsonElement first = Checkpoint(module, configuration, game, null, Kind("initial"));
+            var recorder = new HostTraceRecorder(module, configuration, game, environment);
+            JsonElement first = recorder.InitialCheckpoint;
             if (expected != null)
             {
                 JsonData.Require(JsonData.Hash(expected.Commands.Json) == JsonData.Hash(commands.Json)
                     && expected.Initial.Module.Id == module.Id && JsonData.Hash(expected.InitialCheckpoint) == JsonData.Hash(first),
                     "ComparisonInputMismatch", "$.initialCheckpoint");
             }
-            var checkpoints = new List<JsonElement>();
-            int accepted = 0, rejected = 0;
-            checkpointCompleted?.Invoke(first, accepted, rejected);
-            if (commands.Operations.Count != 0)
-            {
-                yield return first;
-            }
+            checkpointCompleted?.Invoke(first, 0, 0);
+            JsonElement last = first;
             foreach (CommandOperation operation in commands.Operations)
             {
-                operationStarting?.Invoke(checkpoints.Count);
-                JsonElement result;
+                yield return last;
+                int index = recorder.Count;
+                operationStarting?.Invoke(index);
                 if (operation.Command.HasValue)
                 {
-                    long sequence = submit(operation.Command.Value);
-                    result = JsonData.Write(writer =>
-                    {
-                        writer.WriteStartObject();
-                        writer.WriteString("kind", "submitted");
-                        writer.WriteString("sequence", StateCodec.Text(sequence));
-                        writer.WriteEndObject();
-                    });
+                    JsonElement command = operation.Command.Value;
+                    last = recorder.Submitted(command, submit(command));
                 }
                 else
                 {
-                    result = advance();
-                    foreach (JsonElement input in result.GetProperty("inputs").EnumerateArray())
-                    {
-                        if (input.GetProperty("accepted").GetBoolean())
-                        {
-                            accepted++;
-                        }
-                        else
-                        {
-                            rejected++;
-                        }
-                    }
+                    last = recorder.Advanced(advance());
                 }
-                JsonElement checkpoint = Checkpoint(module, configuration, game, checkpoints.Count, result);
-                // Publish only fully captured checkpoints. A later fault preserves this trusted prefix.
-                checkpointCompleted?.Invoke(checkpoint, accepted, rejected);
+                checkpointCompleted?.Invoke(last, recorder.Accepted, recorder.Rejected);
                 if (expected != null)
                 {
-                    IReadOnlyList<FieldDifference> differences = Differences(expected.Checkpoints[checkpoints.Count], checkpoint);
+                    var differences = Differences(expected.Checkpoints[index], last);
                     if (differences.Count != 0)
                     {
-                        throw new ReplayMismatchException(checkpoints.Count, differences, accepted, rejected);
+                        throw new ReplayMismatchException(index, differences, recorder.Accepted, recorder.Rejected);
                     }
                 }
-                checkpoints.Add(checkpoint);
-                if (checkpoints.Count < commands.Operations.Count)
-                {
-                    yield return checkpoint;
-                }
             }
-            JsonElement replay = JsonData.Write(writer =>
-            {
-                writer.WriteStartObject();
-                writer.WriteNumber("formatVersion", 2);
-                writer.WritePropertyName("initialSnapshot");
-                initial.WriteTo(writer);
-                writer.WritePropertyName("commands");
-                commands.Json.WriteTo(writer);
-                writer.WritePropertyName("initialCheckpoint");
-                first.WriteTo(writer);
-                writer.WriteStartArray("checkpoints");
-                foreach (JsonElement checkpoint in checkpoints)
-                {
-                    checkpoint.WriteTo(writer);
-                }
-                writer.WriteEndArray();
-                writer.WriteEndObject();
-            });
-            completed(new RecordedRun(replay, StateCodec.Encode(module, configuration, game, environment), game.Observe(), accepted, rejected));
-            // Freeze the terminal snapshot before returning control to the scene's next frame.
-            yield return checkpoints.Count == 0 ? first : checkpoints[checkpoints.Count - 1];
+            completed(recorder.Finish());
+            yield return last;
         }
 
         public static HostComparison Compare(ReplayRecord expected, ReplayRecord actual)
@@ -250,36 +203,5 @@ namespace AiNative.Hosting
             return text.Length <= 256 ? text : text.Substring(0, 128) + "… sha256=" + JsonData.Hash(value);
         }
 
-        private static JsonElement Checkpoint(IGameModule module, JsonElement configuration, IHostedGame game, int? index, JsonElement result)
-        {
-            JsonElement runtime = StateCodec.Runtime(game), state = game.CaptureGameState();
-            return JsonData.Write(writer =>
-            {
-                writer.WriteStartObject();
-                if (index.HasValue)
-                {
-                    writer.WriteNumber("operationIndex", index.Value);
-                }
-                else
-                {
-                    writer.WriteNull("operationIndex");
-                }
-                writer.WritePropertyName("runtime");
-                runtime.WriteTo(writer);
-                writer.WritePropertyName("state");
-                state.WriteTo(writer);
-                writer.WriteString("stateHash", StateCodec.Digest(module, JsonData.Hash(configuration), runtime, state));
-                writer.WritePropertyName("result");
-                result.WriteTo(writer);
-                writer.WriteEndObject();
-            });
-        }
-
-        private static JsonElement Kind(string kind) => JsonData.Write(writer =>
-        {
-            writer.WriteStartObject();
-            writer.WriteString("kind", kind);
-            writer.WriteEndObject();
-        });
     }
 }

@@ -49,7 +49,10 @@ namespace AiNative.Hosting
             }
             JsonData.Require(pending == 0, "PendingCommands", "$.operations");
             // Re-encode typed commands, so equivalent numeric/case spellings have one representation.
-            JsonElement canonical = JsonData.Write(writer =>
+            return new CommandFile(Encode(operations), operations.AsReadOnly());
+        }
+
+        internal static JsonElement Encode(IEnumerable<CommandOperation> operations) => JsonData.Write(writer =>
             {
                 writer.WriteStartObject();
                 writer.WriteNumber("formatVersion", 2);
@@ -68,7 +71,5 @@ namespace AiNative.Hosting
                 writer.WriteEndArray();
                 writer.WriteEndObject();
             });
-            return new CommandFile(canonical, operations.AsReadOnly());
-        }
     }
 }

@@ -1,0 +1,7 @@
+{
+  "name": "PhysicsSandbox.Play",
+  "references": [
+    "AiNative.Unity",
+    "UnityEngine.UI"
+  ]
+}

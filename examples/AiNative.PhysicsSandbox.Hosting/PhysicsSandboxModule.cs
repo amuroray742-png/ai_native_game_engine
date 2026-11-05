@@ -35,7 +35,7 @@ namespace AiNative.PhysicsSandbox.Hosting
             writer.WriteStringValue("Remove(id)");
             writer.WriteStringValue("Impulse(id, impulse[3])");
             writer.WriteEndArray();
-            writer.WriteString("observation", "stable body IDs, pose, velocity, active state; ordered contact events");
+            writer.WriteString("observation", "stable body IDs, shape, size, pose, velocity, active state; ordered contact events");
             writer.WriteEndObject();
         });
 
@@ -66,10 +66,14 @@ namespace AiNative.PhysicsSandbox.Hosting
 
         public void ValidateResult(JsonElement result) => SandboxData.ValidateResult(result);
 
-        public IHostedGame Create(JsonElement configuration, ulong seed)
+        public SandboxCommand DecodePlayCommand(JsonElement command) => SandboxData.ReadCommand(command);
+        public JsonElement EncodePlayCommand(SandboxCommand command) => JsonData.Write(writer => SandboxData.WriteCommand(writer, command));
+        public IHostedGame Create(JsonElement configuration, ulong seed) => CreatePlay(configuration, seed);
+
+        public SandboxHost CreatePlay(JsonElement configuration, ulong seed)
         {
             IReadOnlyList<BodyDefinition> bodies = SandboxData.ReadConfiguration(ReadConfiguration(configuration));
-            return new SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<BodyState>, SandboxState>.Create(
+            return new SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<ObservedBody>, SandboxState>.Create(
                 () => SandboxSimulation.Create(_factory, bodies, SandboxData.ReadWorkerThreads(configuration)), seed, Timing));
         }
 
@@ -78,7 +82,7 @@ namespace AiNative.PhysicsSandbox.Hosting
             state = ReadState(configuration, state, runtime.Processed);
             JsonData.Require(runtime.Timing.TicksPerSecond == 60, "TimingMismatch", "$.runtime.ticksPerSecond");
             SandboxState snapshot = SandboxData.ReadState(state, _factory.Backend);
-            return new SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<BodyState>, SandboxState>.Restore(
+            return new SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<ObservedBody>, SandboxState>.Restore(
                 new SimulationSnapshot<SandboxState>(runtime, snapshot), data => SandboxSimulation.Restore(_factory, data)));
         }
 
@@ -93,11 +97,11 @@ namespace AiNative.PhysicsSandbox.Hosting
         }
     }
 
-    internal sealed class SandboxHost : HostedGame<SandboxCommand, IReadOnlyList<BodyState>, SandboxState>
+    public sealed class SandboxHost : HostedGame<SandboxCommand, IReadOnlyList<ObservedBody>, SandboxState>
     {
-        internal SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<BodyState>, SandboxState> runtime) : base(runtime) { }
+        internal SandboxHost(SimulationRuntime<SandboxCommand, IReadOnlyList<ObservedBody>, SandboxState> runtime) : base(runtime) { }
         protected override SandboxCommand ReadCommand(JsonElement command) => SandboxData.ReadCommand(command);
-        protected override void WriteObservation(Utf8JsonWriter writer, IReadOnlyList<BodyState> bodies) => SandboxData.WriteBodies(writer, bodies);
+        protected override void WriteObservation(Utf8JsonWriter writer, IReadOnlyList<ObservedBody> bodies) => SandboxData.WriteObservation(writer, bodies);
         protected override void WriteState(Utf8JsonWriter writer, SandboxState state) => SandboxData.WriteState(writer, state);
         protected override void WriteEvent(Utf8JsonWriter writer, GameEvent value) => SandboxData.WriteEvent(writer, value);
     }

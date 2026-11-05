@@ -1,6 +1,6 @@
 # Unity Play 宿主
 
-打开 GridGame 工程的 `GridGame.unity`，按 Play 后在 Game 视图完成一局。框架包归仓库维护，每个示例携带自己的场景、包清单、配置和插件。Windows Editor 是本次验收目标。
+两个示例复用 `AiNative.Unity`，各自维护场景、包清单、配置和插件。GridGame 在玩家操作时手动推进。PhysicsSandbox 在 Windows x64 Editor 中按 60 Hz 推进，由 Jolt 更新刚体。下文保留 GridGame 的复现步骤与原始证据。沙盒的暂停输入、读档首帧与 CLI 续跑另有完整记录。[PhysicsSandbox 实施与验收](phase-3-physics-sandbox-unity-plan.md)
 
 ```mermaid
 flowchart LR
@@ -8,6 +8,9 @@ flowchart LR
   Scene --> Module[GridGameModule.CreatePlay]
   Host --> Session[Hosting / IPlaySession]
   Module --> Session
+  Sandbox[SandboxScene] --> Host
+  Sandbox --> SandboxModule[PhysicsSandboxModule.CreatePlay]
+  SandboxModule --> Session
   Session --> Core[Core / SimulationRuntime]
   Board[Sprite 棋盘与 UGUI HUD] --> Scene
   CLI[CLI 与 v2 记录] --> Protocol[Hosting / IHostedGame]
@@ -20,9 +23,9 @@ flowchart LR
 
 **手动时序。** 选中单位 → 更新本地选中态。点目标 → 提交强类型命令 → 请求一次手动 Tick → Core 消费待处理命令 → 宿主入队不可变结果 → 后续渲染帧播放移动或受击 → 完成该帧。显式空步也推进，动画和 UI 查询都不推进。
 
-**固定时序。** Update 传入本帧游戏时间 → 累加有效时长 → 按会话频率每帧最多执行四步 → 余量保留到下一帧 → 实时缓冲交付相邻观察与独立事件批次。暂停不消费积压也不积累暂停时长。恢复后使用正常游戏帧时长。时间设置由模块决定，玩法内核不读取 Unity 时钟。
+**固定时序。** `PumpFrame` 将本帧游戏时间传给 `PlayHost.Pump`。每帧最多推进四步，结余留到下一帧。PhysicsSandbox 在游戏内暂停时仍接收输入，时钟保留已有积压。恢复后的下一步按提交顺序消费输入。验收模式通过 `Pump` 的单步回调记录每个实际完成的 Tick。实时缓冲向表现层交付相邻观察和独立的事件批次。
 
-**表现与证据。** 正交相机把屏幕坐标映射为格子，HUD 射线优先。棋盘、单位和输入映射由 GridGame 维护。实际场景在连续 Play 帧中提交、推进与记录，快慢两局均比较 CLI 的 16 个 v2 检查点。截图指定已呈现 Tick。固定时钟以测试会话验证，Jolt 实时示例、Player 与 IL2CPP 独立验收。
+**表现与证据。** 正交相机把屏幕坐标映射为格子，HUD 射线优先。棋盘、单位和输入映射由 GridGame 维护。实际场景在连续 Play 帧中提交、推进与记录，快慢两局均比较 CLI 的 16 个 v2 检查点。截图指定已呈现 Tick。GridGame 本轮以测试会话验证固定时钟。真实 Jolt 场景的独立验收见[PhysicsSandbox 记录](phase-3-physics-sandbox-unity-plan.md)。Player 与 IL2CPP 仍待验证。
 
 验收记录每次操作和表现完成时的 Time.frameCount，核对操作跨帧。60 Hz 一次收到十步时长时依次推进 4、4、2 步，中间暂停不消耗积压。候选捕获失败要释放候选一次并允许旧局继续运行；替换成功后旧回调必须失效。prepare 将公共包内嵌到独立工程。
 
@@ -44,7 +47,7 @@ unity open examples/unity/GridGame
 
 使用 `python scripts/unity_grid.py verify --output TestResults/grid-play` 验收。脚本复制准备好的工程，在临时副本中分别设置 Domain Reload，运行带图形输出的 Unity Test Runner，保存 Game 视图截图、XML、Editor 日志、实际操作与呈现帧号、快慢两局的 v2 回放及 CLI 比较结果。额外一次测试在同一进程进出 Play 两次，检查对局释放。随后对比独立 CLI 记录，并注入单字段差异验证首个分歧定位。
 
-## 本地验收记录
+## GridGame 本地验收记录
 
 Windows x64、Unity 6000.3.23f1。Domain Reload 开、关各通过 7 项 PlayMode 测试，另通过 1 项同进程两次进出 Play 的测试。快慢表现与两种重载设置组成的四组比较均匹配初始检查点及 15 个操作检查点。种子 42 下共 8 个 Tick，6 次接受、1 次拒绝，A 方获胜。负对照定位到 Tick 2 的 `$.result.inputs[0].error`。[机器摘要与真实帧号](evidence/phase-3/grid-play/summary.json)
 

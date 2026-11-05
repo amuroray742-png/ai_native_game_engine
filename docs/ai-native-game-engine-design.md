@@ -1,6 +1,6 @@
 # AI Native 游戏引擎设计思路
 
-当前设计基线为通用框架 v2，详细签名、协议和物理边界见 [v2 契约](framework-v2.md)，实际验证见 [v2 验收](v2-acceptance.md)。GridGame 使用 [Unity Play 公共宿主](unity-play-host.md)。第一、第二阶段、原宿主边界与原 Editor 窗口材料保留为历史证据。PhysicsSandbox 的 Unity 集成、Player 和 IL2CPP 仍待实施。
+当前设计基线为通用框架 v2，详细签名、协议和物理边界见 [v2 契约](framework-v2.md)，实际验证见 [v2 验收](v2-acceptance.md)。GridGame 使用 [Unity Play 公共宿主](unity-play-host.md)。第一、第二阶段、原宿主边界与原 Editor 窗口材料保留为历史证据。PhysicsSandbox 的 Windows Editor 接入与逐 Tick 证据见[第三阶段实施与验收](phase-3-physics-sandbox-unity-plan.md)，Player 和 IL2CPP 另行验收。
 
 实现同时遵循[架构与代码规范](engineering-guidelines.md)。边界变化必须同步契约、验证与验收说明。
 
@@ -24,6 +24,9 @@ flowchart TD
     Scene --> PlayHost[AiNative.Unity]
     PlayHost --> Hosting
     Runner --> PhysicsAdapter[PhysicsSandbox.Hosting]
+    SandboxScene[PhysicsSandbox Play 场景] --> PlayHost
+    SandboxScene --> PhysicsAdapter
+    SandboxScene --> Jolt
     GridAdapter --> Hosting
     GridAdapter --> Grid[GridGame 规则]
     Grid --> Core
@@ -38,13 +41,13 @@ flowchart TD
 
 游戏模块创建/恢复完整运行时，宿主不自行配对会话和规则。运行时独占游戏实例，物理示例独占物理世界。Dispose 幂等，释放后操作失败；候选恢复完全验证后才可替换旧对局。没有跨对局的可变玩法静态状态；Jolt 全局类型注册仅由原生世界引用计数管理。
 
-每个接入 Unity 的 Example Game 拥有独立工程，位于 `examples/unity/<Game>/`。该游戏独立维护 `Assets/`、`Packages/`、`ProjectSettings/` 和插件集合。GridGame 工程只装配 GridGame，PhysicsSandbox 接入时新建自己的工程并引入 Jolt。两者复用 Core、Hosting 和无头验收工具，玩法及表现代码归各自示例。
+每个接入 Unity 的 Example Game 拥有独立工程，位于 `examples/unity/<Game>/`。该游戏独立维护 `Assets/`、`Packages/`、`ProjectSettings/` 和插件集合。GridGame 工程只装配 GridGame，PhysicsSandbox 在自己的工程装配 Jolt。两者复用 Core、Hosting 和无头验收工具，玩法及表现代码归各自示例。
 
 ### 2.1 时间、输入与故障
 
 输入序号、已处理输入数、模拟 Tick、玩法回合相互独立。Submit 只排队。Advance 按序消费调用开始时全部输入，然后调用游戏推进一次，再发布绑定 Tick 的不可变观察、有序输入结果和事件。空输入也推进；调用期间不可重入。Core 不读系统时间。
 
-时间设置在创建时固定并进入记录。GridGame 的手动模式步长为零，回合由 EndTurn 规则决定；PhysicsSandbox 为 60 Hz。物理规则明确执行输入/物理前规则 → 一次 Jolt 更新 → 已排序碰撞消费/物理后规则。当前只做最小示例，没有额外系统调度抽象。
+时间设置在创建时固定并进入记录。GridGame 的手动模式步长为零，回合由 EndTurn 规则决定。PhysicsSandbox 以 60 Hz 推进，每步依次处理输入、执行一次 Jolt 更新、消费排好序的碰撞事件。Unity 宿主每个渲染帧最多补四步，输入归入提交后下一个尚未执行的 Tick。游戏内暂停保留待处理输入和已有积压，继续后的第一步按提交序号消费队列。
 
 业务拒绝不修改该输入的状态、不消耗随机数，后续输入与物理仍执行。意外异常使运行时进入故障状态，不能继续推进或保存；CLI 保留最后可信检查点，不把故障步骤算作已完成。
 
@@ -68,7 +71,7 @@ Jolt 锁定 5.6.0 提交 e77f175595e64cb44218cc9d9d56fc365ad0e36a，单精度、
 
 CLI 提供 games / describe / run / inspect / replay / compare。输入先严格校验；协议错误、业务拒绝、模拟故障和比较分歧有独立语义。文件发布禁止覆盖已有目标，失败保留已发布制品并报告准确清单。各宿主自行读取文件和环境，Editor 和 Headless 共用 Hosting 的场景校验、记录与比较协议。
 
-测试覆盖模块引用、原玩法、时间语义、状态与随机、物理连续性、生命周期、错误协议、表现与真实进程。完整证据由验收脚本和 CI 归档，历史测试与45次CLI逐项映射见验收索引。截图与性能不能代替规则断言；Unity 与人工体验验证须在第三阶段单独完成。
+无头验证覆盖规则、随机状态、快照连续性、资源释放和真实 CLI 进程。Windows/Linux 工作流执行无头回归。两个 Unity 工程另在本机 Windows Editor 运行 PlayMode 测试，并保存能与 CLI 逐操作比较的记录。人工试玩、独立 Player 和 IL2CPP 单独验收。[验收索引](v2-acceptance.md)
 
 ## 4. Agent 工作流与项目知识
 
@@ -143,7 +146,7 @@ CLI 提供 games / describe / run / inspect / replay / compare。输入先严格
 
 ## 6. 验收场景与收益测量
 
-以下是各阶段实现必须验证的行为；已完成项与测试证据见阶段验收记录。快照、跨进程恢复和回放的本地证据见第二阶段 P2-T3–T5 记录；P2-T6 的[验收入口与证据索引](phase-2-acceptance.md)已有本地及远端 CI 证据，上传制品已核验。GridGame 的宿主一致性与表现独立性见 [Play 验收](unity-play-host.md)。
+以下是各阶段实现必须验证的行为；已完成项与测试证据见阶段验收记录。快照、跨进程恢复和回放的本地证据见第二阶段 P2-T3–T5 记录；P2-T6 的[验收入口与证据索引](phase-2-acceptance.md)已有本地及远端 CI 证据，上传制品已核验。GridGame 的快慢表现对照见 [GridGame Play 验收](unity-play-host.md)。PhysicsSandbox 的暂停输入、读档首帧和独立 CLI 续跑见 [PhysicsSandbox Play 验收](phase-3-physics-sandbox-unity-plan.md)。
 
 | 场景 | 预期结果 |
 | --- | --- |

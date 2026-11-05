@@ -21,6 +21,8 @@ Submit 分配连续输入序号并入队。Advance 消费调用开始时全部�
 
 手动模式 ticksPerSecond=0、DeltaSeconds=0；固定频率为创建时确定的整数频率，PhysicsSandbox 为60。Core 不访问墙上时间。宿主决定何时调用 Advance，并负责采样与追赶，不在 Core 引入累积器或系统调度。
 
+固定频率宿主把实时输入交给提交后下一个尚未执行的 Tick。同一 Tick 开始前的多条输入按提交序号消费一次，补步和暂停均沿用这条规则。PhysicsSandbox 的暂停输入策略、具体帧序列和检查点见[Unity 实施与验收](phase-3-physics-sandbox-unity-plan.md)。
+
 业务拒绝须保证该输入不改变游戏状态或消耗随机数；Core 检查随机不变量，游戏测试验证状态不变量。后续输入、计时与物理继续运行。意外异常使实例故障，后续正常操作失败，只有释放可继续。计数溢出明确失败；Submit 溢出发生在入队之前。
 
 ExportState/StateCodec.Encode 只在健康、无待处理输入时成功。物理 Save 还要求碰撞已消费，删除后已完成下一次 Step；不会为保存自动执行输入。CaptureGameState 用于验证中有待输入的检查点，不是可恢复快照：这种检查点只有完整操作前缀才能解释，不能传给恢复入口。
@@ -42,6 +44,10 @@ C# PhysicsSnapshotCodec 编码物理恢复 blob：格式标识 0x344a4e41、固�
 Jolt 原始 BodyManager::RestoreState 使用手动锁，不保证读取异常时解锁。构建脚本在 build 目录生成单一翻译单元副本，将该作用域改为 RAII 解锁；原始源码 checkout 保持精确固定提交和 clean。补丁脚本与生成源摘要进入构建身份。同时对线程池启动失败增加停止和回收补丁，并用独立子进程故障注入验证。MSVC 对 joltc 与项目边界使用 `/EHs /EHc-`，避免假设所有 C 接口均不抛异常而省略清理。升级 Jolt/joltc 必须重新审查结构布局与补丁，不能只改版本字符串。
 
 原生复用 joltc 的 Update2、TempAllocator 及物理设置 Get/Set；临时分配器初始 16 MiB，使用上游 malloc fallback，配置进入构建清单。专用扩展仅保留完整内部状态、单线程 jobs、异常安全创建与最终 registry 清理。
+
+沙盒的强类型 Play 会话和 CLI 视图共享同一实例。托管 `IPhysicsWorld.GetBodies()` 现在返回 `IReadOnlyList<ObservedBody>`。每个观察从世界登记的不可变定义复制形状与尺寸，并附带本 Tick 的位姿、速度及活动状态。已有物理接口实现需更新签名并重新编译。v2 存档的 `state.bodies` 仍写入原有诊断字段，几何定义仍由原物理快照恢复。[几何观察](../src/AiNative.Physics/PhysicsTypes.cs)
+
+PhysicsSandbox 游戏 JSON 中的有限 binary32 数值沿用 .NET CLI 的最短可往返十进制表示。Mono 的写入长度、负零及接近两个浮点值中点时的读取结果会与 .NET 不同，沙盒适配在 Mono 中使用显式的最近值、同距取偶规则，保留负零。原生 ABI、快照字段和游戏版本沿用 v2。[数值编解码](../examples/AiNative.PhysicsSandbox.Hosting/PhysicsJsonFloat.cs)
 
 ## v2 文件协议
 
@@ -99,7 +105,9 @@ replay重新执行且在首个分歧处停止，保留实际可信前缀；compa
 
 SequentialPresentationQueue要求同实例连续Tick，BeginNext→检查IsActive→应用UI/动画→Complete。只使用该帧自带观察。Reset后旧帧无法Complete或继续写新对局。
 
-[Unity Play](unity-play-host.md) 与 CLI 共用 `GameRegistry.ReadScenario`。GridGame 的 `CreatePlay` 返回同一会话的强类型入口和工具协议视图。场景宿主向 `IPlaySession` 提交类型化命令并接收 `AdvanceTick` 的帧，CLI 从 `IGameModule.Create` 取得 `IHostedGame`。跨帧记录使用 `HostVerification.RecordSteps`，通过实际场景入口执行每个操作，在交还最后一个检查点前冻结终局状态。
+[Unity Play](unity-play-host.md) 与 CLI 共用 `GameRegistry.ReadScenario`。GridGame 的 `CreatePlay` 返回同一会话的强类型入口和工具协议视图。场景宿主向 `IPlaySession` 提交类型化命令并接收 `AdvanceTick` 的帧，CLI 从 `IGameModule.Create` 取得 `IHostedGame`。GridGame 的跨帧验收使用 `HostVerification.RecordSteps`，通过实际场景入口执行每个操作，在交还最后一个检查点前冻结终局状态。
+
+固定频率 Unity 会话由 `PlayHost.Pump` 独占推进。验收模式在实际提交返回后和每个单步完成后调用 `HostTraceRecorder`，从同一会话捕获状态并核对相邻操作。单步观察回调内禁止再次推进、提交、替换或释放宿主。CLI 的主动驱动与 Unity 的被动记录使用同一检查点与回放编码。帧日志单列实际绘制的前后 Tick 与插值比例。[PhysicsSandbox 验收](phase-3-physics-sandbox-unity-plan.md)
 
 RealtimePresentationBuffer保留Previous/Current两个观察，插值由表现适配按时间设置完成。PresentationEvents独立FIFO，含输入结果和事件，不附带历史完整观察。TakeEvents只取一次，延迟回调执行前检查IsActive；Reset清空旧批次并更换generation。IsAt检查当前指定Tick及该Tick事件已取出，宿主仍负责应用完成与相机/UI刷新。不会无限保存历史画面，也不会为截图清空未来所有表现。
 

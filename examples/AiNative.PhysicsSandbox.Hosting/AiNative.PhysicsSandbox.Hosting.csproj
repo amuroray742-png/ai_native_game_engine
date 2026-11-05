@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>netstandard2.1</TargetFramework><LangVersion>9.0</LangVersion></PropertyGroup>
   <ItemGroup><ProjectReference Include="../AiNative.PhysicsSandbox/AiNative.PhysicsSandbox.csproj"/><ProjectReference Include="../../src/AiNative.Hosting/AiNative.Hosting.csproj"/></ItemGroup>
+  <ItemGroup><InternalsVisibleTo Include="AiNative.Tests"/></ItemGroup>
 </Project>

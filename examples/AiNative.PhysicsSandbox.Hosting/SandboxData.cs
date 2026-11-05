@@ -53,9 +53,12 @@ namespace AiNative.PhysicsSandbox.Hosting
                 WriteVector(writer, body.Position);
                 writer.WritePropertyName("rotation");
                 WriteRotation(writer, body.Rotation);
-                writer.WriteNumber("mass", body.Mass);
-                writer.WriteNumber("friction", body.Friction);
-                writer.WriteNumber("restitution", body.Restitution);
+                writer.WritePropertyName("mass");
+                PhysicsJsonFloat.Write(writer, body.Mass);
+                writer.WritePropertyName("friction");
+                PhysicsJsonFloat.Write(writer, body.Friction);
+                writer.WritePropertyName("restitution");
+                PhysicsJsonFloat.Write(writer, body.Restitution);
                 writer.WriteEndObject();
             }
             writer.WriteEndArray();
@@ -154,26 +157,46 @@ namespace AiNative.PhysicsSandbox.Hosting
             writer.WriteEndObject();
         }
 
-        internal static void WriteBodies(Utf8JsonWriter writer, IReadOnlyList<BodyState> bodies)
+        private static void WriteBodies(Utf8JsonWriter writer, IReadOnlyList<BodyState> bodies)
         {
             writer.WriteStartArray();
             foreach (BodyState body in bodies)
             {
                 writer.WriteStartObject();
-                writer.WriteString("id", Text(body.Id));
-                writer.WritePropertyName("position");
-                WriteVector(writer, body.Position);
-                writer.WritePropertyName("rotation");
-                WriteRotation(writer, body.Rotation);
-                writer.WritePropertyName("velocity");
-                WriteVector(writer, body.Velocity);
-                writer.WritePropertyName("angularVelocity");
-                WriteVector(writer, body.AngularVelocity);
-                writer.WriteBoolean("active", body.Active);
-                writer.WriteBoolean("dynamic", body.Dynamic);
+                WriteBodyFields(writer, body);
                 writer.WriteEndObject();
             }
             writer.WriteEndArray();
+        }
+
+        internal static void WriteObservation(Utf8JsonWriter writer, IReadOnlyList<ObservedBody> bodies)
+        {
+            writer.WriteStartArray();
+            foreach (ObservedBody body in bodies)
+            {
+                writer.WriteStartObject();
+                WriteBodyFields(writer, body);
+                writer.WriteString("shape", body.Shape.ToString());
+                writer.WritePropertyName("size");
+                WriteVector(writer, body.Size);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+        }
+
+        private static void WriteBodyFields(Utf8JsonWriter writer, BodyState body)
+        {
+            writer.WriteString("id", Text(body.Id));
+            writer.WritePropertyName("position");
+            WriteVector(writer, body.Position);
+            writer.WritePropertyName("rotation");
+            WriteRotation(writer, body.Rotation);
+            writer.WritePropertyName("velocity");
+            WriteVector(writer, body.Velocity);
+            writer.WritePropertyName("angularVelocity");
+            WriteVector(writer, body.AngularVelocity);
+            writer.WriteBoolean("active", body.Active);
+            writer.WriteBoolean("dynamic", body.Dynamic);
         }
 
         internal static void WriteEvent(Utf8JsonWriter writer, GameEvent value)
@@ -238,8 +261,8 @@ namespace AiNative.PhysicsSandbox.Hosting
         }
         private static float Number(JsonElement value)
         {
-            JsonData.Require(value.ValueKind == JsonValueKind.Number && value.TryGetSingle(out _), "InvalidProtocol", "$.number");
-            float number = value.GetSingle();
+            JsonData.Require(value.ValueKind == JsonValueKind.Number, "InvalidProtocol", "$.number");
+            float number = PhysicsJsonFloat.Read(value);
             JsonData.Require(BodyDefinition.Finite(number), "InvalidProtocol", "$.number");
             return number;
         }
@@ -263,18 +286,18 @@ namespace AiNative.PhysicsSandbox.Hosting
         private static void WriteVector(Utf8JsonWriter writer, Vector3 value)
         {
             writer.WriteStartArray();
-            writer.WriteNumberValue(value.X);
-            writer.WriteNumberValue(value.Y);
-            writer.WriteNumberValue(value.Z);
+            PhysicsJsonFloat.Write(writer, value.X);
+            PhysicsJsonFloat.Write(writer, value.Y);
+            PhysicsJsonFloat.Write(writer, value.Z);
             writer.WriteEndArray();
         }
         private static void WriteRotation(Utf8JsonWriter writer, Quaternion value)
         {
             writer.WriteStartArray();
-            writer.WriteNumberValue(value.X);
-            writer.WriteNumberValue(value.Y);
-            writer.WriteNumberValue(value.Z);
-            writer.WriteNumberValue(value.W);
+            PhysicsJsonFloat.Write(writer, value.X);
+            PhysicsJsonFloat.Write(writer, value.Y);
+            PhysicsJsonFloat.Write(writer, value.Z);
+            PhysicsJsonFloat.Write(writer, value.W);
             writer.WriteEndArray();
         }
         private static string Text(ulong value) => value.ToString(CultureInfo.InvariantCulture);

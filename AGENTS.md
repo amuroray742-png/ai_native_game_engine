@@ -3,6 +3,7 @@
 开始修改前阅读 [设计文档](docs/ai-native-game-engine-design.md) 和 [架构与代码规范](docs/engineering-guidelines.md)，并检查当前任务涉及的模块。详细规则以这两份文档为准，本文件只提供执行入口。
 
 - 当前运行入口已迁移到通用框架 v2。阅读 docs/framework-v2.md 与 docs/v2-acceptance.md 确认当前契约及已验证范围；旧阶段材料保留历史证据；不要把 Unity 或尚未执行的 CI 验收描述为已完成，也不要为文档任务安装依赖或生成空项目。
+- 第三阶段的 Windows Editor 验收分别记录在 [GridGame Play 宿主](docs/unity-play-host.md) 和 [PhysicsSandbox 实施与验收](docs/phase-3-physics-sandbox-unity-plan.md)。修改 Unity 宿主时对照相应示例的入口、通过条件和归档。
 - 保持纯 C# 模拟内核独立于 Unity、文件系统和网络；具体玩法由宿主装配，表现层不裁定规则。
 - 优先直接、清楚的实现。新增抽象、依赖或跨模块接口时说明当前问题和必要性，不为假设需求建设框架。
 - 命名、控制流和目录结构应方便人阅读；不能以缩短代码或方便生成代码为理由隐藏副作用与执行顺序。

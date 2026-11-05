@@ -1,5 +1,7 @@
 # 物理适配分层迁移
 
+本文保留物理分层迁移时的契约和无头验收。后续 PhysicsSandbox 接入 Unity 时，托管 `GetBodies()` 返回带几何信息的 `ObservedBody`，外部物理实现需更新签名并重编译。原生 ABI 4 与 v2 快照格式继续使用。[当前契约](framework-v2.md) · [Windows Editor 验收](phase-3-physics-sandbox-unity-plan.md)
+
 ## 目标与边界
 
 将实体身份、BodyID 分配、快照元数据和候选恢复编排迁到 `AiNative.Physics.Jolt`。Core、Physics 公共契约及游戏规则保持不变；继续使用 netstandard2.1 / C# 9。原生层保留 Jolt 资源聚合所有权、异常边界、工作线程事件收集、批量查询及内部状态校验与恢复。

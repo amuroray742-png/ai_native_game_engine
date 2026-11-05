@@ -10,6 +10,7 @@ namespace AiNative.Unity
     {
         private IPlaySession<TCommand, TObservation>? _session;
         private double _pendingSteps;
+        private bool _pumping;
         private bool _disposed;
         private bool _faulted;
         public SequentialPresentationQueue<TObservation>? Sequential { get; private set; }
@@ -20,6 +21,7 @@ namespace AiNative.Unity
         /// <summary>工厂交付新会话的所有权。初始观察或队列创建失败时保留旧对局。</summary>
         public void Replace(Func<IPlaySession<TCommand, TObservation>> create)
         {
+            EnsureOutsidePump();
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(PlayHost<TCommand, TObservation>));
@@ -78,10 +80,15 @@ namespace AiNative.Unity
             _faulted = false;
         }
 
-        public long Submit(TCommand command) => Current.Submit(command);
+        public long Submit(TCommand command)
+        {
+            EnsureOutsidePump();
+            return Current.Submit(command);
+        }
 
         public TickResult<TObservation> AdvanceManual()
         {
+            EnsureOutsidePump();
             if (Current.Timing.TicksPerSecond != 0)
             {
                 throw new InvalidOperationException("Fixed sessions advance in Pump.");
@@ -89,8 +96,12 @@ namespace AiNative.Unity
             return Step();
         }
 
-        public void Pump(double deltaSeconds, bool paused)
+        public void Pump(double deltaSeconds, bool paused) => Pump(deltaSeconds, paused, null);
+
+        /// <summary>观察器只读已完成的单步，返回后才执行下一步。</summary>
+        public void Pump(double deltaSeconds, bool paused, Action<TickResult<TObservation>>? stepCompleted)
         {
+            EnsureOutsidePump();
             int frequency = Current.Timing.TicksPerSecond;
             if (frequency == 0 || paused)
             {
@@ -101,10 +112,29 @@ namespace AiNative.Unity
                 throw new ArgumentOutOfRangeException(nameof(deltaSeconds));
             }
             _pendingSteps += deltaSeconds * frequency;
-            for (int count = 0; count < 4 && _pendingSteps >= 1; count++)
+            _pumping = true;
+            try
             {
-                Step();
-                _pendingSteps -= 1;
+                for (int count = 0; count < 4 && _pendingSteps >= 1; count++)
+                {
+                    var frame = Step();
+                    _pendingSteps -= 1;
+                    stepCompleted?.Invoke(frame);
+                }
+            }
+            catch
+            {
+                _faulted = true;
+                throw;
+            }
+            finally { _pumping = false; }
+        }
+
+        private void EnsureOutsidePump()
+        {
+            if (_pumping)
+            {
+                throw new InvalidOperationException("Cannot modify the host inside its fixed step.");
             }
         }
 
@@ -148,6 +178,7 @@ namespace AiNative.Unity
 
         public void Dispose()
         {
+            EnsureOutsidePump();
             if (_disposed)
             {
                 return;

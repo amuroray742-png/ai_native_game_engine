@@ -76,7 +76,7 @@ namespace AiNative.Physics.Jolt
             JoltNative.Check(JoltNative.aj_impulse(_handle, entry.BodyId, impulse));
         }
 
-        public IReadOnlyList<BodyState> GetBodies()
+        public IReadOnlyList<ObservedBody> GetBodies()
         {
             EnsureAvailable();
             var native = new JoltNative.BodyView[_bodies.Count];
@@ -85,12 +85,17 @@ namespace AiNative.Physics.Jolt
             {
                 throw new InvalidOperationException("Native body count differs from managed ownership.");
             }
-            var result = new BodyState[count];
+            var result = new ObservedBody[count];
             for (int index = 0; index < count; index++)
             {
                 JoltNative.BodyView body = native[index];
-                result[index] = new BodyState(_bodies.EntityFor(body.BodyId), body.Position, body.Rotation,
-                    body.Velocity, body.AngularVelocity, body.Active != 0, body.Dynamic != 0);
+                BodyDefinition definition = _bodies.Find(_bodies.EntityFor(body.BodyId)).Definition;
+                if (definition.Dynamic != (body.Dynamic != 0))
+                {
+                    throw new InvalidOperationException("Native motion type differs from registered definition.");
+                }
+                result[index] = new ObservedBody(definition, body.Position, body.Rotation,
+                    body.Velocity, body.AngularVelocity, body.Active != 0);
             }
             Array.Sort(result, (first, second) => first.Id.CompareTo(second.Id));
             return Array.AsReadOnly(result);
