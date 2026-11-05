@@ -65,7 +65,7 @@ namespace AiNative.Hosting
             return JsonData.WithProperty(checkpoint, "state", state);
         }
 
-        private static void ValidateTransition(JsonElement previous, JsonElement current, CommandOperation operation, IGameModule module)
+        internal static void ValidateTransition(JsonElement previous, JsonElement current, CommandOperation operation, IGameModule module)
         {
             JsonElement before = previous.GetProperty("runtime"), after = current.GetProperty("runtime"), result = current.GetProperty("result");
             long submitted = StateCodec.Long(before, "submitted"), processed = StateCodec.Long(before, "processed"), tick = StateCodec.Long(before, "tick");

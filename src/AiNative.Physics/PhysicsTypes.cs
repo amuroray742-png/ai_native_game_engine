@@ -47,7 +47,7 @@ namespace AiNative.Physics
         public static bool Finite(Vector3 value) => Finite(value.X) && Finite(value.Y) && Finite(value.Z);
     }
 
-    public sealed class BodyState
+    public class BodyState
     {
         public BodyState(ulong id, Vector3 position, Quaternion rotation, Vector3 velocity,
             Vector3 angularVelocity, bool active, bool dynamic)
@@ -67,6 +67,20 @@ namespace AiNative.Physics
         public Vector3 AngularVelocity { get; }
         public bool Active { get; }
         public bool Dynamic { get; }
+    }
+
+    /// <summary>活体观察，引用同一世界登记的不可变定义。v2 快照的诊断数据仍使用 BodyState。</summary>
+    public sealed class ObservedBody : BodyState
+    {
+        public ObservedBody(BodyDefinition definition, Vector3 position, Quaternion rotation, Vector3 velocity,
+            Vector3 angularVelocity, bool active)
+            : base(definition.Id, position, rotation, velocity, angularVelocity, active, definition.Dynamic)
+        {
+            Shape = definition.Shape;
+            Size = definition.Size;
+        }
+        public ShapeKind Shape { get; }
+        public Vector3 Size { get; }
     }
 
     public sealed class PhysicsContact
@@ -114,7 +128,7 @@ namespace AiNative.Physics
         void Add(BodyDefinition definition);
         void Remove(ulong id);
         void ApplyImpulse(ulong id, Vector3 impulse);
-        IReadOnlyList<BodyState> GetBodies();
+        IReadOnlyList<ObservedBody> GetBodies();
         IReadOnlyList<PhysicsContact> Step(float seconds);
         PhysicsSnapshot Capture();
     }

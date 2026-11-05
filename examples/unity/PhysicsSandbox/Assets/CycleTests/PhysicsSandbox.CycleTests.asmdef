@@ -1,0 +1,1 @@
+{"name":"PhysicsSandbox.CycleTests","references":["PhysicsSandbox.Play","AiNative.Unity"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"],"overrideReferences":true,"precompiledReferences":["nunit.framework.dll","AiNative.Physics.Jolt.dll","AiNative.Physics.dll","AiNative.Core.dll","AiNative.Hosting.dll","AiNative.PhysicsSandbox.dll"]}

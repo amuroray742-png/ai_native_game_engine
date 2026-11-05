@@ -1,0 +1,22 @@
+{
+  "name": "PhysicsSandbox.PlayTests",
+  "references": [
+    "PhysicsSandbox.Play",
+    "AiNative.Unity",
+    "UnityEngine.UI"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "AiNative.Core.dll",
+    "AiNative.Hosting.dll",
+    "AiNative.Physics.dll",
+    "AiNative.Physics.Jolt.dll",
+    "AiNative.PhysicsSandbox.dll",
+    "AiNative.PhysicsSandbox.Hosting.dll",
+    "System.Text.Json.dll"
+  ]
+}

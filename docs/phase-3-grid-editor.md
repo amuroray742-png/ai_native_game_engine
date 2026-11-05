@@ -52,4 +52,4 @@ python scripts/unity_grid.py verify --output TestResults/grid-editor
 
 独立审查将准备好的 GridGame 单独复制到仓库外，使用相同版本的 Editor 首次导入并运行，快慢两份记录均匹配 CLI 的 16 个检查点。该副本只从工程的 StreamingAssets 读取默认场景。
 
-本轮验收范围为 Windows x64 上的 GridGame Editor。PhysicsSandbox 的 Unity 接入、独立 Player、IL2CPP 和其他平台的 Editor 属于后续工作。现有云端 CI 执行无头回归，本页的 Unity 证据来自本地授权的真实 Editor。
+本轮验收范围为 Windows x64 上的 GridGame Editor。PhysicsSandbox 后来完成了独立的 [Windows Editor 验收](phase-3-physics-sandbox-unity-plan.md)。独立 Player、IL2CPP 和其他平台的 Editor 仍待验证。现有云端 CI 执行无头回归，本页的 Unity 证据来自本地授权的真实 Editor。

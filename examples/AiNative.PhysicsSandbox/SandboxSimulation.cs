@@ -82,7 +82,7 @@ namespace AiNative.PhysicsSandbox
         public IReadOnlyList<BodyState> Bodies { get; }
     }
 
-    public sealed class SandboxSimulation : IGameSimulation<SandboxCommand, IReadOnlyList<BodyState>, SandboxState>
+    public sealed class SandboxSimulation : IGameSimulation<SandboxCommand, IReadOnlyList<ObservedBody>, SandboxState>
     {
         private readonly IPhysicsWorld _world;
         private ulong _nextId;
@@ -171,7 +171,7 @@ namespace AiNative.PhysicsSandbox
             return Array.AsReadOnly(_world.Step(context.Timing.DeltaSeconds)
                 .Select(contact => (GameEvent)new ContactChanged(contact)).ToArray());
         }
-        public IReadOnlyList<BodyState> GetState() => _world.GetBodies();
+        public IReadOnlyList<ObservedBody> GetState() => _world.GetBodies();
         public SandboxState ExportState() => new SandboxState(_nextId, _world.Capture(), _world.GetBodies());
         public void Dispose() => _world.Dispose();
     }

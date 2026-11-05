@@ -6,9 +6,16 @@
 
 后续 C#/原生分层迁移的契约和实际检查见[物理分层迁移](managed-physics-migration.md)。
 
-第三阶段当前入口与逐 Tick 对照见[Unity Play 宿主](unity-play-host.md)。上一版 Editor 窗口的证据保存在[历史验收](phase-3-grid-editor.md)。
+## 第三阶段 Windows Editor 验收
 
-## 验收入口与范围
+| 示例 | 本地验收范围 | 可复核证据 |
+| --- | --- | --- |
+| GridGame | 快慢表现与两种 Domain Reload 设置共四组，每组匹配 16 个检查点 | [Play 宿主记录](unity-play-host.md) · [机器摘要](evidence/phase-3/grid-play/summary.json) |
+| PhysicsSandbox | 两种 Domain Reload 设置各通过 11 项 PlayMode 测试和 1 项退出 Play 测试。每种设置比较均匀推进、补步、暂停输入以及 Tick 90、91 的读档续跑，共十组匹配 | [实施与验收](phase-3-physics-sandbox-unity-plan.md) · [机器摘要](evidence/phase-3/physics-play/summary.json) · [原始制品](evidence/phase-3/physics-play/physics-play-evidence.zip) |
+
+PhysicsSandbox 同轮本地无头回归通过 249 项 .NET 测试、108 次 CLI 进程验收及原生损坏探针。两份 Editor 记录来自本机 Windows x64。远端工作流运行无头检查，Player、IL2CPP 与人工试玩仍待单独验证。旧 GridGame 窗口的验证范围见[历史验收](phase-3-grid-editor.md)。
+
+## 迁移前 v2 基线的验收入口与范围
 
 | 范围 | 可执行入口/证据 |
 | --- | --- |
@@ -22,7 +29,7 @@
 
 本地复现命令见[README](../README.md#验证)。输出目录须不存在；process-index.json逐项保存实际命令/退出码/code，inputs、snapshot、replay、stdout/stderr、environment.json与native-probe结果同目录。TRX单列；原生构建材料含源码pin、编译器、flags、补丁hash、compile_commands与实际binary hash。
 
-## 本轮记录
+## 迁移前 v2 基线的运行记录
 
 2026-11-03 Windows x64 初次完整验证：213项单元测试、80次CLI、1581个截断位置和1582个单字节变异通过；TestResults/v2-windows-final、TestResults/v2-unit。随后按独立审查修复装配/诊断和补充迁移回归；2026-11-04最终本地单元222项通过（TestResults/v2-unit-final），80次CLI与原生probe重跑通过（TestResults/v2-windows-reviewed）。独立Reviewer已复核这些结果，未发现剩余代码阻断项。
 

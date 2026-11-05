@@ -1,0 +1,119 @@
+{
+  "scene": "physics.scenario.json",
+  "seed": 42,
+  "workerThreads": 2,
+  "tests": {
+    "on": [
+      "CatchupAndRestoreBothBoundaries",
+      "CommandFloatHasTheCliBitsAndSpelling(\"-0\",int.MinValue,\"-0\")",
+      "CommandFloatHasTheCliBitsAndSpelling(\"1.0000000596046447753906250000000001\",1065353217,\"1.0000001\")",
+      "CommandFloatHasTheCliBitsAndSpelling(\"1.0000001788139343261718749999999999\",1065353217,\"1.0000001\")",
+      "CommandFloatHasTheCliBitsAndSpelling(\"7.038531E-26\",363742205,\"7.038531E-26\")",
+      "CompletedStepCannotRecursivelyPumpOrReplace",
+      "ExitingPlayReleasesTheOnlyWorld",
+      "FileSaveAndPausedRestore",
+      "FractionalPauseAndFailedReplacement",
+      "GameViewPointerQueuesInputWhilePaused",
+      "PausedInputAndDebt",
+      "UniformSteps"
+    ],
+    "off": [
+      "CatchupAndRestoreBothBoundaries",
+      "CommandFloatHasTheCliBitsAndSpelling(\"-0\",int.MinValue,\"-0\")",
+      "CommandFloatHasTheCliBitsAndSpelling(\"1.0000000596046447753906250000000001\",1065353217,\"1.0000001\")",
+      "CommandFloatHasTheCliBitsAndSpelling(\"1.0000001788139343261718749999999999\",1065353217,\"1.0000001\")",
+      "CommandFloatHasTheCliBitsAndSpelling(\"7.038531E-26\",363742205,\"7.038531E-26\")",
+      "CompletedStepCannotRecursivelyPumpOrReplace",
+      "ExitingPlayReleasesTheOnlyWorld",
+      "FileSaveAndPausedRestore",
+      "FractionalPauseAndFailedReplacement",
+      "GameViewPointerQueuesInputWhilePaused",
+      "PausedInputAndDebt",
+      "UniformSteps"
+    ]
+  },
+  "comparisons": {
+    "on-uniform": 245,
+    "on-catchup": 245,
+    "on-pause": 14,
+    "on-from-90": 153,
+    "on-from-91": 150,
+    "off-uniform": 245,
+    "off-catchup": 245,
+    "off-pause": 14,
+    "off-from-90": 153,
+    "off-from-91": 150
+  },
+  "negative": {
+    "on": {
+      "operationIndex": 7,
+      "tick": 5,
+      "difference": {
+        "path": "$.result.inputs[1].error",
+        "expected": "\"UnknownBody\"",
+        "actual": "\"StaticBody\""
+      }
+    },
+    "off": {
+      "operationIndex": 7,
+      "tick": 5,
+      "difference": {
+        "path": "$.result.inputs[1].error",
+        "expected": "\"UnknownBody\"",
+        "actual": "\"StaticBody\""
+      }
+    }
+  },
+  "inputs": {
+    "physics.scenario.json": "758a4fe6b3472cdb2e4b009525df73aa634ab32d929349f154e23839b5f4527c",
+    "physics.commands.json": "7a9e2cdda88ed415bf213bf84d0e8e83d57e4775b3ddc690b7d9a620061a8617",
+    "pause.commands.json": "4ecb823baab973f0bfb9e90ac7710277c6cf352de4c9279dac6b834399efb675"
+  },
+  "editor": "6000.3.23f1",
+  "unityEnvironment": {
+    "architecture": "x64",
+    "buildHash": "485fc2c3ab4c303780f69ca5e7e5e85c474a05347fa968a7da19532157cdb02c",
+    "components": {
+      "AiNative.Core": "51dd0308f7c9087bbf09da81cbe10c2593600d729ba9743f3422c918fb181835",
+      "AiNative.Hosting": "eb0f2c7d4940795e34b52a3a0e6f76d805dfcf846b6dcf4d600558367104aadf",
+      "AiNative.Physics": "838a864fcb3efd58e3c215e6c45f3a3231c68e60364b43415c2ce1526a1fbfce",
+      "AiNative.Physics.Jolt": "6ec92b346febacc3b33b1254972fbf745762fa1f4a91201cefc5a7d88095487a",
+      "AiNative.PhysicsSandbox": "2bbb643b5e7853007341cb9ed05eec9130a8311f5a3f9a5d1d6d81e83cfb9959",
+      "AiNative.PhysicsSandbox.Hosting": "501ff5142735c762f1b08a0acf792f00295add970700eea67a3960e89a624b87",
+      "AiNative.Unity": "b225b6dff88c149291fd389e0b70db4e08c800e0ee553c0ab034cd7879a67e0c",
+      "Microsoft.Bcl.AsyncInterfaces": "82c3eb14261e9eda644d66abebc7a57530ea062c0b0813dc36b0681546d26e49",
+      "PhysicsSandbox.Play": "a7ec086c4f50bfcbc90da984d81240fe164f10280a32c8091f4f95d6aa2be763",
+      "System.IO.Pipelines": "9f5514995fc52aad781a2f7fc8ef999ecc78e8ccacaa15a6491d550de7f55bcf",
+      "System.Runtime.CompilerServices.Unsafe": "fd67abc4c4af10affbcd42fd68a2a7bc361b26714afe6965d4d0d139459d8297",
+      "System.Text.Encodings.Web": "6630388e3573f1d6500891723b30f21d8545e14370707b4d4328e6f61aaca233",
+      "System.Text.Json": "136262fc12b3473cf408a4f5a3e604c73019b8baa0d3593205a87df67c7c4228",
+      "UnityEngine.CoreModule": "0fa704172fa3538d85d16ee8c0aba3912b23cee3db7f6aa7081b91bc69034207",
+      "UnityEngine.UI": "4cfc3e9de3dad47cc9e0ef1af1fa68b01a74fb7043be0b03a924f8dcbe1899e4",
+      "ainative_jolt.build": "7285dc87cb49dcbd8027e3e2294f369683222bedce97f10e7a5131eb5aefc228",
+      "ainative_jolt.dll": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25"
+    },
+    "os": "WindowsEditor",
+    "runtime": "Unity 6000.3.23f1 / Mono 4.0.30319.42000"
+  },
+  "cliEnvironment": {
+    "architecture": "x64",
+    "buildHash": "91a803b5df5891ed6ee2bdcc6a30e4b232ce28142b0274f4fe7e21587917d776",
+    "components": {
+      "AiNative.Core": "51dd0308f7c9087bbf09da81cbe10c2593600d729ba9743f3422c918fb181835",
+      "AiNative.Examples.Runner": "3a07f2cdb48174b44795f6a38a142fed81453a4123218a890de5f920a80de350",
+      "AiNative.Headless": "a4578a1ca9a57d86a080644a9a769c14da570ea923d47e1bb009b491e004e23b",
+      "AiNative.Hosting": "eb0f2c7d4940795e34b52a3a0e6f76d805dfcf846b6dcf4d600558367104aadf",
+      "AiNative.Physics": "838a864fcb3efd58e3c215e6c45f3a3231c68e60364b43415c2ce1526a1fbfce",
+      "AiNative.Physics.Jolt": "6ec92b346febacc3b33b1254972fbf745762fa1f4a91201cefc5a7d88095487a",
+      "AiNative.PhysicsSandbox": "2bbb643b5e7853007341cb9ed05eec9130a8311f5a3f9a5d1d6d81e83cfb9959",
+      "AiNative.PhysicsSandbox.Hosting": "501ff5142735c762f1b08a0acf792f00295add970700eea67a3960e89a624b87",
+      "System.IO.Pipelines": "7875941c62c402cbb1f3505883bf87ed74088f18171ff3a66d8c8fa06e511836",
+      "System.Text.Encodings.Web": "a2c7ef05abc665de9c07dcb600914889d501c8cfa13973bbe3c60c45367bc291",
+      "System.Text.Json": "9f4fd55056a3ccd6aa5f204933f9b8e3da412b060238cbeb8bb2be2fe4046f2a",
+      "ainative_jolt.build": "7285dc87cb49dcbd8027e3e2294f369683222bedce97f10e7a5131eb5aefc228",
+      "ainative_jolt.dll": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25"
+    },
+    "os": "windows",
+    "runtime": "10.0.13"
+  }
+}

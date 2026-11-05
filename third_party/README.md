@@ -14,4 +14,6 @@ NuGet包恢复位置由[Directory.Build.props](../Directory.Build.props)统一�
 
 项目维护的适配、补丁与验证代码位于[native/jolt](../native/jolt)，原生中间文件和发布产物位于`artifacts/`；运行时所需依赖由构建复制到各项目输出目录。
 
+Windows Editor 的 PhysicsSandbox 使用 `artifacts/native/win-x64/` 中的 `ainative_jolt.dll` 和 `native-build.json`。先运行 `python scripts/build_native.py`，再运行 `python scripts/unity_physics.py prepare`。准备脚本核对清单中的 DLL 摘要，复制插件和场景数据。运行时核对实际加载的 DLL，以便存档和回放记录正确的环境身份。[准备脚本](../scripts/unity_physics.py) · [试玩入口](../README.md#验证)
+
 从旧目录升级时，可以将`TestResults/native-deps/JoltPhysics`与`TestResults/native-deps/joltc`移动到本目录对应位置，再执行上述命令。原生构建清单记录实际源码路径，移动后重建可能改变构建身份；严格快照恢复仍遵循[当前契约](../docs/framework-v2.md)，需要时重新生成回放材料。

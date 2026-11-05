@@ -2,9 +2,9 @@
 
 可复用的纯 C# 玩法内核与工具链。GridGame（手动回合制）和 PhysicsSandbox（60 Hz 真实 Jolt 刚体）作为独立 Example，共用输入、快照、回放、比较和 CLI。
 
-通用框架 v2 与当前 joltc ABI 4 分层适配已通过[Windows/Linux 双平台验收](https://github.com/rayss1/ai_native_game_engine/actions/runs/41837315399)。GridGame 的 Unity 入口是独立工程里的 Play 场景。PhysicsSandbox 的 Unity 接入、Player 与 IL2CPP 留给后续阶段。[设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md) · [Play 宿主与验收](docs/unity-play-host.md)
+GridGame 和 PhysicsSandbox 各有一个独立 Unity 工程，均已在 Windows x64 Editor 与 CLI 逐 Tick 对照。PhysicsSandbox 的十组比较覆盖均匀推进、补步、暂停输入和两处读档续跑。Player 与 IL2CPP 另行验收。[GridGame 验收](docs/unity-play-host.md) · [PhysicsSandbox 验收](docs/phase-3-physics-sandbox-unity-plan.md) · [架构设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md)
 
-物理后端现已迁移至固定版本 **joltc + 项目扩展**，支持显式0..16工作线程、完整状态恢复与同线程配置确定性回放。PhysicsSandbox场景使用游戏版本2和必填`configuration.workerThreads`（示例为2）。当前 ABI 4 将实体映射、快照元数据及恢复编排迁到 C#，原生层保留资源清理、事件收集和内部状态能力；旧物理记录需要重新生成。当前验证见[物理分层迁移](docs/managed-physics-migration.md)，此前记录见[joltc迁移](docs/joltc-migration.md)。
+物理后端使用固定版本的 **joltc + 项目扩展**，支持 0–16 个工作线程、完整状态恢复和同线程配置的确定性回放。PhysicsSandbox 场景使用游戏版本 2，必填 `configuration.workerThreads`（示例取 2）。ABI 4 迁移时，C# 接管了实体映射、快照元数据与恢复编排，原生层负责资源清理、事件收集和内部状态。旧 ABI 的物理记录需要重新生成。该迁移提交已有独立的 Windows/Linux 无头 CI 记录。[物理分层迁移与 CI 制品](docs/managed-physics-migration.md) · [joltc 迁移历史](docs/joltc-migration.md)
 
 第三方依赖统一存放在 [`third_party/`](third_party/README.md)：Jolt/joltc源码由原生构建脚本获取，NuGet包由`dotnet restore --locked-mode`恢复到`third_party/nuget/`。
 
@@ -47,6 +47,7 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
 | packages/com.ainative.unity | 场景生命周期、手动与固定步长推进、类型化 Tick 交付 |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
+| examples/unity/PhysicsSandbox | 独立 Windows Editor 工程，提供 Jolt 沙盒、实时输入、存读档和逐 Tick 对照 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |
 | third_party | 下载的 Jolt/joltc 源码与 NuGet 包；版本锁定，下载内容不提交 Git |
 
@@ -64,6 +65,20 @@ unity open examples/unity/GridGame
 在 Project 窗口双击 [Assets/Scenes/GridGame.unity](examples/unity/GridGame/Assets/Scenes/GridGame.unity)，点击工具栏 **Play**，在 **Game** 视图点击左下角的薄荷色棋子，再点右边一格移动，点珊瑚色棋子攻击。`End turn` 切换行动方，`New match` 重开。
 
 使用 `python scripts/unity_grid.py verify --output TestResults/grid-play` 执行 PlayMode 和 CLI 对照。脚本使用临时工程副本，分别验证开启和关闭 Domain Reload 的情况，输出目录必须是新的。[验收方式与证据](docs/unity-play-host.md)
+
+**试玩 PhysicsSandbox**。在 Windows x64 上准备已锁定的 Jolt DLL 和沙盒工程，再打开场景按 Play。
+
+```sh
+python scripts/build_native.py
+python scripts/unity_physics.py prepare
+unity open examples/unity/PhysicsSandbox
+```
+
+打开 [PhysicsSandbox 场景](examples/unity/PhysicsSandbox/Assets/Scenes/PhysicsSandbox.unity)。用 **Spawn sphere / Spawn box** 生成刚体，在 **Body ID** 输入目标编号后施加冲量或删除。**Pause** 后的点击会排队，**Resume** 后在下一步处理。**Save / Load** 使用本机单个存档槽，读档后暂停在保存的 Tick。
+
+运行 `python scripts/unity_physics.py verify --output TestResults/physics-play` 可在临时工程中复现两种 Domain Reload 设置的 PlayMode、退出 Play 和独立 CLI 验收。使用新的输出目录。[通过条件与原始证据](docs/phase-3-physics-sandbox-unity-plan.md)
+
+**无头回归**按下列顺序运行。
 
 ```sh
 python scripts/build_native.py
