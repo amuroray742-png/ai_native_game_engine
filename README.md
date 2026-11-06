@@ -46,13 +46,17 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.PhysicsSandbox / PhysicsSandbox.Hosting | 实时物理规则与专属协议 |
 | examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
 | packages/com.ainative.unity | 场景生命周期、手动与固定步长推进、类型化 Tick 交付 |
-| packages/com.ainative.unitycore | UnityCore 包骨架，含程序集定义与接口目录占位，尚未接入示例 |
+| packages/com.ainative.unitycore | UnityCore 运行时接口与 UniTask 依赖，PhysicsSandbox 通过本地包引用 |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
 | examples/unity/PhysicsSandbox | 独立 Windows Editor 工程，提供 Jolt 沙盒、实时输入、存读档和逐 Tick 对照 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |
 | third_party | 下载的 Jolt/joltc 源码与 NuGet 包；版本锁定，下载内容不提交 Git |
 
 Core 和可移植库保持 netstandard2.1 / C# 9；Headless、Runner、测试使用 .NET 10。框架没有 Example 引用，也没有反射插件发现或通用 ECS。
+
+UnityCore 声明 [UniTask 2.5.11](https://github.com/Cysharp/UniTask/releases/tag/2.5.11) 依赖，并引用 `UniTask` 程序集，供 Unity PlayerLoop 异步等待使用。使用 UnityCore 的项目需在 `Packages/manifest.json` 配置 OpenUPM 注册表 `https://package.openupm.com`，作用域为 `com.cysharp.unitask`；[PhysicsSandbox 配置](examples/unity/PhysicsSandbox/Packages/manifest.json)已包含此项。该依赖仅用于 Unity 侧，纯 C# 模拟内核保持独立；新增依赖不改变 v2 模拟与文件协议。
+
+PhysicsSandbox 安装了 Unity CLI 的 `com.unity.pipeline` 插件，固定版本为 `0.10.0-exp.1`（实验版）。打开项目后，可在仓库根目录运行 `unity status --project-path examples/unity/PhysicsSandbox --format json` 检查连接，运行 `unity command editor status --project-path examples/unity/PhysicsSandbox --format json` 读取编辑器状态。CLI 命令显式指定项目路径，以免操作其他已打开的 Unity 工程。
 
 ## 验证
 
