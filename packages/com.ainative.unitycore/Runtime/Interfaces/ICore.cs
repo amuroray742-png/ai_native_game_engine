@@ -7,7 +7,7 @@ using Cysharp.Threading.Tasks;
 
 namespace AiNative.UnityCore.Interfaces
 {
-    /// <summary>Unity 应用服务的装配入口。生命周期与模块回调均在 Unity 主线程执行。</summary>
+    /// <summary>Unity 应用服务的装配入口。仅支持主线程调用；生命周期与模块完成须由调用方保证回到主线程。</summary>
     public interface ICore
     {
         CoreState State { get; }

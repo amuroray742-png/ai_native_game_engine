@@ -12,7 +12,7 @@
 
 公共入口改为 `RunAsync(CancellationToken = default)`、`CloseAsync()`、`RestartAsync(CancellationToken = default)`；旧 `Close`、`Restart` 不再保留。`IModule.Initialize/Start` 增加 CancellationToken，返回的 `UniCoreException?` 为 null 表示成功。原 `Logger.Inst` 改为传入 `ICore.Logger`，入口诊断可使用 `Core.Log`。移除泛型反射 Singleton 和对外可修改的 ModuleManager 列表。
 
-所有生命周期入口、模块回调及异步完成须在 Unity 主线程执行。模块必须响应取消，释放尚未交付的局部资源；尤其退出 Play 的取消收尾不能依赖下一次 PlayerLoop。外部操作不能立即取消时，模块须自行隔离并回收迟到结果，不可在关闭后发布资源。
+Core 只支持 Unity 主线程使用，不记录线程 ID、不检查调用线程，也不提供自动切线程或并发支持。所有生命周期入口、外部取消请求、模块回调及异步完成须在 Unity 主线程执行；模块主动使用后台任务时，负责在返回前切回主线程。模块必须响应取消，释放尚未交付的局部资源；尤其退出 Play 的取消收尾不能依赖下一次 PlayerLoop。外部操作不能立即取消时，模块须自行隔离并回收迟到结果，不可在关闭后发布资源。
 
 RunAsync/RestartAsync 的外部 CancellationToken 仅控制启动；成功后断开外部取消注册。传给模块的内部令牌仍保留到 CloseAsync 请求取消，避免模块已取消而驱动仍运行。多个初始化共同响应取消时保留 Canceled 结果；混有真实错误或清理错误时仍报告失败。关闭操作保存独立完成源，允许关闭等待者同步恢复后启动下一轮，不改变其他等待者所等待的关闭结果。
 
@@ -28,6 +28,8 @@ RunAsync/RestartAsync 的外部 CancellationToken 仅控制启动；成功后断
 | 退出 Play / 应用 / 脚本重载 | 立即隔离旧 Core 并请求关闭。SubsystemRegistration 为下一次 Play 开放新实例；旧实例不能发布成功或改写新实例。 |
 
 每轮只对已经进入 Initialize 的模块调用 Shut，包括部分初始化失败者；Shut 必须同步、幂等且能释放部分资源。错误通知只是通知，不能将失败改成成功。初始化任务先捕获各自错误，使 WhenAll 等待所有任务；仅消费其返回数组一次，不能再次读取池化 UniTask。
+
+模块返回的具体错误直接进入通知、清理及任务失败流程，不先抛出再捕获。现有 Run/Close/Restart 的 UniTask 失败与取消契约保持不变；编程契约违反仍明确失败。捕获仅保留在模块执行、通知和释放边界；驱动及根对象的空值判断对应部分创建或 Unity 对象已被销毁的实际状态。
 
 ## 表现回调与定时器
 
@@ -84,3 +86,22 @@ python scripts/unity_physics.py verify --output TestResults/unitycore-windows-20
 完整本地输出位于 `TestResults/unitycore-windows-20261109/`；[机器摘要](evidence/unitycore/windows-editor-20261109/summary.json)和[原始证据 ZIP](evidence/unitycore/windows-editor-20261109/unitycore-windows-evidence.zip)包含四份最终测试 XML、Editor 日志、CLI 输入/结果/回放、帧日志、截图、开发期结果和审查说明。13 个问题与测试的对应关系见上表。
 
 此前 GridGame、PhysicsSandbox 历史记录保持原样。本轮未运行完整 .NET 单元套件、GridGame Editor、Player、IL2CPP、人工试玩或远端 CI；这些不计入本次完成范围。
+
+## 2026-11-09 后续精简与验证
+
+基于已合并的 `aa630d4`，移除 `_threadId`、`EnsureThread` 及全部调用，明确 Core 只支持主线程。架构规范新增防御范围约束：检查必须有契约或实际问题依据，减少逐层捕获与重复判空，预期失败优先沿现有结果类型返回具体错误。
+
+Initialize/Start 返回的错误直接交给失败收尾，不再先抛出再捕获；关闭时也直接把清理错误写入完成源。Start 的非预期异常由启动边界统一通知，去除自有 ClearAll 操作的捕获，Core 的 catch 从 7 处减为 5 处。保留部分创建和 Unity 销毁状态检查，以及模块、通知和清理边界的异常隔离。公开 UniTask 失败/取消语义不变，未扩建结果类型或跨线程支持。
+
+独立 Reviewer 已复核代码及原始结果，未发现剩余具体阻断项。使用 Unity CLI 1.0.0-beta.17、Unity 6000.3.23f1，在仓库外 PhysicsSandbox 工程副本运行整个 UnityCore 包测试：
+
+| Domain Reload | EditMode | PlayMode |
+| --- | --- | --- |
+| 开启 | 21/21 | 13/13 |
+| 关闭 | 21/21 | 13/13 |
+
+合计 68 次执行，0 失败、0 跳过。新增用例验证返回错误的对象、错误码、通知先于清理及后续阶段停止；通知异常用例覆盖初始化返回错误、Start 返回错误和 Start 抛异常。原取消、部分初始化清理、同实例重启、关闭完成后同步重入、连续进出 Play 回归全部通过。本机已打开的 PhysicsSandbox 处于停止状态，内嵌包同步后编译通过，0 错误、0 警告。
+
+命令为 `unity test <副本路径> --mode EditMode|PlayMode --filter AiNative.UnityCore.Tests --output <XML路径> --timeout 600 --format json -- -logFile <日志路径>`，每种 Domain Reload 各运行两个模式；具体命令、结果与代码指纹见[后续验收摘要](evidence/unitycore/simplify-20261109/summary.json)，XML、日志及独立审查说明见[后续证据 ZIP](evidence/unitycore/simplify-20261109/unitycore-simplify-evidence.zip)。本地完整输出在 `TestResults/unitycore-simplify-20261109/`。
+
+本次仅复跑 UnityCore 包的 Windows Editor 回归；未重新执行 PhysicsSandbox CLI 比较、完整 .NET 单元套件、GridGame Editor、Player、IL2CPP、人工试玩或远端 CI。前一轮 90 次测试及十组比较仍是原版本的历史证据。

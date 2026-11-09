@@ -11,13 +11,12 @@ using UnityEngine;
 
 namespace AiNative.UnityCore
 {
-    /// <summary>Unity 应用级服务的唯一入口，不拥有对局状态。所有入口与模块完成回调在主线程执行。</summary>
+    /// <summary>Unity 应用级服务的唯一入口，不拥有对局状态。只支持主线程调用，不提供跨线程检查或调度。</summary>
     public sealed class Core : ICore
     {
         private static Core? _instance;
         private static bool _exiting;
         private readonly ModuleManager _modules = new ModuleManager();
-        private readonly int _threadId = Thread.CurrentThread.ManagedThreadId;
         private CoreRun? _run;
         private UniTaskCompletionSource? _closeCompletion;
         private bool _retired;
@@ -97,7 +96,6 @@ namespace AiNative.UnityCore
 
         public UniTask CloseAsync()
         {
-            EnsureThread();
             if (_closeCompletion != null) { return _closeCompletion.Task; }
             if (_run == null) { return UniTask.CompletedTask; }
             var completion = new UniTaskCompletionSource();
@@ -120,6 +118,7 @@ namespace AiNative.UnityCore
 
         private async UniTask RunOperationAsync(CoreRun run)
         {
+            IModule? startingModule = null;
             try
             {
                 CreateRoot(run);
@@ -132,7 +131,6 @@ namespace AiNative.UnityCore
 
                 // Each task captures its failure, so WhenAll settles every module before cleanup.
                 Exception?[] results = await UniTask.WhenAll(tasks);
-                EnsureThread();
                 var failures = new List<Exception>();
                 for (int i = 0; i < results.Length; i++)
                 {
@@ -144,11 +142,8 @@ namespace AiNative.UnityCore
                 }
                 if (failures.Count != 0)
                 {
-                    if (run.Token.IsCancellationRequested && failures.TrueForAll(error => error is OperationCanceledException))
-                    {
-                        throw new OperationCanceledException(run.Token);
-                    }
-                    throw Combine(failures);
+                    FailStartup(run, failures);
+                    return;
                 }
                 EnsureStarting(run);
                 foreach (var module in run.Modules)
@@ -158,17 +153,15 @@ namespace AiNative.UnityCore
                 }
                 foreach (var module in run.Modules)
                 {
-                    try
+                    startingModule = module;
+                    UniCoreException? error = await module.Start(this, run.Token);
+                    startingModule = null;
+                    if (error != null)
                     {
-                        UniCoreException? error = await module.Start(this, run.Token);
-                        EnsureThread();
-                        if (error != null) { throw error; }
-                    }
-                    catch (Exception error)
-                    {
-                        var startFailures = new List<Exception> { error };
-                        Notify(_startException, module, error, startFailures);
-                        throw Combine(startFailures);
+                        failures.Add(error);
+                        Notify(_startException, module, error, failures);
+                        FailStartup(run, failures);
+                        return;
                     }
                     EnsureStarting(run);
                 }
@@ -186,20 +179,28 @@ namespace AiNative.UnityCore
             }
             catch (Exception error)
             {
-                StopDispatch(run);
-                run.Cancel();
-                Cleanup(run);
-                if (State != CoreState.Closing) { State = CoreState.Faulted; }
                 var failures = new List<Exception> { error };
-                failures.AddRange(run.CleanupErrors);
-                Exception failure = Combine(failures);
-                if (failure is OperationCanceledException canceled)
+                if (startingModule != null)
                 {
-                    run.Started.TrySetCanceled(canceled.CancellationToken);
+                    Notify(_startException, startingModule, error, failures);
                 }
-                else { run.Started.TrySetException(failure); }
+                FailStartup(run, failures);
             }
             finally { run.Settled.TrySetResult(); }
+        }
+
+        private void FailStartup(CoreRun run, List<Exception> failures)
+        {
+            StopDispatch(run);
+            run.Cancel();
+            Cleanup(run);
+            if (State != CoreState.Closing) { State = CoreState.Faulted; }
+            failures.AddRange(run.CleanupErrors);
+            if (run.CleanupErrors.Count == 0 && failures.TrueForAll(error => error is OperationCanceledException))
+            {
+                run.Started.TrySetCanceled(run.Token);
+            }
+            else { run.Started.TrySetException(Combine(failures)); }
         }
 
         private async UniTask<Exception?> InitializeAsync(CoreRun run, IModule module)
@@ -220,12 +221,11 @@ namespace AiNative.UnityCore
                 StopDispatch(run);
                 run.Cancel();
                 await run.Settled.Task;
-                EnsureThread();
                 Cleanup(run);
                 _run = null;
                 State = run.CleanupErrors.Count == 0 ? CoreState.Stopped : CoreState.Faulted;
-                if (run.CleanupErrors.Count != 0) { throw Combine(run.CleanupErrors); }
-                completion.TrySetResult();
+                if (run.CleanupErrors.Count == 0) { completion.TrySetResult(); }
+                else { completion.TrySetException(Combine(run.CleanupErrors)); }
             }
             catch (Exception error)
             {
@@ -264,8 +264,7 @@ namespace AiNative.UnityCore
                 try { run.Entered[i].Shut(this); }
                 catch (Exception error) { run.CleanupErrors.Add(error); }
             }
-            try { TimeMachine.ClearAll(); }
-            catch (Exception error) { run.CleanupErrors.Add(error); }
+            TimeMachine.ClearAll();
             if (run.Lifetime != null) { run.Lifetime.Unbind(); }
             if (run.Root != null)
             {
@@ -298,7 +297,6 @@ namespace AiNative.UnityCore
 
         private void EnsureStarting(CoreRun run)
         {
-            EnsureThread();
             run.Token.ThrowIfCancellationRequested();
             if (_retired || !ReferenceEquals(_run, run) || State != CoreState.Starting)
             {
@@ -308,16 +306,7 @@ namespace AiNative.UnityCore
 
         private void EnsureCurrent()
         {
-            EnsureThread();
             if (_retired) { throw new ObjectDisposedException(nameof(Core), "This Core belongs to a previous Play session."); }
-        }
-
-        private void EnsureThread()
-        {
-            if (Thread.CurrentThread.ManagedThreadId != _threadId)
-            {
-                throw new InvalidOperationException("UnityCore lifecycle must run on its Unity main thread.");
-            }
         }
 
         private void EnsureStopped()
