@@ -36,7 +36,7 @@ namespace AiNative.UnityCore.Logger
             return Level;
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -46,7 +46,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Debug, message, null);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,7 +56,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Debug, message, context);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -67,7 +67,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Debug, message, null);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,7 +78,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Debug, message, context);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,7 +88,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Info, message, null);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,7 +98,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Info, message, context);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,7 +109,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Info, message, null);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,7 +120,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Info, message, context);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -130,7 +130,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Warn, message, null);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,7 +140,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Warn, message, context);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,7 +151,7 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Warn, message, null);
         }
 
-#if WEPIE_RELEASE
+#if AINATIVE_RELEASE
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

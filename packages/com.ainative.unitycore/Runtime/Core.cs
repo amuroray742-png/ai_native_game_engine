@@ -38,11 +38,12 @@ namespace AiNative.UnityCore
         public ITimeMachine TimeMachine { get; } = new TimeMachine.TimeMachine();
         public CoreState State { get; private set; }
         public bool IsRunning => State == CoreState.Running;
-#if UNITY_EDITOR || !WEPIE_RELEASE
+#if UNITY_EDITOR || !AINATIVE_RELEASE
         public bool IsDevelopMode => true;
 #else
         public bool IsDevelopMode => false;
 #endif
+
         public GameObject? RootGameObject => _run?.Root;
 
         private Core() { }
