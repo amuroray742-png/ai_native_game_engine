@@ -101,6 +101,8 @@ namespace AiNative.Hosting
             try
             {
                 candidate = snapshot.Module.Restore(snapshot.Configuration, snapshot.State, snapshot.Runtime);
+                JsonData.Require(JsonData.Hash(Runtime(candidate)) == JsonData.Hash(snapshot.Json.GetProperty("runtime")),
+                    "RestoreRuntimeMismatch", "$.runtime");
                 JsonData.Require(JsonData.Hash(candidate.CaptureGameState()) == JsonData.Hash(snapshot.State),
                     "RestoreStateMismatch", "$.state");
                 return candidate;

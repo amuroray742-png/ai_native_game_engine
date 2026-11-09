@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.ainative.unity": {
-      "version": "file:com.ainative.unity",
+      "version": "file:../../../../packages/com.ainative.unity",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
       "dependencies": {}
     },
     "com.unity.ext.nunit": {

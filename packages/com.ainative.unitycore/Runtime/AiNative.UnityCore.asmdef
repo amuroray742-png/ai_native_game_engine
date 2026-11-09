@@ -1,0 +1,6 @@
+{
+  "name": "AiNative.UnityCore",
+  "references": ["UniTask"],
+  "overrideReferences": true,
+  "precompiledReferences": []
+}

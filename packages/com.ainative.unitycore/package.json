@@ -1,0 +1,10 @@
+{
+  "name": "com.ainative.unitycore",
+  "version": "0.1.0",
+  "displayName": "AI Native Unity Core",
+  "description": "Unity core runtime package.",
+  "unity": "6000.3",
+  "dependencies": {
+    "com.cysharp.unitask": "2.5.11"
+  }
+}

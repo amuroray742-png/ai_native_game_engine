@@ -68,6 +68,7 @@ namespace AiNative.Hosting
         {
             Require(element.ValueKind == JsonValueKind.Number, path, "需要 Int32 整数。");
             string token = element.GetRawText();
+            Require(token != "-0", path, "Int32 零必须写为 0。");
             Require(!token.Contains('.') && !token.Contains('e') && !token.Contains('E'), path, "不允许小数或指数。");
             Require(element.TryGetInt32(out int value), path, "整数超出 Int32 范围。");
             return value;

@@ -10,6 +10,8 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
+from unity_packages import copy_verification_project, local_packages
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / "examples/unity/GridGame"
@@ -25,32 +27,8 @@ PLUGINS = (
 )
 
 
-def sync_package(source, project):
-    packages = project / "Packages"
-    target = packages / source.name
-    if packages.resolve() != project.resolve() / "Packages" or target.resolve() != packages.resolve() / source.name:
-        raise ValueError(f"Expected a local embedded package in {project}")
-
-    def contents(directory):
-        return {p.relative_to(directory): p.read_bytes() for p in directory.rglob("*") if p.is_file()}
-
-    if target.is_dir() and contents(target) == contents(source):
-        return
-    # Stage outside the project on the same volume. A failed copy never changes the active package.
-    with tempfile.TemporaryDirectory(dir=project.parent, prefix=".ainative-upm-") as tmp:
-        staged, previous = Path(tmp) / "new", Path(tmp) / "previous"
-        shutil.copytree(source, staged)
-        if target.exists():
-            target.rename(previous)
-        try:
-            staged.rename(target)
-        except OSError:
-            if previous.exists():
-                previous.rename(target)
-            raise
-
-
 def prepare():
+    local_packages(PROJECT)
     subprocess.run(["dotnet", "restore", str(ADAPTER), "--locked-mode"], cwd=ROOT, check=True)
     target = PROJECT / "Assets/Plugins/AiNative"
     target.mkdir(parents=True, exist_ok=True)
@@ -74,7 +52,6 @@ def prepare():
         if directory.is_dir() and not any(directory.iterdir()):
             directory.rmdir()
             directory.with_suffix(".meta").unlink(missing_ok=True)
-    sync_package(ROOT / "packages/com.ainative.unity", PROJECT)
     for name in ("grid.scenario.json", "grid.commands.json"):
         source = DATA / name
         bundled = PROJECT / "Assets/StreamingAssets" / name
@@ -94,9 +71,7 @@ def run_play_tests(output):
         raise RuntimeError(f"Install Unity Editor {version} to run PlayMode verification.")
     results = {}
     with tempfile.TemporaryDirectory(prefix="ainative-play-") as work:
-        project = Path(work) / "GridGame"
-        for directory in ("Assets", "Packages", "ProjectSettings"):
-            shutil.copytree(PROJECT / directory, project / directory)
+        project = copy_verification_project(PROJECT, Path(work))
         settings = project / "ProjectSettings/EditorSettings.asset"
         original = settings.read_text(encoding="utf-8")
         for reload in ("on", "off"):

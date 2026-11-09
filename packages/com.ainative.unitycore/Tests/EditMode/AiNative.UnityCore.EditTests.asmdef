@@ -1,0 +1,6 @@
+{
+  "name": "AiNative.UnityCore.EditTests",
+  "references": ["AiNative.UnityCore", "UniTask"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

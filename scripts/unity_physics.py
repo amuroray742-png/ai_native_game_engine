@@ -7,7 +7,8 @@ import shutil
 import subprocess
 import tempfile
 
-from unity_grid import ROOT, sync_package
+from unity_grid import ROOT
+from unity_packages import local_packages
 
 
 PROJECT = ROOT / "examples/unity/PhysicsSandbox"
@@ -28,6 +29,7 @@ def copy(source, destination):
 
 
 def prepare():
+    local_packages(PROJECT)
     native = ROOT / "artifacts/native/win-x64"
     library = native / "ainative_jolt.dll"
     if not library.is_file():
@@ -54,7 +56,6 @@ def prepare():
     copy(manifest, assets / manifest.name)
     for name in ("physics.scenario.json", "physics.commands.json"):
         copy(DATA / name, assets / name)
-    sync_package(ROOT / "packages/com.ainative.unity", PROJECT)
 
 
 def main():

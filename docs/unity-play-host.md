@@ -27,14 +27,14 @@ flowchart LR
 
 **表现与证据。** 正交相机把屏幕坐标映射为格子，HUD 射线优先。棋盘、单位和输入映射由 GridGame 维护。实际场景在连续 Play 帧中提交、推进与记录，快慢两局均比较 CLI 的 16 个 v2 检查点。截图指定已呈现 Tick。GridGame 本轮以测试会话验证固定时钟。真实 Jolt 场景的独立验收见[PhysicsSandbox 记录](phase-3-physics-sandbox-unity-plan.md)。Player 与 IL2CPP 仍待验证。
 
-验收记录每次操作和表现完成时的 Time.frameCount，核对操作跨帧。60 Hz 一次收到十步时长时依次推进 4、4、2 步，中间暂停不消耗积压。候选捕获失败要释放候选一次并允许旧局继续运行；替换成功后旧回调必须失效。prepare 将公共包内嵌到独立工程。
+验收记录每次操作和表现完成时的 Time.frameCount，核对操作跨帧。60 Hz 一次收到十步时长时依次推进 4、4、2 步，中间暂停不消耗积压。候选捕获失败要释放候选一次并允许旧局继续运行；替换成功后旧回调必须失效。开发工程通过本地 UPM 引用直接编译仓库公共包源码。
 
 ## 游戏如何接入
 
 1. 在自己的 Unity 工程创建具体的 `PlaySceneHost<TCommand,TObservation>` 组件。基类持有每实例的 `PlayHost`，在启用时调用 `ConnectScene`，停用时调用 `DisconnectScene` 并释放对局。游戏在这两个方法中对称绑定与解除场景输入。
 2. 在 `ConnectScene` 中显式创建模块，校验配置，通过 `Host.Replace` 的工厂交付新会话。GridGame 在发布候选前建立隐藏的 Sprite 棋盘。当前示例最多显示 4096 格，该限制仅作用于场景表现。如果释放旧会话自身抛错，宿主清理候选并进入故障状态；重建成功后才可再次推进。
 3. 每帧依次调用 `SampleInput`、宿主的 `Pump` 和 `PresentFrame`。手动游戏用 `Host.Submit` 排队、`Host.AdvanceManual` 显式推进，从 `Host.Sequential` 消费结果。固定频率游戏只提交输入，基类按 `Timing` 推进，从 `Host.Realtime` 获取前后观察与独立事件。通过 `Host.Interpolation` 取得插值进度。
-4. 包的源位于 [packages/com.ainative.unity](../packages/com.ainative.unity)。`prepare` 为示例生成内嵌包和运行时 DLL，包更新时同步移除已删除的文件。准备完成的工程可以复制到仓库外运行。示例自己的场景、HUD、业务命令及点击映射都留在工程中。
+4. 包的源位于 [packages/com.ainative.unity](../packages/com.ainative.unity)。manifest 通过 `file:../../../../packages/com.ainative.unity` 直接引用源码；`prepare` 只更新运行时 DLL 和数据。验收使用 `copy_verification_project` 在临时目录保留 `examples/unity/<Game>` 与 `packages/` 的相对结构，复制包源码形成隔离快照；不能仅复制示例工程三个目录后丢掉包目录。示例自己的场景、HUD、业务命令及点击映射都留在工程中。
 
 ## 试玩与复现
 
