@@ -37,12 +37,6 @@ namespace AiNative.UnityCore.Logger
             Level = level;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsEnabled(ELogLevel level)
-        {
-            return Level <= level;
-        }
-
         public void SetLogLevel(ELogLevel level)
         {
             Level = level;
@@ -56,6 +50,7 @@ namespace AiNative.UnityCore.Logger
 #if WEPIE_RELEASE
         [Conditional("FALSE")]
 #endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Debug(string message)
         {
             if (!IsEnabled(ELogLevel.Debug)) { return; }
@@ -65,27 +60,7 @@ namespace AiNative.UnityCore.Logger
 #if WEPIE_RELEASE
         [Conditional("FALSE")]
 #endif
-        public void Debug(string format, params object[] args)
-        {
-            if (!IsEnabled(ELogLevel.Debug)) { return; }
-            string message = FormatMessage(format, args);
-            Log(ELogLevel.Debug, message, null);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug(string format, UnityEngine.Object context, params object[] args)
-        {
-            if (!IsEnabled(ELogLevel.Debug)) { return; }
-            string message = FormatMessage(format, args);
-            Log(ELogLevel.Debug, message, context);
-        }
-
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Debug(string message, UnityEngine.Object context)
         {
             if (!IsEnabled(ELogLevel.Debug)) { return; }
@@ -96,10 +71,84 @@ namespace AiNative.UnityCore.Logger
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Debug(string format, params object[] args)
+        {
+            if (!IsEnabled(ELogLevel.Debug)) { return; }
+            string message = FormatMessage(format, args);
+            Log(ELogLevel.Debug, message, null);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Debug(string format, UnityEngine.Object context, params object[] args)
+        {
+            if (!IsEnabled(ELogLevel.Debug)) { return; }
+            string message = FormatMessage(format, args);
+            Log(ELogLevel.Debug, message, context);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Info(string message)
+        {
+            if (!IsEnabled(ELogLevel.Info)) { return; }
+            Log(ELogLevel.Info, message);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Info(string message, UnityEngine.Object context)
+        {
+            if (!IsEnabled(ELogLevel.Info)) { return; }
+            Log(ELogLevel.Info, message, context);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Info(string format, params object[] args)
+        {
+            if (!IsEnabled(ELogLevel.Info)) { return; }
+            string message = FormatMessage(format, args);
+            Log(ELogLevel.Info, message);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Info(string format, UnityEngine.Object context, params object[] args)
+        {
+            if (!IsEnabled(ELogLevel.Info)) { return; }
+            string message = FormatMessage(format, args);
+            Log(ELogLevel.Info, message, context);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Warning(string message)
         {
             if (!IsEnabled(ELogLevel.Warn)) { return; }
             Log(ELogLevel.Warn, message, null);
+        }
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Warning(string message, UnityEngine.Object context)
+        {
+            if (!IsEnabled(ELogLevel.Warn)) { return; }
+            Log(ELogLevel.Warn, message, context);
         }
 
 #if WEPIE_RELEASE
@@ -134,21 +183,18 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Warn, message, obj);
         }
 
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning(string message, UnityEngine.Object obj)
-        {
-            if (!IsEnabled(ELogLevel.Warn)) { return; }
-            Log(ELogLevel.Warn, message, obj);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(string message)
         {
             if (!IsEnabled(ELogLevel.Error)) { return; }
             Log(ELogLevel.Error, message, null);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Error(string message, UnityEngine.Object obj)
+        {
+            if (!IsEnabled(ELogLevel.Error)) { return; }
+            Log(ELogLevel.Error, message, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -174,39 +220,17 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Error, message, obj);
         }
 
-        public void Error(string message, UnityEngine.Object obj)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsEnabled(ELogLevel level)
         {
-            if (!IsEnabled(ELogLevel.Error)) { return; }
-            Log(ELogLevel.Error, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info(string message, UnityEngine.Object obj)
-        {
-            if (!IsEnabled(ELogLevel.Info)) { return; }
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<TState>(TState state, Func<TState, string> messageFactory, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info)) { return; }
-            Log(ELogLevel.Info, messageFactory(state), obj);
-        }
-
-        public void Exception(string message, UnityEngine.Object obj)
-        {
-            if (!IsEnabled(ELogLevel.Exception)) { return; }
-            Log(ELogLevel.Exception, message, obj);
+            return Level <= level;
         }
 
         private string FormatMessage(string format, object[] args)
         {
-            return string.Format(format, args);
+            StringBuilder messageBuilder = new StringBuilder();
+            messageBuilder.AppendFormat(format, args);
+            return messageBuilder.ToString();
         }
 
         private void Log(ELogLevel level, string message, UnityEngine.Object obj)
@@ -227,7 +251,6 @@ namespace AiNative.UnityCore.Logger
             }
 
             logStr = infoBuilder.ToString();
-            // CacheLog(level, logStr);
             switch (level)
             {
                 case ELogLevel.Debug:
@@ -244,9 +267,9 @@ namespace AiNative.UnityCore.Logger
                     break;
             }
         }
+
         private void Log(ELogLevel level, Exception message)
         {
-            // CacheLog(level, logStr);
             switch (level)
             {
                 case ELogLevel.Debug:
@@ -262,36 +285,6 @@ namespace AiNative.UnityCore.Logger
                     UnityEngine.Debug.LogError(message);
                     break;
             }
-        }
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Info(string message)
-        {
-            if (!IsEnabled(ELogLevel.Info)) { return; }
-            Log(ELogLevel.Info, message);
-        }
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Info(string format, params object[] args)
-        {
-            if (!IsEnabled(ELogLevel.Info)) { return; }
-            string message = FormatMessage(format, args);
-            Log(ELogLevel.Info, message);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Info(string format, UnityEngine.Object obj, params object[] args)
-        {
-            if (!IsEnabled(ELogLevel.Info)) { return; }
-            string message = FormatMessage(format, args);
-            Log(ELogLevel.Info, message, obj);
         }
 
         private StringBuilder GetFormatString(ELogLevel logLevel, string message)
