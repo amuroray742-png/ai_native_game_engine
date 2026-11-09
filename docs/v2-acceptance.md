@@ -6,6 +6,8 @@
 
 后续 C#/原生分层迁移的契约和实际检查见[物理分层迁移](managed-physics-migration.md)。
 
+2026-11-09 的 UnityCore 有边界单例例外、生命周期与调度修复及 Windows Editor 验收单列在[UnityCore 记录](unitycore-lifecycle.md)。两种 Domain Reload 各通过 23 项 PlayMode、22 项 EditMode，并重新完成十组 PhysicsSandbox CLI 检查点比较；不改写下述历史基线，也不扩展模拟内核与 v2 文件协议的边界。
+
 ## 第三阶段 Windows Editor 验收
 
 | 示例 | 本地验收范围 | 可复核证据 |

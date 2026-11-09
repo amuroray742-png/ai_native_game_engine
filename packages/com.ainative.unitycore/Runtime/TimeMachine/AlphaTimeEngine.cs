@@ -12,16 +12,12 @@ namespace AiNative.UnityCore.TimeMachine
             _machine = machine;
         }
 
-        void Start()
-        {
-            _machine.StartFrameLogicTimer();
-        }
-
         // Update is called once per frame
         void Update()
         {
             if (_machine != null)
             {
+                _machine.SetFrameStartTime();
                 float dt = Time.deltaTime;
                 using (OnUpdateMarker.Auto())
                 {
@@ -29,7 +25,7 @@ namespace AiNative.UnityCore.TimeMachine
                 }
                 using (OnTimerUpdateMarker.Auto())
                 {
-                    _machine.OnTimerUpdate(dt);
+                    if (enabled) { _machine.OnTimerUpdate(dt); }
                 }
             }
         }

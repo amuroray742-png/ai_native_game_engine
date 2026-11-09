@@ -1,187 +1,356 @@
+#nullable enable
 using System;
-using System.Reflection;
-using AiNative.UnityCore.Attributes;
+using System.Collections.Generic;
+using System.Threading;
 using AiNative.UnityCore.Consts;
 using AiNative.UnityCore.Exceptions;
 using AiNative.UnityCore.Interfaces;
-using AiNative.UnityCore.Single;
 using AiNative.UnityCore.TimeMachine;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-
 namespace AiNative.UnityCore
 {
-    public class Core : Singleton<Core>, ICore
+    /// <summary>Unity 应用级服务的唯一入口，不拥有对局状态。所有入口与模块完成回调在主线程执行。</summary>
+    public sealed class Core : ICore
     {
-        private IModuleManager _moduleManager;
-        private bool _isRunning;
-        private bool _isDevelopMode;
-        private GameObject? _rootGameObject;
-        private Action<string, UniCoreException>? _modulesInitExceptionAction;
-        private Action<string, UniCoreException>? _modulesStartExceptionAction;
-        public GameObject? RootGameObject => _rootGameObject;
-        public bool IsRunning => _isRunning;
-        public bool IsDevelopMode => _isDevelopMode;
-        public static Logger.Logger Log => Logger.Logger.Inst;
-        private ITimeMachine _timeMachine;
-        public ITimeMachine TimeMachine => _timeMachine;
+        private static Core? _instance;
+        private static bool _exiting;
+        private readonly ModuleManager _modules = new ModuleManager();
+        private readonly int _threadId = Thread.CurrentThread.ManagedThreadId;
+        private CoreRun? _run;
+        private UniTaskCompletionSource? _closeCompletion;
+        private bool _retired;
+        private Action<string, UniCoreException>? _initException;
+        private Action<string, UniCoreException>? _startException;
+
+        public static Core Inst
+        {
+            get
+            {
+                if (_exiting) { throw new InvalidOperationException("UnityCore is exiting Play mode."); }
+                return _instance ??= new Core();
+            }
+        }
+
+        public static Logger.Logger Log => Inst.Logger;
+        public Logger.Logger Logger { get; } = new Logger.Logger();
+        public ITimeMachine TimeMachine { get; } = new TimeMachine.TimeMachine();
+        public CoreState State { get; private set; }
+        public bool IsRunning => State == CoreState.Running;
+#if UNITY_EDITOR || !WEPIE_RELEASE
+        public bool IsDevelopMode => true;
+#else
+        public bool IsDevelopMode => false;
+#endif
+        public GameObject? RootGameObject => _run?.Root;
+
+        private Core() { }
+
+        public ICore RegisterModule(IModule module)
+        {
+            EnsureStopped();
+            _modules.Register(this, module);
+            return this;
+        }
+
+        public ICore RegisterInterface<TService, TModule>(TModule module) where TModule : class, IModule, TService
+        {
+            EnsureStopped();
+            _modules.RegisterInterface<TService, TModule>(module);
+            return this;
+        }
+
+        public T GetModule<T>() where T : class
+        {
+            EnsureCurrent();
+            return _modules.Get<T>();
+        }
 
         public ICore OnModulesInitException(Action<string, UniCoreException> callback)
         {
-            _modulesInitExceptionAction += callback;
+            EnsureCurrent();
+            _initException += callback ?? throw new ArgumentNullException(nameof(callback));
             return this;
         }
 
         public ICore OnModulesStartException(Action<string, UniCoreException> callback)
         {
-            _modulesStartExceptionAction += callback;
+            EnsureCurrent();
+            _startException += callback ?? throw new ArgumentNullException(nameof(callback));
             return this;
         }
 
-        protected Core()
+        public UniTask RunAsync(CancellationToken cancellationToken = default)
         {
-            _moduleManager = new ModuleManager();
-            _timeMachine = new TimeMachine.TimeMachine();
+            EnsureCurrent();
+            if (State == CoreState.Running) { return UniTask.CompletedTask; }
+            EnsureStopped();
+            cancellationToken.ThrowIfCancellationRequested();
+            var run = new CoreRun(_modules.GetStartOrder(), cancellationToken);
+            _run = run;
+            _closeCompletion = null;
+            State = CoreState.Starting;
+            RunOperationAsync(run).Forget();
+            return run.Started.Task;
         }
 
-        public T GetModule<T>()
+        public UniTask CloseAsync()
         {
-            return _moduleManager.Get<T>();
+            EnsureThread();
+            if (_closeCompletion != null) { return _closeCompletion.Task; }
+            if (_run == null) { return UniTask.CompletedTask; }
+            var completion = new UniTaskCompletionSource();
+            _closeCompletion = completion;
+            State = CoreState.Closing;
+            CloseOperationAsync(_run, completion).Forget();
+            return completion.Task;
         }
 
-        public ICore RegisterModule(IModule module)
+        public async UniTask RestartAsync(CancellationToken cancellationToken = default)
         {
-            _moduleManager.Register(this, module);
-            return this;
-        }
-
-        public ICore RegisterInterface<T1, T2>(T2 module) where T2 : IModule, T1
-        {
-            _moduleManager.RegisterInterface<T1, T2>(module);
-            return this;
-        }
-
-        public async UniTask RunAsync()
-        {
-            if (_isRunning)
+            EnsureCurrent();
+            if (State == CoreState.Starting || State == CoreState.Closing)
             {
-                return;
+                throw new InvalidOperationException("Cannot restart during a lifecycle operation.");
             }
+            await CloseAsync();
+            await RunAsync(cancellationToken);
+        }
 
-#if UNITY_EDITOR || !WEPIE_RELEASE
-            _isDevelopMode = true;
-#else
-            _isDevelopMode = false;
-#endif
-
-            Log.Debug("[AiNative.UnityCore] Framework - Ver.{0}", FrameworkConst.FrameworkVersion);
-            // 设置屏幕不休眠
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            _rootGameObject = GameObjectExtend.FindOrCreateGameObject(FrameworkConst.FrameworkRootGameObject);
-            _rootGameObject.transform.position = new Vector3(-9999, -9999, -9999);
-            UnityEngine.Object.DontDestroyOnLoad(_rootGameObject);
-
-            var moduleList = _moduleManager.ModuleList;
-            int GetModuleOrder(ref IModule mod)
+        private async UniTask RunOperationAsync(CoreRun run)
+        {
+            try
             {
-                Type type = mod.GetType();
-                var attr = type.GetCustomAttribute<ModuleOrderAttribute>();
-                if (attr != null)
+                CreateRoot(run);
+                Logger.Debug("[AiNative.UnityCore] Framework - Ver.{0}", FrameworkConst.FrameworkVersion);
+                var tasks = new UniTask<Exception?>[run.Modules.Length];
+                for (int i = 0; i < tasks.Length; i++)
                 {
-                    return attr.Order;
+                    tasks[i] = InitializeAsync(run, run.Modules[i]);
                 }
-                return 100;
-            }
 
-            moduleList.Sort((x, y) => GetModuleOrder(ref x).CompareTo(GetModuleOrder(ref y)));
-
-            UniTask<UniCoreException>[] arrInitTasks = new UniTask<UniCoreException>[moduleList.Count];
-            for (int i = 0; i < moduleList.Count; i++)
-            {
-                Log.Debug((moduleList: moduleList, i: i), static logState => string.Format("    [Module Init]:{0}", logState.moduleList[logState.i].GetModuleName()));
-                arrInitTasks[i] = moduleList[i].Initialize(this);
-            }
-
-            // 可以并行初始化模块，因为初始化时不依赖其他模块
-            await UniTask.WhenAll(arrInitTasks);
-
-            for (int i = 0; i < moduleList.Count; i++)
-            {
-                var exception = arrInitTasks[i].GetAwaiter().GetResult();
-                if (exception != null)
+                // Each task captures its failure, so WhenAll settles every module before cleanup.
+                Exception?[] results = await UniTask.WhenAll(tasks);
+                EnsureThread();
+                var failures = new List<Exception>();
+                for (int i = 0; i < results.Length; i++)
                 {
-                    if (_modulesInitExceptionAction != null && _modulesInitExceptionAction.GetInvocationList().Length > 0)
+                    if (results[i] is Exception error)
                     {
-                        _modulesInitExceptionAction.Invoke(moduleList[i].GetModuleName(), exception);
-                    }
-                    else
-                    {
-                        Log.Error((moduleList: moduleList, i: i), static logState => string.Format("[Wepie.Core] Exception when init module \"{0}\"", logState.moduleList[logState.i].GetModuleName()));
-                        throw exception;
+                        failures.Add(error);
+                        Notify(_initException, run.Modules[i], error, failures);
                     }
                 }
-            }
-
-            // 依赖注入点，顺序串行执行
-            foreach (var mod in moduleList)
-            {
-                mod.AfterInitialize(this);
-            }
-
-
-            // 模块启动，顺序串行执行
-            foreach (var m in moduleList)
-            {
-                Log.Debug(m, static logState => string.Format("    [Module Start]:{0}", logState.GetModuleName()));
-                var exception = await m.Start(this);
-                if (exception != null)
+                if (failures.Count != 0)
                 {
-                    if (_modulesStartExceptionAction != null && _modulesStartExceptionAction.GetInvocationList().Length > 0)
+                    if (run.Token.IsCancellationRequested && failures.TrueForAll(error => error is OperationCanceledException))
                     {
-                        _modulesStartExceptionAction.Invoke(m.GetModuleName(), exception);
+                        throw new OperationCanceledException(run.Token);
                     }
-                    else
-                    {
-                        Log.Error(m, static logState => string.Format("[Wepie.Core] Exception when start module \"{0}\"", logState.GetModuleName()));
-                        throw exception;
-                    }
+                    throw Combine(failures);
                 }
+                EnsureStarting(run);
+                foreach (var module in run.Modules)
+                {
+                    module.AfterInitialize(this);
+                    EnsureStarting(run);
+                }
+                foreach (var module in run.Modules)
+                {
+                    try
+                    {
+                        UniCoreException? error = await module.Start(this, run.Token);
+                        EnsureThread();
+                        if (error != null) { throw error; }
+                    }
+                    catch (Exception error)
+                    {
+                        var startFailures = new List<Exception> { error };
+                        Notify(_startException, module, error, startFailures);
+                        throw Combine(startFailures);
+                    }
+                    EnsureStarting(run);
+                }
+                foreach (var module in run.Modules)
+                {
+                    module.AfterStart(this);
+                    EnsureStarting(run);
+                }
+                run.FinishStartup();
+                State = CoreState.Running;
+                TimeMachine.StartFrameLogicTimer();
+                run.Alpha!.enabled = true;
+                run.Omega!.enabled = true;
+                run.Started.TrySetResult();
             }
-
-            // 启动后处理，顺序串行执行
-            foreach (var mod in moduleList)
+            catch (Exception error)
             {
-                mod.AfterStart(this);
+                StopDispatch(run);
+                run.Cancel();
+                Cleanup(run);
+                if (State != CoreState.Closing) { State = CoreState.Faulted; }
+                var failures = new List<Exception> { error };
+                failures.AddRange(run.CleanupErrors);
+                Exception failure = Combine(failures);
+                if (failure is OperationCanceledException canceled)
+                {
+                    run.Started.TrySetCanceled(canceled.CancellationToken);
+                }
+                else { run.Started.TrySetException(failure); }
             }
-
-            _isRunning = true;
-            Log.Debug("Framework startup finish.");
+            finally { run.Settled.TrySetResult(); }
         }
 
-        public void Close()
+        private async UniTask<Exception?> InitializeAsync(CoreRun run, IModule module)
         {
-            if (!_isRunning)
+            try
             {
-                return;
+                run.Token.ThrowIfCancellationRequested();
+                run.Entered.Add(module);
+                return await module.Initialize(this, run.Token);
             }
-
-            Log.Debug("Framework is closing...");
-            var moduleList = this._moduleManager.ModuleList;
-            // 关闭要和启动顺序相反
-            for (int i = moduleList.Count - 1; i >= 0; i--)
-            {
-                moduleList[i].Shut(this);
-            }
-
-            _moduleManager.ClearModuleList();
-            _isRunning = false;
+            catch (Exception error) { return error; }
         }
 
-        public async UniTask Restart()
+        private async UniTask CloseOperationAsync(CoreRun run, UniTaskCompletionSource completion)
         {
-            Close();
-            await RunAsync();
+            try
+            {
+                StopDispatch(run);
+                run.Cancel();
+                await run.Settled.Task;
+                EnsureThread();
+                Cleanup(run);
+                _run = null;
+                State = run.CleanupErrors.Count == 0 ? CoreState.Stopped : CoreState.Faulted;
+                if (run.CleanupErrors.Count != 0) { throw Combine(run.CleanupErrors); }
+                completion.TrySetResult();
+            }
+            catch (Exception error)
+            {
+                State = CoreState.Faulted;
+                completion.TrySetException(error);
+            }
+        }
+
+        private void CreateRoot(CoreRun run)
+        {
+            run.Root = new GameObject(FrameworkConst.FrameworkRootGameObject);
+            UnityEngine.Object.DontDestroyOnLoad(run.Root);
+            run.Lifetime = run.Root.AddComponent<CoreLifetime>();
+            run.Lifetime.Bind(this);
+            run.Alpha = run.Root.AddComponent<AlphaTimeEngine>();
+            run.Omega = run.Root.AddComponent<OmegaTimeEngine>();
+            run.Alpha.enabled = false;
+            run.Omega.enabled = false;
+            run.Alpha.SetTimeMachine(TimeMachine);
+            run.Omega.SetTimeMachine(TimeMachine);
+            TimeMachine.StartFrameLogicTimer();
+        }
+
+        private static void StopDispatch(CoreRun run)
+        {
+            if (run.Alpha != null) { run.Alpha.enabled = false; }
+            if (run.Omega != null) { run.Omega.enabled = false; }
+        }
+
+        private void Cleanup(CoreRun run)
+        {
+            if (run.Cleaned) { return; }
+            run.Cleaned = true;
+            for (int i = run.Entered.Count - 1; i >= 0; i--)
+            {
+                try { run.Entered[i].Shut(this); }
+                catch (Exception error) { run.CleanupErrors.Add(error); }
+            }
+            try { TimeMachine.ClearAll(); }
+            catch (Exception error) { run.CleanupErrors.Add(error); }
+            if (run.Lifetime != null) { run.Lifetime.Unbind(); }
+            if (run.Root != null)
+            {
+                run.Root.SetActive(false);
+                UnityEngine.Object.Destroy(run.Root);
+            }
+            run.Root = null;
+            run.DisposeCancellation();
+        }
+
+        private static void Notify(Action<string, UniCoreException>? callbacks, IModule module,
+            Exception error, List<Exception> failures)
+        {
+            if (callbacks == null || error is OperationCanceledException) { return; }
+            foreach (Action<string, UniCoreException> callback in callbacks.GetInvocationList())
+            {
+                try
+                {
+                    callback(module.GetModuleName(), error as UniCoreException
+                        ?? new UniCoreException("Module lifecycle failed.", error));
+                }
+                catch (Exception notificationError) { failures.Add(notificationError); }
+            }
+        }
+
+        private static Exception Combine(List<Exception> errors)
+        {
+            return errors.Count == 1 ? errors[0] : new AggregateException("UnityCore lifecycle failed.", errors);
+        }
+
+        private void EnsureStarting(CoreRun run)
+        {
+            EnsureThread();
+            run.Token.ThrowIfCancellationRequested();
+            if (_retired || !ReferenceEquals(_run, run) || State != CoreState.Starting)
+            {
+                throw new OperationCanceledException(run.Token);
+            }
+        }
+
+        private void EnsureCurrent()
+        {
+            EnsureThread();
+            if (_retired) { throw new ObjectDisposedException(nameof(Core), "This Core belongs to a previous Play session."); }
+        }
+
+        private void EnsureThread()
+        {
+            if (Thread.CurrentThread.ManagedThreadId != _threadId)
+            {
+                throw new InvalidOperationException("UnityCore lifecycle must run on its Unity main thread.");
+            }
+        }
+
+        private void EnsureStopped()
+        {
+            EnsureCurrent();
+            if (State != CoreState.Stopped) { throw new InvalidOperationException($"Core must be stopped, current state: {State}."); }
+        }
+
+        internal void OnRootDestroyed()
+        {
+            CloseAsync().Forget(error => Logger.Exception(error));
+        }
+
+        internal static void RetireCurrent()
+        {
+            _exiting = true;
+            Core? previous = _instance;
+            _instance = null;
+            if (previous == null) { return; }
+            previous._retired = true;
+            if (previous._closeCompletion == null)
+            {
+                previous.CloseAsync().Forget(error => previous.Logger.Exception(error));
+            }
+            previous._initException = null;
+            previous._startException = null;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        internal static void ResetForPlay()
+        {
+            RetireCurrent();
+            _exiting = false;
         }
     }
 }

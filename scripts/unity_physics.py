@@ -55,6 +55,7 @@ def prepare():
     for name in ("physics.scenario.json", "physics.commands.json"):
         copy(DATA / name, assets / name)
     sync_package(ROOT / "packages/com.ainative.unity", PROJECT)
+    sync_package(ROOT / "packages/com.ainative.unitycore", PROJECT)
 
 
 def main():

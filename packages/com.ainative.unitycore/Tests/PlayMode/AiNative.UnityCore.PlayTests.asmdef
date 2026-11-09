@@ -1,0 +1,5 @@
+{
+  "name": "AiNative.UnityCore.PlayTests",
+  "references": ["AiNative.UnityCore", "UniTask"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

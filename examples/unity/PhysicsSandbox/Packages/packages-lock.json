@@ -7,9 +7,9 @@
       "dependencies": {}
     },
     "com.ainative.unitycore": {
-      "version": "file:C:/work/github/ai_native_game_engine/packages/com.ainative.unitycore",
+      "version": "0.1.0",
       "depth": 0,
-      "source": "local",
+      "source": "embedded",
       "dependencies": {
         "com.cysharp.unitask": "2.5.11"
       }

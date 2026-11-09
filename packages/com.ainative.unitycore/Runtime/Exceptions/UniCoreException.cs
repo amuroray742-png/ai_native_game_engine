@@ -11,6 +11,11 @@ namespace AiNative.UnityCore.Exceptions
             InitModule();
         }
 
+        public UniCoreException(string message, Exception innerException) : base(message, innerException)
+        {
+            InitModule();
+        }
+
         public UniCoreException(string msg, int errorCode) : base(msg)
         {
             InitModule();
