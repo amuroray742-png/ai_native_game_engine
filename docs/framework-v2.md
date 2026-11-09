@@ -19,6 +19,8 @@ Unity 应用服务允许单独的、有边界的例外：`AiNative.UnityCore.Cor
 
 ## 时间、错误与保存边界
 
+Unity 侧的 [Assets 资源包](unitycore-assets.md) 单向依赖 UnityCore，拥有本地资源、实例、池和场景；其异步关闭扩展不改变模拟时间、状态、文件协议和每局 PlayHost 所有权。
+
 Submit 分配连续输入序号并入队。Advance 消费调用开始时全部排队输入，按序执行，再推进一次游戏并发布结果；即使无输入也增加 Tick。输入结果携带输入序号，TickResult 携带 Tick，游戏回合只存在于 GridGame 状态。运行时禁止重入，包括 Tick 回调期间的提交、推进、观察与保存。
 
 手动模式 ticksPerSecond=0、DeltaSeconds=0；固定频率为创建时确定的整数频率，PhysicsSandbox 为60。Core 不访问墙上时间。宿主决定何时调用 Advance，并负责采样与追赶，不在 Core 引入累积器或系统调度。

@@ -1,0 +1,44 @@
+{
+  "PlayMode-reload-On": 40,
+  "EditMode-reload-On": 34,
+  "PlayMode-reload-Off": 40,
+  "EditMode-reload-Off": 34,
+  "Mono": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "Il2Cpp": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "unity": "6000.3.23f1",
+  "platform": "Windows x64",
+  "command": "python scripts/verify_unity_assets.py TestResults/assets-final-20261109-r3 --players",
+  "review": "review.md",
+  "developmentRunsExcluded": [
+    "assets-development",
+    "assets-final-20261109",
+    "assets-final-20261109-r2"
+  ],
+  "playerSettings": {
+    "Mono": {
+      "backend": "Mono2x",
+      "options": "Development"
+    },
+    "Il2Cpp": {
+      "backend": "IL2CPP",
+      "options": "None"
+    },
+    "scene": "Assets/Bootstrap.unity",
+    "assetBundleManifestPath": "StreamingAssets/AiNativeAssets/<root-manifest.txt value>"
+  },
+  "content": {
+    "bundles": 7,
+    "publicAddresses": 6,
+    "sourceGuidsInPackedReport": 7,
+    "duplicateSourceOwners": 0,
+    "sceneEvidence": "GetAllScenePaths + runtime shared material identity",
+    "sha256Verified": true
+  },
+  "archiveSha256": "0cd0491577c47b60e6c688a3716c096ff6ac80df9633e2c31297f32816a09b67"
+}
