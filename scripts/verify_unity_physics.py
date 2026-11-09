@@ -45,7 +45,11 @@ def play(project, editor, output, reload):
                    cwd=ROOT, env=env, check=True, timeout=360)
     tests = ET.parse(output / "play.xml").findall(".//test-case")
     required = {"UniformSteps", "CatchupAndRestoreBothBoundaries", "FractionalPauseAndFailedReplacement", "PausedInputAndDebt",
-                "CompletedStepCannotRecursivelyPumpOrReplace", "FileSaveAndPausedRestore", "GameViewPointerQueuesInputWhilePaused"}
+                "CompletedStepCannotRecursivelyPumpOrReplace", "FileSaveAndPausedRestore", "GameViewPointerQueuesInputWhilePaused",
+                "DefaultLoggerAndPooledInitializationStartTheDrivers", "EveryStartupFailureCleansBothEnteredModules",
+                "CloseDuringInitializationCancelsAndSharesCleanup", "RestartPreservesInstancesAndRegistrationOrder",
+                "RetiredCoreCannotPublishLateInitialization", "CloseContinuationCanStartAnotherRunBeforeCloseReturns",
+                "ExternalCancellationOnlyControlsStartup", "ExternalCancellationSettlesAllPendingInitializers"}
     require(required <= {case.get("name") for case in tests} and all(case.get("result") == "Passed" for case in tests),
             f"Incomplete PlayMode tests: {output}")
     float_cases = [case for case in tests if case.get("name", "").startswith("CommandFloatHasTheCliBitsAndSpelling(")]
@@ -55,10 +59,14 @@ def play(project, editor, output, reload):
         require(png.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n" and png.stat().st_size > 100, f"Missing capture at {tick}")
     cycle_xml = output / "exit.xml"
     subprocess.run([editor, "-projectPath", str(project), "-runTests", "-testPlatform", "EditMode",
-                    "-testFilter", "WorldLifetimeTests", "-testResults", str(cycle_xml),
+                    "-testResults", str(cycle_xml),
                     "-logFile", str(output / "exit.log")], cwd=ROOT, env=env, check=True, timeout=300)
     cycles = ET.parse(cycle_xml).findall(".//test-case")
-    require(len(cycles) == 1 and cycles[0].get("result") == "Passed", f"Failed to verify Play exit: {output}")
+    required_edit = {"ExitingPlayReleasesTheOnlyWorld", "TwoPlaySessionsReleaseRunningModules",
+                     "ExitingDuringInitializationCancelsBeforeTheNextPlay", "FixedRemovalPreservesLateRegistration",
+                     "TicketOwnsItsClockAndCannotRemoveReplacement", "TimerOrderReplacementDoesNotLeaveARecycledEntry"}
+    require(required_edit <= {case.get("name") for case in cycles} and
+            all(case.get("result") == "Passed" for case in cycles), f"Failed EditMode/lifetime verification: {output}")
     return sorted(case.get("name") for case in tests + cycles)
 
 

@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-using AiNative.UnityCore.Single;
 using AiNative.UnityCore.Utils;
 
 
@@ -29,20 +28,13 @@ namespace AiNative.UnityCore.Logger
         }
     }
 
-    public class Logger : Singleton<Logger>
+    public sealed class Logger
     {
         private volatile ELogLevel _level;
         public ELogLevel Level { get => _level; set => _level = value; }
 
-        [ThreadStatic]
-        private readonly StringBuilder _stringBuilder;
-        [ThreadStatic]
-        private readonly StringBuilder _stringBuilderFormat;
-
-        private Logger(ELogLevel level = ELogLevel.Debug)
+        public Logger(ELogLevel level = ELogLevel.Debug)
         {
-            _stringBuilder = new StringBuilder();
-            _stringBuilderFormat = new StringBuilder();
             Level = level;
         }
 
@@ -840,8 +832,7 @@ namespace AiNative.UnityCore.Logger
 
         private string FormatMessage(string format, object[] args)
         {
-            _stringBuilderFormat.Clear();
-            return _stringBuilderFormat.AppendFormat(format, args).ToString();
+            return string.Format(format, args);
         }
 
         private void Log(ELogLevel level, string message, UnityEngine.Object obj = null)
@@ -854,7 +845,7 @@ namespace AiNative.UnityCore.Logger
                 for (int i = 0; i < stackFrames.Length; i++)
                 {
                     StackFrame frame = stackFrames[i];
-                    string declaringTypeName = frame.GetMethod().DeclaringType.FullName;
+                    string declaringTypeName = frame.GetMethod()?.DeclaringType?.FullName ?? "<unknown>";
                     string methodName = frame.GetMethod().Name;
 
                     infoBuilder.AppendFormat("[{0}::{1}\n", declaringTypeName, methodName);
@@ -940,7 +931,7 @@ namespace AiNative.UnityCore.Logger
 
         private StringBuilder GetFormatString(ELogLevel logLevel, string message)
         {
-            _stringBuilder.Clear();
+            var builder = new StringBuilder();
             switch (logLevel)
             {
                 case ELogLevel.Debug:
@@ -949,28 +940,28 @@ namespace AiNative.UnityCore.Logger
 #else
                     var color = ColorUtil.Blue;
 #endif
-                    _stringBuilder.AppendFormat("<color=#0099bc><b>[debug]</b></color>[{0}] - <color=#{2}>{1}</color>",
+                    builder.AppendFormat("<color=#0099bc><b>[debug]</b></color>[{0}] - <color=#{2}>{1}</color>",
                         GetNowFormatDate(System.DateTime.Now), message, color);
                     break;
                 case ELogLevel.Info:
-                    _stringBuilder.AppendFormat("<color=#0099bc><b>[info]</b></color>[{0}] - <color=#{2}>{1}</color>",
+                    builder.AppendFormat("<color=#0099bc><b>[info]</b></color>[{0}] - <color=#{2}>{1}</color>",
                         GetNowFormatDate(System.DateTime.Now), message, ColorUtil.Green);
                     break;
                 case ELogLevel.Warn:
-                    _stringBuilder.AppendFormat("<color=#0099bc><b>[warn]</b></color>[{0}] - <color=#{2}>{1}</color>",
+                    builder.AppendFormat("<color=#0099bc><b>[warn]</b></color>[{0}] - <color=#{2}>{1}</color>",
                         GetNowFormatDate(System.DateTime.Now), message, ColorUtil.Orange);
                     break;
                 case ELogLevel.Error:
-                    _stringBuilder.AppendFormat("<color=#ff7f50><b>[error]</b></color>[{0}] - <color=#{2}>{1}</color>",
+                    builder.AppendFormat("<color=#ff7f50><b>[error]</b></color>[{0}] - <color=#{2}>{1}</color>",
                         GetNowFormatDate(System.DateTime.Now), message, ColorUtil.Red);
                     break;
                 case ELogLevel.Exception:
-                    _stringBuilder.AppendFormat("<color=#ffc0cb><b>[error]</b></color>[{0}] - <color=#{2}>{1}</color>",
+                    builder.AppendFormat("<color=#ffc0cb><b>[error]</b></color>[{0}] - <color=#{2}>{1}</color>",
                         GetNowFormatDate(System.DateTime.Now), message, ColorUtil.Exception);
                     break;
             }
 
-            return _stringBuilder;
+            return builder;
         }
 
         private string GetNowFormatDate(DateTime date)

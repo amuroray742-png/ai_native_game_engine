@@ -1,72 +1,32 @@
+#nullable enable
+using System;
+
 namespace AiNative.UnityCore.TimeMachine
 {
-    public class TimeTicket : ITimeTicket
+    /// <summary>只注销创建此票据的注册；重复注销及过期票据均无副作用。</summary>
+    public sealed class TimeTicket : ITimeTicket
     {
-        public int? Id { get; internal set; }
+        private readonly int _id;
+        private Action<int>? _remove;
+        private readonly Func<int, bool> _isActive;
+        public int? Id => _remove != null && _isActive(_id) ? _id : (int?)null;
+        public TicketType Type { get; }
 
-        public TicketType Type { get; internal set; }
-
-        public TimeTicket(int id, TicketType t)
+        internal TimeTicket(int id, TicketType type, Action<int> remove, Func<int, bool> isActive)
         {
-            Id = id;
-            Type = t;
+            _id = id;
+            Type = type;
+            _remove = remove;
+            _isActive = isActive;
         }
 
-        public void Dispose()
-        {
-            Unregister();
-        }
+        public void Dispose() { Unregister(); }
 
         public void Unregister()
         {
-            if (Id == null) return;
-            switch (Type)
-            {
-                case TicketType.Update:
-                    Core.Inst.TimeMachine.RemoveUpdate(Id.Value);
-                    break;
-                case TicketType.LateUpdate:
-                    Core.Inst.TimeMachine.RemoveLateUpdate(Id.Value);
-                    break;
-                case TicketType.FixedUpdate:
-                    Core.Inst.TimeMachine.RemoveFixedUpdate(Id.Value);
-                    break;
-                case TicketType.OmegaLateUpdate:
-                    Core.Inst.TimeMachine.RemoveOmegaLateUpdate(Id.Value);
-                    break;
-                case TicketType.Timer:
-                    Core.Inst.TimeMachine.RemoveTimer(Id.Value);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 消除警告用(重载Equals和== !=)
-        /// </summary>
-        /// <returns></returns>
-        public override int GetHashCode()
-        {
-            int hashCode = -1056084179;
-            hashCode = hashCode * -1521134295 + Id.GetHashCode();
-            hashCode = hashCode * -1521134295 + Type.GetHashCode();
-            return hashCode;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is TimeTicket ticket &&
-                   Id == ticket.Id &&
-                   Type == ticket.Type;
-        }
-
-        public static bool operator ==(TimeTicket left, TimeTicket right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(TimeTicket left, TimeTicket right)
-        {
-            return !(left == right);
+            Action<int>? remove = _remove;
+            _remove = null;
+            remove?.Invoke(_id);
         }
     }
 }
