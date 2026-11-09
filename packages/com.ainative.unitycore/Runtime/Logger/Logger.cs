@@ -234,22 +234,7 @@ namespace AiNative.UnityCore.Logger
 
         private void Log(ELogLevel level, string message, UnityEngine.Object? obj)
         {
-            string logStr;
-            StringBuilder infoBuilder = GetFormatString(level, message);
-            if (level == ELogLevel.Error)
-            {
-                StackFrame[] stackFrames = new StackTrace().GetFrames();
-                for (int i = 0; i < stackFrames.Length; i++)
-                {
-                    StackFrame frame = stackFrames[i];
-                    string declaringTypeName = frame.GetMethod()?.DeclaringType?.FullName ?? "<unknown>";
-                    string methodName = frame.GetMethod().Name;
-
-                    infoBuilder.AppendFormat("[{0}::{1}\n", declaringTypeName, methodName);
-                }
-            }
-
-            logStr = infoBuilder.ToString();
+            string logStr = GetFormatString(level, message).ToString();
             switch (level)
             {
                 case ELogLevel.Debug:

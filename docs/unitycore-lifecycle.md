@@ -126,3 +126,9 @@ GridGame 引用仓库 `com.ainative.unity`，PhysicsSandbox 引用该包及 `com
 - `git diff --check`、更新文档的本地链接、manifest/lock/源码路径一致性检查通过。
 
 完整 XML、Editor 日志、比较记录和截图在上述本地输出目录；本轮未运行远端 CI、Linux、Player、IL2CPP、人工试玩或完整 .NET 单元套件。
+
+### 普通 Error 使用 Unity 堆栈输出
+
+2026-11-09 删除 Logger 普通 Error 消息中手动枚举、拼接调用堆栈的逻辑；消息格式和上下文传递保持不变，堆栈由 Unity 的 Error Stack Trace Logging 设置控制。Error(Exception) 继续使用 Debug.LogException。
+
+独立静态审查无阻断项。Windows Editor 6000.3.23f1 中，LoggerTests 的两个 EditMode 用例通过：None 时不产生堆栈，ScriptOnly 时由 Unity 提供脚本堆栈，两者正文均不附加手动堆栈。测试退出时恢复原设置。复现命令为 `unity test <隔离工程路径> --mode EditMode --filter AiNative.UnityCore.Tests.LoggerTests --output <结果路径>`；本地结果为 `TestResults/logger-stack-20261109/results.xml`，同目录保留 editor.log。活动工程编译状态无错误；未运行完整回归、远端 CI 或 Player 验证。
