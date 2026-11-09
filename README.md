@@ -47,6 +47,8 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
 | packages/com.ainative.unity | 场景生命周期、手动与固定步长推进、类型化 Tick 交付 |
 | packages/com.ainative.unitycore | Unity 应用模块生命周期、日志与表现回调，PhysicsSandbox 直接引用仓库中的源码及测试 |
+| packages/com.ainative.unitycore.assets | 本地资源句柄、作用域、共享 AssetBundle、实例池、场景及 Editor 分包/校验工具 |
+| examples/unity/AssetsDemo | 独立资源示例及 Windows Player 冒烟入口，不依赖 Jolt |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
 | examples/unity/PhysicsSandbox | 独立 Windows Editor 工程，提供 Jolt 沙盒、实时输入、存读档和逐 Tick 对照 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |

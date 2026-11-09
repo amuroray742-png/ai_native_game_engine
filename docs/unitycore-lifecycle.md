@@ -1,5 +1,9 @@
 # UnityCore 应用服务契约与修复验收
 
+## Assets 接入后的异步关闭扩展
+
+可选 `IAsyncShutdownModule.ShutdownAsync(ICore, CancellationToken)` 不改变既有 IModule。正常关闭及启动失败收尾按逆序逐模块等待异步清理，再调用同步 Shut；异步失败不跳过 Shut 或其他模块。关闭的强制退出令牌与已经取消的运行令牌分离。退出 Play、重载和应用退出打断异步等待，继续同步隔离；旧任务由模块自行观察和回收，不能发布到下一轮。同步模块仍走原路径。完整资源契约及新验收见 [Assets](unitycore-assets.md)，下列历史验收保持原有版本范围。
+
 当前开发工程已改为直接引用仓库本地 UPM 源码，见文末“本地源码包引用”；下列内嵌包验收记录保留当时的历史做法。
 
 本轮目标是修复 UnityCore 首次导入中的 13 项问题，允许一个有边界的 Unity 应用级单例，并将该决定与行为修复分别记录。适用源码为 `packages/com.ainative.unitycore`，验证宿主为 PhysicsSandbox。具体玩法仍由现有 PlayHost 推进；没有改变 v2 文件协议或纯 C# 模拟内核。

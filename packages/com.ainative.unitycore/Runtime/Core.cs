@@ -144,7 +144,7 @@ namespace AiNative.UnityCore
                 }
                 if (failures.Count != 0)
                 {
-                    FailStartup(run, failures);
+                    await FailStartupAsync(run, failures);
                     return;
                 }
                 EnsureStarting(run);
@@ -162,7 +162,7 @@ namespace AiNative.UnityCore
                     {
                         failures.Add(error);
                         Notify(_startException, module, error, failures);
-                        FailStartup(run, failures);
+                        await FailStartupAsync(run, failures);
                         return;
                     }
                     EnsureStarting(run);
@@ -186,16 +186,16 @@ namespace AiNative.UnityCore
                 {
                     Notify(_startException, startingModule, error, failures);
                 }
-                FailStartup(run, failures);
+                await FailStartupAsync(run, failures);
             }
             finally { run.Settled.TrySetResult(); }
         }
 
-        private void FailStartup(CoreRun run, List<Exception> failures)
+        private async UniTask FailStartupAsync(CoreRun run, List<Exception> failures)
         {
             StopDispatch(run);
             run.Cancel();
-            Cleanup(run);
+            await CleanupAsync(run);
             if (State != CoreState.Closing) { State = CoreState.Faulted; }
             failures.AddRange(run.CleanupErrors);
             if (run.CleanupErrors.Count == 0 && failures.TrueForAll(error => error is OperationCanceledException))
@@ -223,7 +223,7 @@ namespace AiNative.UnityCore
                 StopDispatch(run);
                 run.Cancel();
                 await run.Settled.Task;
-                Cleanup(run);
+                await CleanupAsync(run);
                 _run = null;
                 State = run.CleanupErrors.Count == 0 ? CoreState.Stopped : CoreState.Faulted;
                 if (run.CleanupErrors.Count == 0) { completion.TrySetResult(); }
@@ -257,12 +257,19 @@ namespace AiNative.UnityCore
             if (run.Omega != null) { run.Omega.enabled = false; }
         }
 
-        private void Cleanup(CoreRun run)
+        private async UniTask CleanupAsync(CoreRun run)
         {
             if (run.Cleaned) { return; }
-            run.Cleaned = true;
+            if (run.Cleaning) { await run.CleanupCompleted.Task; return; }
+            run.Cleaning = true;
             for (int i = run.Entered.Count - 1; i >= 0; i--)
             {
+                if (!_retired && run.Entered[i] is IAsyncShutdownModule asynchronous)
+                {
+                    try { await asynchronous.ShutdownAsync(this, run.ForcedExit.Token).AttachExternalCancellation(run.ForcedExit.Token); }
+                    catch (OperationCanceledException) when (_retired) { }
+                    catch (Exception error) { run.CleanupErrors.Add(error); }
+                }
                 try { run.Entered[i].Shut(this); }
                 catch (Exception error) { run.CleanupErrors.Add(error); }
             }
@@ -274,7 +281,9 @@ namespace AiNative.UnityCore
                 UnityEngine.Object.Destroy(run.Root);
             }
             run.Root = null;
+            run.Cleaned = true;
             run.DisposeCancellation();
+            run.CleanupCompleted.TrySetResult();
         }
 
         private static void Notify(Action<string, UniCoreException>? callbacks, IModule module,
@@ -329,6 +338,11 @@ namespace AiNative.UnityCore
             _instance = null;
             if (previous == null) { return; }
             previous._retired = true;
+            if (previous._run != null && !previous._run.Cleaned)
+            {
+                try { previous._run.ForcedExit.Cancel(); }
+                catch (Exception error) { previous._run.CleanupErrors.Add(error); }
+            }
             if (previous._closeCompletion == null)
             {
                 previous.CloseAsync().Forget(error => previous.Logger.Error(error));

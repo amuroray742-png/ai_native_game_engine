@@ -24,6 +24,9 @@ namespace AiNative.UnityCore
         internal AlphaTimeEngine? Alpha;
         internal OmegaTimeEngine? Omega;
         internal bool Cleaned;
+        internal readonly CancellationTokenSource ForcedExit = new CancellationTokenSource();
+        internal readonly UniTaskCompletionSource CleanupCompleted = new UniTaskCompletionSource();
+        internal bool Cleaning;
         private bool _cancelRequested;
         private CancellationTokenRegistration _startupCancellation;
 
@@ -45,6 +48,7 @@ namespace AiNative.UnityCore
         {
             _startupCancellation.Dispose();
             Cancellation.Dispose();
+            ForcedExit.Dispose();
         }
 
         internal void Cancel()

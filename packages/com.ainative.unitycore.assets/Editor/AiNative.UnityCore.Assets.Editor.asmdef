@@ -1,0 +1,1 @@
+{"name":"AiNative.UnityCore.Assets.Editor","references":["AiNative.UnityCore.Assets","AiNative.UnityCore","UniTask"],"includePlatforms":["Editor"]}

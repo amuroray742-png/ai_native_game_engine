@@ -1,0 +1,49 @@
+{
+  "PlayMode-reload-On": 45,
+  "EditMode-reload-On": 37,
+  "PlayMode-reload-Off": 45,
+  "EditMode-reload-Off": 37,
+  "Mono": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "Il2Cpp": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "unity": "6000.3.23f1",
+  "platform": "Windows x64",
+  "command": "python scripts/verify_unity_assets.py TestResults/assets-review-20261109 --players",
+  "baseCommit": "2fbc32356f706b3ebcdd9abf7a0150c3f5c40618",
+  "reviewers": [
+    "assets_leak_audit",
+    "assets_plan_audit"
+  ],
+  "playerSettings": {
+    "Mono": {
+      "backend": "Mono2x",
+      "options": "Development"
+    },
+    "Il2Cpp": {
+      "backend": "IL2CPP",
+      "options": "None"
+    },
+    "scene": "Assets/Bootstrap.unity",
+    "stripping": "Native AssetBundle Manifest supplied to BuildPlayer"
+  },
+  "content": {
+    "bundles": 7,
+    "publicAddresses": 6,
+    "reportedSourceGuids": 7,
+    "duplicateSourceOwners": 0,
+    "sha256Verified": true
+  },
+  "archiveSha256": "13d7694a92b55389f9844a3fa5556368af27e147293e6c6377b7472f4eafc828",
+  "sourceFingerprints": "sources.json: raw working-tree SHA-256; sources-git.json: LF-normalized Git blob IDs",
+  "unexecuted": [
+    "Ambiguous native BuildReport file mapping fault injection",
+    "Other platforms",
+    "Long-running stress/performance budgets",
+    "CI"
+  ]
+}

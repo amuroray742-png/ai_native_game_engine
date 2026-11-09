@@ -3,3 +3,11 @@
 
 # Canonical JSON fixtures are exact hash input bytes, with no final newline.
 docs/contracts/phase-2/examples/*.canonical.json -text
+
+# Unity writes a trailing space for empty YAML fields. Keep its serialized output unchanged.
+examples/unity/AssetsDemo/**/*.meta whitespace=-blank-at-eol
+examples/unity/AssetsDemo/**/*.asset whitespace=-blank-at-eol
+examples/unity/AssetsDemo/**/*.unity whitespace=-blank-at-eol
+examples/unity/AssetsDemo/**/*.mat whitespace=-blank-at-eol
+packages/com.ainative.unitycore.assets/**/*.meta whitespace=-blank-at-eol
+packages/com.ainative.unitycore.assets/package.json.meta whitespace=-blank-at-eol

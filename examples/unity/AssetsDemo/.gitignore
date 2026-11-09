@@ -1,0 +1,9 @@
+/Library/
+/Temp/
+/Logs/
+/UserSettings/
+/BuildArtifacts/
+/*.csproj
+/*.sln*
+/Assets/StreamingAssets/AiNativeAssets/
+/Assets/StreamingAssets/AiNativeAssets.meta

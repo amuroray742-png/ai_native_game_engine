@@ -1,0 +1,108 @@
+using System;
+using System.IO;
+using AiNative.UnityCore;
+using AiNative.UnityCore.Assets;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+
+public sealed class AssetsDemoBootstrap : MonoBehaviour
+{
+    private string _status = "Starting";
+    private bool _continue;
+    private bool _showContinue;
+    private async UniTaskVoid Start()
+    {
+        Application.runInBackground = true;
+        try
+        {
+            var module = new AssetsModule();
+            Core.Inst.RegisterModule(module);
+            await Core.Inst.RunAsync();
+            var first = await module.InstantiateAsync("a");
+            var second = await module.InstantiateAsync("b");
+            first.Value.transform.position = Vector3.left;
+            second.Value.transform.position = Vector3.right;
+            var material = first.Value.GetComponent<Renderer>().sharedMaterial;
+            if (material != second.Value.GetComponent<Renderer>().sharedMaterial) { throw new Exception("Shared material identity differs."); }
+            if (material.mainTexture != second.Value.GetComponent<Renderer>().sharedMaterial.mainTexture) { throw new Exception("Shared texture identity differs."); }
+            _status = "A and B share one material and texture. Continue to test pool, scene and cleanup.";
+            Capture();
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") < 0)
+            {
+                _showContinue = true;
+                await UniTask.WaitUntil(() => _continue, cancellationToken: this.GetCancellationTokenOnDestroy());
+                _showContinue = false;
+            }
+            first.Dispose();
+            await UniTask.Yield();
+            if (second.Value.GetComponent<Renderer>().sharedMaterial != material) { throw new Exception("Releasing A destroyed B dependencies."); }
+            var data = await module.LoadAsync<DemoData>("data");
+            if (data.Value.Value != 42) { throw new Exception("Bundle script type failed."); }
+            data.Dispose();
+            var pool = module.CreatePool("a", new AssetPoolOptions(2));
+            await pool.PrewarmAsync(2);
+            var rental = await pool.RentAsync();
+            rental.Dispose();
+            await pool.CloseAsync();
+            var scene = await module.LoadSceneAsync("scene");
+            var sceneRenderer = scene.Value.GetRootGameObjects()[0].GetComponentInChildren<Renderer>();
+            if (sceneRenderer.sharedMaterial != material) { throw new Exception("Scene external material identity differs."); }
+            await scene.UnloadAsync();
+            second.Dispose();
+            await Core.Inst.RestartAsync();
+            using (var again = await module.LoadAsync<GameObject>("a")) { if (again.Value == null) { throw new Exception("Restart failed."); } }
+            await Core.Inst.CloseAsync();
+            var diagnostics = module.GetDiagnostics();
+            if (diagnostics.Bundles.Count != 0 || diagnostics.PendingOperations != 0 || diagnostics.Scopes.Count != 0) { throw new Exception("Resources remain after shutdown."); }
+            _status = "PASS: shared resources, pool, scene, script types, restart and cleanup";
+            Debug.Log(_status);
+            WriteResult(true, _status);
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0) { Application.Quit(0); }
+        }
+        catch (Exception error)
+        {
+            _status = error.ToString();
+            Debug.LogException(error);
+            WriteResult(false, _status);
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0) { Application.Quit(1); }
+        }
+    }
+    private static void Capture()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        int index = Array.IndexOf(args, "-assetsResult");
+        if (index < 0 || index + 1 >= args.Length) { return; }
+        var camera = UnityEngine.Object.FindFirstObjectByType<Camera>();
+        var target = RenderTexture.GetTemporary(640, 360, 24);
+        var previous = RenderTexture.active;
+        var texture = new Texture2D(640, 360, TextureFormat.RGB24, false);
+        try
+        {
+            camera.targetTexture = target;
+            camera.Render();
+            RenderTexture.active = target;
+            texture.ReadPixels(new Rect(0, 0, 640, 360), 0, 0);
+            texture.Apply();
+            File.WriteAllBytes(Path.ChangeExtension(args[index + 1], ".png"), texture.EncodeToPNG());
+        }
+        finally
+        {
+            camera.targetTexture = null;
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(target);
+            UnityEngine.Object.Destroy(texture);
+        }
+    }
+    private static void WriteResult(bool success, string message)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        int index = Array.IndexOf(args, "-assetsResult");
+        if (index >= 0 && index + 1 < args.Length) { File.WriteAllText(args[index + 1], JsonUtility.ToJson(new SmokeResult { success = success, message = message })); }
+    }
+    [Serializable] private sealed class SmokeResult { public bool success; public string message; }
+    private void OnGUI()
+    {
+        GUI.Label(new Rect(20, 20, Screen.width - 40, 80), _status);
+        if (_showContinue && GUI.Button(new Rect(20, 110, 200, 40), "Run cleanup checks")) { _continue = true; }
+    }
+}

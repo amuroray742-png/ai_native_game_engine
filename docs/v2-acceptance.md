@@ -1,5 +1,7 @@
 # 通用框架 v2 验收
 
+UnityCore Assets 的独立资源包、异步关闭扩展与 Windows 资源验收记录见 [Assets 记录](unitycore-assets.md)。它不改变下述模拟内核和 v2 协议历史基线。
+
 本记录只声明实际执行的检查。当前实现、协议与复现边界见[v2契约](framework-v2.md)。旧355测试/45次CLI的逐项行为映射见[迁移索引](v2-migration-index.md)。
 
 2026-11-09 的宿主故障分类、编码失败终止、恢复 runtime 核对、退出日志和 Int32 负零修复，独立审查及本机271项 .NET、108次CLI和两个Unity宿主验收见[修复记录](review-fixes-20261109.md)。历史基线仍按下文保留。

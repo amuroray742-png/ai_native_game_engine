@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f620af9776af504ab49a215eb26c176, type: 3}
+  m_Name: ResourceGroups
+  m_EditorClassIdentifier: AiNative.UnityCore.Assets.Editor::AiNative.UnityCore.Assets.Editor.AssetGroups
+  Groups:
+  - Id: A
+    Assets:
+    - Address: a
+      Asset: {fileID: 174177958510629367, guid: 94213b7aad46583468c389689ce4bd2a, type: 3}
+  - Id: B
+    Assets:
+    - Address: b
+      Asset: {fileID: 1859819277136389322, guid: cf8ed036118dc7a48b9087a6d4eed082, type: 3}
+  - Id: Data
+    Assets:
+    - Address: data
+      Asset: {fileID: 11400000, guid: 62bad707054872a4d9ae3633d68eec42, type: 2}
+  - Id: Scene
+    Assets:
+    - Address: scene
+      Asset: {fileID: 102900000, guid: 19c6d70f68f0974449d3637c587031cc, type: 3}
+  - Id: Audio
+    Assets:
+    - Address: audio
+      Asset: {fileID: 8300000, guid: 3be902b8ef582604daa8cf89719b4e9a, type: 3}
+  - Id: Sprites
+    Assets:
+    - Address: sprites
+      Asset: {fileID: 2800000, guid: 370ae4d4f9d71d049a2ff55fd141d7ed, type: 2}
