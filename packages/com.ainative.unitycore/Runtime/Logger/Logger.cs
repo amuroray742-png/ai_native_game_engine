@@ -158,7 +158,7 @@ namespace AiNative.UnityCore.Logger
         public void Warning(Exception e)
         {
             if (!IsEnabled(ELogLevel.Warn)) { return; }
-            Log(ELogLevel.Warn, e, null);
+            Log(ELogLevel.Warn, e);
         }
 
 #if WEPIE_RELEASE
@@ -201,7 +201,7 @@ namespace AiNative.UnityCore.Logger
         public void Error(Exception exception)
         {
             if (!IsEnabled(ELogLevel.Error)) { return; }
-            Log(ELogLevel.Error, exception, null);
+            Log(ELogLevel.Error, exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -233,11 +233,11 @@ namespace AiNative.UnityCore.Logger
             return messageBuilder.ToString();
         }
 
-        private void Log(ELogLevel level, string message, UnityEngine.Object obj)
+        private void Log(ELogLevel level, string message, UnityEngine.Object obj = null)
         {
             string logStr;
             StringBuilder infoBuilder = GetFormatString(level, message);
-            if (level == ELogLevel.Error || level == ELogLevel.Exception)
+            if (level == ELogLevel.Error)
             {
                 StackFrame[] stackFrames = new StackTrace().GetFrames();
                 for (int i = 0; i < stackFrames.Length; i++)

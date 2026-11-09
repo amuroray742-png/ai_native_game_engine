@@ -10,6 +10,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from unity_physics import DATA, MANAGED, PROJECT, ROOT, RUNNER
+from unity_packages import copy_verification_project
 
 
 def write(path, value):
@@ -139,9 +140,7 @@ def verify(output):
     editor = next(x["location"] for x in inventory["data"]["items"] if x["version"] == version)
     summary["editor"] = version
     with tempfile.TemporaryDirectory(prefix="ainative-sandbox-") as tmp:
-        project = Path(tmp) / "PhysicsSandbox"
-        for directory in ("Assets", "Packages", "ProjectSettings"):
-            shutil.copytree(PROJECT / directory, project / directory)
+        project = copy_verification_project(PROJECT, Path(tmp))
         for reload in ("on", "off"):
             report = output / ("reload-" + reload)
             summary["tests"][reload] = play(project, editor, report, reload)

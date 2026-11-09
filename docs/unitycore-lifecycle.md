@@ -1,5 +1,7 @@
 # UnityCore 应用服务契约与修复验收
 
+当前开发工程已改为直接引用仓库本地 UPM 源码，见文末“本地源码包引用”；下列内嵌包验收记录保留当时的历史做法。
+
 本轮目标是修复 UnityCore 首次导入中的 13 项问题，允许一个有边界的 Unity 应用级单例，并将该决定与行为修复分别记录。适用源码为 `packages/com.ainative.unitycore`，验证宿主为 PhysicsSandbox。具体玩法仍由现有 PlayHost 推进；没有改变 v2 文件协议或纯 C# 模拟内核。
 
 ## 所有权与装配
@@ -47,7 +49,7 @@ TimeMachine 的 Update/LateUpdate/FixedUpdate/OmegaLateUpdate 与 Timer 仅承�
 
 实现与集成由主 Agent 负责，最终代码另交独立 Reviewer 审查；审查后的改动再运行受影响验证。同一失败按仓库约定最多三轮假设、修改与验证，保留失败材料。
 
-`python scripts/unity_physics.py prepare` 将两个公共包内嵌到 PhysicsSandbox，并同步删除项。UnityCore 测试与源码一起内嵌；manifest 的 testables 包含 UnityCore，没有开发者绝对路径。沙盒场景本身不改用 UnityCore 驱动。
+PhysicsSandbox 的 manifest 使用 `file:../../../../packages/com.ainative.unity` 和 `file:../../../../packages/com.ainative.unitycore`，直接引用仓库源码与测试；testables 包含 UnityCore，没有开发者绝对路径。Unity 开启 Auto Refresh 后，编辑包源码无需运行 prepare。`python scripts/unity_physics.py prepare` 仅更新 DLL、原生库和数据，并拒绝遮蔽本地引用的同名内嵌包。验收临时副本保留同样的相对目录结构并使用独立包副本。沙盒场景本身不改用 UnityCore 驱动。
 
 运行 `python scripts/unity_physics.py verify --output TestResults/<新目录>`：复制工程到仓库外，分别开启和关闭 Domain Reload，运行全量 PlayMode/EditMode 测试以及现有十组 CLI 检查点比较。包内测试位于 `Tests/EditMode` 和 `Tests/PlayMode`，结果包括真实初始化任务、Unity 帧驱动、连续进出 Play 及启动中退出。
 
@@ -107,3 +109,20 @@ Initialize/Start 返回的错误直接交给失败收尾，不再先抛出再捕
 命令为 `unity test <副本路径> --mode EditMode|PlayMode --filter AiNative.UnityCore.Tests --output <XML路径> --timeout 600 --format json -- -logFile <日志路径>`，每种 Domain Reload 各运行两个模式；具体命令、结果与代码指纹见[后续验收摘要](evidence/unitycore/simplify-20261109/summary.json)，XML、日志及独立审查说明见[后续证据 ZIP](evidence/unitycore/simplify-20261109/unitycore-simplify-evidence.zip)。本地完整输出在 `TestResults/unitycore-simplify-20261109/`。
 
 本次仅复跑 UnityCore 包的 Windows Editor 回归；未重新执行 PhysicsSandbox CLI 比较、完整 .NET 单元套件、GridGame Editor、Player、IL2CPP、人工试玩或远端 CI。前一轮 90 次测试及十组比较仍是原版本的历史证据。
+
+## 2026-11-09 本地源码包引用
+
+GridGame 引用仓库 `com.ainative.unity`，PhysicsSandbox 引用该包及 `com.ainative.unitycore`。manifest 使用相对 `file:` 路径，锁文件的 source 为 local；开发工程不再生成内嵌副本。两个 prepare 入口仍更新 DLL 和数据；发现同名内嵌副本会拒绝继续，提示保留修改后移走旧副本。当前机器的旧副本已保留在 `TestResults/local-packages-backup-20261109/`。
+
+`scripts/unity_packages.py` 仅承担本地引用检查和临时验收工程复制：保持 `examples/unity/<Game>` 与根目录 `packages/` 的布局，复制独立包源码，避免临时 Editor 修改活动源码。Python 回归验证搬迁后解析目标正确、源码快照隔离及拒绝旧副本遮蔽而不删除用户修改。没有新增依赖或改变模拟契约。
+
+启用本地源码时，同时修正用户简化 Logger 后遗留的编译不一致：Core 的异常输出调用改为 Error，移除不存在的 ELogLevel.Exception 引用，匹配 Exception 参数重载及可选上下文。保留简化后的接口和局部 StringBuilder 格式化。独立 Reviewer 审查通过；建议补充旧 checkout 迁移说明，已落实到 README。
+
+实际 Windows Editor 6000.3.23f1 验证：活动 PhysicsSandbox 的两个包均解析为仓库 `packages/`（source=Local），生成的 C# 项目引用同一 Logger.cs；程序集重载完成、无编译错误，Auto Refresh 已启用。包解析引发重载时紧接的刷新请求曾断开，随后检查重载已成功完成，不存在未解决连接问题。
+
+- `python -m unittest discover -s scripts -p test_unity_packages.py -v`：2项通过，审查后重跑通过。
+- `python scripts/unity_physics.py verify --output TestResults/local-upm-physics-20261109`：Domain Reload 开/关各24项 PlayMode、23项 EditMode通过，共94次；十组CLI比较全部一致。
+- `python scripts/unity_grid.py verify --output TestResults/local-upm-grid-20261109`：两种设置各7项 PlayMode及1项进出Play测试通过，共15次；四组比较各16个检查点一致。
+- `git diff --check`、更新文档的本地链接、manifest/lock/源码路径一致性检查通过。
+
+完整 XML、Editor 日志、比较记录和截图在上述本地输出目录；本轮未运行远端 CI、Linux、Player、IL2CPP、人工试玩或完整 .NET 单元套件。

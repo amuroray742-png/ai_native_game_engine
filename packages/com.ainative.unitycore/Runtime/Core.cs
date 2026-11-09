@@ -318,7 +318,7 @@ namespace AiNative.UnityCore
 
         internal void OnRootDestroyed()
         {
-            CloseAsync().Forget(error => Logger.Exception(error));
+            CloseAsync().Forget(error => Logger.Error(error));
         }
 
         internal static void RetireCurrent()
@@ -330,7 +330,7 @@ namespace AiNative.UnityCore
             previous._retired = true;
             if (previous._closeCompletion == null)
             {
-                previous.CloseAsync().Forget(error => previous.Logger.Exception(error));
+                previous.CloseAsync().Forget(error => previous.Logger.Error(error));
             }
             previous._initException = null;
             previous._startException = null;

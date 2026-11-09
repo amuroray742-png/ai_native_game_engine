@@ -46,7 +46,7 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | examples/AiNative.PhysicsSandbox / PhysicsSandbox.Hosting | 实时物理规则与专属协议 |
 | examples/AiNative.Examples.Runner | 无头示例可执行入口，显式注册游戏与物理工厂 |
 | packages/com.ainative.unity | 场景生命周期、手动与固定步长推进、类型化 Tick 交付 |
-| packages/com.ainative.unitycore | Unity 应用模块生命周期、日志与表现回调，prepare 将源码及测试内嵌到 PhysicsSandbox |
+| packages/com.ainative.unitycore | Unity 应用模块生命周期、日志与表现回调，PhysicsSandbox 直接引用仓库中的源码及测试 |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
 | examples/unity/PhysicsSandbox | 独立 Windows Editor 工程，提供 Jolt 沙盒、实时输入、存读档和逐 Tick 对照 |
 | native/jolt | 原生资源聚合、BodyID 批量接口、内部状态验证及必要 joltc 扩展 |
@@ -54,9 +54,11 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 
 Core 和可移植库保持 netstandard2.1 / C# 9；Headless、Runner、测试使用 .NET 10。框架没有 Example 引用，也没有反射插件发现或通用 ECS。
 
-UnityCore 声明 [UniTask 2.5.11](https://github.com/Cysharp/UniTask/releases/tag/2.5.11) 依赖，并引用 `UniTask` 程序集，供 Unity PlayerLoop 异步等待使用。使用 UnityCore 的项目需在 `Packages/manifest.json` 配置 OpenUPM 注册表 `https://package.openupm.com`，作用域为 `com.cysharp.unitask`；[PhysicsSandbox 配置](examples/unity/PhysicsSandbox/Packages/manifest.json)已包含此项。运行 `python scripts/unity_physics.py prepare` 同步内嵌包；工程没有开发者机器的包绝对路径。该依赖仅用于 Unity 侧，纯 C# 模拟内核保持独立；新增依赖不改变 v2 模拟与文件协议。[UnityCore 接入、接口迁移与验收](docs/unitycore-lifecycle.md)
+UnityCore 声明 [UniTask 2.5.11](https://github.com/Cysharp/UniTask/releases/tag/2.5.11) 依赖，并引用 `UniTask` 程序集，供 Unity PlayerLoop 异步等待使用。使用 UnityCore 的项目需在 `Packages/manifest.json` 配置 OpenUPM 注册表 `https://package.openupm.com`，作用域为 `com.cysharp.unitask`；[PhysicsSandbox 配置](examples/unity/PhysicsSandbox/Packages/manifest.json)已包含此项。两个示例通过 manifest 中相对 `file:` 路径直接引用仓库 `packages/` 源码，修改包内 C# 后由 Unity 自动刷新编译，无需 prepare 同步。`prepare` 仅更新纯 C# DLL、原生库和场景数据；修改这些构建输入后仍需执行。工程没有开发者机器的包绝对路径。该依赖仅用于 Unity 侧，纯 C# 模拟内核保持独立；新增依赖不改变 v2 模拟与文件协议。[UnityCore 接入、接口迁移与验收](docs/unitycore-lifecycle.md)
 
 PhysicsSandbox 安装了 Unity CLI 的 `com.unity.pipeline` 插件，固定版本为 `0.10.0-exp.1`（实验版）。打开项目后，可在仓库根目录运行 `unity status --project-path examples/unity/PhysicsSandbox --format json` 检查连接，运行 `unity command editor status --project-path examples/unity/PhysicsSandbox --format json` 读取编辑器状态。CLI 命令显式指定项目路径，以免操作其他已打开的 Unity 工程。
+
+从旧版升级时，先备份并移走示例工程 `Packages/com.ainative.unity`、`Packages/com.ainative.unitycore` 中实际存在的旧内嵌副本（检查其中是否有未合并的手动修改）。这些忽略目录不会随 Git 更新消失，而且会遮蔽 manifest 的本地引用。今后统一编辑仓库根目录 `packages/`；开启 Unity Preferences 中的 Auto Refresh。验收副本由脚本复制为独立目录结构，开发工程不再复制公共包。
 
 ## 验证
 
