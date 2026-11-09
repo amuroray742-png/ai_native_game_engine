@@ -12,7 +12,7 @@
 
 公共入口改为 `RunAsync(CancellationToken = default)`、`CloseAsync()`、`RestartAsync(CancellationToken = default)`；旧 `Close`、`Restart` 不再保留。`IModule.Initialize/Start` 增加 CancellationToken，返回的 `UniCoreException?` 为 null 表示成功。原 `Logger.Inst` 改为传入 `ICore.Logger`，入口诊断可使用 `Core.Log`。移除泛型反射 Singleton 和对外可修改的 ModuleManager 列表。
 
-所有生命周期入口、模块回调及异步完成须在 Unity 主线程执行。模块必须响应取消，释放尚未交付的局部资源；尤其退出 Play 的取消收尾不能依赖下一次 PlayerLoop。外部操作不能立即取消时，模块须自行隔离并回收迟到结果，不可在关闭后发布资源。
+Core 只支持 Unity 主线程使用，不记录线程 ID、不检查调用线程，也不提供自动切线程或并发支持。所有生命周期入口、外部取消请求、模块回调及异步完成须在 Unity 主线程执行；模块主动使用后台任务时，负责在返回前切回主线程。模块必须响应取消，释放尚未交付的局部资源；尤其退出 Play 的取消收尾不能依赖下一次 PlayerLoop。外部操作不能立即取消时，模块须自行隔离并回收迟到结果，不可在关闭后发布资源。
 
 RunAsync/RestartAsync 的外部 CancellationToken 仅控制启动；成功后断开外部取消注册。传给模块的内部令牌仍保留到 CloseAsync 请求取消，避免模块已取消而驱动仍运行。多个初始化共同响应取消时保留 Canceled 结果；混有真实错误或清理错误时仍报告失败。关闭操作保存独立完成源，允许关闭等待者同步恢复后启动下一轮，不改变其他等待者所等待的关闭结果。
 
@@ -28,6 +28,8 @@ RunAsync/RestartAsync 的外部 CancellationToken 仅控制启动；成功后断
 | 退出 Play / 应用 / 脚本重载 | 立即隔离旧 Core 并请求关闭。SubsystemRegistration 为下一次 Play 开放新实例；旧实例不能发布成功或改写新实例。 |
 
 每轮只对已经进入 Initialize 的模块调用 Shut，包括部分初始化失败者；Shut 必须同步、幂等且能释放部分资源。错误通知只是通知，不能将失败改成成功。初始化任务先捕获各自错误，使 WhenAll 等待所有任务；仅消费其返回数组一次，不能再次读取池化 UniTask。
+
+模块返回的具体错误直接进入通知、清理及任务失败流程，不先抛出再捕获。现有 Run/Close/Restart 的 UniTask 失败与取消契约保持不变；编程契约违反仍明确失败。捕获仅保留在模块执行、通知和释放边界；驱动及根对象的空值判断对应部分创建或 Unity 对象已被销毁的实际状态。
 
 ## 表现回调与定时器
 
