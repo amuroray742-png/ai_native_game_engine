@@ -7,7 +7,7 @@
       "dependencies": {}
     },
     "com.ainative.unitycore": {
-      "version": "0.1.0",
+      "version": "file:com.ainative.unitycore",
       "depth": 0,
       "source": "embedded",
       "dependencies": {

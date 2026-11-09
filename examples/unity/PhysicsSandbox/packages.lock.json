@@ -2,14 +2,8 @@
   "version": 1,
   "dependencies": {
     ".NETStandard,Version=v2.1": {
-      "ainative.unity": {
+      "ainative.unitycore": {
         "type": "Project"
-      },
-      "physicssandbox.play": {
-        "type": "Project",
-        "dependencies": {
-          "AiNative.Unity": "[1.0.0, )"
-        }
       }
     }
   }
