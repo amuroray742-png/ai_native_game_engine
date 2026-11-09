@@ -13,7 +13,6 @@ namespace AiNative.UnityCore.Logger
         Info = 1,
         Warn = 2,
         Error = 3,
-        Exception = 4
     }
 
     public struct LogInfo
@@ -59,9 +58,8 @@ namespace AiNative.UnityCore.Logger
 #endif
         public void Debug(string message)
         {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            Log(ELogLevel.Debug, message);
+            if (!IsEnabled(ELogLevel.Debug)) { return; }
+            Log(ELogLevel.Debug, message, null);
         }
 
 #if WEPIE_RELEASE
@@ -69,21 +67,29 @@ namespace AiNative.UnityCore.Logger
 #endif
         public void Debug(string format, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
+            if (!IsEnabled(ELogLevel.Debug)) { return; }
             string message = FormatMessage(format, args);
-            Log(ELogLevel.Debug, message);
+            Log(ELogLevel.Debug, message, null);
         }
 
 #if WEPIE_RELEASE
         [Conditional("FALSE")]
 #endif
-        public void Debug(string format, UnityEngine.Object obj, params object[] args)
+        public void Debug(string format, UnityEngine.Object context, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
+            if (!IsEnabled(ELogLevel.Debug)) { return; }
             string message = FormatMessage(format, args);
-            Log(ELogLevel.Debug, message, obj);
+            Log(ELogLevel.Debug, message, context);
+        }
+
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        public void Debug(string message, UnityEngine.Object context)
+        {
+            if (!IsEnabled(ELogLevel.Debug)) { return; }
+            Log(ELogLevel.Debug, message, context);
         }
 
 #if WEPIE_RELEASE
@@ -92,9 +98,8 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Warning(string message)
         {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            Log(ELogLevel.Warn, message);
+            if (!IsEnabled(ELogLevel.Warn)) { return; }
+            Log(ELogLevel.Warn, message, null);
         }
 
 #if WEPIE_RELEASE
@@ -103,9 +108,8 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Warning(Exception e)
         {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            Log(ELogLevel.Warn, e);
+            if (!IsEnabled(ELogLevel.Warn)) { return; }
+            Log(ELogLevel.Warn, e, null);
         }
 
 #if WEPIE_RELEASE
@@ -114,8 +118,7 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Warning(string format, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
+            if (!IsEnabled(ELogLevel.Warn)) { return; }
             string message = FormatMessage(format, args);
             Log(ELogLevel.Warn, message);
         }
@@ -126,222 +129,55 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Warning(string format, UnityEngine.Object obj, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
+            if (!IsEnabled(ELogLevel.Warn)) { return; }
             string message = FormatMessage(format, args);
+            Log(ELogLevel.Warn, message, obj);
+        }
+
+
+#if WEPIE_RELEASE
+        [Conditional("FALSE")]
+#endif
+        public void Warning(string message, UnityEngine.Object obj)
+        {
+            if (!IsEnabled(ELogLevel.Warn)) { return; }
             Log(ELogLevel.Warn, message, obj);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(string message)
         {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            Log(ELogLevel.Error, message);
+            if (!IsEnabled(ELogLevel.Error)) { return; }
+            Log(ELogLevel.Error, message, null);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(Exception exception)
         {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            Log(ELogLevel.Error, exception);
+            if (!IsEnabled(ELogLevel.Error)) { return; }
+            Log(ELogLevel.Error, exception, null);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(string format, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
+            if (!IsEnabled(ELogLevel.Error)) { return; }
             string message = FormatMessage(format, args);
-            Log(ELogLevel.Error, message);
+            Log(ELogLevel.Error, message, null);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(string format, UnityEngine.Object obj, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
+            if (!IsEnabled(ELogLevel.Error)) { return; }
             string message = FormatMessage(format, args);
             Log(ELogLevel.Error, message, obj);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exception(string message)
+        public void Error(string message, UnityEngine.Object obj)
         {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            Log(ELogLevel.Exception, message);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exception(Exception exception)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            Log(ELogLevel.Exception, exception);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exception(string format, params object[] args)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, args);
-            Log(ELogLevel.Exception, message);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Exception(string format, UnityEngine.Object obj, params object[] args)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, args);
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        // Keep explicit object[] calls compatible. Fixed argument calls use these generic
-        // overloads so arrays and boxing happen only after the level check.
-        // Specify Unity object context with the named argument obj: to distinguish it from a format value.
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug(string message, UnityEngine.Object obj)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0>(string format, T0 arg0, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1>(string format, T0 arg0, T1 arg1, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4, T5>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4, T5, T6>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4, T5, T6, T7>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4, T5, T6, T7, T8>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 });
-            Log(ELogLevel.Debug, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Debug<TState>(TState state, Func<TState, string> messageFactory, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Debug))
-                return;
-            Log(ELogLevel.Debug, messageFactory(state), obj);
+            if (!IsEnabled(ELogLevel.Error)) { return; }
+            Log(ELogLevel.Error, message, obj);
         }
 
 #if WEPIE_RELEASE
@@ -349,129 +185,7 @@ namespace AiNative.UnityCore.Logger
 #endif
         public void Info(string message, UnityEngine.Object obj)
         {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0>(string format, T0 arg0, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1>(string format, T0 arg0, T1 arg1, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4, T5>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4, T5, T6>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4, T5, T6, T7>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4, T5, T6, T7, T8>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 });
-            Log(ELogLevel.Info, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Info<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 });
+            if (!IsEnabled(ELogLevel.Info)) { return; }
             Log(ELogLevel.Info, message, obj);
         }
 
@@ -480,354 +194,14 @@ namespace AiNative.UnityCore.Logger
 #endif
         public void Info<TState>(TState state, Func<TState, string> messageFactory, UnityEngine.Object obj = null)
         {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
+            if (!IsEnabled(ELogLevel.Info)) { return; }
             Log(ELogLevel.Info, messageFactory(state), obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning(string message, UnityEngine.Object obj)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0>(string format, T0 arg0, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1>(string format, T0 arg0, T1 arg1, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4, T5>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4, T5, T6>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4, T5, T6, T7>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4, T5, T6, T7, T8>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 });
-            Log(ELogLevel.Warn, message, obj);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        public void Warning<TState>(TState state, Func<TState, string> messageFactory, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Warn))
-                return;
-            Log(ELogLevel.Warn, messageFactory(state), obj);
-        }
-
-        public void Error(string message, UnityEngine.Object obj)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0>(string format, T0 arg0, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1>(string format, T0 arg0, T1 arg1, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4, T5>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4, T5, T6>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4, T5, T6, T7>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4, T5, T6, T7, T8>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 });
-            Log(ELogLevel.Error, message, obj);
-        }
-
-        public void Error<TState>(TState state, Func<TState, string> messageFactory, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Error))
-                return;
-            Log(ELogLevel.Error, messageFactory(state), obj);
         }
 
         public void Exception(string message, UnityEngine.Object obj)
         {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
+            if (!IsEnabled(ELogLevel.Exception)) { return; }
             Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0>(string format, T0 arg0, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1>(string format, T0 arg0, T1 arg1, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4, T5>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4, T5, T6>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4, T5, T6, T7>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4, T5, T6, T7, T8>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            string message = FormatMessage(format, new object[] { arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 });
-            Log(ELogLevel.Exception, message, obj);
-        }
-
-        public void Exception<TState>(TState state, Func<TState, string> messageFactory, UnityEngine.Object obj = null)
-        {
-            if (!IsEnabled(ELogLevel.Exception))
-                return;
-            Log(ELogLevel.Exception, messageFactory(state), obj);
         }
 
         private string FormatMessage(string format, object[] args)
@@ -835,7 +209,7 @@ namespace AiNative.UnityCore.Logger
             return string.Format(format, args);
         }
 
-        private void Log(ELogLevel level, string message, UnityEngine.Object obj = null)
+        private void Log(ELogLevel level, string message, UnityEngine.Object obj)
         {
             string logStr;
             StringBuilder infoBuilder = GetFormatString(level, message);
@@ -868,9 +242,6 @@ namespace AiNative.UnityCore.Logger
                 case ELogLevel.Error:
                     UnityEngine.Debug.LogError(logStr, obj);
                     break;
-                case ELogLevel.Exception:
-                    UnityEngine.Debug.LogError(logStr, obj);
-                    break;
             }
         }
         private void Log(ELogLevel level, Exception message)
@@ -890,9 +261,6 @@ namespace AiNative.UnityCore.Logger
                 case ELogLevel.Error:
                     UnityEngine.Debug.LogError(message);
                     break;
-                case ELogLevel.Exception:
-                    UnityEngine.Debug.LogError(message);
-                    break;
             }
         }
 #if WEPIE_RELEASE
@@ -901,8 +269,7 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Info(string message)
         {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
+            if (!IsEnabled(ELogLevel.Info)) { return; }
             Log(ELogLevel.Info, message);
         }
 #if WEPIE_RELEASE
@@ -911,8 +278,7 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Info(string format, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
+            if (!IsEnabled(ELogLevel.Info)) { return; }
             string message = FormatMessage(format, args);
             Log(ELogLevel.Info, message);
         }
@@ -923,8 +289,7 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Info(string format, UnityEngine.Object obj, params object[] args)
         {
-            if (!IsEnabled(ELogLevel.Info))
-                return;
+            if (!IsEnabled(ELogLevel.Info)) { return; }
             string message = FormatMessage(format, args);
             Log(ELogLevel.Info, message, obj);
         }
@@ -954,10 +319,6 @@ namespace AiNative.UnityCore.Logger
                 case ELogLevel.Error:
                     builder.AppendFormat("<color=#ff7f50><b>[error]</b></color>[{0}] - <color=#{2}>{1}</color>",
                         GetNowFormatDate(System.DateTime.Now), message, ColorUtil.Red);
-                    break;
-                case ELogLevel.Exception:
-                    builder.AppendFormat("<color=#ffc0cb><b>[error]</b></color>[{0}] - <color=#{2}>{1}</color>",
-                        GetNowFormatDate(System.DateTime.Now), message, ColorUtil.Exception);
                     break;
             }
 
