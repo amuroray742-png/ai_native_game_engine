@@ -86,3 +86,22 @@ python scripts/unity_physics.py verify --output TestResults/unitycore-windows-20
 完整本地输出位于 `TestResults/unitycore-windows-20261109/`；[机器摘要](evidence/unitycore/windows-editor-20261109/summary.json)和[原始证据 ZIP](evidence/unitycore/windows-editor-20261109/unitycore-windows-evidence.zip)包含四份最终测试 XML、Editor 日志、CLI 输入/结果/回放、帧日志、截图、开发期结果和审查说明。13 个问题与测试的对应关系见上表。
 
 此前 GridGame、PhysicsSandbox 历史记录保持原样。本轮未运行完整 .NET 单元套件、GridGame Editor、Player、IL2CPP、人工试玩或远端 CI；这些不计入本次完成范围。
+
+## 2026-11-09 后续精简与验证
+
+基于已合并的 `aa630d4`，移除 `_threadId`、`EnsureThread` 及全部调用，明确 Core 只支持主线程。架构规范新增防御范围约束：检查必须有契约或实际问题依据，减少逐层捕获与重复判空，预期失败优先沿现有结果类型返回具体错误。
+
+Initialize/Start 返回的错误直接交给失败收尾，不再先抛出再捕获；关闭时也直接把清理错误写入完成源。Start 的非预期异常由启动边界统一通知，去除自有 ClearAll 操作的捕获，Core 的 catch 从 7 处减为 5 处。保留部分创建和 Unity 销毁状态检查，以及模块、通知和清理边界的异常隔离。公开 UniTask 失败/取消语义不变，未扩建结果类型或跨线程支持。
+
+独立 Reviewer 已复核代码及原始结果，未发现剩余具体阻断项。使用 Unity CLI 1.0.0-beta.17、Unity 6000.3.23f1，在仓库外 PhysicsSandbox 工程副本运行整个 UnityCore 包测试：
+
+| Domain Reload | EditMode | PlayMode |
+| --- | --- | --- |
+| 开启 | 21/21 | 13/13 |
+| 关闭 | 21/21 | 13/13 |
+
+合计 68 次执行，0 失败、0 跳过。新增用例验证返回错误的对象、错误码、通知先于清理及后续阶段停止；通知异常用例覆盖初始化返回错误、Start 返回错误和 Start 抛异常。原取消、部分初始化清理、同实例重启、关闭完成后同步重入、连续进出 Play 回归全部通过。本机已打开的 PhysicsSandbox 处于停止状态，内嵌包同步后编译通过，0 错误、0 警告。
+
+命令为 `unity test <副本路径> --mode EditMode|PlayMode --filter AiNative.UnityCore.Tests --output <XML路径> --timeout 600 --format json -- -logFile <日志路径>`，每种 Domain Reload 各运行两个模式；具体命令、结果与代码指纹见[后续验收摘要](evidence/unitycore/simplify-20261109/summary.json)，XML、日志及独立审查说明见[后续证据 ZIP](evidence/unitycore/simplify-20261109/unitycore-simplify-evidence.zip)。本地完整输出在 `TestResults/unitycore-simplify-20261109/`。
+
+本次仅复跑 UnityCore 包的 Windows Editor 回归；未重新执行 PhysicsSandbox CLI 比较、完整 .NET 单元套件、GridGame Editor、Player、IL2CPP、人工试玩或远端 CI。前一轮 90 次测试及十组比较仍是原版本的历史证据。

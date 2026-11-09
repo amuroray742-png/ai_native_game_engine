@@ -97,17 +97,70 @@ namespace AiNative.UnityCore.Tests
         [UnityTest]
         public IEnumerator NotificationExceptionsCannotTurnFailureIntoSuccessOrSkipCleanup() => UniTask.ToCoroutine(async () =>
         {
-            var module = new Module("failing") { Init = (_, __) => UniTask.FromResult<UniCoreException?>(new UniCoreException("init")) };
-            int notifications = 0;
-            _core.OnModulesInitException((_, __) => throw new InvalidOperationException("observer"));
-            _core.OnModulesInitException((_, __) => notifications++);
-            _core.RegisterModule(module);
-            Exception? failure = await CaptureFailure(_core.RunAsync());
-            Assert.IsInstanceOf<AggregateException>(failure);
-            Assert.AreEqual(1, notifications);
-            Assert.AreEqual(0, module.Starts);
-            Assert.AreEqual(1, module.Shuts);
-            Assert.False(_core.IsRunning);
+            foreach (string phase in new[] { "initialize-return", "start-return", "start-throw" })
+            {
+                Core.ResetForPlay();
+                _core = Core.Inst;
+                var module = new Module("failing");
+                ConfigureFailure(module, phase);
+                int notifications = 0;
+                Action<string, UniCoreException> observer = (_, __) => throw new InvalidOperationException("observer");
+                Action<string, UniCoreException> nextObserver = (_, __) => notifications++;
+                if (phase == "initialize-return")
+                {
+                    _core.OnModulesInitException(observer).OnModulesInitException(nextObserver);
+                }
+                else
+                {
+                    _core.OnModulesStartException(observer).OnModulesStartException(nextObserver);
+                }
+                _core.RegisterModule(module);
+                Exception? failure = await CaptureFailure(_core.RunAsync());
+                Assert.IsInstanceOf<AggregateException>(failure, phase);
+                Assert.AreEqual(2, ((AggregateException)failure!).InnerExceptions.Count, phase);
+                Assert.AreEqual(1, notifications, phase);
+                Assert.AreEqual(1, module.Shuts, phase);
+                Assert.False(_core.IsRunning, phase);
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ReturnedModuleErrorPreservesItsCodeAndStopsLaterStages() => UniTask.ToCoroutine(async () =>
+        {
+            foreach (bool failInitialization in new[] { true, false })
+            {
+                Core.ResetForPlay();
+                _core = Core.Inst;
+                var expected = new UniCoreException("Required configuration is missing.", 401);
+                var module = new Module("failing");
+                var later = new Module("later");
+                UniCoreException? reported = null;
+                Action<string, UniCoreException> observer = (name, error) =>
+                {
+                    Assert.AreEqual("failing", name);
+                    Assert.AreEqual(0, module.Shuts);
+                    reported = error;
+                };
+                if (failInitialization)
+                {
+                    module.Init = (_, __) => UniTask.FromResult<UniCoreException?>(expected);
+                    _core.OnModulesInitException(observer);
+                }
+                else
+                {
+                    module.StartAction = (_, __) => UniTask.FromResult<UniCoreException?>(expected);
+                    _core.OnModulesStartException(observer);
+                }
+                _core.RegisterModule(module).RegisterModule(later);
+                Exception? failure = await CaptureFailure(_core.RunAsync());
+                Assert.AreSame(expected, failure);
+                Assert.AreSame(expected, reported);
+                Assert.AreEqual(401, ((UniCoreException)failure!).ErrorCode);
+                Assert.AreEqual(0, later.Starts);
+                Assert.AreEqual(1, module.Shuts);
+                Assert.AreEqual(1, later.Shuts);
+                Assert.AreEqual(CoreState.Faulted, _core.State);
+            }
         });
 
         [UnityTest]
