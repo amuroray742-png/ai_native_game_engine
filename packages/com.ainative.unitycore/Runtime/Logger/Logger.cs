@@ -96,7 +96,7 @@ namespace AiNative.UnityCore.Logger
         public void Info(string message)
         {
             if (!IsEnabled(ELogLevel.Info)) { return; }
-            Log(ELogLevel.Info, message);
+            Log(ELogLevel.Info, message, null);
         }
 
 #if WEPIE_RELEASE
@@ -117,7 +117,7 @@ namespace AiNative.UnityCore.Logger
         {
             if (!IsEnabled(ELogLevel.Info)) { return; }
             string message = FormatMessage(format, args);
-            Log(ELogLevel.Info, message);
+            Log(ELogLevel.Info, message, null);
         }
 
 #if WEPIE_RELEASE
@@ -155,21 +155,11 @@ namespace AiNative.UnityCore.Logger
         [Conditional("FALSE")]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Warning(Exception e)
-        {
-            if (!IsEnabled(ELogLevel.Warn)) { return; }
-            Log(ELogLevel.Warn, e);
-        }
-
-#if WEPIE_RELEASE
-        [Conditional("FALSE")]
-#endif
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Warning(string format, params object[] args)
         {
             if (!IsEnabled(ELogLevel.Warn)) { return; }
             string message = FormatMessage(format, args);
-            Log(ELogLevel.Warn, message);
+            Log(ELogLevel.Warn, message, null);
         }
 
 #if WEPIE_RELEASE
@@ -198,13 +188,6 @@ namespace AiNative.UnityCore.Logger
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Error(Exception exception)
-        {
-            if (!IsEnabled(ELogLevel.Error)) { return; }
-            Log(ELogLevel.Error, exception);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(string format, params object[] args)
         {
             if (!IsEnabled(ELogLevel.Error)) { return; }
@@ -220,6 +203,22 @@ namespace AiNative.UnityCore.Logger
             Log(ELogLevel.Error, message, obj);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Error(Exception exception)
+        {
+            if (!IsEnabled(ELogLevel.Error))
+            { return; }
+            LogException(exception, null);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Error(Exception exception, UnityEngine.Object obj)
+        {
+            if (!IsEnabled(ELogLevel.Error)) { return; }
+            LogException(exception, obj);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsEnabled(ELogLevel level)
         {
@@ -233,7 +232,7 @@ namespace AiNative.UnityCore.Logger
             return messageBuilder.ToString();
         }
 
-        private void Log(ELogLevel level, string message, UnityEngine.Object obj = null)
+        private void Log(ELogLevel level, string message, UnityEngine.Object? obj)
         {
             string logStr;
             StringBuilder infoBuilder = GetFormatString(level, message);
@@ -268,23 +267,9 @@ namespace AiNative.UnityCore.Logger
             }
         }
 
-        private void Log(ELogLevel level, Exception message)
+        private void LogException(Exception exception, UnityEngine.Object? context)
         {
-            switch (level)
-            {
-                case ELogLevel.Debug:
-                    UnityEngine.Debug.Log(message);
-                    break;
-                case ELogLevel.Info:
-                    UnityEngine.Debug.Log(message);
-                    break;
-                case ELogLevel.Warn:
-                    UnityEngine.Debug.LogWarning(message);
-                    break;
-                case ELogLevel.Error:
-                    UnityEngine.Debug.LogError(message);
-                    break;
-            }
+            UnityEngine.Debug.LogException(exception, context);
         }
 
         private StringBuilder GetFormatString(ELogLevel logLevel, string message)
