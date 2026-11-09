@@ -2,6 +2,8 @@
 
 本记录只声明实际执行的检查。当前实现、协议与复现边界见[v2契约](framework-v2.md)。旧355测试/45次CLI的逐项行为映射见[迁移索引](v2-migration-index.md)。
 
+2026-11-09 的宿主故障分类、编码失败终止、恢复 runtime 核对、退出日志和 Int32 负零修复，独立审查及本机271项 .NET、108次CLI和两个Unity宿主验收见[修复记录](review-fixes-20261109.md)。历史基线仍按下文保留。
+
 后续 joltc 与多线程迁移的版本、契约和新增验收单列在[joltc迁移记录](joltc-migration.md)；本页222项测试/80次CLI记录保留为迁移前v2基线。
 
 后续 C#/原生分层迁移的契约和实际检查见[物理分层迁移](managed-physics-migration.md)。

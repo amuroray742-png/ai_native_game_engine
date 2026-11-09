@@ -1,0 +1,272 @@
+{
+  "date": "2026-11-09",
+  "baseCommit": "1cc849f04c4f2fbb36037108a0b59b146449bf7e",
+  "scope": "Windows x64 local, Unity 6000.3.23f1; no remote CI, Player or IL2CPP run",
+  "sourceSha256": {
+    "packages/com.ainative.unitycore/Runtime/Core.cs": "78c281fa1fef73a66cbec878dd2458107162cc784113a463a73d8f8e63961656",
+    "packages/com.ainative.unitycore/Tests/EditMode/CorePlayCycleTests.cs": "25b6908e159e7723a52cbe3a3b259d1baf4b5838b88258490d344cdc56096201",
+    "scripts/verify_unity_physics.py": "5e060f34a4836d55eb5d1ff67d0fd71d244238169b1cf488a51f546c8e1f9587",
+    "src/AiNative.Core/SimulationRuntime.cs": "a9104f2619c9f69472c6e0840f61ccdeaf5acb76dd4c86b2a63ec07de67e74f1",
+    "src/AiNative.Headless/CliRunner.cs": "82eb35e74c3a68ce03644ef138254c8c4f86f9450ed3a6bd50c31bd88dd873c1",
+    "src/AiNative.Hosting/HostedGame.cs": "d366822d3f3192b3103d754ddb5dafd002b75db4881573e8367cf10b28fe19fd",
+    "src/AiNative.Hosting/ProtocolJson.cs": "34e5ab39610a5e4949f89711afdbffcc92aab209f651d553580bc1c7ad1545e5",
+    "src/AiNative.Hosting/StateCodec.cs": "8675e1b09a1c8d0a34d141afa1e768b4026f13109df05dd4cc7a9df1aaefbac8",
+    "tests/AiNative.Tests/HostFailureTests.cs": "69b490a2ca9c33779b4db69f207fa9d5dc7816a9993a997df50738271002520c"
+  },
+  "unit": {
+    "total": "271",
+    "executed": "271",
+    "passed": "271",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "cliProcesses": 108,
+  "nativeProbe": {
+    "scope": "native-internal-state",
+    "truncationOffsets": 334,
+    "mutationOffsets": 334,
+    "worlds": 0
+  },
+  "unity": {
+    "TestResults/review-fixes-unity/reload-off/exit.xml": {
+      "result": "Passed",
+      "total": "23",
+      "passed": "23",
+      "failed": "0",
+      "skipped": "0"
+    },
+    "TestResults/review-fixes-unity/reload-off/play.xml": {
+      "result": "Passed",
+      "total": "24",
+      "passed": "24",
+      "failed": "0",
+      "skipped": "0"
+    },
+    "TestResults/review-fixes-unity/reload-on/exit.xml": {
+      "result": "Passed",
+      "total": "23",
+      "passed": "23",
+      "failed": "0",
+      "skipped": "0"
+    },
+    "TestResults/review-fixes-unity/reload-on/play.xml": {
+      "result": "Passed",
+      "total": "24",
+      "passed": "24",
+      "failed": "0",
+      "skipped": "0"
+    },
+    "TestResults/review-fixes-grid/play-cycles.xml": {
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "skipped": "0"
+    },
+    "TestResults/review-fixes-grid/reload-off/playmode.xml": {
+      "result": "Passed",
+      "total": "7",
+      "passed": "7",
+      "failed": "0",
+      "skipped": "0"
+    },
+    "TestResults/review-fixes-grid/reload-on/playmode.xml": {
+      "result": "Passed",
+      "total": "7",
+      "passed": "7",
+      "failed": "0",
+      "skipped": "0"
+    }
+  },
+  "physicsComparisons": {
+    "on-uniform": 245,
+    "on-catchup": 245,
+    "on-pause": 14,
+    "on-from-90": 153,
+    "on-from-91": 150,
+    "off-uniform": 245,
+    "off-catchup": 245,
+    "off-pause": 14,
+    "off-from-90": 153,
+    "off-from-91": 150
+  },
+  "gridComparisons": {
+    "on-fast": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 1,
+        "operationFrames": [
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49
+        ],
+        "presentedFrames": [
+          34,
+          36,
+          38,
+          41,
+          42,
+          44,
+          46,
+          48,
+          50
+        ]
+      }
+    },
+    "on-slow": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 8,
+        "operationFrames": [
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93
+        ],
+        "presentedFrames": [
+          78,
+          143,
+          238,
+          434,
+          533,
+          635,
+          736,
+          836,
+          1041
+        ]
+      }
+    },
+    "off-fast": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 1,
+        "operationFrames": [
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48
+        ],
+        "presentedFrames": [
+          33,
+          35,
+          37,
+          40,
+          41,
+          43,
+          45,
+          47,
+          49
+        ]
+      }
+    },
+    "off-slow": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 8,
+        "operationFrames": [
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92
+        ],
+        "presentedFrames": [
+          77,
+          154,
+          232,
+          421,
+          517,
+          615,
+          716,
+          818,
+          1024
+        ]
+      }
+    }
+  },
+  "independentReview": {
+    "reviewer": "independent_review sub-agent",
+    "result": "No remaining concrete blocking findings; both nonblocking suggestions addressed",
+    "independentlyInspected": [
+      "source diff",
+      "271-test TRX",
+      "both PhysicsSandbox PlayMode/EditMode XML sets",
+      "git diff --check"
+    ],
+    "notIndependentlyInspected": [
+      "final CLI comparison summaries (verified by implementing agent)"
+    ]
+  },
+  "archiveSha256": "653bb30e7550442056c81dd595a5b50a40f699a792036a55587b293db4e76b65"
+}

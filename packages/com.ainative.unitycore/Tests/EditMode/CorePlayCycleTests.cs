@@ -19,6 +19,30 @@ namespace AiNative.UnityCore.Tests
         private const string CancelKey = "AiNative.UnityCore.Tests.CancelCount";
 
         [UnityTest]
+        public IEnumerator ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore()
+        {
+            SessionState.SetInt(ExitLogProbe.CountKey, 0);
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            yield return new EnterPlayMode(expectDomainReload: ReloadEnabled());
+            Core.Inst.RegisterModule(new CycleModule(false));
+            yield return Core.Inst.RunAsync().ToCoroutine();
+            new GameObject("ExitLogProbe").AddComponent<ExitLogProbe>();
+            yield return null;
+            yield return new ExitPlayMode();
+            Assert.AreEqual(1, SessionState.GetInt(ExitLogProbe.CountKey, 0));
+            Assert.DoesNotThrow(() => Core.Log.Info("Editor diagnostic after Play exit"));
+            if (!ReloadEnabled())
+            {
+                Assert.Throws<InvalidOperationException>(() => { _ = Core.Inst; });
+            }
+            Assert.IsNull(GameObject.Find("UnityCoreRoot"));
+            yield return new EnterPlayMode(expectDomainReload: ReloadEnabled());
+            Assert.AreSame(Core.Inst.Logger, Core.Log);
+            Assert.AreEqual(CoreState.Stopped, Core.Inst.State);
+            yield return new ExitPlayMode();
+        }
+
+        [UnityTest]
         public IEnumerator TwoPlaySessionsReleaseRunningModules()
         {
             SessionState.SetInt(ShutdownKey, 0);
@@ -97,8 +121,19 @@ namespace AiNative.UnityCore.Tests
             public void AfterStart(ICore core) { }
             public void Shut(ICore core)
             {
+                Core.Log.Info("Module shutdown diagnostic");
                 SessionState.SetInt(ShutdownKey, SessionState.GetInt(ShutdownKey, 0) + 1);
             }
+        }
+    }
+
+    public sealed class ExitLogProbe : MonoBehaviour
+    {
+        internal const string CountKey = "AiNative.UnityCore.Tests.ExitLogCount";
+        private void OnDestroy()
+        {
+            Core.Log.Info("Scene destruction diagnostic");
+            SessionState.SetInt(CountKey, SessionState.GetInt(CountKey, 0) + 1);
         }
     }
 }

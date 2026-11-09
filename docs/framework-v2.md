@@ -53,7 +53,7 @@ PhysicsSandbox 游戏 JSON 中的有限 binary32 数值沿用 .NET CLI 的最短
 
 ## v2 文件协议
 
-所有输入严格检查 UTF-8、重复/未知/缺失字段、非配对 Unicode 和字段类型。Int32 使用整数字面量，不接受指数或小数；非负 Int64/UInt64 用无前导零的 ASCII 十进制字符串。摘要为64位小写 SHA-256。对象属性按 ordinal 排序；模块规范化配置与领域状态（例如实体按ID排序），数组中有业务顺序的事件/操作保持原顺序。
+所有输入严格检查 UTF-8、重复/未知/缺失字段、非配对 Unicode 和字段类型。Int32 使用整数字面量，不接受指数、小数或 `-0`，零只接受 `0`；此限制不改变物理 binary32 负零的保留规则。非负 Int64/UInt64 用无前导零的 ASCII 十进制字符串。摘要为64位小写 SHA-256。对象属性按 ordinal 排序；模块规范化配置与领域状态（例如实体按ID排序），数组中有业务顺序的事件/操作保持原顺序。
 
 场景：
 
@@ -114,5 +114,9 @@ SequentialPresentationQueue要求同实例连续Tick，BeginNext→检查IsActiv
 RealtimePresentationBuffer保留Previous/Current两个观察，插值由表现适配按时间设置完成。PresentationEvents独立FIFO，含输入结果和事件，不附带历史完整观察。TakeEvents只取一次，延迟回调执行前检查IsActive；Reset清空旧批次并更换generation。IsAt检查当前指定Tick及该Tick事件已取出，宿主仍负责应用完成与相机/UI刷新。不会无限保存历史画面，也不会为截图清空未来所有表现。
 
 ## 重新生成与兼容
+
+Hosting 的结果编码、观察/状态编码及顺序帧交付失败后，通过运行时的 `MarkFaulted` 显式终止实例。此入口用于弥补编码发生在模拟 Tick 提交之后的边界：不回滚已提交 Tick，不允许继续提交、推进或捕获状态。Core 不依赖 JSON 或宿主实现。CLI 在创建/恢复与执行阶段遇到模块抛出的协议异常时报告 SimulationFailure（退出码1），保留原错误码、字段路径、当前操作索引及最后可信检查点；输入预检中的同类异常仍为 InputError（退出码2）。
+
+恢复候选在发布前同时核对完整游戏状态与 runtime 的 Tick、submitted、processed、pending、Timing 和随机状态；不一致释放候选，分别报告 `RestoreStateMismatch` 或 `RestoreRuntimeMismatch`。检查不修改旧会话。
 
 不运行v1文件、不静默转换计数。按examples/data配置创建v2场景和操作，经run重新生成快照/回放。改变框架、游戏、适配、原生二进制或构建配置会改变身份；旧材料在严格恢复时明确拒绝。协议错误UnsupportedVersion提示重新生成。历史测试/CLI行为到v2的映射与实际证据见[v2验收](v2-acceptance.md)。

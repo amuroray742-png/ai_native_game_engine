@@ -31,6 +31,12 @@ namespace AiNative.Core
         public SimulationTiming Timing { get; }
         public bool IsFaulted { get; private set; }
 
+        /// <summary>宿主在结果编码或交付失败后终止此实例；已提交的 Tick 不回滚，之后不能推进或捕获状态。</summary>
+        public void MarkFaulted()
+        {
+            IsFaulted = true;
+        }
+
         public static SimulationRuntime<TCommand, TObservation, TState> Create(
             Func<IGameSimulation<TCommand, TObservation, TState>> factory, ulong seed, SimulationTiming timing)
         {

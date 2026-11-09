@@ -163,37 +163,44 @@ namespace AiNative.Headless
             {
                 throw new HostOperationException("InputError", "OutputCollision", "两个输出不能使用同一路径。");
             }
-            using IHostedGame game = snapshot == null ? module.Create(configuration, options.Seed) : StateCodec.Restore(snapshot, environment);
-            RecordedRun result = HostVerification.Record(module, configuration, game, commands, environment, replay,
-                (checkpoint, accepted, rejected) =>
+            try
+            {
+                using IHostedGame game = snapshot == null ? module.Create(configuration, options.Seed) : StateCodec.Restore(snapshot, environment);
+                RecordedRun result = HostVerification.Record(module, configuration, game, commands, environment, replay,
+                    (checkpoint, accepted, rejected) =>
+                    {
+                        if (checkpoint.GetProperty("operationIndex").ValueKind == JsonValueKind.Null)
+                        {
+                            response.InitialCheckpoint = checkpoint;
+                        }
+                        else
+                        {
+                            response.Checkpoints.Add(checkpoint);
+                        }
+                        response.Accepted = accepted;
+                        response.Rejected = rejected;
+                    }, index => response.Operation = index);
+                response.Operation = null;
+                response.Observation = result.Observation;
+                response.Accepted = result.Accepted;
+                response.Rejected = result.Rejected;
+                response.Code = options.Mode == "replay" ? "ReplayMatched" : options.Mode == "inspect" ? "SnapshotInspected" : "RunCompleted";
+                if (replay != null)
                 {
-                    if (checkpoint.GetProperty("operationIndex").ValueKind == JsonValueKind.Null)
-                    {
-                        response.InitialCheckpoint = checkpoint;
-                    }
-                    else
-                    {
-                        response.Checkpoints.Add(checkpoint);
-                    }
-                    response.Accepted = accepted;
-                    response.Rejected = rejected;
-                }, index => response.Operation = index);
-            response.Operation = null;
-            response.Observation = result.Observation;
-            response.Accepted = result.Accepted;
-            response.Rejected = result.Rejected;
-            response.Code = options.Mode == "replay" ? "ReplayMatched" : options.Mode == "inspect" ? "SnapshotInspected" : "RunCompleted";
-            if (replay != null)
-            {
-                response.Compared = replay.Checkpoints.Count + 1;
+                    response.Compared = replay.Checkpoints.Count + 1;
+                }
+                if (snapshotOutput != null)
+                {
+                    response.Artifacts.Add(Publish(snapshotOutput, result.Snapshot));
+                }
+                if (replayOutput != null)
+                {
+                    response.Artifacts.Add(Publish(replayOutput, result.Replay));
+                }
             }
-            if (snapshotOutput != null)
+            catch (ProtocolException failure)
             {
-                response.Artifacts.Add(Publish(snapshotOutput, result.Snapshot));
-            }
-            if (replayOutput != null)
-            {
-                response.Artifacts.Add(Publish(replayOutput, result.Replay));
+                throw new HostOperationException("SimulationFailure", failure.Code, failure.Message, failure.Path, failure);
             }
         }
 

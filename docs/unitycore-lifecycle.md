@@ -4,11 +4,13 @@
 
 ## 所有权与装配
 
-`AiNative.UnityCore.Core` 是兼容层唯一应用级服务入口；它与 `AiNative.Core` 模拟内核不是同一概念。Logger、模块和 TimeMachine 均为实例对象。Core 通过显式注册管理应用服务，不持有跨对局的随机源、权威世界或会话。静态 `Core.Log` 只转发到当前 Core 的日志对象，不创建第二个单例。
+`AiNative.UnityCore.Core` 是兼容层唯一应用级服务入口；它与 `AiNative.Core` 模拟内核不是同一概念。Logger、模块和 TimeMachine 均为实例对象。Core 通过显式注册管理应用服务，不持有跨对局的随机源、权威世界或会话。正常运行时，静态 `Core.Log` 只转发到当前 Core 的日志对象，不创建第二个单例；退出期间的临时日志例外见下文。
 
 `RegisterModule(instance)` 仅允许在停止状态调用。模块 `OnRegister` 只为自身调用 `RegisterInterface<TService,TModule>`，失败时撤销本次全部接口映射。重复接口、重复实例和嵌套注册明确失败。场景装配及 `AfterInitialize(ICore)` 可以通过 `GetModule<TService>` 绑定接口，缺失接口立即抛错；运行方法使用已保存的依赖。该例外不适用于玩法、物理、Hosting 和无头工具。
 
 ## 生命周期与迁移
+
+退出期间 `Core.Inst` 仍拒绝访问，以免重建应用服务；`Core.Log` 改为返回临时 Logger，直接沿用 Unity Debug 输出，不创建 Core、模块或驱动。该临时日志使用默认等级，不保留等级修改。模块 Shut、场景 OnDestroy 以及关闭 Domain Reload 后的 Editor 诊断均可记录；下一次 Play 后日志重新属于新 Core。
 
 公共入口改为 `RunAsync(CancellationToken = default)`、`CloseAsync()`、`RestartAsync(CancellationToken = default)`；旧 `Close`、`Restart` 不再保留。`IModule.Initialize/Start` 增加 CancellationToken，返回的 `UniCoreException?` 为 null 表示成功。原 `Logger.Inst` 改为传入 `ICore.Logger`，入口诊断可使用 `Core.Log`。移除泛型反射 Singleton 和对外可修改的 ModuleManager 列表。
 

@@ -32,7 +32,8 @@ namespace AiNative.UnityCore
             }
         }
 
-        public static Logger.Logger Log => Inst.Logger;
+        // Exit diagnostics must not reopen application services after retirement.
+        public static Logger.Logger Log => _exiting ? new Logger.Logger() : Inst.Logger;
         public Logger.Logger Logger { get; } = new Logger.Logger();
         public ITimeMachine TimeMachine { get; } = new TimeMachine.TimeMachine();
         public CoreState State { get; private set; }

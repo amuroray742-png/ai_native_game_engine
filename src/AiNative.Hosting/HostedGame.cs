@@ -34,13 +34,13 @@ namespace AiNative.Hosting
         public long Submit(TCommand command) => Runtime.Submit(command);
         public long Submit(JsonElement command) => Submit(ReadCommand(command));
         public Observation<TObservation> CaptureObservation() => Runtime.Capture();
-        public JsonElement Observe() => JsonData.Write(writer => WriteObservation(writer, Runtime.GetState()));
-        public JsonElement CaptureGameState() => JsonData.Write(writer => WriteState(writer, Runtime.CaptureGameState()));
+        public JsonElement Observe() => Encode(writer => WriteObservation(writer, Runtime.GetState()));
+        public JsonElement CaptureGameState() => Encode(writer => WriteState(writer, Runtime.CaptureGameState()));
 
         public TickResult<TObservation> AdvanceTick()
         {
             TickResult<TObservation> result = Runtime.Advance();
-            _frames?.Enqueue(result);
+            Publish(result);
             return result;
         }
 
@@ -48,12 +48,12 @@ namespace AiNative.Hosting
         {
             TickResult<TObservation> frame = Runtime.Advance();
             JsonElement encoded = EncodeTick(frame);
-            _frames?.Enqueue(frame);
+            Publish(frame);
             return encoded;
         }
 
         /// <summary>为记录器编码已完成的帧，不再次推进。</summary>
-        public JsonElement EncodeTick(TickResult<TObservation> result) => JsonData.Write(writer =>
+        public JsonElement EncodeTick(TickResult<TObservation> result) => Encode(writer =>
             {
                 writer.WriteStartObject();
                 writer.WriteString("kind", "tick");
@@ -83,6 +83,28 @@ namespace AiNative.Hosting
                 writer.WriteEndArray();
                 writer.WriteEndObject();
             });
+
+        private JsonElement Encode(Action<Utf8JsonWriter> write)
+        {
+            try
+            { return JsonData.Write(write); }
+            catch
+            {
+                Runtime.MarkFaulted();
+                throw;
+            }
+        }
+
+        private void Publish(TickResult<TObservation> frame)
+        {
+            try
+            { _frames?.Enqueue(frame); }
+            catch
+            {
+                Runtime.MarkFaulted();
+                throw;
+            }
+        }
 
         public void Dispose() => Runtime.Dispose();
     }

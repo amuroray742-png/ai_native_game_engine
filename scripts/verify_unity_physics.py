@@ -63,6 +63,7 @@ def play(project, editor, output, reload):
                     "-logFile", str(output / "exit.log")], cwd=ROOT, env=env, check=True, timeout=300)
     cycles = ET.parse(cycle_xml).findall(".//test-case")
     required_edit = {"ExitingPlayReleasesTheOnlyWorld", "TwoPlaySessionsReleaseRunningModules",
+                     "ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore",
                      "ExitingDuringInitializationCancelsBeforeTheNextPlay", "FixedRemovalPreservesLateRegistration",
                      "TicketOwnsItsClockAndCannotRemoveReplacement", "TimerOrderReplacementDoesNotLeaveARecycledEntry"}
     require(required_edit <= {case.get("name") for case in cycles} and
