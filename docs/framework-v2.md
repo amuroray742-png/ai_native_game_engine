@@ -13,7 +13,9 @@
 | IHostedGame | 面向工具的完整运行时，不暴露规则/会话的配对；状态通过 JsonElement 隔离 |
 | IPhysicsWorld / IPhysicsWorldFactory | 明确创建/恢复/释放世界；刚体操作、Step、查询、Capture；元数据离线校验与原生候选恢复分开 |
 
-接口用于两个真实游戏共享边界；没有反射扫描、Service Locator、自动插件发现或通用系统调度。Headless 是可复用库，Examples.Runner 是显式装配入口。框架项目不得引用 Example。
+接口用于两个真实游戏共享边界；模拟、Hosting、Physics 与 Headless 没有反射扫描、Service Locator、自动插件发现或通用系统调度。Headless 是可复用库，Examples.Runner 是显式装配入口。框架项目不得引用 Example。
+
+Unity 应用服务允许单独的、有边界的例外：`AiNative.UnityCore.Core` 是兼容层唯一的应用级单例，模块在场景装配或 `AfterInitialize(ICore)` 阶段按接口绑定依赖，运行阶段使用已绑定引用。该包的帧回调与定时器仅服务表现和应用工作，不替代 PlayHost 的模拟时钟；无头、回放、存档以及各对局所有权维持本契约。[生命周期及公开 API](unitycore-lifecycle.md)
 
 ## 时间、错误与保存边界
 
