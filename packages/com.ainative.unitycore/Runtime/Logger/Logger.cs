@@ -1,5 +1,6 @@
+#nullable enable
+
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using AiNative.UnityCore.Utils;
@@ -13,18 +14,6 @@ namespace AiNative.UnityCore.Logger
         Info = 1,
         Warn = 2,
         Error = 3,
-    }
-
-    public struct LogInfo
-    {
-        ELogLevel Level { get; }
-        string Message { get; }
-
-        public LogInfo(ELogLevel level, string message)
-        {
-            Level = level;
-            Message = message;
-        }
     }
 
     public sealed class Logger
@@ -207,8 +196,7 @@ namespace AiNative.UnityCore.Logger
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Error(Exception exception)
         {
-            if (!IsEnabled(ELogLevel.Error))
-            { return; }
+            if (!IsEnabled(ELogLevel.Error)) { return; }
             LogException(exception, null);
         }
 

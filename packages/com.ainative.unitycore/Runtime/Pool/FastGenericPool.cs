@@ -1,4 +1,4 @@
-﻿namespace Wepie.Core.Pool
+namespace AiNative.UnityCore.Pool
 {
     /// <summary>
     /// 封装Unity的ObjectPool, 因为Unity的pool默认CollectionChecks是true的

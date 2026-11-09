@@ -1,14 +1,17 @@
 using UnityEngine;
 
-public static class GameObjectExtend
+namespace AiNative.UnityCore.UnityExtends
 {
-    public static GameObject FindOrCreateGameObject(string name)
+    public static class GameObjectExtend
     {
-        var go = GameObject.Find(name);
-        if (go == null)
+        public static GameObject FindOrCreateGameObject(string name)
         {
-            go = new GameObject(name);
+            var go = GameObject.Find(name);
+            if (go == null)
+            {
+                go = new GameObject(name);
+            }
+            return go;
         }
-        return go;
     }
 }
