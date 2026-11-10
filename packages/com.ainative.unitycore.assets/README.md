@@ -23,9 +23,9 @@ Create **AI Native → Assets → Resource Groups**. Each group has a stable ID 
 
 Explicit ownership wins. Otherwise dependencies referenced by multiple original groups are grouped by that sorted group set into deterministic shared bundles. Scene external dependencies always go into ordinary bundles. Cycles fail with a dependency chain. Sprite and other subasset names must be unique per exact type within a source file.
 
-Builds use LZ4 and produce catalog.json, the native manifest, file checksums, original BuildReport, planned/actual ownership TSVs, exclusions and errors. Duplicate source ownership, incomplete ordinary-resource evidence, unmappable report files, or differing dependencies reject publication. Scene paths are separately verified from real bundles. Generated scene preload metadata, scripts and Unity built-ins are listed as exclusions, not ordinary source assets. Builds stage under the project's BuildArtifacts/Assets directory; add BuildArtifacts to the consuming project's ignore rules. Publication uses a fresh destination on the same volume and never overwrites an existing build.
+Builds use LZ4 and produce catalog.json, file checksums, backend-specific raw evidence, planned/actual ownership TSVs, exclusions and errors. Duplicate source ownership, incomplete ordinary-resource evidence, unmappable report files, or differing dependencies reject publication. Scene paths are separately verified from real bundles. Generated scene preload metadata, scripts and Unity built-ins are listed as exclusions, not ordinary source assets. Builds stage under the project's BuildArtifacts/Assets directory; add BuildArtifacts to the consuming project's ignore rules. Publication uses a fresh destination on the same volume and never overwrites an existing build.
 
-`AssetBuilder.Build(settings, output)` and `AssetBuilder.BatchBuild` provide scripted and batch entrypoints. Batch arguments are `-assetGroups Assets/ResourceGroups.asset -assetOutput <new-directory>`. Keep the content root unchanged throughout a module run. Rebuild for a different Unity version, target or changed script identity. The AssetsDemo Player builder supplies the generated native manifest to preserve bundle-only script types from stripping.
+`AssetBuilder.Build(settings, output)` and `AssetBuilder.BatchBuild` provide scripted and batch entrypoints. Batch arguments are `-assetGroups Assets/ResourceGroups.asset -assetOutput <new-directory>`. Keep the content root unchanged throughout a module run. Rebuild for a different Unity version, target or changed script identity. Use AssetPlayerBuildSupport.BuildPlayer(contentRoot, options) to preserve bundle-only script types using the native manifest or SBP linker XML.
 
 Loading validates file existence, size and Unity CRC. Because Unity interprets CRC zero as disabled, zero-CRC entries additionally verify the full SHA-256 before loading. This rare fallback scans the file on the main thread; no runtime frame budget is promised. A missing CRC field therefore cannot silently disable content verification.
 
@@ -61,3 +61,19 @@ See the repository's `docs/unitycore-assets.md` for acceptance evidence and curr
 Inspector 的 `Validate and inspect packing` 可预览最终公开地址、源路径和物理 Bundle 所有权，再执行构建。可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。
 
 地址冲突报告包含两个源路径和所属组；跨组重复收集报告双方组 ID；Bundle 名冲突报告双方组集合。共享名称拼接冲突（例如场景组 A_B 的外部依赖与 A/B 共享资源）拒绝发布，可调整组名或切换 StableHash 模式。
+
+## 构建后端与缓存
+
+全局 `AssetGroups.BuildBackend` 支持 `ScriptableBuildPipeline`（默认）和 `Builtin`。旧配置没有该字段时也默认 SBP；已发布内容仍由相同运行时加载，不自动转换。Assets 直接依赖 SBP 2.6.2，仅 Editor 程序集引用其 API；不同版本会明确拒绝，避免在未经验证的写入证据格式下发布。
+
+两种后端共用收集、自动地址和分包计划。`AssetBuilder.Build(settings, output)` 默认使用 SBP 本地缓存；`AssetBuilder.Build(settings, output, new AssetBuildOptions { UseCache = false })` 为干净构建。本次不读取缓存，不删除全工程缓存；原生后端始终强制重建。Inspector 提供两个构建按钮，批处理使用 `-assetCleanBuild` 关闭缓存。远程缓存始终禁用。
+
+SBP 构建期间关闭 `slimWriteResults`，在 finally 恢复；该设置参与 SBP 缓存键。`sbp-write-results.json` 记录实际序列化对象及文件→Bundle 映射，`buildlogtep.json` 保留缓存记录。普通源 GUID 缺失、重复、未知输出或映射不完整均拒绝发布；原生后端仍保留 `assets.buildreport`。场景生成对象单列，不冒充独立源资源。SBP 依赖结果包含传递依赖：比较双方可达关系后，目录存储约简后的直接依赖。
+
+原生 CRC 从原生构建结果查询；SBP 使用归档结果的 CRC，并在构建验证时用它实际打开 Bundle。文件大小、CRC、SHA-256 和目录格式对两个后端一致。校验后复制到未被 Unity 加载的发布暂存目录，再原子改名；验证暂存目录保留供追溯，因此成功构建也会占用额外磁盘空间，可在无构建运行时归档清理 `BuildArtifacts/Assets`。
+
+`build-metadata.json` 记录格式版本、后端、Unity/SBP 版本、缓存开关、裁剪文件及其 SHA-256。`AssetPlayerBuildSupport.BuildPlayer` 是显式 Windows Player 构建入口：原生使用 Manifest，SBP 使用生成的 `link.xml`；linker 回调仅在本次调用期间生效，finally 清理，不改用户的 link.xml。缺失、越界或损坏裁剪证据会失败。旧内容缺少构建元数据时仍可运行，但通过新辅助入口构建 Player 前须重建内容。
+
+完整验收命令见仓库 `scripts/verify_unity_assets.py --help`。`--backend both --players` 先验原生、再验 SBP，最后使用 SBP 内容构建 Mono Development 和 IL2CPP Player。`--baseline-fixture` 只在隔离副本使用已提交的示例组配置，保留本地编辑。
+
+Windows 发布重命名若遇短暂 I/O 拒绝，只在源仍存在、目标完全不存在时最多额外尝试两次（总等待 200ms）。最终失败保留现场并抛出异常；该处理来自独立文件系统复现，不依赖假设的 Unity 锁占用。

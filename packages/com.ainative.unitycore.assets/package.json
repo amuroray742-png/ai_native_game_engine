@@ -8,6 +8,7 @@
     "com.ainative.unitycore": "0.1.0",
     "com.cysharp.unitask": "2.5.11",
     "com.unity.modules.assetbundle": "1.0.0",
-    "com.unity.modules.jsonserialize": "1.0.0"
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.scriptablebuildpipeline": "2.6.2"
   }
 }

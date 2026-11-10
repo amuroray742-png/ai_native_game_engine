@@ -17,6 +17,7 @@ namespace AiNative.UnityCore.Assets.Editor
         public static AssetBuildPlan Create(AssetGroups settings)
         {
             if (settings == null) { throw new ArgumentNullException(nameof(settings)); }
+            if (!Enum.IsDefined(typeof(AssetBuildBackend), settings.BuildBackend)) { throw new AssetException("InvalidBuildBackend", "Unknown build backend."); }
             if (!Enum.IsDefined(typeof(BundleNamingMode), settings.BundleNaming)) { throw new AssetException("InvalidNamingMode", "Unknown bundle naming mode."); }
             if (!Enum.IsDefined(typeof(ResourceAddressMode), settings.AddressMode)) { throw new AssetException("InvalidAddressMode", "Unknown global address mode."); }
             var result = new AssetBuildPlan();

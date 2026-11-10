@@ -70,12 +70,21 @@ public static class AssetsDemoSetup
         PlayerSettings.runInBackground = true;
         AssetDatabase.SaveAssets();
     }
-    public static void BuildContent()
+    public static void BuildContent() => BuildContent(null);
+    public static void BuildContentBuiltin() => BuildContent(AssetBuildBackend.Builtin);
+    public static void BuildContentSbp() => BuildContent(AssetBuildBackend.ScriptableBuildPipeline);
+    private static void BuildContent(AssetBuildBackend? backend)
     {
         string output = Path.Combine(Application.streamingAssetsPath, "AiNativeAssets");
         // Unity may recreate a moved empty folder from its retained .meta; never remove actual content.
         if (Directory.Exists(output) && Directory.GetFileSystemEntries(output).Length == 0) { AssetDatabase.DeleteAsset("Assets/StreamingAssets/AiNativeAssets"); }
-        AssetBuilder.Build(AssetDatabase.LoadAssetAtPath<AssetGroups>("Assets/ResourceGroups.asset"), output);
+        var settings = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<AssetGroups>("Assets/ResourceGroups.asset"));
+        try
+        {
+            if (backend.HasValue) { settings.BuildBackend = backend.Value; }
+            AssetBuilder.Build(settings, output);
+        }
+        finally { UnityEngine.Object.DestroyImmediate(settings); }
         AssetDatabase.Refresh();
     }
     public static void BuildMono() { BuildPlayer(ScriptingImplementation.Mono2x, "Mono"); }
@@ -90,12 +99,11 @@ public static class AssetsDemoSetup
             PlayerSettings.SetScriptingBackend(target, backend);
             string output = Path.GetFullPath("../../../TestResults/assets-players/" + name + "/AssetsDemo.exe");
             Directory.CreateDirectory(Path.GetDirectoryName(output));
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+            var report = AssetPlayerBuildSupport.BuildPlayer(content, new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/Bootstrap.unity" }, locationPathName = output,
                 target = BuildTarget.StandaloneWindows64,
-                options = backend == ScriptingImplementation.Mono2x ? BuildOptions.Development : BuildOptions.None,
-                assetBundleManifestPath = Path.Combine(content, File.ReadAllText(Path.Combine(content, "root-manifest.txt")))
+                options = backend == ScriptingImplementation.Mono2x ? BuildOptions.Development : BuildOptions.None
             });
             if (report.summary.result != BuildResult.Succeeded) { throw new Exception("Player build failed: " + report.summary.result); }
         }

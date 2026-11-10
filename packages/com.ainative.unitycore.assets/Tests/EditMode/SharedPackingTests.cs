@@ -11,8 +11,9 @@ namespace AiNative.UnityCore.Assets.Tests
 {
     public sealed class SharedPackingTests
     {
-        [Test]
-        public void AB_AC_ABC_AreDistinctAndExplicitOwnerWins()
+        [TestCase(AssetBuildBackend.Builtin)]
+        [TestCase(AssetBuildBackend.ScriptableBuildPipeline)]
+        public void AB_AC_ABC_AreDistinctAndExplicitOwnerWins(AssetBuildBackend backend)
         {
             string root = "Assets/PackingTest-" + Guid.NewGuid().ToString("N");
             AssetDatabase.CreateFolder("Assets", Path.GetFileName(root));
@@ -25,6 +26,7 @@ namespace AiNative.UnityCore.Assets.Tests
                     AssetDatabase.CreateAsset(texture, root + "/" + name + ".asset");
                     return texture;
                 }
+                settings.BuildBackend = backend;
                 var ab = Texture("ab"); var ac = Texture("ac"); var abc = Texture("abc");
                 ResourceAddress Entry(string id, Texture2D texture)
                 {
@@ -40,11 +42,13 @@ namespace AiNative.UnityCore.Assets.Tests
                 AssetDatabase.SaveAssets();
                 var plan = AssetBuildPlan.Create(settings);
                 Assert.AreEqual(3, new[] { plan.Owners[root + "/ab.asset"], plan.Owners[root + "/ac.asset"], plan.Owners[root + "/abc.asset"] }.Distinct().Count());
+                AssetBuilder.Build(settings, Path.GetFullPath("BuildArtifacts/SharedSets-" + Guid.NewGuid().ToString("N")));
                 settings.Groups = settings.Groups.Concat(new[] { new ResourceGroup { Id = "Explicit", Assets = new[] { new ResourceAddress { Asset = abc } } } }).ToArray();
                 var explicitPlan = AssetBuildPlan.Create(settings);
                 StringAssert.StartsWith("group_", explicitPlan.Owners[root + "/abc.asset"]);
                 Array.Reverse(settings.Groups);
                 CollectionAssert.AreEqual(explicitPlan.Owners, AssetBuildPlan.Create(settings).Owners);
+                AssetBuilder.Build(settings, Path.GetFullPath("BuildArtifacts/ExplicitOwner-" + Guid.NewGuid().ToString("N")));
             }
             finally { UnityEngine.Object.DestroyImmediate(settings); AssetDatabase.DeleteAsset(root); }
         }
