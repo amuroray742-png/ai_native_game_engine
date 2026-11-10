@@ -44,7 +44,7 @@ namespace AiNative.UnityCore.Assets.Tests
             var settings = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<AssetGroups>("Assets/ResourceGroups.asset"));
             try
             {
-                settings.Groups[1].Assets[0].Address = settings.Groups[0].Assets[0].Address;
+                settings.Groups[1].Assets[0].Asset = settings.Groups[0].Assets[0].Asset;
                 Assert.Throws<AssetException>(() => AssetBuildPlan.Create(settings));
             }
             finally { UnityEngine.Object.DestroyImmediate(settings); }

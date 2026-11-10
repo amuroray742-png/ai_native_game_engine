@@ -23,7 +23,7 @@ namespace AiNative.UnityCore.Assets.Editor
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
-            EditorGUILayout.HelpBox("Folders are collected recursively. Choose Full Path or Group And Asset Name for folder groups. Explicit addresses override automatic addresses. Name defaults to Id. Validate to preview addresses and bundle names.", MessageType.Info);
+            EditorGUILayout.HelpBox("Folders are collected recursively. The global Address Mode applies to every group and asset. Name defaults to Id. Validate to preview addresses and bundle names.", MessageType.Info);
             if (GUILayout.Button("Validate and inspect packing"))
             {
                 try { AssetPackingWindow.Show(AssetBuildPlan.Create((AssetGroups)target)); }

@@ -18,8 +18,8 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             var module = new AssetsModule();
             Core.Inst.RegisterModule(module);
             await Core.Inst.RunAsync();
-            var first = await module.InstantiateAsync("a");
-            var second = await module.InstantiateAsync("b");
+            var first = await module.InstantiateAsync("Assets/Probe/A");
+            var second = await module.InstantiateAsync("Assets/Probe/B");
             first.Value.transform.position = Vector3.left;
             second.Value.transform.position = Vector3.right;
             var material = first.Value.GetComponent<Renderer>().sharedMaterial;
@@ -36,21 +36,21 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             first.Dispose();
             await UniTask.Yield();
             if (second.Value.GetComponent<Renderer>().sharedMaterial != material) { throw new Exception("Releasing A destroyed B dependencies."); }
-            var data = await module.LoadAsync<DemoData>("data");
+            var data = await module.LoadAsync<DemoData>("Assets/Probe/Data");
             if (data.Value.Value != 42) { throw new Exception("Bundle script type failed."); }
             data.Dispose();
-            var pool = module.CreatePool("a", new AssetPoolOptions(2));
+            var pool = module.CreatePool("Assets/Probe/A", new AssetPoolOptions(2));
             await pool.PrewarmAsync(2);
             var rental = await pool.RentAsync();
             rental.Dispose();
             await pool.CloseAsync();
-            var scene = await module.LoadSceneAsync("scene");
+            var scene = await module.LoadSceneAsync("Assets/Probe/Content");
             var sceneRenderer = scene.Value.GetRootGameObjects()[0].GetComponentInChildren<Renderer>();
             if (sceneRenderer.sharedMaterial != material) { throw new Exception("Scene external material identity differs."); }
             await scene.UnloadAsync();
             second.Dispose();
             await Core.Inst.RestartAsync();
-            using (var again = await module.LoadAsync<GameObject>("a")) { if (again.Value == null) { throw new Exception("Restart failed."); } }
+            using (var again = await module.LoadAsync<GameObject>("Assets/Probe/A")) { if (again.Value == null) { throw new Exception("Restart failed."); } }
             await Core.Inst.CloseAsync();
             var diagnostics = module.GetDiagnostics();
             if (diagnostics.Bundles.Count != 0 || diagnostics.PendingOperations != 0 || diagnostics.Scopes.Count != 0) { throw new Exception("Resources remain after shutdown."); }

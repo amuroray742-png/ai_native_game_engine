@@ -22,3 +22,5 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 目标目录必须不存在。脚本复制工程和两个源码包，重新构建内容，在开关 Domain Reload 两种设置下分别运行 EditMode/PlayMode 测试，再构建并运行两种 Player。保留源文件摘要、命令、XML、日志、原始 Bundle 报告、Player 结果与渲染截图。测试会生成故意重复或损坏的内容，仅在隔离副本/临时目录使用。
 
 `BundleReportProbe.Run` 是原生 A/B/shared 最小报告探针，输出 `TestResults/assets-probe/bundles`。完整构建的严格归属检查由 `AssetBuilder` 执行。该样例不参与模拟内核或 PlayHost 的玩法装配。
+
+示例使用全局 `FullPath` 地址，如 `Assets/Probe/A`、`Assets/Probe/Content`。从旧版本升级时必须归档旧内容后重新构建，原来的 `a`、`scene` 等手填地址不再生成。若改为全局 `GroupAndAssetName`，也需同步调整示例调用。

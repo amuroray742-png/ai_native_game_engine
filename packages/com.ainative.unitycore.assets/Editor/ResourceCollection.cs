@@ -8,17 +8,17 @@ namespace AiNative.UnityCore.Assets.Editor
 {
     internal static class ResourceCollection
     {
-        internal static ResourceAddress[] Collect(ResourceGroup group)
+        internal static (UnityEngine.Object Asset, string Address)[] Collect(ResourceGroup group, ResourceAddressMode mode)
         {
-            if (!Enum.IsDefined(typeof(ResourceAddressMode), group.AddressMode))
+            if (!Enum.IsDefined(typeof(ResourceAddressMode), mode))
             {
                 throw new AssetException("InvalidAddressMode", "Unknown address mode: " + group.Id);
             }
-            var entries = new SortedDictionary<string, ResourceAddress>(StringComparer.Ordinal);
+            var entries = new SortedDictionary<string, (UnityEngine.Object Asset, string Address)>(StringComparer.Ordinal);
             foreach (var item in group.Assets)
             {
                 string path = AssetDatabase.GetAssetPath(item.Asset);
-                if (!entries.TryAdd(path, new ResourceAddress { Asset = item.Asset, Address = Address(group, path, item.Address) }))
+                if (!entries.TryAdd(path, (item.Asset, Address(group, path, mode))))
                 {
                     throw new AssetException("InvalidEntry", "Repeated explicit resource: " + path);
                 }
@@ -27,25 +27,20 @@ namespace AiNative.UnityCore.Assets.Editor
             {
                 string path = AssetDatabase.GetAssetPath(folder);
                 if (!AssetDatabase.IsValidFolder(path)) { throw new AssetException("InvalidFolder", "Expected a project folder in group " + group.Id); }
-                if (group.AddressMode == ResourceAddressMode.Manual)
-                {
-                    throw new AssetException("FolderAddressMode", "Folder collection requires FullPath or GroupAndAssetName in group " + group.Id);
-                }
                 foreach (string assetPath in AssetDatabase.FindAssets("", new[] { path }).Select(AssetDatabase.GUIDToAssetPath).OrderBy(x => x, StringComparer.Ordinal))
                 {
-                    // Explicit entries override folder-generated addresses; overlapping folders collect once.
+                    // Explicit entries and overlapping folders collect each source only once.
                     if (!AssetBuildPlan.IsPackable(assetPath) || entries.ContainsKey(assetPath)) { continue; }
-                    entries.Add(assetPath, new ResourceAddress { Asset = AssetDatabase.LoadMainAssetAtPath(assetPath), Address = Address(group, assetPath, "") });
+                    entries.Add(assetPath, (AssetDatabase.LoadMainAssetAtPath(assetPath), Address(group, assetPath, mode)));
                 }
             }
             return entries.Values.ToArray();
         }
 
-        private static string Address(ResourceGroup group, string path, string configured)
+        private static string Address(ResourceGroup group, string path, ResourceAddressMode mode)
         {
-            if (!string.IsNullOrWhiteSpace(configured) || group.AddressMode == ResourceAddressMode.Manual) { return configured; }
             string extension = Path.GetExtension(path);
-            if (group.AddressMode == ResourceAddressMode.FullPath) { return path.Substring(0, path.Length - extension.Length); }
+            if (mode == ResourceAddressMode.FullPath) { return path.Substring(0, path.Length - extension.Length); }
             return group.EffectiveName + "/" + Path.GetFileNameWithoutExtension(path);
         }
 

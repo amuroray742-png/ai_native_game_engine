@@ -29,7 +29,7 @@ namespace AiNative.UnityCore.Assets.Editor
             {
                 if (string.IsNullOrWhiteSpace(group.Id) || !groups.TryAdd(group.Id, group)) { throw new AssetException("InvalidGroup", "Empty or duplicate group ID."); }
                 bool? scene = null;
-                foreach (var item in ResourceCollection.Collect(group))
+                foreach (var item in ResourceCollection.Collect(group, settings.AddressMode))
                 {
                     string path = AssetDatabase.GetAssetPath(item.Asset);
                     if (string.IsNullOrWhiteSpace(item.Address) || !usedAddresses.Add(item.Address) || !IsPackable(path)

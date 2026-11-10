@@ -7,7 +7,7 @@ var assets = new AssetsModule(); // StreamingAssets/AiNativeAssets
 Core.Inst.RegisterModule(assets);
 await Core.Inst.RunAsync();
 var screen = assets.CreateScope("inventory");
-var instance = await screen.InstantiateAsync("inventory-panel");
+var instance = await screen.InstantiateAsync("Assets/UI/InventoryPanel");
 // Closing the owner destroys its instances and drains pending operations.
 await screen.CloseAsync();
 await Core.Inst.CloseAsync();
@@ -19,7 +19,7 @@ Normal instance cleanup waits until all component destruction callbacks have com
 
 ## Resource authoring
 
-Create **AI Native → Assets → Resource Groups**. Each group has a stable ID and main-asset entries with exact case-sensitive addresses. Scene groups contain scenes only. The Inspector validates and displays packing or builds Windows bundles into a new directory. Addresses remain stable when assets move. Implicit dependencies have no public address.
+Create **AI Native → Assets → Resource Groups**. Each group has a stable ID and main-asset entries or folders. One global address mode generates case-sensitive addresses for every entry. Scene groups contain scenes only. The Inspector validates and displays packing or builds Windows bundles into a new directory. Full-path addresses change when assets move; group/name addresses change when the group or file name changes. Implicit dependencies have no public address.
 
 Explicit ownership wins. Otherwise dependencies referenced by multiple original groups are grouped by that sorted group set into deterministic shared bundles. Scene external dependencies always go into ordinary bundles. Cycles fail with a dependency chain. Sprite and other subasset names must be unique per exact type within a source file.
 
@@ -47,16 +47,15 @@ See the repository's `docs/unitycore-assets.md` for acceptance evidence and curr
 
 每组的 `Folders` 可拖入目录，验证、Editor 初始化和构建时递归收集最新内容；目录本身、脚本和程序集定义不收集。重叠目录在同组内去重，同一文件跨组收集仍报重复归属。目录里的场景与普通资源不能混组，沿用原有场景边界。
 
-`AddressMode` 按组配置，资源 `Assets/Probe/A.prefab`、组名称 A 的对应地址如下：
+`AssetGroups.AddressMode` 是全局配置，统一应用于所有组、目录和单项资源，仅提供以下两种模式。资源为 `Assets/Probe/A.prefab`、组名称为 A 时：
 
 | 模式 | 地址 | 调用示例 |
 | --- | --- | --- |
-| FullPath | Assets/Probe/A | `InstantiateAsync("Assets/Probe/A")` |
+| FullPath（默认） | Assets/Probe/A | `InstantiateAsync("Assets/Probe/A")` |
 | GroupAndAssetName | A/A | `InstantiateAsync("A/A")` |
-| Manual | 手填 a | `InstantiateAsync("a")` |
 
-自动模式只去掉最后一个扩展名；地址保留大小写。单独配置的 `Assets` 条目可用非空 `Address` 覆盖自动值，也会覆盖同组目录收集产生的地址。手动模式需要逐条填写，不支持动态目录收集；使用目录时请切换到上述任一自动模式。不同目录的同名文件、不同扩展名产生的相同地址均报错，可用全路径模式或单资源覆盖消除冲突。自动地址会随路径或组名称变化，需稳定地址时使用手动覆盖。
+自动地址只去掉最后一个扩展名并保留大小写。没有手动地址或单项覆盖；不同目录的同名文件、不同扩展名产生的相同地址均报错，请调整资源名称或使用全路径模式。同组显式资源与目录重叠时只收集一次。
 
-Inspector 的 `Validate and inspect packing` 可预览最终公开地址、源路径和物理 Bundle 所有权，再执行构建。
+迁移：旧的组级 AddressMode 和手填 Address 不再读取；没有全局字段的旧配置默认 FullPath。必须重新构建 catalog/Bundle 并更新调用处，运行时不会为旧地址生成别名。更改全局模式、资源路径或组名会影响公开地址。
 
-可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。
+Inspector 的 `Validate and inspect packing` 可预览最终公开地址、源路径和物理 Bundle 所有权，再执行构建。可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。

@@ -43,7 +43,7 @@ namespace AiNative.UnityCore.Assets.Tests
         {
             string source = Path.Combine(Application.streamingAssetsPath, "AiNativeAssets");
             var catalog = JsonUtility.FromJson<AssetCatalog>(File.ReadAllText(Path.Combine(source, "catalog.json")));
-            var entry = catalog.Bundles.Single(x => x.Name == catalog.Assets.Single(a => a.Address == "a").Bundle);
+            var entry = catalog.Bundles.Single(x => x.Name == catalog.Assets.Single(a => a.Address == "Assets/Probe/A").Bundle);
             string target = Path.Combine(Application.temporaryCachePath, "ZeroCrc-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(target);
             string path = Path.Combine(target, entry.Name);
@@ -62,7 +62,7 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator DependenciesRemainOwnedThroughoutBusinessOnDestroy() => UniTask.ToCoroutine(async () =>
         {
-            var instance = await _assets.InstantiateAsync("a");
+            var instance = await _assets.InstantiateAsync("Assets/Probe/A");
             instance.Value.AddComponent<AssetReentryProbe>();
             var material = instance.Value.GetComponent<Renderer>().sharedMaterial;
             bool called = false;
@@ -86,11 +86,11 @@ namespace AiNative.UnityCore.Assets.Tests
         public IEnumerator WrongTypeRollsBackAndCanRetryCorrectType() => UniTask.ToCoroutine(async () =>
         {
             Exception failure = null;
-            try { await _assets.LoadAsync<AudioClip>("a"); } catch (Exception error) { failure = error; }
+            try { await _assets.LoadAsync<AudioClip>("Assets/Probe/A"); } catch (Exception error) { failure = error; }
             Assert.IsInstanceOf<AssetException>(failure);
             Assert.AreEqual("AssetTypeMismatch", ((AssetException)failure).Code);
             Assert.Zero(_assets.GetDiagnostics().Bundles.Count);
-            using var valid = await _assets.LoadAsync<GameObject>("a");
+            using var valid = await _assets.LoadAsync<GameObject>("Assets/Probe/A");
             Assert.NotNull(valid.Value);
         });
         [UnityTest]
@@ -101,7 +101,7 @@ namespace AiNative.UnityCore.Assets.Tests
             string target = Path.Combine(Application.temporaryCachePath, "CorruptAssets-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(target);
             foreach (var bundle in catalog.Bundles) { File.Copy(Path.Combine(source, bundle.Name), Path.Combine(target, bundle.Name)); }
-            string name = catalog.Assets.Single(x => x.Address == "a").Bundle;
+            string name = catalog.Assets.Single(x => x.Address == "Assets/Probe/A").Bundle;
             using (var stream = File.OpenWrite(Path.Combine(target, name))) { stream.Write(new byte[32], 0, 32); }
             var scope = new AssetScope(new AssetRuntime(catalog, new BundleBackend(target)), "corrupt");
             bool previous = LogAssert.ignoreFailingMessages;
@@ -110,13 +110,13 @@ namespace AiNative.UnityCore.Assets.Tests
             {
                 // Unity emits platform-dependent native corruption messages; the stable managed result is asserted below.
                 LogAssert.ignoreFailingMessages = true;
-                try { await scope.LoadAsync<GameObject>("a"); } catch (Exception error) { failure = error; }
+                try { await scope.LoadAsync<GameObject>("Assets/Probe/A"); } catch (Exception error) { failure = error; }
                 await scope.CloseAsync();
             }
             finally { LogAssert.ignoreFailingMessages = previous; }
             Assert.IsInstanceOf<AssetException>(failure);
             Assert.AreEqual("BundleLoadFailed", ((AssetException)failure).Code);
-            Assert.AreEqual("a", ((AssetException)failure).Address);
+            Assert.AreEqual("Assets/Probe/A", ((AssetException)failure).Address);
             Assert.AreEqual(name, ((AssetException)failure).Bundle);
             Assert.AreEqual("bundle", ((AssetException)failure).Stage);
             Assert.NotNull(failure.InnerException);
@@ -126,8 +126,8 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator ExternalSceneUnloadReleasesSharedDependencies() => UniTask.ToCoroutine(async () =>
         {
-            var instance = await _assets.InstantiateAsync("b");
-            var scene = await _assets.LoadSceneAsync("scene");
+            var instance = await _assets.InstantiateAsync("Assets/Probe/B");
+            var scene = await _assets.LoadSceneAsync("Assets/Probe/Content");
             var renderer = scene.Value.GetRootGameObjects()[0].GetComponentInChildren<Renderer>();
             Assert.AreSame(instance.Value.GetComponent<Renderer>().sharedMaterial, renderer.sharedMaterial);
             await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(scene.Value);
@@ -140,8 +140,8 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator AudioAndSpriteSubAssetsLoadFromRealBundles() => UniTask.ToCoroutine(async () =>
         {
-            using var audio = await _assets.LoadAsync<AudioClip>("audio");
-            using var sprite = await _assets.LoadSubAssetAsync<Sprite>("sprites", "icon");
+            using var audio = await _assets.LoadAsync<AudioClip>("Assets/Probe/Tone");
+            using var sprite = await _assets.LoadSubAssetAsync<Sprite>("Assets/Probe/SpriteSet", "icon");
             Assert.Greater(audio.Value.samples, 0);
             Assert.AreEqual("icon", sprite.Value.name);
             Assert.NotNull(sprite.Value.texture);
@@ -149,8 +149,8 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator SharedMaterialLivesUntilLastOwner() => UniTask.ToCoroutine(async () =>
         {
-            var a = await _assets.InstantiateAsync("a");
-            var b = await _assets.InstantiateAsync("b");
+            var a = await _assets.InstantiateAsync("Assets/Probe/A");
+            var b = await _assets.InstantiateAsync("Assets/Probe/B");
             var material = a.Value.GetComponent<Renderer>().sharedMaterial;
             Assert.AreSame(material, b.Value.GetComponent<Renderer>().sharedMaterial);
             Assert.AreSame(material.mainTexture, b.Value.GetComponent<Renderer>().sharedMaterial.mainTexture);
@@ -164,8 +164,8 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator ConcurrentRequestsOwnIndependentLeases() => UniTask.ToCoroutine(async () =>
         {
-            var one = _assets.LoadAsync<GameObject>("a");
-            var two = _assets.LoadAsync<GameObject>("a");
+            var one = _assets.LoadAsync<GameObject>("Assets/Probe/A");
+            var two = _assets.LoadAsync<GameObject>("Assets/Probe/A");
             var a = await one;
             var b = await two;
             Assert.AreSame(a.Value, b.Value);
@@ -179,8 +179,8 @@ namespace AiNative.UnityCore.Assets.Tests
         public IEnumerator OneCancelledWaiterDoesNotCancelAnother() => UniTask.ToCoroutine(async () =>
         {
             using var cancel = new CancellationTokenSource();
-            var one = _assets.LoadAsync<GameObject>("a", cancel.Token);
-            var two = _assets.LoadAsync<GameObject>("a");
+            var one = _assets.LoadAsync<GameObject>("Assets/Probe/A", cancel.Token);
+            var two = _assets.LoadAsync<GameObject>("Assets/Probe/A");
             cancel.Cancel();
             Assert.IsTrue(await one.SuppressCancellationThrow() is var result && result.IsCanceled);
             using var survivor = await two;
@@ -191,7 +191,7 @@ namespace AiNative.UnityCore.Assets.Tests
         {
             var scope = _assets.CreateScope("scene-test");
             using var cancel = new CancellationTokenSource();
-            var request = scope.LoadSceneAsync("scene", cancel.Token);
+            var request = scope.LoadSceneAsync("Assets/Probe/Content", cancel.Token);
             cancel.Cancel();
             await request.SuppressCancellationThrow();
             await scope.CloseAsync();
@@ -201,7 +201,7 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator NeverActivatedPrewarmObjectsAreReleased() => UniTask.ToCoroutine(async () =>
         {
-            var pool = _assets.CreatePool("a", new AssetPoolOptions(2));
+            var pool = _assets.CreatePool("Assets/Probe/A", new AssetPoolOptions(2));
             await pool.PrewarmAsync(2);
             Assert.AreEqual(2, pool.InactiveCount);
             await pool.CloseAsync();
@@ -210,7 +210,7 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator RentalIsIdempotentAndCannotReturnSuccessor() => UniTask.ToCoroutine(async () =>
         {
-            var pool = _assets.CreatePool("a", new AssetPoolOptions(1));
+            var pool = _assets.CreatePool("Assets/Probe/A", new AssetPoolOptions(1));
             var first = await pool.RentAsync();
             var value = first.Value;
             first.Dispose();
@@ -228,7 +228,7 @@ namespace AiNative.UnityCore.Assets.Tests
             for (int i = 0; i < 5; i++)
             {
                 var scope = _assets.CreateScope("transient");
-                using (var lease = await scope.LoadAsync<GameObject>("a")) { Assert.IsNotNull(lease.Value); }
+                using (var lease = await scope.LoadAsync<GameObject>("Assets/Probe/A")) { Assert.IsNotNull(lease.Value); }
                 await scope.CloseAsync();
             }
             Assert.AreEqual(1, _assets.GetDiagnostics().Scopes.Count);
@@ -237,7 +237,7 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator PoolCapacityDestroysOverflow() => UniTask.ToCoroutine(async () =>
         {
-            var pool = _assets.CreatePool("a", new AssetPoolOptions(1));
+            var pool = _assets.CreatePool("Assets/Probe/A", new AssetPoolOptions(1));
             var one = await pool.RentAsync();
             var two = await pool.RentAsync();
             var overflow = two.Value;
@@ -251,7 +251,7 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator ExternalDestroyInvalidatesPoolRentalAndIdleCapacity() => UniTask.ToCoroutine(async () =>
         {
-            var pool = _assets.CreatePool("a", new AssetPoolOptions(1));
+            var pool = _assets.CreatePool("Assets/Probe/A", new AssetPoolOptions(1));
             var rental = await pool.RentAsync();
             UnityEngine.Object.Destroy(rental.Value);
             await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
@@ -273,19 +273,19 @@ namespace AiNative.UnityCore.Assets.Tests
         [UnityTest]
         public IEnumerator RestartInvalidatesOldLeases() => UniTask.ToCoroutine(async () =>
         {
-            var old = await _assets.LoadAsync<GameObject>("a");
+            var old = await _assets.LoadAsync<GameObject>("Assets/Probe/A");
             await _core.RestartAsync();
             Assert.Throws<ObjectDisposedException>(() => { _ = old.Value; });
-            using var current = await _assets.LoadAsync<GameObject>("a");
+            using var current = await _assets.LoadAsync<GameObject>("Assets/Probe/A");
             old.Dispose();
             Assert.IsNotNull(current.Value);
         });
         [UnityTest]
         public IEnumerator SceneRejectsDuplicateAndReleasesOnUnload() => UniTask.ToCoroutine(async () =>
         {
-            var scene = await _assets.LoadSceneAsync("scene");
+            var scene = await _assets.LoadSceneAsync("Assets/Probe/Content");
             Exception failure = null;
-            try { await _assets.LoadSceneAsync("scene"); } catch (Exception error) { failure = error; }
+            try { await _assets.LoadSceneAsync("Assets/Probe/Content"); } catch (Exception error) { failure = error; }
             Assert.IsInstanceOf<AssetException>(failure);
             scene.SetActive();
             await scene.UnloadAsync();
