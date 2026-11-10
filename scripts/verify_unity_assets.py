@@ -52,8 +52,6 @@ def verify(output, players, backend="sbp", baseline_fixture=False):
     summary = {}
     backends = ("builtin", "sbp") if backend == "both" else (backend,)
     for content_backend in backends:
-        if content.exists():
-            content.rename(output / "previous-backend-content")
         method("content-" + content_backend, "AssetsDemoSetup.BuildContent" + ("Sbp" if content_backend == "sbp" else "Builtin"))
         shutil.copytree(content, output / ("content-" + content_backend))
         for reload in ("On", "Off"):
@@ -67,18 +65,27 @@ def verify(output, players, backend="sbp", baseline_fixture=False):
                 if not cases or any(case.get("result") != "Passed" for case in cases):
                     raise RuntimeError(f"Failed or empty test report: {xml}")
                 summary[label] = len(cases)
-    if players:
-        for backend in ("Mono", "Il2Cpp"):
-            method("build-" + backend, "AssetsDemoSetup.Build" + backend)
-            executable = output / "workspace/TestResults/assets-players" / backend / "AssetsDemo.exe"
-            result_path = output / (backend + "-smoke.json")
-            command = [str(executable), "-batchmode", "-assetsSmoke", "-assetsResult", str(result_path), "-logFile", str(output / (backend + "-player.log"))]
-            creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-            subprocess.run(command, cwd=executable.parent, check=True, timeout=90, creationflags=creationflags)
-            result = json.loads(result_path.read_bytes())
-            if not result["success"]:
-                raise RuntimeError(str(result))
-            summary[backend] = result
+        if players:
+            for player_backend in ("Mono", "Il2Cpp"):
+                label = content_backend + "-" + player_backend
+                entry = "AssetsDemoSetup.Build" + player_backend + ("Standard" if content_backend == "sbp" else "")
+                method("build-" + label, entry)
+                executable = output / "workspace/TestResults/assets-players" / player_backend / "AssetsDemo.exe"
+                deployed = executable.parent / "AssetsDemo_Data/StreamingAssets/AiNativeAssets"
+                catalog = json.loads((deployed / "catalog.json").read_bytes())
+                expected = {"catalog.json", *(bundle["Name"] for bundle in catalog["Bundles"])}
+                actual = {path.name for path in deployed.iterdir()}
+                if actual != expected:
+                    raise RuntimeError(f"Unexpected Player runtime files: {actual ^ expected}")
+                (output / (label + "-runtime-files.json")).write_text(json.dumps(sorted(actual), indent=2), encoding="utf-8")
+                result_path = output / (label + "-smoke.json")
+                command = [str(executable), "-batchmode", "-assetsSmoke", "-assetsResult", str(result_path), "-logFile", str(output / (label + "-player.log"))]
+                creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                subprocess.run(command, cwd=executable.parent, check=True, timeout=90, creationflags=creationflags)
+                result = json.loads(result_path.read_bytes())
+                if not result["success"]:
+                    raise RuntimeError(str(result))
+                summary[label] = result
     (output / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary), flush=True)
 
@@ -87,7 +94,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="New evidence directory (never overwritten)")
     parser.add_argument("--players", action="store_true", help="Also build and smoke Windows Mono Development and IL2CPP Players")
-    parser.add_argument("--backend", choices=("sbp", "builtin", "both"), default="sbp", help="Content backends to verify; both finishes with SBP for Player validation")
+    parser.add_argument("--backend", choices=("sbp", "builtin", "both"), default="sbp", help="Content backends to verify; each selected backend also builds Players when requested")
     parser.add_argument("--baseline-fixture", action="store_true", help="Use the committed groups fixture only inside the isolated copy; keep local configuration edits untouched")
     args = parser.parse_args()
     verify(args.output.resolve(), args.players, args.backend, args.baseline_fixture)

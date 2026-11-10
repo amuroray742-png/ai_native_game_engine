@@ -13,6 +13,22 @@ namespace AiNative.UnityCore.Assets.Editor
         public ResourceAddressMode AddressMode = ResourceAddressMode.FullPath;
         public BundleNamingMode BundleNaming = BundleNamingMode.StableHash;
         public ResourceGroup[] Groups = Array.Empty<ResourceGroup>();
+        [SerializeField, HideInInspector] private string _lastBuildPath = "";
+        [SerializeField, HideInInspector] private int _lastBuildVersion;
+        [SerializeField, HideInInspector] private string _lastBuildCatalogSha256 = "";
+        public string LastBuildPath => _lastBuildPath;
+        public int LastBuildVersion => _lastBuildVersion;
+        public string LastBuildCatalogSha256 => _lastBuildCatalogSha256;
+
+        internal void RecordPublishedBuild(string path, int version, string catalogSha256)
+        {
+            string project = System.IO.Path.GetDirectoryName(Application.dataPath);
+            string relative = System.IO.Path.GetRelativePath(project, path);
+            _lastBuildPath = relative != ".." && !relative.StartsWith(".." + System.IO.Path.DirectorySeparatorChar)
+                && !System.IO.Path.IsPathRooted(relative) ? relative.Replace('\\', '/') : path;
+            _lastBuildVersion = version;
+            _lastBuildCatalogSha256 = catalogSha256;
+        }
     }
     public enum BundleNamingMode { StableHash, GroupName }
     public enum ResourceAddressMode { FullPath, GroupAndAssetName }

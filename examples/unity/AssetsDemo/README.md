@@ -9,9 +9,9 @@ unity run examples/unity/AssetsDemo -- -executeMethod AssetsDemoSetup.BuildConte
 unity open examples/unity/AssetsDemo
 ```
 
-内容写入被 Git 忽略的 `Assets/StreamingAssets/AiNativeAssets`。构建器只发布到新目录；重建时先停止运行、将旧内容及其目录 meta 归档到 Assets 外，再构建。不要在一轮运行中覆盖内容。
+内容先构建到独立的 `BuildArtifacts/DemoContent/<id>`，再精简部署到被 Git 忽略的 `Assets/StreamingAssets/AiNativeAssets`。重新执行会校验后替换模块专用目录；请先退出 Play。原始报告和裁剪证据留在 StreamingAssets 外。
 
-`AssetsDemoSetup.BuildMono` 构建 Development Mono；`BuildIl2Cpp` 构建 IL2CPP Player。需要安装当前 Editor 的 Windows IL2CPP 模块及兼容的 Visual C++ 工具链。构建入口调用 AssetPlayerBuildSupport，按后端使用原生 Manifest 或 SBP link.xml 保留 Bundle 引用的脚本类型。示例以 ScriptableObject 加载并反射验证 DemoData，不直接引用该运行时类型。输出在仓库 `TestResults/assets-players`。
+`AssetsDemoSetup.BuildMono` 构建 Development Mono；`BuildIl2Cpp` 构建 IL2CPP Player。需要安装当前 Editor 的 Windows IL2CPP 模块及兼容的 Visual C++ 工具链。构建入口调用 AssetPlayerBuildSupport.BuildDeployedPlayer，按部署快照使用原生 Manifest 或 SBP link.xml 保留 Bundle 引用的脚本类型。SBP 还可用 BuildMonoStandard / BuildIl2CppStandard 验证标准 BuildPipeline 入口。示例以 ScriptableObject 加载并反射验证 DemoData，不直接引用该运行时类型。输出在仓库 `TestResults/assets-players`。
 
 完整的隔离验收命令：
 
@@ -27,4 +27,6 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --back
 
 默认 SBP 2.6.2。`AssetsDemoSetup.BuildContentBuiltin` 和 `BuildContentSbp` 可只覆盖本次构建后端，不改配置资产；输出目录仍必须是新目录。需要排除本地示例配置试验对标准验收的影响时，加 `--baseline-fixture`，仅隔离副本恢复已提交的 ResourceGroups 配置。
 
-Inspector 手工构建：选中 ResourceGroups，设置 Version（默认下一版本 1）与 Output Directory（默认 `{projectDir}/BundleBuildOutput/{version}`），预览路径后点击构建，无需选择目录。成功后版本加 1 并保存。示例 `BuildContent*` 入口仍使用配置克隆、显式输出到 StreamingAssets，所以只递增克隆的内存版本，不修改原配置；这些入口用于演示部署，不自动同步手工构建产物。
+Inspector 手工构建：选中 ResourceGroups，设置 Version（默认下一版本 1）与 Output Directory（默认 `{projectDir}/BundleBuildOutput/{version}`），预览路径后点击构建，无需选择目录。成功后版本加 1 并保存。示例 `BuildContent*` 使用配置克隆，独立构建后调用 CopyLatestToStreamingAssets，只递增克隆的内存版本，不修改原配置。手工构建的产物通过 Inspector 的 Copy latest build to StreamingAssets 按钮部署，不再手动复制整个目录。
+
+`--backend both --players` 现在对每个内容后端分别验证 Mono 与 IL2CPP Player：Builtin 走部署辅助入口，SBP 走标准 BuildPipeline 入口，并检查 Player 运行时目录仅有 catalog 和 Bundle。

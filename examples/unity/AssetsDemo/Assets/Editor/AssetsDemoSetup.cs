@@ -75,23 +75,23 @@ public static class AssetsDemoSetup
     public static void BuildContentSbp() => BuildContent(AssetBuildBackend.ScriptableBuildPipeline);
     private static void BuildContent(AssetBuildBackend? backend)
     {
-        string output = Path.Combine(Application.streamingAssetsPath, "AiNativeAssets");
-        // Unity may recreate a moved empty folder from its retained .meta; never remove actual content.
-        if (Directory.Exists(output) && Directory.GetFileSystemEntries(output).Length == 0) { AssetDatabase.DeleteAsset("Assets/StreamingAssets/AiNativeAssets"); }
+        string output = Path.GetFullPath("BuildArtifacts/DemoContent/" + Guid.NewGuid().ToString("N"));
         var settings = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<AssetGroups>("Assets/ResourceGroups.asset"));
         try
         {
             if (backend.HasValue) { settings.BuildBackend = backend.Value; }
             AssetBuilder.Build(settings, output);
+            AssetDeployment.CopyLatestToStreamingAssets(settings);
         }
         finally { UnityEngine.Object.DestroyImmediate(settings); }
         AssetDatabase.Refresh();
     }
     public static void BuildMono() { BuildPlayer(ScriptingImplementation.Mono2x, "Mono"); }
+    public static void BuildMonoStandard() { BuildPlayer(ScriptingImplementation.Mono2x, "Mono", true); }
+    public static void BuildIl2CppStandard() { BuildPlayer(ScriptingImplementation.IL2CPP, "Il2Cpp", true); }
     public static void BuildIl2Cpp() { BuildPlayer(ScriptingImplementation.IL2CPP, "Il2Cpp"); }
-    private static void BuildPlayer(ScriptingImplementation backend, string name)
+    private static void BuildPlayer(ScriptingImplementation backend, string name, bool standard = false)
     {
-        string content = Path.Combine(Application.streamingAssetsPath, "AiNativeAssets");
         var target = UnityEditor.Build.NamedBuildTarget.Standalone;
         var previous = PlayerSettings.GetScriptingBackend(target);
         try
@@ -99,12 +99,13 @@ public static class AssetsDemoSetup
             PlayerSettings.SetScriptingBackend(target, backend);
             string output = Path.GetFullPath("../../../TestResults/assets-players/" + name + "/AssetsDemo.exe");
             Directory.CreateDirectory(Path.GetDirectoryName(output));
-            var report = AssetPlayerBuildSupport.BuildPlayer(content, new BuildPlayerOptions
+            var options = new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/Bootstrap.unity" }, locationPathName = output,
                 target = BuildTarget.StandaloneWindows64,
                 options = backend == ScriptingImplementation.Mono2x ? BuildOptions.Development : BuildOptions.None
-            });
+            };
+            var report = standard ? BuildPipeline.BuildPlayer(options) : AssetPlayerBuildSupport.BuildDeployedPlayer(options);
             if (report.summary.result != BuildResult.Succeeded) { throw new Exception("Player build failed: " + report.summary.result); }
         }
         finally { PlayerSettings.SetScriptingBackend(target, previous); }

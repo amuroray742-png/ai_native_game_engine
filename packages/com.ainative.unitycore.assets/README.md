@@ -87,3 +87,20 @@ Inspector 显示本次实际输出路径；普通构建、干净构建和菜单�
 成功发布版本 1 到 `/1` 后，配置自动保存为版本 2；构建或校验失败不递增。`build-metadata.json.ContentVersion` 记录本次版本，catalog 和运行时加载协议不变。新旧配置缺少字段时均从默认值开始，不自动重写旧资产。显式路径重载也遵循版本递增；临时配置只更新内存。
 
 持久配置必须可写；仅保存当前配置资产，不保存全工程其他脏资产。若发布成功后配置保存失败，会报告已发布路径并保留产物与内存中的下一版本；修复写权限后保存该配置。再次启动若磁盘版本仍旧，已有目录检查会阻止覆盖，需核对已发布版本后修正配置。不会自动覆盖、跳号或清理旧内容。
+
+## 一键部署到 StreamingAssets
+
+选中 ResourceGroups，点击 **Copy latest build to StreamingAssets**（同名菜单位于 AI Native/Assets）。最近成功构建的路径、版本和 catalog 摘要随配置保存；不会扫描最高版本目录，也不会从下一版本猜测来源。旧配置先成功构建一次，或使用 `AssetDeployment.CopyToStreamingAssets(sourceDirectory)` 部署已有完整产物。复制不构建、不递增版本。
+
+目标固定为 `Assets/StreamingAssets/AiNativeAssets`，仅包含 catalog.json 和 catalog 列出的全部 Bundle。先验证来源和暂存副本的大小及 SHA-256，再完整替换目标；旧包及其 meta 被清理，目录自身 meta 与其他 StreamingAssets 内容不动。仅 Edit Mode 可部署，来源重叠或目录链接会拒绝。异常替换尝试恢复旧目录；如果恢复也失败，错误明确列出保留的备份路径。进程崩溃不保证跨目录事务恢复。
+
+裁剪证据保存在 `BuildArtifacts/Assets/StreamingAssetsDeployment/<catalogSha256>`，不会进入 Player 的 StreamingAssets。SBP 保存 link.xml，Builtin 保存根及逐包 Manifest；删除原始构建输出后仍能使用。不同摘要快照保留；重复部署同一摘要会重新验证并替换其辅助快照，能够修复损坏的证据。不要仅复制运行时目录到另一工程后直接打包，需同时重新部署完整构建源以建立证据。
+
+SBP 精简部署支持标准 Build Profiles 和 `BuildPipeline.BuildPlayer`，构建前验证实际文件与证据，linker 回调只使用对应的 link.xml。Builtin 使用 `AssetPlayerBuildSupport.BuildDeployedPlayer(options)`（或显式提供匹配的部署 Manifest），不具备保护信息的标准构建会失败。原有 `BuildPlayer(fullContentRoot, options)` 保持兼容，但其来源必须与实际部署内容一致；旧式完整 StreamingAssets 目录仍可能包含报告，需重新部署才能精简。
+
+```powershell
+unity run <Unity工程路径> -- -executeMethod AiNative.UnityCore.Assets.Editor.AssetDeployment.BatchCopy -assetGroups Assets/ResourceGroups.asset
+unity run <Unity工程路径> -- -executeMethod AiNative.UnityCore.Assets.Editor.AssetDeployment.BatchCopy -assetSource <完整构建输出目录>
+```
+
+两个来源参数必须且只能提供一个。结果日志显示来源、版本、目标、运行时文件数和总字节数。
