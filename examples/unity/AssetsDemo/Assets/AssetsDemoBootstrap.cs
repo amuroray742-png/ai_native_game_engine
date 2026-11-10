@@ -15,7 +15,12 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         Application.runInBackground = true;
         try
         {
+#if UNITY_EDITOR
+            var groups = UnityEditor.AssetDatabase.LoadAssetAtPath<AiNative.UnityCore.Assets.Editor.AssetGroups>("Assets/ResourceGroups.asset");
+            var module = AiNative.UnityCore.Assets.Editor.EditorAssets.CreateConfigured(groups);
+#else
             var module = new AssetsModule();
+#endif
             Core.Inst.RegisterModule(module);
             await Core.Inst.RunAsync();
             var first = await module.InstantiateAsync("Assets/Probe/A");

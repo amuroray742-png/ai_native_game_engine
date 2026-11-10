@@ -1,1 +1,9 @@
-{"name":"AssetsDemo","references":["AiNative.UnityCore","AiNative.UnityCore.Assets","UniTask"]}
+{
+  "name": "AssetsDemo",
+  "references": [
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Assets",
+    "UniTask",
+    "AiNative.UnityCore.Assets.Editor"
+  ]
+}

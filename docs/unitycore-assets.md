@@ -92,3 +92,13 @@ SBP 接入设计、证据和验收边界见 [双后端构建验收](unitycore-as
 ### 最新构建精简部署
 
 资源配置新增最近成功构建记录，Inspector、菜单与批处理可将 catalog 和全部 Bundle 一键部署到 StreamingAssets/AiNativeAssets；裁剪证据保存在 StreamingAssets 外。两后端及四种 Player 的验证和未完成 GUI 项详见 [部署契约与验收](unitycore-assets-deployment.md)。
+
+### Editor 加载模式选择
+
+ResourceGroups Inspector 新增 `Editor Load Mode`，新旧配置均默认 `AssetBundle`。Editor 启动使用 `EditorAssets.CreateConfigured(groups, contentRoot)` 读取配置，或 `EditorAssets.Create(groups, EditorAssetLoadMode.AssetDatabase)` 显式指定模式。直读不需要构建目录；Bundle 模式默认读取 StreamingAssets/AiNativeAssets，也可指定目录。选择在创建模块时固定，不提供运行中热切换；修改后创建新模块，示例可退出并重新进入 Play。旧 `EditorAssets.Create(groups)` 保持直读语义。
+
+示例已接入配置入口，Player 条件编译分支仍使用 `new AssetsModule()`。模式枚举和工厂仅在 Editor 程序集中，不改变运行时 API、所有权或构建后端选择。只修改 Inspector 配置不会改变自行直接调用 AssetsModule 构造函数的宿主；其初始化代码需接入上述工厂。
+
+2026-11-10：独立审查通过。隔离工程 Unity 6000.3.23f1 / SBP 2.6.2 在 Domain Reload 开、关下各通过 EditMode 91 项和 PlayMode 45 项；审查后新增显式 Bundle 目录缺失负例及 Inspector 帮助文本，再对最终代码开、关各运行 5 项模式专项测试，均通过。专项覆盖默认值和旧字段缺省、非法模式、直读忽略 Bundle 路径、创建后配置变化不热切换、实例/池/场景清理、源资源保留及跨会话退出。Mono Development 和 IL2CPP Player 构建运行通过，渲染截图检查正常，验证示例新增 Editor 程序集引用未破坏 Player 编译。
+
+本轮未执行 Inspector 鼠标操作，未重复 Builtin 后端（构建实现未改动）。未修改用户本地 ResourceGroups 或工程配置。证据：[摘要](evidence/unitycore-assets/editor-load-mode/summary.json)、[最终源码指纹](evidence/unitycore-assets/editor-load-mode/sources.json)、[XML、日志、截图与复现脚本](evidence/unitycore-assets/editor-load-mode/editor-load-mode-evidence.zip)。完整回归与最终专项分别记录源码指纹，不将补测前的回归冒充最终新增测试结果。
