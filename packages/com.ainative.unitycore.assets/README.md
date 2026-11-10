@@ -41,6 +41,8 @@ The `AssetGroups` Inspector exposes **Editor Load Mode**, defaulting to **AssetB
 
 Keep these factory calls under `#if UNITY_EDITOR`, with an Editor assembly reference where needed. Player startup continues to use `new AssetsModule()` and always loads bundles. Existing `EditorAssets.Create(groups)` remains an unconditional AssetDatabase entry point for compatibility. Direct mode uses the same ownership API and never destroys source assets; it cannot verify actual bundle unloading. Use real bundles for lifetime and Player acceptance. `AssetDiagnosticsWindow.Inspect(assets)` displays live ownership; `GetDiagnostics()` returns copied read-only information. File sizes are not runtime memory measurements.
 
+Both modes share reference counting, scope cancellation and shutdown. AssetDatabase requests can complete synchronously, as can requests for already loaded Bundle resources. Cancelling after completion does not revoke the returned lease: dispose it or close its scope. Pre-cancelled requests never acquire ownership; cancelled in-flight operations remain observed and are drained by close. Normal pool close waits for borrowed objects, inactive objects and the pool root to be actually destroyed before reporting completion. Source objects remaining alive after direct-mode close belong to the Editor and are not evidence of outstanding module ownership.
+
 See the repository's `docs/unitycore-assets.md` for acceptance evidence and current limits. No remote updates, content deduplication across distinct GUIDs, or cross-platform compatibility is promised.
 
 ### 目录收集、地址和 Bundle 命名

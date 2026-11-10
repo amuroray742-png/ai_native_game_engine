@@ -102,3 +102,13 @@ ResourceGroups Inspector 新增 `Editor Load Mode`，新旧配置均默认 `Asse
 2026-11-10：独立审查通过。隔离工程 Unity 6000.3.23f1 / SBP 2.6.2 在 Domain Reload 开、关下各通过 EditMode 91 项和 PlayMode 45 项；审查后新增显式 Bundle 目录缺失负例及 Inspector 帮助文本，再对最终代码开、关各运行 5 项模式专项测试，均通过。专项覆盖默认值和旧字段缺省、非法模式、直读忽略 Bundle 路径、创建后配置变化不热切换、实例/池/场景清理、源资源保留及跨会话退出。Mono Development 和 IL2CPP Player 构建运行通过，渲染截图检查正常，验证示例新增 Editor 程序集引用未破坏 Player 编译。
 
 本轮未执行 Inspector 鼠标操作，未重复 Builtin 后端（构建实现未改动）。未修改用户本地 ResourceGroups 或工程配置。证据：[摘要](evidence/unitycore-assets/editor-load-mode/summary.json)、[最终源码指纹](evidence/unitycore-assets/editor-load-mode/sources.json)、[XML、日志、截图与复现脚本](evidence/unitycore-assets/editor-load-mode/editor-load-mode-evidence.zip)。完整回归与最终专项分别记录源码指纹，不将补测前的回归冒充最终新增测试结果。
+
+### 模式切换所有权复审
+
+2026-11-10 后续审查确认：两种加载模式共享 AssetRuntime、AssetScope 和句柄协议，没有发现直读绕过计数的路径。AssetDatabase 普通加载可以同步完成；Bundle 资源缓存命中也可同步完成。完成后取消不撤回句柄，调用方仍需释放或关闭作用域。直读关闭只释放管理引用，Editor 源资源保留；真实 Bundle 最后持有者释放后执行 Unload(true)。
+
+复现并修复一处共用关闭时序问题：空池 CloseAsync 原先在 Destroy(root) 后立即完成，实际根对象仍存在。现在等待根对象实际销毁，再解除池登记并返回。该问题是关闭提前完成和短暂残留，不将其描述成已证实的永久泄漏。强制关闭保留 DestroyImmediate。
+
+四项新用例分别在 AssetDatabase 和真实 Bundle 下验证独立句柄/重复释放、预取消与完成后取消、失败回滚及子资源、场景在途取消和外部卸载、池根对象及借出对象关闭、关闭中加载、外部销毁、跨代旧句柄隔离。断言正常关闭后资源、Bundle、作用域、池和请求全部归零。独立审查通过，Unity 6000.3.23f1 / SBP 2.6.2 隔离工程在 Domain Reload 开关下分别通过 96 EditMode、45 PlayMode，共 282 项；Mono Development 和 IL2CPP Player 重新构建运行通过，截图检查正常。本轮未操作 Inspector 鼠标界面，未重建 Builtin 内容，使用已有隔离 SBP 内容验证两种加载模式，保留用户本地配置和 StreamingAssets。
+
+原代码复现结果为三项测试两项通过，池关闭断言失败。此前两次测试组织方式分别遇到跨 Domain Reload 委托失效和 Unity 测试运行器异常；改为各用例直接进入 Play 后再创建委托，所有失败记录均保留。[复审摘要](evidence/unitycore-assets/mode-ownership-review/summary.json)、[被测源码指纹](evidence/unitycore-assets/mode-ownership-review/sources.json)、[原始失败与最终回归归档](evidence/unitycore-assets/mode-ownership-review/mode-ownership-evidence.zip)。

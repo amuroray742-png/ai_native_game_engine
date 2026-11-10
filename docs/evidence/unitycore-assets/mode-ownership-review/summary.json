@@ -1,0 +1,22 @@
+{
+  "EditMode-reload-On": 96,
+  "PlayMode-reload-On": 45,
+  "EditMode-reload-Off": 96,
+  "PlayMode-reload-Off": 45,
+  "Mono": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "Il2Cpp": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "unity": "6000.3.23f1",
+  "content_backend": "SBP 2.6.2",
+  "fixed": "Pool normal close completed before deferred destruction of its root. Now waits until root is actually destroyed.",
+  "before_fix": "before-final.xml: 2 passed; pool close failed because the AssetDatabase pool root remained alive.",
+  "test_harness_attempts": "before.xml failed across domain reload with a captured delegate. before-corrected.log records a Unity test-runner exception during Play entry from setup. Final tests use direct EnterPlayMode in each iterator and create delegates afterwards.",
+  "review": "Independent static audit and final change review passed.",
+  "limitations": "No Inspector mouse interaction or Builtin content rebuild in this review. Existing isolated SBP content reused; both resource loading modes tested. Player validation repeated for runtime cleanup change.",
+  "archive_sha256": "5147079a8fdf21f226c26b6c5499e9927efa40f67e8b832d8b365535eab0302e"
+}

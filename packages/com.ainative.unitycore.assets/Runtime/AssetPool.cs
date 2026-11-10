@@ -155,6 +155,7 @@ namespace AiNative.UnityCore.Assets
                 await _scope.CloseAsync();
                 _transforms.Clear();
                 UnityEngine.Object.Destroy(_root);
+                await UniTask.WaitUntil(() => _root == null, PlayerLoopTiming.LastPostLateUpdate);
                 Released?.Invoke();
                 Released = null;
                 completion.TrySetResult();
