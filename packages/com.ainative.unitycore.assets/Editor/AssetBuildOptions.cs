@@ -14,6 +14,7 @@ namespace AiNative.UnityCore.Assets.Editor
     internal sealed class AssetBuildMetadata
     {
         public int FormatVersion = 1;
+        public int ContentVersion;
         public AssetBuildBackend Backend;
         public string UnityVersion = Application.unityVersion;
         public string SbpVersion = "";

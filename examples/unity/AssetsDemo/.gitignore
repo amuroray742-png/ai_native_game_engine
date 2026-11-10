@@ -7,3 +7,5 @@
 /*.sln*
 /Assets/StreamingAssets/AiNativeAssets/
 /Assets/StreamingAssets/AiNativeAssets.meta
+
+/BundleBuildOutput/

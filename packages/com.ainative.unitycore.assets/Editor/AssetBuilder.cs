@@ -11,22 +11,36 @@ namespace AiNative.UnityCore.Assets.Editor
 {
     public static class AssetBuilder
     {
-        /// <summary>Builds to a fresh directory. Never overwrites a published build; failed staging is retained for diagnosis.</summary>
+        /// <summary>Publishes using the configured template, then increments and saves the next version.</summary>
+        public static AssetCatalog Build(AssetGroups settings) => Build(settings, new AssetBuildOptions());
+
+        /// <summary>Uses the configured output template and cache options; publication precedes version persistence.</summary>
+        public static AssetCatalog Build(AssetGroups settings, AssetBuildOptions options)
+            => Build(settings, AssetBuildSession.ResolveOutputDirectory(settings), options);
+
+        /// <summary>Overrides the output directory. Increments the version after publication; never overwrites existing content.</summary>
         public static AssetCatalog Build(AssetGroups settings, string destination)
             => Build(settings, destination, new AssetBuildOptions());
 
         public static AssetCatalog Build(AssetGroups settings, string destination, AssetBuildOptions options)
         {
             if (settings == null) { throw new ArgumentNullException(nameof(settings)); }
+            if (options == null) { throw new ArgumentNullException(nameof(options)); }
+            using var session = AssetBuildSession.Begin(settings, destination);
             // Native and SBP builds can unload objects while ignoring managed references.
-            bool transient = !EditorUtility.IsPersistent(settings);
             HideFlags previous = settings.hideFlags;
-            if (transient) { settings.hideFlags |= HideFlags.HideAndDontSave; }
-            try { return BuildContent(settings, destination, options); }
-            finally { if (transient && settings != null) { settings.hideFlags = previous; } }
+            settings.hideFlags |= HideFlags.HideAndDontSave;
+            AssetCatalog catalog;
+            try
+            {
+                catalog = BuildContent(settings, session.Destination, options, session.Version);
+            }
+            finally { if (settings != null) { settings.hideFlags = previous; } }
+            session.Complete();
+            return catalog;
         }
 
-        private static AssetCatalog BuildContent(AssetGroups settings, string destination, AssetBuildOptions options)
+        private static AssetCatalog BuildContent(AssetGroups settings, string destination, AssetBuildOptions options, int version)
         {
             if (options == null) { throw new ArgumentNullException(nameof(options)); }
             destination = Path.GetFullPath(destination);
@@ -37,7 +51,7 @@ namespace AiNative.UnityCore.Assets.Editor
             if (!string.Equals(Path.GetPathRoot(staging), Path.GetPathRoot(destination), StringComparison.OrdinalIgnoreCase))
             { throw new IOException("Atomic publication requires output on the project volume."); }
             Directory.CreateDirectory(staging);
-            var metadata = new AssetBuildMetadata { Backend = settings.BuildBackend, UseCache = settings.BuildBackend == AssetBuildBackend.ScriptableBuildPipeline && options.UseCache };
+            var metadata = new AssetBuildMetadata { ContentVersion = version, Backend = settings.BuildBackend, UseCache = settings.BuildBackend == AssetBuildBackend.ScriptableBuildPipeline && options.UseCache };
             Dictionary<string, uint> crcs;
             var actualDependencies = settings.BuildBackend == AssetBuildBackend.Builtin
                 ? BuildBuiltin(plan, staging, metadata, out crcs)
@@ -185,8 +199,10 @@ namespace AiNative.UnityCore.Assets.Editor
                 if (index < 0 || index + 1 >= args.Length) { throw new ArgumentException("Missing argument " + key); }
                 return args[index + 1];
             }
-            Build(AssetDatabase.LoadAssetAtPath<AssetGroups>(Read("-assetGroups")), Read("-assetOutput"),
-                new AssetBuildOptions { UseCache = !args.Contains("-assetCleanBuild") });
+            var settings = AssetDatabase.LoadAssetAtPath<AssetGroups>(Read("-assetGroups"));
+            var options = new AssetBuildOptions { UseCache = !args.Contains("-assetCleanBuild") };
+            if (args.Contains("-assetOutput")) { Build(settings, Read("-assetOutput"), options); }
+            else { Build(settings, options); }
         }
     }
 }

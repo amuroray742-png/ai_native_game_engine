@@ -1,0 +1,27 @@
+{
+  "batch-default": {
+    "contentVersion": 1,
+    "nextVersion": 2,
+    "output": "C:\\work\\github\\ai_native_game_engine\\TestResults\\build-version\\workspace\\examples\\unity\\AssetsDemo\\BundleBuildOutput\\1"
+  },
+  "batch-override": {
+    "contentVersion": 2,
+    "nextVersion": 3,
+    "output": "C:\\work\\github\\ai_native_game_engine\\TestResults\\build-version\\override-output"
+  },
+  "EditMode": 80,
+  "PlayMode": 45,
+  "unity": "6000.3.23f1",
+  "sbp": "2.6.2",
+  "totalTests": 125,
+  "newTests": 21,
+  "independentReview": "passed",
+  "notRun": [
+    "Player rebuilds",
+    "Inspector/menu GUI clicks",
+    "second Domain Reload mode"
+  ],
+  "configurationHideFlags": 0,
+  "archiveSha256": "a00ce6552d2e443a28f218394ccc931c0a3846e2ede3a709fb9976e8839196ec",
+  "archiveBytes": 3419136
+}

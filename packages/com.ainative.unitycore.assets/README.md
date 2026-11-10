@@ -25,7 +25,7 @@ Explicit ownership wins. Otherwise dependencies referenced by multiple original 
 
 Builds use LZ4 and produce catalog.json, file checksums, backend-specific raw evidence, planned/actual ownership TSVs, exclusions and errors. Duplicate source ownership, incomplete ordinary-resource evidence, unmappable report files, or differing dependencies reject publication. Scene paths are separately verified from real bundles. Generated scene preload metadata, scripts and Unity built-ins are listed as exclusions, not ordinary source assets. Builds stage under the project's BuildArtifacts/Assets directory; add BuildArtifacts to the consuming project's ignore rules. Publication uses a fresh destination on the same volume and never overwrites an existing build.
 
-`AssetBuilder.Build(settings, output)` and `AssetBuilder.BatchBuild` provide scripted and batch entrypoints. Batch arguments are `-assetGroups Assets/ResourceGroups.asset -assetOutput <new-directory>`. Keep the content root unchanged throughout a module run. Rebuild for a different Unity version, target or changed script identity. Use AssetPlayerBuildSupport.BuildPlayer(contentRoot, options) to preserve bundle-only script types using the native manifest or SBP linker XML.
+`AssetBuilder.Build(settings, output)` and `AssetBuilder.BatchBuild` provide scripted and batch entrypoints. Batch requires `-assetGroups Assets/ResourceGroups.asset`; optional `-assetOutput <new-directory>` overrides the configured output template. Keep the content root unchanged throughout a module run. Rebuild for a different Unity version, target or changed script identity. Use AssetPlayerBuildSupport.BuildPlayer(contentRoot, options) to preserve bundle-only script types using the native manifest or SBP linker XML.
 
 Loading validates file existence, size and Unity CRC. Because Unity interprets CRC zero as disabled, zero-CRC entries additionally verify the full SHA-256 before loading. This rare fallback scans the file on the main thread; no runtime frame budget is promised. A missing CRC field therefore cannot silently disable content verification.
 
@@ -77,3 +77,13 @@ SBP 构建期间关闭 `slimWriteResults`，在 finally 恢复；该设置参与
 完整验收命令见仓库 `scripts/verify_unity_assets.py --help`。`--backend both --players` 先验原生、再验 SBP，最后使用 SBP 内容构建 Mono Development 和 IL2CPP Player。`--baseline-fixture` 只在隔离副本使用已提交的示例组配置，保留本地编辑。
 
 Windows 发布重命名若遇短暂 I/O 拒绝，只在源仍存在、目标完全不存在时最多额外尝试两次（总等待 200ms）。最终失败保留现场并抛出异常；该处理来自独立文件系统复现，不依赖假设的 Unity 锁占用。
+
+## 构建版本与输出路径
+
+`AssetGroups.Version` 是下一次构建的版本，默认 1。全局 `OutputDirectory` 默认 `{projectDir}/BundleBuildOutput/{version}`；必须包含 `{version}`，仅支持区分大小写的 `{projectDir}` 与 `{version}`。相对路径以 Unity 工程根目录解析，输出必须同盘且目录尚不存在。将 `BundleBuildOutput/` 加入消费工程的忽略规则。
+
+Inspector 显示本次实际输出路径；普通构建、干净构建和菜单构建直接使用配置，不再选择目录。`AssetBuilder.Build(settings)` / `Build(settings, options)` 使用模板；原有显式传入输出目录的重载优先使用该路径。批处理省略 `-assetOutput` 时使用模板。
+
+成功发布版本 1 到 `/1` 后，配置自动保存为版本 2；构建或校验失败不递增。`build-metadata.json.ContentVersion` 记录本次版本，catalog 和运行时加载协议不变。新旧配置缺少字段时均从默认值开始，不自动重写旧资产。显式路径重载也遵循版本递增；临时配置只更新内存。
+
+持久配置必须可写；仅保存当前配置资产，不保存全工程其他脏资产。若发布成功后配置保存失败，会报告已发布路径并保留产物与内存中的下一版本；修复写权限后保存该配置。再次启动若磁盘版本仍旧，已有目录检查会阻止覆盖，需核对已发布版本后修正配置。不会自动覆盖、跳号或清理旧内容。
