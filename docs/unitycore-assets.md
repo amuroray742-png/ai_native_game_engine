@@ -80,3 +80,11 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 最终代码在 Unity 6000.3.23f1 隔离工程验证：EditMode 48/48、PlayMode 45/45 通过。目录排除文件在分析窗口及 `excluded.txt` 可见。失败复现、测试准备失败现场、最终 XML 和源码指纹保存在本机 `TestResults/assets-collection-audit-20261110`，已核对被测副本与提交源码一致。本次未重跑 Player 构建、其他平台或双 Domain Reload 矩阵。
 
 SBP 接入设计、证据和验收边界见 [双后端构建验收](unitycore-assets-sbp.md)。
+
+### 构建版本与输出目录
+
+资源配置增加下一构建版本 `Version = 1` 和全局路径模板 `OutputDirectory = "{projectDir}/BundleBuildOutput/{version}"`。Inspector、菜单和未提供 `-assetOutput` 的批处理均使用模板，预览路径后直接构建。仅支持 `{projectDir}`、`{version}`，后者必须存在；相对路径以 Unity 工程为基准。显式输出重载保留。两后端发布成功才递增版本并保存当前配置，失败不递增；已发布但保存失败时保留内容并明确报告。临时配置仅更新内存，元数据记录本次 `ContentVersion`，运行时目录格式不变。详见 [包使用说明](../packages/com.ainative.unitycore.assets/README.md#构建版本与输出路径)。
+
+2026-11-10 版本与路径验收：独立审查完成，隔离 Windows Editor（Unity 6000.3.23f1 / SBP 2.6.2）最终 EditMode 80/80、PlayMode 45/45 通过，包含 21 项新增测试。两后端连续构建、持久配置重载、干净构建、实际 SBP 取消、发布失败、配置只读与发布后保存失败、旧元数据兼容均已验证。真实批处理分别省略和提供 `-assetOutput`，发布版本 1、2 后配置保存为 3；示例克隆构建使用版本 3，不推进原配置。实际配置磁盘 hideFlags 为 0。
+
+实现期间先复现隔离工程未准备 StreamingAssets 导致的生命周期用例失败，再复现未由 Inspector 持有的持久配置被构建卸载、发布后无法保存版本；保留失败日志与产物，修复保护标记并补齐内容后完成最终回归。[摘要](evidence/unitycore-assets/build-version/summary.json)、[原始证据与复现脚本](evidence/unitycore-assets/build-version/build-version-evidence.zip)、[被测源码指纹](evidence/unitycore-assets/build-version/sources.json)。78 个包实现/测试文件与隔离副本逐字节一致。Inspector/菜单本轮为代码审查，未执行 GUI 点击；本轮未重复 Player 构建和另一 Domain Reload 设置，不扩大此前验收声明。

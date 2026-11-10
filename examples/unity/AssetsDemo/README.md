@@ -26,3 +26,5 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --back
 示例使用全局 `FullPath` 地址，如 `Assets/Probe/A`、`Assets/Probe/Content`。从旧版本升级时必须归档旧内容后重新构建，原来的 `a`、`scene` 等手填地址不再生成。若改为全局 `GroupAndAssetName`，也需同步调整示例调用。
 
 默认 SBP 2.6.2。`AssetsDemoSetup.BuildContentBuiltin` 和 `BuildContentSbp` 可只覆盖本次构建后端，不改配置资产；输出目录仍必须是新目录。需要排除本地示例配置试验对标准验收的影响时，加 `--baseline-fixture`，仅隔离副本恢复已提交的 ResourceGroups 配置。
+
+Inspector 手工构建：选中 ResourceGroups，设置 Version（默认下一版本 1）与 Output Directory（默认 `{projectDir}/BundleBuildOutput/{version}`），预览路径后点击构建，无需选择目录。成功后版本加 1 并保存。示例 `BuildContent*` 入口仍使用配置克隆、显式输出到 StreamingAssets，所以只递增克隆的内存版本，不修改原配置；这些入口用于演示部署，不自动同步手工构建产物。

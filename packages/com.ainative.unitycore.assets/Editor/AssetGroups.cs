@@ -6,6 +6,9 @@ namespace AiNative.UnityCore.Assets.Editor
     [CreateAssetMenu(menuName = "AI Native/Assets/Resource Groups")]
     public sealed class AssetGroups : ScriptableObject
     {
+        [Tooltip("Version used by the next build. Incremented and saved only after publication.")]
+        public int Version = 1;
+        public string OutputDirectory = "{projectDir}/BundleBuildOutput/{version}";
         public AssetBuildBackend BuildBackend = AssetBuildBackend.ScriptableBuildPipeline;
         public ResourceAddressMode AddressMode = ResourceAddressMode.FullPath;
         public BundleNamingMode BundleNaming = BundleNamingMode.StableHash;

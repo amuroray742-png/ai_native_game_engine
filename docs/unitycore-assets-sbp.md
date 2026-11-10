@@ -22,7 +22,7 @@ SBP 默认 `slimWriteResults` 会只保留每个序列化文件的部分对象�
 
 示例运行代码改用 `LoadAsync<ScriptableObject>`，通过类型名称和反射检查 DemoData.Value=42，不直接引用 DemoData 类型，以验证 Bundle-only 类型及序列化字段的保留。
 
-Unity 构建可能清理 transient ScriptableObject。构建入口仅对非持久配置临时增加 HideAndDontSave，并在 finally 恢复；持久配置不改 flags。
+Unity 构建可能清理仅由托管代码持有的 ScriptableObject。构建入口临时增加 HideAndDontSave，并在 finally 恢复；版本保存前先恢复原 flags，不将临时标记写入配置资产。后续版本构建的批处理实测表明，未由 Inspector 持有的持久配置同样需要此保护。
 
 校验目录与发布目录分离：复制已验证文件到未加载的发布暂存目录，最后原子重命名，目标必须不存在。暂存保留供追溯，成功构建有额外磁盘占用。纯 Python 文件系统压力探针也复现 Windows WinError 5（60 次中 1 次，100ms 后恢复），因此 Windows Editor 在源仍存在且目标完全不存在时最多额外尝试两次原子重命名，总等待 200ms；不覆盖目标、不吞最终错误。不将此现象归因于已确认的 Unity 文件锁。
 

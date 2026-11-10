@@ -17,25 +17,24 @@ namespace AiNative.UnityCore.Assets.Editor
         {
             var groups = Selection.activeObject as AssetGroups;
             if (groups == null) { throw new InvalidOperationException("Select an AssetGroups configuration first."); }
-            string path = EditorUtility.SaveFilePanel("New build directory", "", "AssetsContent", "");
-            if (path.Length != 0) { AssetBuilder.Build(groups, path); }
+            AssetBuilder.Build(groups);
         }
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+            try { EditorGUILayout.HelpBox("Next output: " + AssetBuildSession.ResolveOutputDirectory((AssetGroups)target), MessageType.Info); }
+            catch (Exception error) { EditorGUILayout.HelpBox(error.Message, MessageType.Error); }
             EditorGUILayout.HelpBox("Folders are collected recursively. The global Address Mode applies to every group and asset. Name defaults to Id. Validate to preview addresses and bundle names.", MessageType.Info);
             if (GUILayout.Button("Validate and inspect packing"))
             {
                 try { AssetPackingWindow.Show(AssetBuildPlan.Create((AssetGroups)target)); }
                 catch (Exception error) { Debug.LogException(error); }
             }
-            bool build = GUILayout.Button("Build Windows bundles to new directory");
+            bool build = GUILayout.Button("Build Windows bundles");
             bool clean = GUILayout.Button("Build Windows bundles without cache");
             if (build || clean)
             {
-                string path = EditorUtility.SaveFilePanel("New build directory", "", "AssetsContent", "");
-                if (path.Length == 0) { return; }
-                try { AssetBuilder.Build((AssetGroups)target, path, new AssetBuildOptions { UseCache = !clean }); }
+                try { AssetBuilder.Build((AssetGroups)target, new AssetBuildOptions { UseCache = !clean }); }
                 catch (Exception error) { Debug.LogException(error); }
             }
         }
