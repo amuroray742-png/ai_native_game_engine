@@ -4,7 +4,7 @@
 
 ## 边界与任务
 
-`com.ainative.unitycore.assets` 是依赖 UnityCore 的 Unity 应用资源包，版本 0.1.0，Unity 6000.3.23f1、Windows x64。沿用 UniTask，不引入 Addressables、YooAsset 或第三方构建库。具体使用见[包文档](../packages/com.ainative.unitycore.assets/README.md)。
+`com.ainative.unitycore.assets` 是依赖 UnityCore 的 Unity 应用资源包，版本 0.1.0，Unity 6000.3.23f1、Windows x64。沿用 UniTask，使用 Unity 官方 SBP 2.6.2 为默认构建后端，保留原生后端；不引入 Addressables 或 YooAsset。具体使用见[包文档](../packages/com.ainative.unitycore.assets/README.md)。
 
 资源包不依赖模拟内核、Hosting、Jolt 或 Example，不持有权威游戏状态。资源异步操作、实例与场景的生命周期独立于 PlayHost 的模拟 Tick。目标是本地资源、自动共享依赖、可追踪所有权和真实 Player 闭环；远端更新、加密、跨平台及完整场景切换系统不在本轮。
 
@@ -14,11 +14,11 @@
 
 一次受管 Bundle 构建集合内，可独立打包的同一源 GUID 只有一个物理包所有者；同文件子资源整体归属。地址由全局规则从源路径或组名/资源名生成，与物理分包分离；相关路径或名称变化时地址也变化。显式归属优先，否则按原始引用组集合提取共享包。单一场景组的外部依赖也单独进入普通包。不同 GUID 内容相同不自动合并。
 
-构建前生成完整依赖闭包和归属，检测循环。构建后通过 BuildReport.packedAssets 的 shortPath 与 GetFiles 文件名唯一匹配，定位实际 Bundle；Unity 6000.3 不再允许使用旧的 packed.file 索引。实际依赖与计划比对，源资产重复或证据缺失阻止发布。
+构建前生成完整依赖闭包和归属，检测循环。原生构建后通过 BuildReport.packedAssets 的 shortPath 与 GetFiles 文件名唯一匹配，定位实际 Bundle；Unity 6000.3 不再允许使用旧的 packed.file 索引。SBP 使用本轮完整 WriteResults 对象与文件→Bundle 映射，缓存命中也要求完整证据。实际依赖与计划比较可达关系，目录输出约简后的直接依赖；源资产重复或证据缺失阻止发布。
 
 场景内嵌对象不作为独立源 GUID 去重。场景外部资源必须有归属证据，实际场景路径由 GetAllScenePaths 校验。脚本、Unity 内置对象、AssetBundle 元数据，以及零 GUID 且类型明确的场景 PreloadData/AssetBundle 元数据单列排除，不用未知源路径兜底。这里不承诺 Player 内置数据与 Bundle 之间的全局零重复。
 
-实际构建产物包含 catalog、原生 Manifest、原始 BuildReport、计划/实际归属 TSV、排除项、错误和文件摘要。构建暂存目录位于 BuildArtifacts/Assets，避免导入半成品；Unity 不允许直接构建到 Library。成功后才在同卷发布到不存在的目标目录。
+实际构建产物包含 catalog、构建元数据、后端裁剪文件（原生 Manifest 或 SBP link.xml）、原始 BuildReport 或 SBP 写入结果、计划/实际归属 TSV、排除项、错误和文件摘要。构建暂存目录位于 BuildArtifacts/Assets，避免导入半成品；Unity 不允许直接构建到 Library。成功后才在同卷发布到不存在的目标目录。
 
 ## 运行与清理
 
@@ -78,3 +78,5 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 冲突诊断现包含两边的源路径、组 ID 或共享集合，保留原有错误码。补充回归覆盖：去扩展名导致的地址碰撞、重叠目录重排、文件移动后地址重新生成、场景与普通资源混组、单场景组 `A_B` 的外部依赖与 `A/B` 共享包的名称碰撞。后者使用可读名称必须拒绝，哈希模式可区分，未引入静默合并或名称后缀回退。独立只读复审已完成。
 
 最终代码在 Unity 6000.3.23f1 隔离工程验证：EditMode 48/48、PlayMode 45/45 通过。目录排除文件在分析窗口及 `excluded.txt` 可见。失败复现、测试准备失败现场、最终 XML 和源码指纹保存在本机 `TestResults/assets-collection-audit-20261110`，已核对被测副本与提交源码一致。本次未重跑 Player 构建、其他平台或双 Domain Reload 矩阵。
+
+SBP 接入设计、证据和验收边界见 [双后端构建验收](unitycore-assets-sbp.md)。

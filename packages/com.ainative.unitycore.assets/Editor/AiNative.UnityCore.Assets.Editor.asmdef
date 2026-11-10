@@ -1,1 +1,13 @@
-{"name":"AiNative.UnityCore.Assets.Editor","references":["AiNative.UnityCore.Assets","AiNative.UnityCore","UniTask"],"includePlatforms":["Editor"]}
+{
+  "name": "AiNative.UnityCore.Assets.Editor",
+  "references": [
+    "AiNative.UnityCore.Assets",
+    "AiNative.UnityCore",
+    "UniTask",
+    "Unity.ScriptableBuildPipeline.Editor",
+    "Unity.ScriptableBuildPipeline"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

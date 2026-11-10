@@ -6,6 +6,7 @@ namespace AiNative.UnityCore.Assets.Editor
     [CreateAssetMenu(menuName = "AI Native/Assets/Resource Groups")]
     public sealed class AssetGroups : ScriptableObject
     {
+        public AssetBuildBackend BuildBackend = AssetBuildBackend.ScriptableBuildPipeline;
         public ResourceAddressMode AddressMode = ResourceAddressMode.FullPath;
         public BundleNamingMode BundleNaming = BundleNamingMode.StableHash;
         public ResourceGroup[] Groups = Array.Empty<ResourceGroup>();

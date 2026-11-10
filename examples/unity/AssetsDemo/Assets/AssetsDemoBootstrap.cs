@@ -36,8 +36,8 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             first.Dispose();
             await UniTask.Yield();
             if (second.Value.GetComponent<Renderer>().sharedMaterial != material) { throw new Exception("Releasing A destroyed B dependencies."); }
-            var data = await module.LoadAsync<DemoData>("Assets/Probe/Data");
-            if (data.Value.Value != 42) { throw new Exception("Bundle script type failed."); }
+            var data = await module.LoadAsync<ScriptableObject>("Assets/Probe/Data");
+            if (data.Value.GetType().Name != "DemoData" || !Equals(data.Value.GetType().GetField("Value")?.GetValue(data.Value), 42)) { throw new Exception("Bundle script type failed."); }
             data.Dispose();
             var pool = module.CreatePool("Assets/Probe/A", new AssetPoolOptions(2));
             await pool.PrewarmAsync(2);

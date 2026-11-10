@@ -29,11 +29,13 @@ namespace AiNative.UnityCore.Assets.Editor
                 try { AssetPackingWindow.Show(AssetBuildPlan.Create((AssetGroups)target)); }
                 catch (Exception error) { Debug.LogException(error); }
             }
-            if (GUILayout.Button("Build Windows bundles to new directory"))
+            bool build = GUILayout.Button("Build Windows bundles to new directory");
+            bool clean = GUILayout.Button("Build Windows bundles without cache");
+            if (build || clean)
             {
                 string path = EditorUtility.SaveFilePanel("New build directory", "", "AssetsContent", "");
                 if (path.Length == 0) { return; }
-                try { AssetBuilder.Build((AssetGroups)target, path); }
+                try { AssetBuilder.Build((AssetGroups)target, path, new AssetBuildOptions { UseCache = !clean }); }
                 catch (Exception error) { Debug.LogException(error); }
             }
         }

@@ -11,12 +11,12 @@ unity open examples/unity/AssetsDemo
 
 内容写入被 Git 忽略的 `Assets/StreamingAssets/AiNativeAssets`。构建器只发布到新目录；重建时先停止运行、将旧内容及其目录 meta 归档到 Assets 外，再构建。不要在一轮运行中覆盖内容。
 
-`AssetsDemoSetup.BuildMono` 构建 Development Mono；`BuildIl2Cpp` 构建 IL2CPP Player。需要安装当前 Editor 的 Windows IL2CPP 模块及兼容的 Visual C++ 工具链。构建入口将原生 Bundle Manifest 传给 Player 构建，保留 Bundle 引用的脚本类型。输出在仓库 `TestResults/assets-players`。
+`AssetsDemoSetup.BuildMono` 构建 Development Mono；`BuildIl2Cpp` 构建 IL2CPP Player。需要安装当前 Editor 的 Windows IL2CPP 模块及兼容的 Visual C++ 工具链。构建入口调用 AssetPlayerBuildSupport，按后端使用原生 Manifest 或 SBP link.xml 保留 Bundle 引用的脚本类型。示例以 ScriptableObject 加载并反射验证 DemoData，不直接引用该运行时类型。输出在仓库 `TestResults/assets-players`。
 
 完整的隔离验收命令：
 
 ```powershell
-python scripts/verify_unity_assets.py TestResults/assets-verification-new --players
+python scripts/verify_unity_assets.py TestResults/assets-verification-new --backend both --players
 ```
 
 目标目录必须不存在。脚本复制工程和两个源码包，重新构建内容，在开关 Domain Reload 两种设置下分别运行 EditMode/PlayMode 测试，再构建并运行两种 Player。保留源文件摘要、命令、XML、日志、原始 Bundle 报告、Player 结果与渲染截图。测试会生成故意重复或损坏的内容，仅在隔离副本/临时目录使用。
@@ -24,3 +24,5 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 `BundleReportProbe.Run` 是原生 A/B/shared 最小报告探针，输出 `TestResults/assets-probe/bundles`。完整构建的严格归属检查由 `AssetBuilder` 执行。该样例不参与模拟内核或 PlayHost 的玩法装配。
 
 示例使用全局 `FullPath` 地址，如 `Assets/Probe/A`、`Assets/Probe/Content`。从旧版本升级时必须归档旧内容后重新构建，原来的 `a`、`scene` 等手填地址不再生成。若改为全局 `GroupAndAssetName`，也需同步调整示例调用。
+
+默认 SBP 2.6.2。`AssetsDemoSetup.BuildContentBuiltin` 和 `BuildContentSbp` 可只覆盖本次构建后端，不改配置资产；输出目录仍必须是新目录。需要排除本地示例配置试验对标准验收的影响时，加 `--baseline-fixture`，仅隔离副本恢复已提交的 ResourceGroups 配置。

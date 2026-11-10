@@ -1,1 +1,17 @@
-{"name":"AiNative.UnityCore.Assets.EditTests","references":["AiNative.UnityCore","AiNative.UnityCore.Assets","AiNative.UnityCore.Assets.Editor","UniTask"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"]}
+{
+  "name": "AiNative.UnityCore.Assets.EditTests",
+  "references": [
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Assets",
+    "AiNative.UnityCore.Assets.Editor",
+    "UniTask",
+    "Unity.ScriptableBuildPipeline.Editor",
+    "Unity.ScriptableBuildPipeline"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

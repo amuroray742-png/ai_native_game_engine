@@ -13,9 +13,13 @@ ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / "examples/unity/AssetsDemo"
 
 
-def verify(output, players):
+def verify(output, players, backend="sbp", baseline_fixture=False):
     output.mkdir(parents=True, exist_ok=False)
     project = copy_verification_project(PROJECT, output / "workspace")
+    if baseline_fixture:
+        fixture = subprocess.check_output(["git", "show", "HEAD:examples/unity/AssetsDemo/Assets/ResourceGroups.asset"], cwd=ROOT)
+        (project / "Assets/ResourceGroups.asset").write_bytes(fixture)
+        (output / "fixture-source.asset").write_bytes(fixture)
     cli = shutil.which("unity")
     if not cli:
         raise RuntimeError("Install Unity CLI before running verification")
@@ -45,19 +49,24 @@ def verify(output, players):
     content = project / "Assets/StreamingAssets/AiNativeAssets"
     if content.exists():
         content.rename(output / "copied-development-content")
-    method("content", "AssetsDemoSetup.BuildContent")
     summary = {}
-    for reload in ("On", "Off"):
-        method("reload-" + reload, "AssetsDemoSetup.Reload" + reload)
-        for mode in ("PlayMode", "EditMode"):
-            label = mode + "-reload-" + reload
-            xml = output / (label + ".xml")
-            run(label, ["test", project, "--mode", mode, "--filter", "AiNative.UnityCore",
-                        "--output", xml, "--timeout", "800", "--format", "json", "--", "-logFile", output / (label + ".log")])
-            cases = ET.parse(xml).findall(".//test-case")
-            if not cases or any(case.get("result") != "Passed" for case in cases):
-                raise RuntimeError(f"Failed or empty test report: {xml}")
-            summary[label] = len(cases)
+    backends = ("builtin", "sbp") if backend == "both" else (backend,)
+    for content_backend in backends:
+        if content.exists():
+            content.rename(output / "previous-backend-content")
+        method("content-" + content_backend, "AssetsDemoSetup.BuildContent" + ("Sbp" if content_backend == "sbp" else "Builtin"))
+        shutil.copytree(content, output / ("content-" + content_backend))
+        for reload in ("On", "Off"):
+            method(content_backend + "-reload-" + reload, "AssetsDemoSetup.Reload" + reload)
+            for mode in ("PlayMode", "EditMode"):
+                label = content_backend + "-" + mode + "-reload-" + reload
+                xml = output / (label + ".xml")
+                run(label, ["test", project, "--mode", mode, "--filter", "AiNative.UnityCore",
+                            "--output", xml, "--timeout", "800", "--format", "json", "--", "-logFile", output / (label + ".log")])
+                cases = ET.parse(xml).findall(".//test-case")
+                if not cases or any(case.get("result") != "Passed" for case in cases):
+                    raise RuntimeError(f"Failed or empty test report: {xml}")
+                summary[label] = len(cases)
     if players:
         for backend in ("Mono", "Il2Cpp"):
             method("build-" + backend, "AssetsDemoSetup.Build" + backend)
@@ -78,5 +87,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="New evidence directory (never overwritten)")
     parser.add_argument("--players", action="store_true", help="Also build and smoke Windows Mono Development and IL2CPP Players")
+    parser.add_argument("--backend", choices=("sbp", "builtin", "both"), default="sbp", help="Content backends to verify; both finishes with SBP for Player validation")
+    parser.add_argument("--baseline-fixture", action="store_true", help="Use the committed groups fixture only inside the isolated copy; keep local configuration edits untouched")
     args = parser.parse_args()
-    verify(args.output.resolve(), args.players)
+    verify(args.output.resolve(), args.players, args.backend, args.baseline_fixture)

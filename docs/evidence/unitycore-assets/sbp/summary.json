@@ -1,0 +1,41 @@
+{
+  "unity": "6000.3.23f1",
+  "sbp": "2.6.2",
+  "testsAndPlayers": {
+    "builtin-PlayMode-reload-On": 45,
+    "builtin-EditMode-reload-On": 59,
+    "builtin-PlayMode-reload-Off": 45,
+    "builtin-EditMode-reload-Off": 59,
+    "sbp-PlayMode-reload-On": 45,
+    "sbp-EditMode-reload-On": 59,
+    "sbp-PlayMode-reload-Off": 45,
+    "sbp-EditMode-reload-Off": 59,
+    "Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    }
+  },
+  "totalTests": 416,
+  "verificationRoot": "TestResults\\sbp-pass",
+  "commands": "python scripts/verify_unity_assets.py TestResults/sbp-verification-new --backend both --baseline-fixture --players",
+  "content": {
+    "builtin": {
+      "bundles": 7,
+      "addresses": 6,
+      "ordinarySourceGuids": 7,
+      "duplicates": 0
+    },
+    "sbp": {
+      "bundles": 7,
+      "addresses": 6,
+      "ordinarySourceGuids": 7,
+      "duplicates": 0
+    }
+  },
+  "archiveSha256": "ea277af3af84a33aec2b08b38508fd809dc843a2f603fed0385048f14032bca6",
+  "archiveBytes": 1773518
+}
