@@ -8,12 +8,8 @@ namespace AiNative.UnityCore.Assets.Editor
 {
     internal static class ResourceCollection
     {
-        internal static (UnityEngine.Object Asset, string Address)[] Collect(ResourceGroup group, ResourceAddressMode mode)
+        internal static (UnityEngine.Object Asset, string Address)[] Collect(ResourceGroup group, ResourceAddressMode mode, List<string> excluded)
         {
-            if (!Enum.IsDefined(typeof(ResourceAddressMode), mode))
-            {
-                throw new AssetException("InvalidAddressMode", "Unknown address mode: " + group.Id);
-            }
             var entries = new SortedDictionary<string, (UnityEngine.Object Asset, string Address)>(StringComparer.Ordinal);
             foreach (var item in group.Assets)
             {
@@ -30,7 +26,12 @@ namespace AiNative.UnityCore.Assets.Editor
                 foreach (string assetPath in AssetDatabase.FindAssets("", new[] { path }).Select(AssetDatabase.GUIDToAssetPath).OrderBy(x => x, StringComparer.Ordinal))
                 {
                     // Explicit entries and overlapping folders collect each source only once.
-                    if (!AssetBuildPlan.IsPackable(assetPath) || entries.ContainsKey(assetPath)) { continue; }
+                    if (!AssetBuildPlan.IsPackable(assetPath))
+                    {
+                        if (!AssetDatabase.IsValidFolder(assetPath)) { excluded.Add(assetPath); }
+                        continue;
+                    }
+                    if (entries.ContainsKey(assetPath)) { continue; }
                     entries.Add(assetPath, (AssetDatabase.LoadMainAssetAtPath(assetPath), Address(group, assetPath, mode)));
                 }
             }

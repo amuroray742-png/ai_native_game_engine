@@ -46,7 +46,8 @@ namespace AiNative.UnityCore.Assets.Editor
         {
             var window = GetWindow<AssetPackingWindow>("Asset Packing");
             window._text = "Public addresses\n" + string.Join("\n", System.Linq.Enumerable.Select(plan.Addresses, x => x.Address + " → " + x.Path + " → " + x.Bundle))
-                + "\n\nAll resource owners\n" + string.Join("\n", System.Linq.Enumerable.Select(plan.Owners, x => x.Key + " → " + x.Value));
+                + "\n\nAll resource owners\n" + string.Join("\n", System.Linq.Enumerable.Select(plan.Owners, x => x.Key + " → " + x.Value))
+                + "\n\nExcluded sources\n" + string.Join("\n", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Distinct(plan.Excluded), x => x, StringComparer.Ordinal));
         }
         private void OnGUI() { _scroll = EditorGUILayout.BeginScrollView(_scroll); EditorGUILayout.TextArea(_text); EditorGUILayout.EndScrollView(); }
     }

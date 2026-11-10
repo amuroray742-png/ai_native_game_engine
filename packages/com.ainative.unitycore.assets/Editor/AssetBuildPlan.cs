@@ -18,23 +18,30 @@ namespace AiNative.UnityCore.Assets.Editor
         {
             if (settings == null) { throw new ArgumentNullException(nameof(settings)); }
             if (!Enum.IsDefined(typeof(BundleNamingMode), settings.BundleNaming)) { throw new AssetException("InvalidNamingMode", "Unknown bundle naming mode."); }
+            if (!Enum.IsDefined(typeof(ResourceAddressMode), settings.AddressMode)) { throw new AssetException("InvalidAddressMode", "Unknown global address mode."); }
             var result = new AssetBuildPlan();
             var groups = new Dictionary<string, ResourceGroup>(StringComparer.Ordinal);
             var explicitOwners = new Dictionary<string, string>(StringComparer.Ordinal);
             var references = new Dictionary<string, SortedSet<string>>(StringComparer.Ordinal);
             var addresses = new List<AssetEntry>();
-            var usedAddresses = new HashSet<string>(StringComparer.Ordinal);
+            var usedAddresses = new Dictionary<string, string>(StringComparer.Ordinal);
             var sceneGroups = new HashSet<string>();
             foreach (var group in settings.Groups.OrderBy(x => x.Id, StringComparer.Ordinal))
             {
                 if (string.IsNullOrWhiteSpace(group.Id) || !groups.TryAdd(group.Id, group)) { throw new AssetException("InvalidGroup", "Empty or duplicate group ID."); }
                 bool? scene = null;
-                foreach (var item in ResourceCollection.Collect(group, settings.AddressMode))
+                foreach (var item in ResourceCollection.Collect(group, settings.AddressMode, result.Excluded))
                 {
                     string path = AssetDatabase.GetAssetPath(item.Asset);
-                    if (string.IsNullOrWhiteSpace(item.Address) || !usedAddresses.Add(item.Address) || !IsPackable(path)
-                        || AssetDatabase.IsSubAsset(item.Asset) || !explicitOwners.TryAdd(path, group.Id))
-                    { throw new AssetException("InvalidEntry", "Address/resource missing, duplicated or not a main asset.", item.Address); }
+                    if (string.IsNullOrWhiteSpace(item.Address) || !IsPackable(path) || AssetDatabase.IsSubAsset(item.Asset))
+                    { throw new AssetException("InvalidEntry", "Missing or unsupported main asset in group " + group.Id + ": " + path, item.Address); }
+                    if (explicitOwners.TryGetValue(path, out string previousGroup))
+                    { throw new AssetException("InvalidEntry", "Resource " + path + " is collected by both groups " + previousGroup + " and " + group.Id, item.Address); }
+                    string source = "group " + group.Id + ": " + path;
+                    if (usedAddresses.TryGetValue(item.Address, out string previousSource))
+                    { throw new AssetException("InvalidEntry", "Address collision between " + previousSource + " and " + source, item.Address); }
+                    explicitOwners.Add(path, group.Id);
+                    usedAddresses.Add(item.Address, source);
                     bool isScene = path.EndsWith(".unity", StringComparison.OrdinalIgnoreCase);
                     if (scene.HasValue && scene != isScene) { throw new AssetException("MixedSceneGroup", "Scene and ordinary assets must use separate groups."); }
                     scene = isScene;
@@ -64,7 +71,8 @@ namespace AiNative.UnityCore.Assets.Editor
                     // Unity normalizes physical AssetBundle names to lowercase.
                     name = ((prefix == "shared_" ? "share_" : prefix) + string.Join("_", labels) + ".bundle").ToLowerInvariant();
                 }
-                if (names.TryGetValue(name, out string previous) && previous != identity) { throw new AssetException("BundleNameCollision", name); }
+                if (names.TryGetValue(name, out string previous) && previous != identity)
+                { throw new AssetException("BundleNameCollision", name + " maps to different group sets: " + previous + " and " + identity); }
                 names[name] = identity;
                 return name;
             }
@@ -114,7 +122,7 @@ namespace AiNative.UnityCore.Assets.Editor
         {
             if (!(path.StartsWith("Assets/", StringComparison.Ordinal) || path.StartsWith("Packages/", StringComparison.Ordinal)) || AssetDatabase.IsValidFolder(path)) { return false; }
             var type = AssetDatabase.GetMainAssetTypeAtPath(path);
-            return type != null && type != typeof(MonoScript) && !path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+            return type != null && type != typeof(DefaultAsset) && type != typeof(MonoScript) && !path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
                 && !path.EndsWith(".asmdef", StringComparison.OrdinalIgnoreCase) && !path.EndsWith(".asmref", StringComparison.OrdinalIgnoreCase);
         }
     }

@@ -48,6 +48,60 @@ namespace AiNative.UnityCore.Assets.Tests
         }
 
         [Test]
+        public void UnknownFileIsNotCollectedAsBundleSource()
+        {
+            string path = _root + "/notes.unsupported";
+            File.WriteAllText(path, "not a Unity imported resource");
+            AssetDatabase.ImportAsset(path);
+            Assert.AreEqual(typeof(DefaultAsset), AssetDatabase.GetMainAssetTypeAtPath(path));
+            Assert.IsFalse(AssetBuildPlan.Create(_settings).Owners.ContainsKey(path));
+            string text = _root + "/readme.txt";
+            File.WriteAllText(text, "a supported TextAsset");
+            AssetDatabase.ImportAsset(text);
+            string output = Path.GetFullPath("BuildArtifacts/FolderFilter-" + Guid.NewGuid().ToString("N"));
+            var catalog = AssetBuilder.Build(_settings, output);
+            Assert.IsTrue(catalog.Assets.Any(x => x.Path == text));
+            Assert.IsFalse(catalog.Assets.Any(x => x.Path == path));
+            StringAssert.Contains(path, File.ReadAllText(Path.Combine(output, "excluded.txt")));
+            _group.Assets = new[] { new ResourceAddress { Asset = AssetDatabase.LoadMainAssetAtPath(path) } };
+            Assert.AreEqual("InvalidEntry", Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings)).Code);
+        }
+
+        [Test]
+        public void ExtensionRemovalCollisionReportsBothSourcePaths()
+        {
+            string text = _root + "/A.txt";
+            File.WriteAllText(text, "same address, different source GUID");
+            AssetDatabase.ImportAsset(text);
+            var error = Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings));
+            Assert.AreEqual("InvalidEntry", error.Code);
+            Assert.AreEqual(_root + "/A", error.Address);
+            StringAssert.Contains(text, error.Message);
+            StringAssert.Contains(_root + "/A.asset", error.Message);
+        }
+
+        [Test]
+        public void FolderOrderAndMovesRecomputeDeterministicAddresses()
+        {
+            _group.Folders = new[] { AssetDatabase.LoadMainAssetAtPath(_root + "/Nested"), AssetDatabase.LoadMainAssetAtPath(_root) };
+            var before = AssetBuildPlan.Create(_settings);
+            Array.Reverse(_group.Folders);
+            CollectionAssert.AreEqual(before.Owners, AssetBuildPlan.Create(_settings).Owners);
+            Assert.AreEqual("", AssetDatabase.MoveAsset(_root + "/Nested/B.asset", _root + "/Moved.asset"));
+            var moved = AssetBuildPlan.Create(_settings);
+            CollectionAssert.AreEquivalent(new[] { _root + "/A", _root + "/Moved" }, moved.Addresses.Select(x => x.Address));
+            Assert.AreEqual(before.Owners[_root + "/Nested/B.asset"], moved.Owners[_root + "/Moved.asset"]);
+        }
+
+        [Test]
+        public void EmptyConfigurationStillValidatesGlobalMode()
+        {
+            _settings.Groups = Array.Empty<ResourceGroup>();
+            _settings.AddressMode = (ResourceAddressMode)99;
+            Assert.AreEqual("InvalidAddressMode", Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings)).Code);
+        }
+
+        [Test]
         public void GlobalModeAppliesToAllGroupsAndIgnoresLegacyManualAddresses()
         {
             // Old serialized group modes and addresses must not override the new global policy.
@@ -67,7 +121,10 @@ namespace AiNative.UnityCore.Assets.Tests
             Assert.AreEqual("InvalidEntry", Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings)).Code);
             _settings.AddressMode = ResourceAddressMode.FullPath;
             _settings.Groups = new[] { _group, new ResourceGroup { Id = "B", Folders = _group.Folders } };
-            Assert.AreEqual("InvalidEntry", Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings)).Code);
+            var error = Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings));
+            Assert.AreEqual("InvalidEntry", error.Code);
+            StringAssert.Contains("stable-id", error.Message);
+            StringAssert.Contains("B", error.Message);
         }
 
         [Test]
@@ -78,6 +135,38 @@ namespace AiNative.UnityCore.Assets.Tests
             _settings.AddressMode = ResourceAddressMode.FullPath;
             _group.Folders = new[] { AssetDatabase.LoadMainAssetAtPath(_root + "/A.asset") };
             Assert.AreEqual("InvalidFolder", Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings)).Code);
+        }
+
+        [Test]
+        public void SceneDependencyNameCannotAliasAnotherSharedGroupSet()
+        {
+            var first = AssetDatabase.LoadAssetAtPath<Texture2D>(_root + "/A.asset");
+            Material Material(string name, Texture2D texture)
+            {
+                var material = new Material(Shader.Find("Unlit/Texture")) { mainTexture = texture };
+                AssetDatabase.CreateAsset(material, _root + "/" + name + ".mat");
+                return material;
+            }
+            var a = Material("first", first);
+            var b = Material("second", first);
+            string path = _root + "/Content.unity";
+            // Copy the saved fixture so this test never replaces or saves the user's open scene.
+            Assert.IsTrue(AssetDatabase.CopyAsset("Assets/Probe/Content.unity", path));
+            AssetDatabase.SaveAssets();
+            // A directory with scenes and ordinary assets must still respect the scene-only boundary.
+            Assert.AreEqual("MixedSceneGroup", Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings)).Code);
+            _settings.Groups = new[] {
+                new ResourceGroup { Id = "A", Assets = new[] { new ResourceAddress { Asset = a } } },
+                new ResourceGroup { Id = "B", Assets = new[] { new ResourceAddress { Asset = b } } },
+                new ResourceGroup { Id = "A_B", Assets = new[] { new ResourceAddress { Asset = AssetDatabase.LoadMainAssetAtPath(path) } } }
+            };
+            _settings.BundleNaming = BundleNamingMode.GroupName;
+            var failure = Assert.Throws<AssetException>(() => AssetBuildPlan.Create(_settings));
+            Assert.AreEqual("BundleNameCollision", failure.Code);
+            StringAssert.Contains("share_a_b.bundle", failure.Message);
+            // Stable hashes distinguish the single scene group from the two-group reference set.
+            _settings.BundleNaming = BundleNamingMode.StableHash;
+            Assert.DoesNotThrow(() => AssetBuildPlan.Create(_settings));
         }
 
         [Test]

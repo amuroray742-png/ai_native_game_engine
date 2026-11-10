@@ -70,3 +70,11 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 本次验证：Unity 6000.3.23f1 隔离工程中 EditMode 42/42、PlayMode 45/45 通过，包含可读包名真实构建、递归收集、单项覆盖、跨组归属与共享拼接冲突。首次实验揭示 Unity 自动小写 Bundle 名，修复后全量通过；原始 XML 和源码指纹保存在本机 `TestResults/assets-collection-20261110`。独立只读审查完成。本次未重新构建 Player 或重复双 Domain Reload 矩阵，沿用先前记录仅作历史证据。
 
 全局地址规则调整后重新构建真实内容，EditMode 43/43、PlayMode 45/45 通过；新增旧手填字段/组级模式被忽略与多组统一切换测试，独立审查完成。原始日志、XML、内容和源码指纹在本机 `TestResults/assets-global-address-20261110`。本次未重跑 Player 构建和双 Domain Reload 矩阵。
+
+## 目录、自动地址与共享命名复审（2026-11-10）
+
+复现并修复两处遗漏：目录扫描原先会将未知扩展名导入的 `DefaultAsset` 当作可打包资源，现在自动收集跳过它，显式条目引用则报 `InvalidEntry`，合法 TextAsset 仍参与真实构建；空组配置原先绕过全局地址模式校验，现在统一在计划入口校验。
+
+冲突诊断现包含两边的源路径、组 ID 或共享集合，保留原有错误码。补充回归覆盖：去扩展名导致的地址碰撞、重叠目录重排、文件移动后地址重新生成、场景与普通资源混组、单场景组 `A_B` 的外部依赖与 `A/B` 共享包的名称碰撞。后者使用可读名称必须拒绝，哈希模式可区分，未引入静默合并或名称后缀回退。独立只读复审已完成。
+
+最终代码在 Unity 6000.3.23f1 隔离工程验证：EditMode 48/48、PlayMode 45/45 通过。目录排除文件在分析窗口及 `excluded.txt` 可见。失败复现、测试准备失败现场、最终 XML 和源码指纹保存在本机 `TestResults/assets-collection-audit-20261110`，已核对被测副本与提交源码一致。本次未重跑 Player 构建、其他平台或双 Domain Reload 矩阵。
