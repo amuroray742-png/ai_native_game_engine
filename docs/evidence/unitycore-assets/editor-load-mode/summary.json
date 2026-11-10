@@ -1,0 +1,27 @@
+{
+  "sbp-PlayMode-reload-On": 45,
+  "sbp-EditMode-reload-On": 91,
+  "sbp-PlayMode-reload-Off": 45,
+  "sbp-EditMode-reload-Off": 91,
+  "sbp-Mono": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "sbp-Il2Cpp": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "unity": "6000.3.23f1",
+  "sbp": "2.6.2",
+  "final_targeted_mode_tests": {
+    "DomainReloadOff": 5,
+    "DomainReloadOn": 5
+  },
+  "independent_review": "Passed; explicit missing bundle directory negative case added and verified.",
+  "scope": "Full SBP regression and Players used initial implementation; final test and Inspector help additions followed by focused mode regressions. Runtime/factory/example code unchanged between runs.",
+  "not_executed": [
+    "Inspector mouse interaction",
+    "Builtin backend rerun (no backend code changed)"
+  ],
+  "archive_sha256": "4f145d1c21c136768f0f4265fc2c69825c1e2d07b9ec1e5398aa2786ea318e69"
+}

@@ -8,8 +8,31 @@ using UnityEngine.SceneManagement;
 
 namespace AiNative.UnityCore.Assets.Editor
 {
+    public enum EditorAssetLoadMode { AssetBundle = 0, AssetDatabase = 1 }
+
     public static class EditorAssets
     {
+        /// <summary>Captures the configuration's Editor mode when creating a module; changing it does not switch a running module.</summary>
+        public static AssetsModule CreateConfigured(AssetGroups groups, string contentRoot = null)
+        {
+            if (groups == null) { throw new ArgumentNullException(nameof(groups)); }
+            return Create(groups, groups.EditorLoadMode, contentRoot);
+        }
+
+        /// <summary>Explicit Editor mode selection. Bundle mode does not need groups; direct mode requires them and ignores contentRoot.</summary>
+        public static AssetsModule Create(AssetGroups groups, EditorAssetLoadMode mode, string contentRoot = null)
+        {
+            switch (mode)
+            {
+                case EditorAssetLoadMode.AssetBundle: return new AssetsModule(contentRoot);
+                case EditorAssetLoadMode.AssetDatabase:
+                    if (groups == null) { throw new ArgumentNullException(nameof(groups)); }
+                    return Create(groups);
+                default: throw new AssetException("InvalidEditorLoadMode", "Unknown Editor resource load mode: " + mode);
+            }
+        }
+
+        /// <summary>Legacy direct-loading entry point; always uses AssetDatabase regardless of the configuration mode.</summary>
         public static AssetsModule Create(AssetGroups groups)
         {
             return new AssetsModule(() =>

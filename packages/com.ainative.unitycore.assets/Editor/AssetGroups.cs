@@ -9,6 +9,8 @@ namespace AiNative.UnityCore.Assets.Editor
         [Tooltip("Version used by the next build. Incremented and saved only after publication.")]
         public int Version = 1;
         public string OutputDirectory = "{projectDir}/BundleBuildOutput/{version}";
+        [Tooltip("Editor module creation only. AssetBundle uses deployed content; AssetDatabase reads source assets. Player always uses bundles.")]
+        public EditorAssetLoadMode EditorLoadMode = EditorAssetLoadMode.AssetBundle;
         public AssetBuildBackend BuildBackend = AssetBuildBackend.ScriptableBuildPipeline;
         public ResourceAddressMode AddressMode = ResourceAddressMode.FullPath;
         public BundleNamingMode BundleNaming = BundleNamingMode.StableHash;

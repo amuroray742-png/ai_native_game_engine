@@ -28,6 +28,7 @@ namespace AiNative.UnityCore.Assets.Editor
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+            EditorGUILayout.HelpBox("Editor Load Mode is used by EditorAssets.CreateConfigured at module creation. Restart Play to apply changes. AssetDatabase needs no build; Player always uses bundles.", MessageType.Info);
             var groups = (AssetGroups)target;
             EditorGUILayout.LabelField("Last published version", groups.LastBuildVersion.ToString());
             EditorGUILayout.LabelField("Last build", groups.LastBuildPath);

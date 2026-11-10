@@ -2,7 +2,9 @@
 
 Unity 6000.3.23f1，Windows x64，直接引用仓库中的 UnityCore 与 Assets 包。打开 `Assets/Bootstrap.unity`，示例显示 A/B 两个共享材质、贴图的对象；点击 **Run cleanup checks** 执行池、场景、重启与关闭检查。`Assets/ResourceGroups.asset` 是可编辑配置。
 
-首次运行先构建内容（关闭这个工程的 Editor 后执行）：
+Editor 中选中 `Assets/ResourceGroups.asset`，通过 **Editor Load Mode** 切换：`AssetDatabase` 直接读取源资源，无需构建或部署；默认的 `AssetBundle` 读取已部署内容。示例启动时调用 `EditorAssets.CreateConfigured(groups)`，切换后需退出并重新进入 Play。此开关不改变打包后端，Player 始终加载 Bundle。
+
+以默认 Bundle 模式首次运行先构建内容（关闭这个工程的 Editor 后执行）：
 
 ```powershell
 unity run examples/unity/AssetsDemo -- -executeMethod AssetsDemoSetup.BuildContent
