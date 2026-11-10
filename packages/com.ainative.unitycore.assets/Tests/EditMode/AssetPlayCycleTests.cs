@@ -26,7 +26,7 @@ namespace AiNative.UnityCore.Assets.Tests
                 var module = EditorAssets.Create(groups);
                 Core.Inst.RegisterModule(module);
                 await Core.Inst.RunAsync();
-                var lease = await module.LoadAsync<GameObject>("a");
+                var lease = await module.LoadAsync<GameObject>("Assets/Probe/A");
                 var source = lease.Value;
                 await Core.Inst.CloseAsync();
                 Assert.IsTrue(source != null);
@@ -56,11 +56,11 @@ namespace AiNative.UnityCore.Assets.Tests
             var module = new AssetsModule();
             Core.Inst.RegisterModule(module);
             await Core.Inst.RunAsync();
-            var pool = module.CreatePool("a", new AssetPoolOptions(1));
+            var pool = module.CreatePool("Assets/Probe/A", new AssetPoolOptions(1));
             await pool.PrewarmAsync(1);
             await pool.RentAsync();
-            await module.InstantiateAsync("b");
-            await module.LoadSceneAsync("scene");
+            await module.InstantiateAsync("Assets/Probe/B");
+            await module.LoadSceneAsync("Assets/Probe/Content");
         }
     }
 }

@@ -30,7 +30,7 @@ namespace AiNative.UnityCore.Assets.Tests
                 {
                     var material = new Material(Shader.Find("Unlit/Texture")) { mainTexture = texture };
                     AssetDatabase.CreateAsset(material, root + "/" + id + ".mat");
-                    return new ResourceAddress { Address = id, Asset = material };
+                    return new ResourceAddress { Asset = material };
                 }
                 settings.Groups = new[] {
                     new ResourceGroup { Id = "A", Assets = new[] { Entry("a-ab", ab), Entry("a-ac", ac), Entry("a-abc", abc) } },
@@ -40,7 +40,7 @@ namespace AiNative.UnityCore.Assets.Tests
                 AssetDatabase.SaveAssets();
                 var plan = AssetBuildPlan.Create(settings);
                 Assert.AreEqual(3, new[] { plan.Owners[root + "/ab.asset"], plan.Owners[root + "/ac.asset"], plan.Owners[root + "/abc.asset"] }.Distinct().Count());
-                settings.Groups = settings.Groups.Concat(new[] { new ResourceGroup { Id = "Explicit", Assets = new[] { new ResourceAddress { Address = "common", Asset = abc } } } }).ToArray();
+                settings.Groups = settings.Groups.Concat(new[] { new ResourceGroup { Id = "Explicit", Assets = new[] { new ResourceAddress { Asset = abc } } } }).ToArray();
                 var explicitPlan = AssetBuildPlan.Create(settings);
                 StringAssert.StartsWith("group_", explicitPlan.Owners[root + "/abc.asset"]);
                 Array.Reverse(settings.Groups);
@@ -61,7 +61,7 @@ namespace AiNative.UnityCore.Assets.Tests
                 AssetDatabase.CreateAsset(a, root + "/a.asset");
                 AssetDatabase.CreateAsset(b, root + "/b.asset");
                 ResourceGroup Group(string id, UnityEngine.Object asset) => new ResourceGroup { Id = id,
-                    Assets = new[] { new ResourceAddress { Address = id, Asset = asset } } };
+                    Assets = new[] { new ResourceAddress { Asset = asset } } };
                 a.Groups = new[] { Group("to-b", b) };
                 b.Groups = new[] { Group("to-a", a) };
                 EditorUtility.SetDirty(a); EditorUtility.SetDirty(b); AssetDatabase.SaveAssets();
@@ -102,7 +102,7 @@ namespace AiNative.UnityCore.Assets.Tests
                     AssetDatabase.AddObjectToAsset(sprite, source);
                 }
                 AssetDatabase.SaveAssets();
-                settings.Groups = new[] { new ResourceGroup { Id = "Sprites", Assets = new[] { new ResourceAddress { Address = "sprite", Asset = source } } } };
+                settings.Groups = new[] { new ResourceGroup { Id = "Sprites", Assets = new[] { new ResourceAddress { Asset = source } } } };
                 Assert.Throws<AssetException>(() => AssetBuildPlan.Create(settings));
             }
             finally { AssetDatabase.DeleteAsset(path); UnityEngine.Object.DestroyImmediate(settings); }

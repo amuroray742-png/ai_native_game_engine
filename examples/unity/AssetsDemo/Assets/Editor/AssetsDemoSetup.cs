@@ -51,9 +51,10 @@ public static class AssetsDemoSetup
         cube.GetComponent<Renderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(root + "/SharedMaterial.mat");
         EditorSceneManager.SaveScene(content, root + "/Content.unity");
         EditorSceneManager.CloseScene(content, true);
-        ResourceGroup Group(string id, string address, string path) => new ResourceGroup { Id = id, Assets = new[] { new ResourceAddress { Address = address, Asset = AssetDatabase.LoadMainAssetAtPath(path) } } };
-        settings.Groups = new[] { Group("A", "a", root + "/A.prefab"), Group("B", "b", root + "/B.prefab"), Group("Data", "data", root + "/Data.asset"),
-            Group("Scene", "scene", root + "/Content.unity"), Group("Audio", "audio", root + "/Tone.wav"), Group("Sprites", "sprites", root + "/SpriteSet.asset") };
+        ResourceGroup Group(string id, string path) => new ResourceGroup { Id = id, Assets = new[] { new ResourceAddress { Asset = AssetDatabase.LoadMainAssetAtPath(path) } } };
+        settings.AddressMode = ResourceAddressMode.FullPath;
+        settings.Groups = new[] { Group("A", root + "/A.prefab"), Group("B", root + "/B.prefab"), Group("Data", root + "/Data.asset"),
+            Group("Scene", root + "/Content.unity"), Group("Audio", root + "/Tone.wav"), Group("Sprites", root + "/SpriteSet.asset") };
         EditorUtility.SetDirty(settings);
         var bootstrap = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
         var host = new GameObject("Assets Demo");

@@ -23,6 +23,7 @@ namespace AiNative.UnityCore.Assets.Editor
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+            EditorGUILayout.HelpBox("Folders are collected recursively. The global Address Mode applies to every group and asset. Name defaults to Id. Validate to preview addresses and bundle names.", MessageType.Info);
             if (GUILayout.Button("Validate and inspect packing"))
             {
                 try { AssetPackingWindow.Show(AssetBuildPlan.Create((AssetGroups)target)); }
@@ -44,7 +45,9 @@ namespace AiNative.UnityCore.Assets.Editor
         internal static void Show(AssetBuildPlan plan)
         {
             var window = GetWindow<AssetPackingWindow>("Asset Packing");
-            window._text = string.Join("\n", System.Linq.Enumerable.Select(plan.Owners, x => x.Key + " → " + x.Value));
+            window._text = "Public addresses\n" + string.Join("\n", System.Linq.Enumerable.Select(plan.Addresses, x => x.Address + " → " + x.Path + " → " + x.Bundle))
+                + "\n\nAll resource owners\n" + string.Join("\n", System.Linq.Enumerable.Select(plan.Owners, x => x.Key + " → " + x.Value))
+                + "\n\nExcluded sources\n" + string.Join("\n", System.Linq.Enumerable.OrderBy(System.Linq.Enumerable.Distinct(plan.Excluded), x => x, StringComparer.Ordinal));
         }
         private void OnGUI() { _scroll = EditorGUILayout.BeginScrollView(_scroll); EditorGUILayout.TextArea(_text); EditorGUILayout.EndScrollView(); }
     }

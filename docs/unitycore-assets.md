@@ -12,7 +12,7 @@
 
 ## 零冗余契约
 
-一次受管 Bundle 构建集合内，可独立打包的同一源 GUID 只有一个物理包所有者；同文件子资源整体归属。地址是稳定逻辑入口，与物理分包分离。显式归属优先，否则按原始引用组集合提取共享包。单一场景组的外部依赖也单独进入普通包。不同 GUID 内容相同不自动合并。
+一次受管 Bundle 构建集合内，可独立打包的同一源 GUID 只有一个物理包所有者；同文件子资源整体归属。地址由全局规则从源路径或组名/资源名生成，与物理分包分离；相关路径或名称变化时地址也变化。显式归属优先，否则按原始引用组集合提取共享包。单一场景组的外部依赖也单独进入普通包。不同 GUID 内容相同不自动合并。
 
 构建前生成完整依赖闭包和归属，检测循环。构建后通过 BuildReport.packedAssets 的 shortPath 与 GetFiles 文件名唯一匹配，定位实际 Bundle；Unity 6000.3 不再允许使用旧的 packed.file 索引。实际依赖与计划比对，源资产重复或证据缺失阻止发布。
 
@@ -60,3 +60,21 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 证据：[机器摘要](evidence/unitycore-assets/summary.json)、[源码指纹](evidence/unitycore-assets/sources.json)、[Player 文件指纹](evidence/unitycore-assets/player-files.json)、[原始证据包](evidence/unitycore-assets/assets-evidence.zip)、[Mono 截图](evidence/unitycore-assets/Mono-smoke.png)、[IL2CPP 截图](evidence/unitycore-assets/Il2Cpp-smoke.png)。证据包包含原始 BuildReport、产物与归属表、负例报告、四份 NUnit XML、日志、构建设置及复现脚本。Player 可执行文件保留在本机 `TestResults/assets-final-20261109-r3/workspace/TestResults/assets-players`，不将大体积二进制纳入源码仓库。
 
 验证边界：这里只证明本次受管构建集合内的源资源唯一归属，不证明 Player 内置数据与 Bundle 的全局去重，也不把场景内嵌对象算作独立源资源。未执行其他平台、远端更新、长期压力或性能预算验收；未接入 CI、分析器或自动格式检查。诊断的 `fileBytes` 是文件大小，`objectMemoryBytes` 是 Unity Profiler 对该资源对象的测量值，不代表整个 Bundle 或其依赖的完整内存成本。
+
+## 目录与自动命名扩展（2026-11-10）
+
+资源组现支持递归目录收集、全局选择自动地址（去扩展名全路径、组名/资源名），所有组和资源使用同一规则。全局 Bundle 命名可选择原哈希模式或可读名称模式，后者共享包为 `share_a_b.bundle`。旧序列化配置的地址规则默认使用全路径，原手填地址与组级模式不再生效；需重建内容并迁移调用处。哈希名称默认保持不变。完整使用方式与冲突规则见 [包说明](../packages/com.ainative.unitycore.assets/README.md)。本次只扩展 Editor 收集与构建配置，不改变运行时所有权和取消协议。
+
+可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。
+
+本次验证：Unity 6000.3.23f1 隔离工程中 EditMode 42/42、PlayMode 45/45 通过，包含可读包名真实构建、递归收集、单项覆盖、跨组归属与共享拼接冲突。首次实验揭示 Unity 自动小写 Bundle 名，修复后全量通过；原始 XML 和源码指纹保存在本机 `TestResults/assets-collection-20261110`。独立只读审查完成。本次未重新构建 Player 或重复双 Domain Reload 矩阵，沿用先前记录仅作历史证据。
+
+全局地址规则调整后重新构建真实内容，EditMode 43/43、PlayMode 45/45 通过；新增旧手填字段/组级模式被忽略与多组统一切换测试，独立审查完成。原始日志、XML、内容和源码指纹在本机 `TestResults/assets-global-address-20261110`。本次未重跑 Player 构建和双 Domain Reload 矩阵。
+
+## 目录、自动地址与共享命名复审（2026-11-10）
+
+复现并修复两处遗漏：目录扫描原先会将未知扩展名导入的 `DefaultAsset` 当作可打包资源，现在自动收集跳过它，显式条目引用则报 `InvalidEntry`，合法 TextAsset 仍参与真实构建；空组配置原先绕过全局地址模式校验，现在统一在计划入口校验。
+
+冲突诊断现包含两边的源路径、组 ID 或共享集合，保留原有错误码。补充回归覆盖：去扩展名导致的地址碰撞、重叠目录重排、文件移动后地址重新生成、场景与普通资源混组、单场景组 `A_B` 的外部依赖与 `A/B` 共享包的名称碰撞。后者使用可读名称必须拒绝，哈希模式可区分，未引入静默合并或名称后缀回退。独立只读复审已完成。
+
+最终代码在 Unity 6000.3.23f1 隔离工程验证：EditMode 48/48、PlayMode 45/45 通过。目录排除文件在分析窗口及 `excluded.txt` 可见。失败复现、测试准备失败现场、最终 XML 和源码指纹保存在本机 `TestResults/assets-collection-audit-20261110`，已核对被测副本与提交源码一致。本次未重跑 Player 构建、其他平台或双 Domain Reload 矩阵。

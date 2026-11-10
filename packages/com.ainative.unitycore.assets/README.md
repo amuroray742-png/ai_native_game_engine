@@ -7,7 +7,7 @@ var assets = new AssetsModule(); // StreamingAssets/AiNativeAssets
 Core.Inst.RegisterModule(assets);
 await Core.Inst.RunAsync();
 var screen = assets.CreateScope("inventory");
-var instance = await screen.InstantiateAsync("inventory-panel");
+var instance = await screen.InstantiateAsync("Assets/UI/InventoryPanel");
 // Closing the owner destroys its instances and drains pending operations.
 await screen.CloseAsync();
 await Core.Inst.CloseAsync();
@@ -19,7 +19,7 @@ Normal instance cleanup waits until all component destruction callbacks have com
 
 ## Resource authoring
 
-Create **AI Native → Assets → Resource Groups**. Each group has a stable ID and main-asset entries with exact case-sensitive addresses. Scene groups contain scenes only. The Inspector validates and displays packing or builds Windows bundles into a new directory. Addresses remain stable when assets move. Implicit dependencies have no public address.
+Create **AI Native → Assets → Resource Groups**. Each group has a stable ID and main-asset entries or folders. One global address mode generates case-sensitive addresses for every entry. Scene groups contain scenes only. The Inspector validates and displays packing or builds Windows bundles into a new directory. Full-path addresses change when assets move; group/name addresses change when the group or file name changes. Implicit dependencies have no public address.
 
 Explicit ownership wins. Otherwise dependencies referenced by multiple original groups are grouped by that sorted group set into deterministic shared bundles. Scene external dependencies always go into ordinary bundles. Cycles fail with a dependency chain. Sprite and other subasset names must be unique per exact type within a source file.
 
@@ -40,3 +40,24 @@ Scene loading is Additive and automatically activates. `AssetScene.SetActive` se
 Editor-only `EditorAssets.Create(groups)` uses AssetDatabase with the same ownership API. It never destroys source assets. Use real bundles for lifetime and Player acceptance. `AssetDiagnosticsWindow.Inspect(assets)` displays live ownership; `GetDiagnostics()` returns copied read-only information. File sizes are not runtime memory measurements.
 
 See the repository's `docs/unitycore-assets.md` for acceptance evidence and current limits. No remote updates, content deduplication across distinct GUIDs, or cross-platform compatibility is promised.
+
+### 目录收集、地址和 Bundle 命名
+
+`AssetGroups.BundleNaming` 对本次配置内所有包生效：`StableHash` 保留旧的 `group_<sha>.bundle` / `shared_<sha>.bundle`；`GroupName` 使用 `group_a.bundle`，A、B 共享依赖使用 `share_a_b.bundle`。共享名称按组名称的 Ordinal 顺序排列。`ResourceGroup.Name` 为空时沿用稳定 `Id`；可读包名允许字母、数字、下划线、连字符，大小写冲突及拼接歧义均拒绝构建。不要通过修改 Id 来重命名显示名称。
+
+每组的 `Folders` 可拖入目录，验证、Editor 初始化和构建时递归收集最新内容；目录本身、脚本、程序集定义及 Unity 无法识别的 `DefaultAsset` 文件不收集；可导入的 TextAsset（如 `.txt`）正常收集。显式配置不支持的文件则报错。目录中被跳过的非目录文件列在分析窗口的 Excluded sources 和构建报告 `excluded.txt` 中。重叠目录在同组内去重，同一文件跨组收集仍报重复归属。目录里的场景与普通资源不能混组，沿用原有场景边界。
+
+`AssetGroups.AddressMode` 是全局配置，统一应用于所有组、目录和单项资源，仅提供以下两种模式。资源为 `Assets/Probe/A.prefab`、组名称为 A 时：
+
+| 模式 | 地址 | 调用示例 |
+| --- | --- | --- |
+| FullPath（默认） | Assets/Probe/A | `InstantiateAsync("Assets/Probe/A")` |
+| GroupAndAssetName | A/A | `InstantiateAsync("A/A")` |
+
+自动地址只去掉最后一个扩展名并保留大小写。没有手动地址或单项覆盖；不同目录的同名文件、不同扩展名产生的相同地址均报错，请调整资源名称或使用全路径模式。同组显式资源与目录重叠时只收集一次。
+
+迁移：旧的组级 AddressMode 和手填 Address 不再读取；没有全局字段的旧配置默认 FullPath。必须重新构建 catalog/Bundle 并更新调用处，运行时不会为旧地址生成别名。更改全局模式、资源路径或组名会影响公开地址。
+
+Inspector 的 `Validate and inspect packing` 可预览最终公开地址、源路径和物理 Bundle 所有权，再执行构建。可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。
+
+地址冲突报告包含两个源路径和所属组；跨组重复收集报告双方组 ID；Bundle 名冲突报告双方组集合。共享名称拼接冲突（例如场景组 A_B 的外部依赖与 A/B 共享资源）拒绝发布，可调整组名或切换 StableHash 模式。
