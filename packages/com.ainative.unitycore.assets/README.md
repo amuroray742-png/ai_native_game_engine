@@ -40,3 +40,23 @@ Scene loading is Additive and automatically activates. `AssetScene.SetActive` se
 Editor-only `EditorAssets.Create(groups)` uses AssetDatabase with the same ownership API. It never destroys source assets. Use real bundles for lifetime and Player acceptance. `AssetDiagnosticsWindow.Inspect(assets)` displays live ownership; `GetDiagnostics()` returns copied read-only information. File sizes are not runtime memory measurements.
 
 See the repository's `docs/unitycore-assets.md` for acceptance evidence and current limits. No remote updates, content deduplication across distinct GUIDs, or cross-platform compatibility is promised.
+
+### 目录收集、地址和 Bundle 命名
+
+`AssetGroups.BundleNaming` 对本次配置内所有包生效：`StableHash` 保留旧的 `group_<sha>.bundle` / `shared_<sha>.bundle`；`GroupName` 使用 `group_a.bundle`，A、B 共享依赖使用 `share_a_b.bundle`。共享名称按组名称的 Ordinal 顺序排列。`ResourceGroup.Name` 为空时沿用稳定 `Id`；可读包名允许字母、数字、下划线、连字符，大小写冲突及拼接歧义均拒绝构建。不要通过修改 Id 来重命名显示名称。
+
+每组的 `Folders` 可拖入目录，验证、Editor 初始化和构建时递归收集最新内容；目录本身、脚本和程序集定义不收集。重叠目录在同组内去重，同一文件跨组收集仍报重复归属。目录里的场景与普通资源不能混组，沿用原有场景边界。
+
+`AddressMode` 按组配置，资源 `Assets/Probe/A.prefab`、组名称 A 的对应地址如下：
+
+| 模式 | 地址 | 调用示例 |
+| --- | --- | --- |
+| FullPath | Assets/Probe/A | `InstantiateAsync("Assets/Probe/A")` |
+| GroupAndAssetName | A/A | `InstantiateAsync("A/A")` |
+| Manual | 手填 a | `InstantiateAsync("a")` |
+
+自动模式只去掉最后一个扩展名；地址保留大小写。单独配置的 `Assets` 条目可用非空 `Address` 覆盖自动值，也会覆盖同组目录收集产生的地址。手动模式需要逐条填写，不支持动态目录收集；使用目录时请切换到上述任一自动模式。不同目录的同名文件、不同扩展名产生的相同地址均报错，可用全路径模式或单资源覆盖消除冲突。自动地址会随路径或组名称变化，需稳定地址时使用手动覆盖。
+
+Inspector 的 `Validate and inspect packing` 可预览最终公开地址、源路径和物理 Bundle 所有权，再执行构建。
+
+可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。

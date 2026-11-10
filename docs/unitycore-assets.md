@@ -60,3 +60,11 @@ python scripts/verify_unity_assets.py TestResults/assets-verification-new --play
 证据：[机器摘要](evidence/unitycore-assets/summary.json)、[源码指纹](evidence/unitycore-assets/sources.json)、[Player 文件指纹](evidence/unitycore-assets/player-files.json)、[原始证据包](evidence/unitycore-assets/assets-evidence.zip)、[Mono 截图](evidence/unitycore-assets/Mono-smoke.png)、[IL2CPP 截图](evidence/unitycore-assets/Il2Cpp-smoke.png)。证据包包含原始 BuildReport、产物与归属表、负例报告、四份 NUnit XML、日志、构建设置及复现脚本。Player 可执行文件保留在本机 `TestResults/assets-final-20261109-r3/workspace/TestResults/assets-players`，不将大体积二进制纳入源码仓库。
 
 验证边界：这里只证明本次受管构建集合内的源资源唯一归属，不证明 Player 内置数据与 Bundle 的全局去重，也不把场景内嵌对象算作独立源资源。未执行其他平台、远端更新、长期压力或性能预算验收；未接入 CI、分析器或自动格式检查。诊断的 `fileBytes` 是文件大小，`objectMemoryBytes` 是 Unity Profiler 对该资源对象的测量值，不代表整个 Bundle 或其依赖的完整内存成本。
+
+## 目录与自动命名扩展（2026-11-10）
+
+资源组现支持递归目录收集、按组选择自动地址（去扩展名全路径、组名/资源名），单资源非空地址覆盖自动规则。全局 Bundle 命名可选择原哈希模式或可读名称模式，后者共享包为 `share_a_b.bundle`。旧序列化配置默认继续手动地址和哈希名称。完整使用方式与冲突规则见 [包说明](../packages/com.ainative.unitycore.assets/README.md)。本次只扩展 Editor 收集与构建配置，不改变运行时所有权和取消协议。
+
+可读 Bundle 文件名遵循 Unity 的规则统一转为小写，公开地址不受影响。
+
+本次验证：Unity 6000.3.23f1 隔离工程中 EditMode 42/42、PlayMode 45/45 通过，包含可读包名真实构建、递归收集、单项覆盖、跨组归属与共享拼接冲突。首次实验揭示 Unity 自动小写 Bundle 名，修复后全量通过；原始 XML 和源码指纹保存在本机 `TestResults/assets-collection-20261110`。独立只读审查完成。本次未重新构建 Player 或重复双 Domain Reload 矩阵，沿用先前记录仅作历史证据。

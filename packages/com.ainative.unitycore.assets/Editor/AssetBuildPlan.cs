@@ -17,6 +17,7 @@ namespace AiNative.UnityCore.Assets.Editor
         public static AssetBuildPlan Create(AssetGroups settings)
         {
             if (settings == null) { throw new ArgumentNullException(nameof(settings)); }
+            if (!Enum.IsDefined(typeof(BundleNamingMode), settings.BundleNaming)) { throw new AssetException("InvalidNamingMode", "Unknown bundle naming mode."); }
             var result = new AssetBuildPlan();
             var groups = new Dictionary<string, ResourceGroup>(StringComparer.Ordinal);
             var explicitOwners = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -28,7 +29,7 @@ namespace AiNative.UnityCore.Assets.Editor
             {
                 if (string.IsNullOrWhiteSpace(group.Id) || !groups.TryAdd(group.Id, group)) { throw new AssetException("InvalidGroup", "Empty or duplicate group ID."); }
                 bool? scene = null;
-                foreach (var item in group.Assets)
+                foreach (var item in ResourceCollection.Collect(group))
                 {
                     string path = AssetDatabase.GetAssetPath(item.Asset);
                     if (string.IsNullOrWhiteSpace(item.Address) || !usedAddresses.Add(item.Address) || !IsPackable(path)
@@ -47,12 +48,22 @@ namespace AiNative.UnityCore.Assets.Editor
                 }
                 if (scene == true) { sceneGroups.Add(group.Id); }
             }
-            var names = new Dictionary<string, string>();
+            var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             string BundleName(string prefix, IEnumerable<string> ids)
             {
-                string identity = string.Join("", ids.Select(x => x.Length + ":" + x));
+                string[] sortedIds = ids.OrderBy(x => x, StringComparer.Ordinal).ToArray();
+                string identity = prefix + string.Join("", sortedIds.Select(x => x.Length + ":" + x));
                 using var sha = SHA256.Create();
-                string name = prefix + BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(identity))).Replace("-", "").ToLowerInvariant() + ".bundle";
+                // Preserve the existing hash input for previously published configurations.
+                string hashInput = string.Join("", sortedIds.Select(x => x.Length + ":" + x));
+                string name = prefix + BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(hashInput))).Replace("-", "").ToLowerInvariant() + ".bundle";
+                if (settings.BundleNaming == BundleNamingMode.GroupName)
+                {
+                    string[] labels = sortedIds.Select(x => groups[x].EffectiveName).OrderBy(x => x, StringComparer.Ordinal).ToArray();
+                    foreach (string label in labels) { ResourceCollection.ValidateBundleLabel(label); }
+                    // Unity normalizes physical AssetBundle names to lowercase.
+                    name = ((prefix == "shared_" ? "share_" : prefix) + string.Join("_", labels) + ".bundle").ToLowerInvariant();
+                }
                 if (names.TryGetValue(name, out string previous) && previous != identity) { throw new AssetException("BundleNameCollision", name); }
                 names[name] = identity;
                 return name;
