@@ -91,11 +91,12 @@ namespace AiNative.UnityCore.Assets.Editor
             using var stream = File.Open(_assetPath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
         }
 
-        internal void Complete()
+        internal void Complete(string catalogSha256)
         {
             if (_completed) { throw new InvalidOperationException("Build version was already committed."); }
             _completed = true;
             _settings.Version = Version + 1;
+            _settings.RecordPublishedBuild(Destination, Version, catalogSha256);
             if (_assetPath.Length == 0) { return; }
             try
             {

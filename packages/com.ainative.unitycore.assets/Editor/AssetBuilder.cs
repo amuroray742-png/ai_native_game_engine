@@ -36,7 +36,7 @@ namespace AiNative.UnityCore.Assets.Editor
                 catalog = BuildContent(settings, session.Destination, options, session.Version);
             }
             finally { if (settings != null) { settings.hideFlags = previous; } }
-            session.Complete();
+            session.Complete(FileHash(Path.Combine(session.Destination, "catalog.json")));
             return catalog;
         }
 
@@ -137,7 +137,7 @@ namespace AiNative.UnityCore.Assets.Editor
         internal static string FileHash(string path)
         {
             using var sha = SHA256.Create();
-            using var stream = File.OpenRead(path);
+            using var stream = File.OpenRead(DeploymentFiles.IoPath(path));
             return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
         }
 

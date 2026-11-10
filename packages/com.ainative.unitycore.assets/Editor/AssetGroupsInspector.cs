@@ -7,6 +7,12 @@ namespace AiNative.UnityCore.Assets.Editor
     [CustomEditor(typeof(AssetGroups))]
     internal sealed class AssetGroupsInspector : UnityEditor.Editor
     {
+        private string _deploymentResult;
+        [MenuItem("AI Native/Assets/Copy latest build to StreamingAssets")]
+        private static void CopySelected()
+        {
+            AssetDeployment.CopyLatestToStreamingAssets(Selection.activeObject as AssetGroups);
+        }
         [MenuItem("AI Native/Assets/Validate selected groups")]
         private static void ValidateSelected()
         {
@@ -22,6 +28,15 @@ namespace AiNative.UnityCore.Assets.Editor
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+            var groups = (AssetGroups)target;
+            EditorGUILayout.LabelField("Last published version", groups.LastBuildVersion.ToString());
+            EditorGUILayout.LabelField("Last build", groups.LastBuildPath);
+            if (GUILayout.Button("Copy latest build to StreamingAssets"))
+            {
+                try { _deploymentResult = AssetDeployment.CopyLatestToStreamingAssets(groups).ToString(); }
+                catch (Exception error) { _deploymentResult = error.Message; Debug.LogException(error); }
+            }
+            if (!string.IsNullOrEmpty(_deploymentResult)) { EditorGUILayout.HelpBox(_deploymentResult, MessageType.Info); }
             try { EditorGUILayout.HelpBox("Next output: " + AssetBuildSession.ResolveOutputDirectory((AssetGroups)target), MessageType.Info); }
             catch (Exception error) { EditorGUILayout.HelpBox(error.Message, MessageType.Error); }
             EditorGUILayout.HelpBox("Folders are collected recursively. The global Address Mode applies to every group and asset. Name defaults to Id. Validate to preview addresses and bundle names.", MessageType.Info);

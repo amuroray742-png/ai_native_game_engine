@@ -114,6 +114,9 @@ namespace AiNative.UnityCore.Assets.Tests
                 Resources.UnloadAsset(_settings);
                 _settings = AssetDatabase.LoadAssetAtPath<AssetGroups>(_assetPath);
                 Assert.AreEqual(version + 1, _settings.Version);
+                Assert.AreEqual(version, _settings.LastBuildVersion);
+                Assert.AreEqual(output, DeploymentFiles.FullPath(_settings.LastBuildPath));
+                Assert.AreEqual(AssetBuilder.FileHash(Path.Combine(output, "catalog.json")), _settings.LastBuildCatalogSha256);
             }
         }
 
@@ -202,7 +205,7 @@ namespace AiNative.UnityCore.Assets.Tests
                 string saved = File.ReadAllText(otherPath);
                 other.Version = 50;
                 EditorUtility.SetDirty(other);
-                using (var session = AssetBuildSession.Begin(_settings, _root)) { session.Complete(); }
+                using (var session = AssetBuildSession.Begin(_settings, _root)) { session.Complete(new string('a', 64)); }
                 Assert.IsTrue(EditorUtility.IsDirty(other));
                 Assert.AreEqual(saved, File.ReadAllText(otherPath));
                 Assert.IsFalse(EditorUtility.IsDirty(_settings));
@@ -220,7 +223,7 @@ namespace AiNative.UnityCore.Assets.Tests
             File.WriteAllText(Path.Combine(staging, "content"), "published");
             AssetBuilder.Publish(staging, _root);
             File.SetAttributes(_assetPath, FileAttributes.ReadOnly);
-            var error = Assert.Throws<IOException>(() => session.Complete());
+            var error = Assert.Throws<IOException>(() => session.Complete(new string('a', 64)));
             StringAssert.Contains("published to " + _root, error.Message);
             Assert.AreEqual(2, _settings.Version);
             Assert.IsTrue(EditorUtility.IsDirty(_settings));

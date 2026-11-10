@@ -88,3 +88,7 @@ SBP 接入设计、证据和验收边界见 [双后端构建验收](unitycore-as
 2026-11-10 版本与路径验收：独立审查完成，隔离 Windows Editor（Unity 6000.3.23f1 / SBP 2.6.2）最终 EditMode 80/80、PlayMode 45/45 通过，包含 21 项新增测试。两后端连续构建、持久配置重载、干净构建、实际 SBP 取消、发布失败、配置只读与发布后保存失败、旧元数据兼容均已验证。真实批处理分别省略和提供 `-assetOutput`，发布版本 1、2 后配置保存为 3；示例克隆构建使用版本 3，不推进原配置。实际配置磁盘 hideFlags 为 0。
 
 实现期间先复现隔离工程未准备 StreamingAssets 导致的生命周期用例失败，再复现未由 Inspector 持有的持久配置被构建卸载、发布后无法保存版本；保留失败日志与产物，修复保护标记并补齐内容后完成最终回归。[摘要](evidence/unitycore-assets/build-version/summary.json)、[原始证据与复现脚本](evidence/unitycore-assets/build-version/build-version-evidence.zip)、[被测源码指纹](evidence/unitycore-assets/build-version/sources.json)。78 个包实现/测试文件与隔离副本逐字节一致。Inspector/菜单本轮为代码审查，未执行 GUI 点击；本轮未重复 Player 构建和另一 Domain Reload 设置，不扩大此前验收声明。
+
+### 最新构建精简部署
+
+资源配置新增最近成功构建记录，Inspector、菜单与批处理可将 catalog 和全部 Bundle 一键部署到 StreamingAssets/AiNativeAssets；裁剪证据保存在 StreamingAssets 外。两后端及四种 Player 的验证和未完成 GUI 项详见 [部署契约与验收](unitycore-assets-deployment.md)。

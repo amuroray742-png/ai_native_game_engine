@@ -1,0 +1,51 @@
+{
+  "unity": "6000.3.23f1",
+  "sbp": "2.6.2",
+  "results": {
+    "builtin-PlayMode-reload-On": 45,
+    "builtin-EditMode-reload-On": 89,
+    "builtin-PlayMode-reload-Off": 45,
+    "builtin-EditMode-reload-Off": 89,
+    "builtin-Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "builtin-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-PlayMode-reload-On": 45,
+    "sbp-EditMode-reload-On": 89,
+    "sbp-PlayMode-reload-Off": 45,
+    "sbp-EditMode-reload-Off": 89,
+    "sbp-Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    }
+  },
+  "totalTests": 536,
+  "newDeploymentTests": 9,
+  "sourceFilesCompared": 88,
+  "command": "python scripts/verify_unity_assets.py TestResults/deploy-final --backend both --baseline-fixture --players",
+  "extraChecks": {
+    "batchExplicitSource": "passed",
+    "batchLatestRecord": "passed",
+    "builtinStandardBuild": "rejected as required",
+    "menuInvocation": "passed",
+    "runtimeFilesPerPlayer": 8
+  },
+  "gui": {
+    "inspectorMouseClick": "not completed",
+    "reason": "Desktop capture timed out twice; Unity editor_window capture returned a blank image. Only the isolated Editor was opened/closed."
+  },
+  "limitations": [
+    "No arbitrary-depth Windows path guarantee; extended paths cover the reproduced hash/existence checks.",
+    "No cross-directory crash atomicity guarantee."
+  ],
+  "archiveSha256": "8e0142288d4162238d3c81170bfe9f4b94caa96d68b63c4bc4619a426e4e52a5",
+  "archiveBytes": 1746089
+}
