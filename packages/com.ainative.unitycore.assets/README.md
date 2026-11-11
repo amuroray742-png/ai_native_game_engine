@@ -1,5 +1,7 @@
 # AI Native UnityCore Assets
 
+新增批量加载／优先级调度、所有权诊断、生产过滤／分析报告及可选 Shader 流程，参见 [资源增强与 URP 示例](../../docs/assets-enhancement-urp.md)。公共包不依赖 URP；三个消费示例采用 URP 17.3.0，Built-in 渲染兼容性由隔离夹具验证。
+
 Local AssetBundle ownership for Unity 6000.3, Windows x64. Depends on UnityCore and UniTask 2.5.11. Register one `AssetsModule` explicitly before starting Core. Access it through `IAssets` during composition or dependency binding; retain that reference while running.
 
 ```csharp

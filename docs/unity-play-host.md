@@ -1,5 +1,7 @@
 # Unity Play 宿主
 
+当前示例已迁移到 URP 17.3.0 的 3D Forward；新增说明与本轮验收见 [资源增强与 URP 示例](assets-enhancement-urp.md)。下文旧截图和测试归档保留历史含义。本轮 GridGame 已重跑双 Domain Reload、颜色像素、快慢表现及四组 CLI 轨迹比较，不扩大到 Player／IL2CPP。
+
 两个示例复用 `AiNative.Unity`，各自维护场景、包清单、配置和插件。GridGame 在玩家操作时手动推进。PhysicsSandbox 在 Windows x64 Editor 中按 60 Hz 推进，由 Jolt 更新刚体。下文保留 GridGame 的复现步骤与原始证据。沙盒的暂停输入、读档首帧与 CLI 续跑另有完整记录。[PhysicsSandbox 实施与验收](phase-3-physics-sandbox-unity-plan.md)
 
 ```mermaid

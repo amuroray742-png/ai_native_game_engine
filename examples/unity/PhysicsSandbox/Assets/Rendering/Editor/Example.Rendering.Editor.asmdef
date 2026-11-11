@@ -1,0 +1,10 @@
+{
+  "name": "Example.Rendering.Editor",
+  "references": [
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

@@ -10,6 +10,7 @@ namespace AiNative.UnityCore.Assets
         private readonly InstanceLifetime _lifetime;
         private bool _disposed;
         internal Action Released;
+        internal long DiagnosticId;
         private AssetInstance(GameObject value, InstanceLifetime lifetime) { _object = value; _lifetime = lifetime; }
         public bool IsAlive => !_disposed && _object != null;
         public GameObject Value => IsAlive ? _object : throw new ObjectDisposedException(nameof(AssetInstance));

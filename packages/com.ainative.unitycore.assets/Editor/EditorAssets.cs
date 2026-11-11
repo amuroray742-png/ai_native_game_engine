@@ -13,27 +13,28 @@ namespace AiNative.UnityCore.Assets.Editor
     public static class EditorAssets
     {
         /// <summary>Captures the configuration's Editor mode when creating a module; changing it does not switch a running module.</summary>
-        public static AssetsModule CreateConfigured(AssetGroups groups, string contentRoot = null)
+        public static AssetsModule CreateConfigured(AssetGroups groups, string contentRoot = null, AssetRuntimeOptions options = null)
         {
             if (groups == null) { throw new ArgumentNullException(nameof(groups)); }
-            return Create(groups, groups.EditorLoadMode, contentRoot);
+            return Create(groups, groups.EditorLoadMode, contentRoot, options);
         }
 
         /// <summary>Explicit Editor mode selection. Bundle mode does not need groups; direct mode requires them and ignores contentRoot.</summary>
-        public static AssetsModule Create(AssetGroups groups, EditorAssetLoadMode mode, string contentRoot = null)
+        public static AssetsModule Create(AssetGroups groups, EditorAssetLoadMode mode, string contentRoot = null, AssetRuntimeOptions options = null)
         {
             switch (mode)
             {
-                case EditorAssetLoadMode.AssetBundle: return new AssetsModule(contentRoot);
+                case EditorAssetLoadMode.AssetBundle: return new AssetsModule(contentRoot, options ?? new AssetRuntimeOptions());
                 case EditorAssetLoadMode.AssetDatabase:
                     if (groups == null) { throw new ArgumentNullException(nameof(groups)); }
-                    return Create(groups);
+                    return CreateWithOptions(groups, options);
                 default: throw new AssetException("InvalidEditorLoadMode", "Unknown Editor resource load mode: " + mode);
             }
         }
 
         /// <summary>Legacy direct-loading entry point; always uses AssetDatabase regardless of the configuration mode.</summary>
-        public static AssetsModule Create(AssetGroups groups)
+        public static AssetsModule Create(AssetGroups groups) => CreateWithOptions(groups, null);
+        public static AssetsModule CreateWithOptions(AssetGroups groups, AssetRuntimeOptions options)
         {
             return new AssetsModule(() =>
             {
@@ -45,7 +46,7 @@ namespace AiNative.UnityCore.Assets.Editor
                     Bundles = plan.Definitions.Select(x => new BundleEntry { Name = x.assetBundleName, Dependencies = plan.Dependencies[x.assetBundleName].OrderBy(y => y, StringComparer.Ordinal).ToArray() }).ToArray()
                 };
                 return (catalog, new EditorBackend());
-            });
+            }, options);
         }
         private sealed class EditorBackend : IAssetBackend
         {

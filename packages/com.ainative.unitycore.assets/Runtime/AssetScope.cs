@@ -10,6 +10,7 @@ namespace AiNative.UnityCore.Assets
     public sealed class AssetScope : IAssets
     {
         internal readonly AssetRuntime Runtime;
+        internal readonly long Id;
         private readonly string _name;
         private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
         private readonly List<IDisposable> _leases = new List<IDisposable>();
@@ -26,6 +27,7 @@ namespace AiNative.UnityCore.Assets
         {
             Runtime = runtime;
             _name = name;
+            Id = Runtime.Ownership.Add("scope", name);
             Runtime.Scopes.Add(this);
         }
         internal void EnsureOpen()
@@ -36,6 +38,7 @@ namespace AiNative.UnityCore.Assets
         {
             EnsureOpen();
             var child = new AssetScope(Runtime, name);
+            Runtime.Ownership.Change(child.Id, Id);
             _children.Add(child);
             child.Released = () => { _children.Remove(child); TryUnregister(); };
             return child;
@@ -43,17 +46,65 @@ namespace AiNative.UnityCore.Assets
         public UniTask<AssetLease<T>> LoadAsync<T>(string address, CancellationToken cancellationToken = default) where T : UnityEngine.Object
             => LoadSubAssetAsync<T>(address, null, cancellationToken);
         public async UniTask<AssetLease<T>> LoadSubAssetAsync<T>(string address, string name, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => await LoadOwnedAsync<T>(address, name, null, cancellationToken);
+        public UniTask<AssetLease<T>> LoadWithOptionsAsync<T>(string address, AssetLoadOptions options, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => LoadOwnedAsync<T>(address, null, options, cancellationToken);
+        public UniTask<AssetLease<T>> LoadSubAssetWithOptionsAsync<T>(string address, string name, AssetLoadOptions options, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => LoadOwnedAsync<T>(address, name, options, cancellationToken);
+        internal async UniTask<AssetLease<T>> LoadOwnedAsync<T>(string address, string name, AssetLoadOptions options,
+            CancellationToken cancellationToken, Type requestedType = null) where T : UnityEngine.Object
         {
             EnsureOpen();
             _pending++;
+            long requestId = Runtime.Ownership.Add("consumer", address, Id,
+                AssetRuntime.ResourceKey(address, requestedType ?? typeof(T), name), state: "waiting");
+            double requested = AssetOwnershipTracker.Now;
+            Exception failure = null;
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cancellation.Token, Runtime.Lifetime.Token);
             try
             {
-                var lease = await Runtime.LoadAsync<T>(address, name, linked.Token, Track);
+                var lease = await Runtime.LoadAsync<T>(address, name, linked.Token, Track, options?.Priority ?? AssetPriority.Normal, requestedType);
+                long leaseId = Runtime.Ownership.Add("lease", address, Id,
+                    AssetRuntime.ResourceKey(address, requestedType ?? typeof(T), name), Runtime.Find(address, false).Bundle);
+                lease.DiagnosticId = leaseId;
+                lease.OwnershipReleased = () => Runtime.Ownership.Remove(leaseId);
                 _leases.Add(lease);
                 lease.Released = () => { _leases.Remove(lease); TryUnregister(); };
                 return lease;
             }
+            catch (Exception error) { failure = error; throw; }
+            finally
+            {
+                Runtime.Ownership.Finish(requestId, "consumer:" + address, requested, requested, failure);
+                _pending--; TryUnregister();
+            }
+        }
+        public UniTask<AssetBatch> PreloadAsync(IReadOnlyList<AssetLoadRequest> requests, AssetLoadOptions options = null,
+            IProgress<AssetLoadProgress> progress = null, CancellationToken cancellationToken = default)
+            => AssetBatch.Load(this, requests, options, progress, cancellationToken);
+        public async UniTask<AssetBatch> WarmupShadersAsync(IReadOnlyList<string> addresses, CancellationToken cancellationToken = default)
+        {
+            if (addresses == null) { throw new ArgumentNullException(nameof(addresses)); }
+            EnsureOpen();
+            var requests = new List<AssetLoadRequest>();
+            foreach (string address in addresses) { requests.Add(new AssetLoadRequest(address, typeof(ShaderVariantCollection))); }
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cancellation.Token, Runtime.Lifetime.Token);
+            _pending++;
+            AssetBatch batch = null;
+            try
+            {
+                batch = await PreloadAsync(requests, cancellationToken: linked.Token);
+                for (int i = 0; i < batch.Count; i++)
+                {
+                    linked.Token.ThrowIfCancellationRequested();
+                    batch.Get<ShaderVariantCollection>(i).WarmUp();
+                    if (i + 1 < batch.Count) { await UniTask.NextFrame(PlayerLoopTiming.Update, linked.Token, cancelImmediately: true); }
+                }
+                EnsureOpen();
+                cancellationToken.ThrowIfCancellationRequested();
+                return batch;
+            }
+            catch { if (batch != null) { await batch.CloseAsync(); } throw; }
             finally { _pending--; TryUnregister(); }
         }
         private void Track(UniTask operation)
@@ -71,17 +122,22 @@ namespace AiNative.UnityCore.Assets
             var lease = await LoadAsync<GameObject>(address, cancellationToken);
             AssetInstance instance = null;
             _pending++;
-            _leases.Remove(lease);
-            lease.Released = null;
             try
             {
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cancellation.Token, Runtime.Lifetime.Token);
+                await Runtime.Scheduler.WaitForInstance(linked.Token);
                 EnsureOpen();
                 cancellationToken.ThrowIfCancellationRequested();
+                _leases.Remove(lease);
+                lease.Released = null;
                 instance = AssetInstance.Create(lease, parent);
                 EnsureOpen();
                 cancellationToken.ThrowIfCancellationRequested();
                 _instances.Add(instance);
-                instance.Released = () => { _instances.Remove(instance); TryUnregister(); };
+                long instanceId = Runtime.Ownership.Add("instance", address, Id);
+                instance.DiagnosticId = instanceId;
+                Runtime.Ownership.Change(lease.DiagnosticId, instanceId);
+                instance.Released = () => { Runtime.Ownership.Remove(instanceId); _instances.Remove(instance); TryUnregister(); };
                 return instance;
             }
             catch
@@ -117,17 +173,23 @@ namespace AiNative.UnityCore.Assets
         {
             Runtime.Pending++;
             _pending++;
-            var pin = Runtime.Pin(entry.Bundle);
+            Func<AssetPriority> demand = () => token.IsCancellationRequested ? (AssetPriority)(-1) : AssetPriority.Normal;
+            AssetRuntime.BundlePin pin = null;
+            using var cancellationRegistration = token.Register(Runtime.Scheduler.Pump);
             bool transferred = false;
             try
             {
+                await Runtime.WaitForRetiredBundles(entry.Bundle, token);
+                pin = Runtime.Pin(entry.Bundle, demand);
                 await pin.Completion.Task;
                 token.ThrowIfCancellationRequested();
-                var scene = await Runtime.Backend.LoadSceneAsync(entry);
-                var handle = new AssetScene(Runtime, entry, pin, scene);
+                var scene = await Runtime.RunOperation("scene:" + entry.Address, Id, () => Runtime.Backend.LoadSceneAsync(entry),
+                    () => AssetPriority.Normal, () => !token.IsCancellationRequested && !Runtime.Closed);
+                var handle = new AssetScene(Runtime, entry, pin, scene, demand);
                 transferred = true;
                 _scenes.Add(handle);
-                handle.Released = () => { _scenes.Remove(handle); TryUnregister(); };
+                long sceneId = Runtime.Ownership.Add("scene", entry.Address, Id, bundle: entry.Bundle);
+                handle.Released = () => { Runtime.Ownership.Remove(sceneId); _scenes.Remove(handle); TryUnregister(); };
                 if (token.IsCancellationRequested || Runtime.Closed)
                 {
                     await handle.UnloadAsync();
@@ -143,13 +205,14 @@ namespace AiNative.UnityCore.Assets
             }
             finally
             {
-                if (!transferred) { Runtime.Release(pin); Runtime.Scenes.Remove(entry.Path); }
+                if (!transferred) { if (pin != null) { Runtime.Release(pin, demand); } Runtime.Scenes.Remove(entry.Path); }
                 Runtime.Pending--;
                 _pending--;
                 TryUnregister();
             }
         }
         public AssetDiagnostics GetDiagnostics() => Runtime.Diagnostics();
+        public void RefreshDiagnosticsMemory() => Runtime.RefreshMemory();
         internal string Describe() => $"{_name}: pending={_pending}, leases={_leases.Count}, instances={_instances.FindAll(x => x.IsAlive).Count}, pools={_pools.Count}, scenes={_scenes.FindAll(x => x.IsLoaded).Count}";
         internal IEnumerable<string> DescribePools()
         {
@@ -205,6 +268,7 @@ namespace AiNative.UnityCore.Assets
                 || _leases.Count != 0 || _instances.Count != 0 || _scenes.Count != 0
                 || _children.Count != 0 || _pools.Count != 0) { return; }
             Runtime.Scopes.Remove(this);
+            Runtime.Ownership.Remove(Id);
             var released = Released;
             Released = null;
             released?.Invoke();

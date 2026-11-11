@@ -46,12 +46,16 @@ namespace AiNative.UnityCore.Assets.Editor
             destination = Path.GetFullPath(destination);
             if (Directory.Exists(destination) || File.Exists(destination)) { throw new IOException("Output already exists: " + destination); }
             var plan = AssetBuildPlan.Create(settings);
+            bool shaderProcessing = settings.Shaders != null && settings.Shaders.EnableProcessing;
+            using var shaderSession = shaderProcessing ? new AssetShaderBuildSession(settings, plan) : null;
+            options = new AssetBuildOptions { UseCache = options.UseCache && !shaderProcessing };
             // Keep intermediate bundles outside Assets so Editor refresh cannot import partial products.
             string staging = Path.GetFullPath("BuildArtifacts/Assets/" + Guid.NewGuid().ToString("N"));
             if (!string.Equals(Path.GetPathRoot(staging), Path.GetPathRoot(destination), StringComparison.OrdinalIgnoreCase))
             { throw new IOException("Atomic publication requires output on the project volume."); }
             Directory.CreateDirectory(staging);
             var metadata = new AssetBuildMetadata { ContentVersion = version, Backend = settings.BuildBackend, UseCache = settings.BuildBackend == AssetBuildBackend.ScriptableBuildPipeline && options.UseCache };
+            if (shaderProcessing) { metadata.CachePolicyReason = "Custom shader processing requires callback evidence without cached shader output."; }
             Dictionary<string, uint> crcs;
             var actualDependencies = settings.BuildBackend == AssetBuildBackend.Builtin
                 ? BuildBuiltin(plan, staging, metadata, out crcs)
@@ -84,6 +88,8 @@ namespace AiNative.UnityCore.Assets.Editor
             File.WriteAllText(Path.Combine(staging, "catalog.json"), JsonUtility.ToJson(catalog, true));
             metadata.PreservationSha256 = FileHash(Path.Combine(staging, metadata.PreservationFile));
             File.WriteAllText(Path.Combine(staging, "build-metadata.json"), JsonUtility.ToJson(metadata, true));
+            AssetBuildAnalysis.Write(settings, plan, catalog, version, staging);
+            shaderSession?.Write(staging);
             Publish(staging, destination);
             return catalog;
         }

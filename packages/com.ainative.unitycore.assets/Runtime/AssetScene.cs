@@ -10,12 +10,14 @@ namespace AiNative.UnityCore.Assets
         private readonly AssetEntry _entry;
         private readonly AssetRuntime.BundlePin _pin;
         private readonly Scene _scene;
+        private readonly System.Func<AssetPriority> _demand;
         private bool _released;
         private UniTaskCompletionSource _unloaded;
         internal System.Action Released;
-        internal AssetScene(AssetRuntime runtime, AssetEntry entry, AssetRuntime.BundlePin pin, Scene scene)
+        internal AssetScene(AssetRuntime runtime, AssetEntry entry, AssetRuntime.BundlePin pin, Scene scene, System.Func<AssetPriority> demand = null)
         {
             _runtime = runtime; _entry = entry; _pin = pin; _scene = scene;
+            _demand = demand;
             SceneManager.sceneUnloaded += OnUnloaded;
         }
         public bool IsLoaded => !_released && _scene.IsValid() && _scene.isLoaded;
@@ -56,7 +58,7 @@ namespace AiNative.UnityCore.Assets
             _released = true;
             SceneManager.sceneUnloaded -= OnUnloaded;
             _runtime.Scenes.Remove(_entry.Path);
-            _runtime.Release(_pin);
+            _runtime.Release(_pin, _demand);
             Released?.Invoke();
             Released = null;
         }

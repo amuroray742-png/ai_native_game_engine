@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -13,10 +14,13 @@ namespace AiNative.UnityCore.Assets
     public sealed class AssetsModule : IModule, IAsyncShutdownModule, IAssets
     {
         private readonly Func<(AssetCatalog catalog, IAssetBackend backend)> _factory;
+        private readonly AssetRuntimeOptions _options;
         private AssetRuntime _runtime;
         private AssetScope _root;
-        public AssetsModule(string contentRoot = null)
+        public AssetsModule(string contentRoot = null) : this(contentRoot, new AssetRuntimeOptions()) { }
+        public AssetsModule(string contentRoot, AssetRuntimeOptions options)
         {
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             string root = contentRoot ?? Path.Combine(Application.streamingAssetsPath, "AiNativeAssets");
             _factory = () =>
             {
@@ -38,14 +42,15 @@ namespace AiNative.UnityCore.Assets
                 catch (Exception error) { throw new AssetException("CatalogReadFailed", "Cannot read local catalog.", stage: "initialize", inner: error); }
             };
         }
-        internal AssetsModule(Func<(AssetCatalog, IAssetBackend)> factory) { _factory = factory; }
+        internal AssetsModule(Func<(AssetCatalog, IAssetBackend)> factory, AssetRuntimeOptions options = null)
+        { _factory = factory; _options = options ?? new AssetRuntimeOptions(); }
         public string GetModuleName() => "AiNative.UnityCore.Assets";
         public void OnRegister(ICore core) { core.RegisterInterface<IAssets, AssetsModule>(this); }
         public UniTask<UniCoreException> Initialize(ICore core, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var source = _factory();
-            _runtime = new AssetRuntime(source.catalog, source.backend);
+            _runtime = new AssetRuntime(source.catalog, source.backend, _options);
             _root = new AssetScope(_runtime, "application");
             return UniTask.FromResult<UniCoreException>(null);
         }
@@ -58,6 +63,7 @@ namespace AiNative.UnityCore.Assets
             var runtime = _runtime;
             runtime.Closed = true;
             runtime.Lifetime.Cancel();
+            runtime.Scheduler.Pump();
             await _root.CloseAsync().AttachExternalCancellation(forcedExit);
             while (runtime.Pending != 0) { await UniTask.Yield(PlayerLoopTiming.Update, forcedExit); }
         }
@@ -66,6 +72,7 @@ namespace AiNative.UnityCore.Assets
             if (_runtime == null) { return; }
             _runtime.Closed = true;
             _runtime.Lifetime.Cancel();
+            _runtime.Scheduler.Pump();
             _root.ForceRelease();
         }
         private AssetScope Root
@@ -78,11 +85,21 @@ namespace AiNative.UnityCore.Assets
             }
         }
         public AssetScope CreateScope(string name) => Root.CreateScope(name);
+        public UniTask<AssetBatch> PreloadAsync(IReadOnlyList<AssetLoadRequest> requests, AssetLoadOptions options = null,
+            IProgress<AssetLoadProgress> progress = null, CancellationToken cancellationToken = default)
+            => Root.PreloadAsync(requests, options, progress, cancellationToken);
+        public UniTask<AssetBatch> WarmupShadersAsync(IReadOnlyList<string> addresses, CancellationToken cancellationToken = default)
+            => Root.WarmupShadersAsync(addresses, cancellationToken);
+        public UniTask<AssetLease<T>> LoadWithOptionsAsync<T>(string address, AssetLoadOptions options, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => Root.LoadWithOptionsAsync<T>(address, options, cancellationToken);
+        public UniTask<AssetLease<T>> LoadSubAssetWithOptionsAsync<T>(string address, string name, AssetLoadOptions options, CancellationToken cancellationToken = default) where T : UnityEngine.Object
+            => Root.LoadSubAssetWithOptionsAsync<T>(address, name, options, cancellationToken);
         public UniTask<AssetLease<T>> LoadAsync<T>(string address, CancellationToken cancellationToken = default) where T : UnityEngine.Object => Root.LoadAsync<T>(address, cancellationToken);
         public UniTask<AssetLease<T>> LoadSubAssetAsync<T>(string address, string name, CancellationToken cancellationToken = default) where T : UnityEngine.Object => Root.LoadSubAssetAsync<T>(address, name, cancellationToken);
         public UniTask<AssetInstance> InstantiateAsync(string address, Transform parent = null, CancellationToken cancellationToken = default) => Root.InstantiateAsync(address, parent, cancellationToken);
         public AssetPool CreatePool(string address, AssetPoolOptions options) => Root.CreatePool(address, options);
         public UniTask<AssetScene> LoadSceneAsync(string address, CancellationToken cancellationToken = default) => Root.LoadSceneAsync(address, cancellationToken);
         public AssetDiagnostics GetDiagnostics() => _runtime == null ? new AssetDiagnostics(new(), new(), new(), 0) : _runtime.Diagnostics();
+        public void RefreshDiagnosticsMemory() => Root.RefreshDiagnosticsMemory();
     }
 }

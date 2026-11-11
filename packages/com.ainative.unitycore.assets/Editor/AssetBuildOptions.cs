@@ -19,6 +19,7 @@ namespace AiNative.UnityCore.Assets.Editor
         public string UnityVersion = Application.unityVersion;
         public string SbpVersion = "";
         public bool UseCache;
+        public string CachePolicyReason = "";
         public string PreservationFile = "";
         public string PreservationSha256 = "";
     }

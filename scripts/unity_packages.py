@@ -2,6 +2,18 @@
 import json
 from pathlib import Path
 import shutil
+import os
+import uuid
+
+
+def verification_workspace(output):
+    # Unity's managed shader importers still encounter MAX_PATH on Windows.
+    # Keep the isolated project short, persistent and explicitly locatable.
+    workspace = (Path(output.anchor) / "unity-verification" / uuid.uuid4().hex[:12]
+                 if os.name == "nt" else output / "workspace")
+    workspace.mkdir(parents=True, exist_ok=False)
+    (output / "workspace.txt").write_text(str(workspace) + "\n", encoding="utf-8")
+    return workspace
 
 
 def local_packages(project):

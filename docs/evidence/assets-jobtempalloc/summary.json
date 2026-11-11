@@ -1,0 +1,44 @@
+{
+  "editor": "6000.3.23f1",
+  "urp": "17.3.0",
+  "sbp": "2.6.2",
+  "tests": {
+    "diagnostic": {
+      "count": 104,
+      "passed": true,
+      "jobTempAllocWarnings": 3
+    },
+    "native-only": {
+      "count": 1,
+      "passed": true,
+      "jobTempAllocWarnings": 3
+    },
+    "no-strip-r2": {
+      "count": 1,
+      "passed": true,
+      "jobTempAllocWarnings": 0
+    },
+    "fixed-edit": {
+      "count": 104,
+      "passed": true,
+      "jobTempAllocWarnings": 0
+    },
+    "fixed-play": {
+      "count": 55,
+      "passed": true,
+      "jobTempAllocWarnings": 0
+    }
+  },
+  "players": {
+    "Builtin": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "Sbp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    }
+  },
+  "builtinBundleBytes": 438371,
+  "sbpBundleBytes": 438462
+}

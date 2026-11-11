@@ -4,6 +4,7 @@ using AiNative.UnityCore;
 using AiNative.UnityCore.Assets;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public sealed class AssetsDemoBootstrap : MonoBehaviour
 {
@@ -13,6 +14,13 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
     private async UniTaskVoid Start()
     {
         Application.runInBackground = true;
+        string renderingError = null;
+        void ObserveLog(string message, string stack, LogType type)
+        {
+            if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+            { renderingError ??= message; }
+        }
+        Application.logMessageReceived += ObserveLog;
         try
         {
 #if UNITY_EDITOR
@@ -23,6 +31,7 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
 #endif
             Core.Inst.RegisterModule(module);
             await Core.Inst.RunAsync();
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsShaderProbe") >= 0) { await ShaderProbeVerification.Run(module); }
             var first = await module.InstantiateAsync("Assets/Probe/A");
             var second = await module.InstantiateAsync("Assets/Probe/B");
             first.Value.transform.position = Vector3.left;
@@ -60,6 +69,7 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             var diagnostics = module.GetDiagnostics();
             if (diagnostics.Bundles.Count != 0 || diagnostics.PendingOperations != 0 || diagnostics.Scopes.Count != 0) { throw new Exception("Resources remain after shutdown."); }
             _status = "PASS: shared resources, pool, scene, script types, restart and cleanup";
+            if (renderingError != null) { throw new Exception("Player logged an error during acceptance: " + renderingError); }
             Debug.Log(_status);
             WriteResult(true, _status);
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0) { Application.Quit(0); }
@@ -71,6 +81,7 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             WriteResult(false, _status);
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0) { Application.Quit(1); }
         }
+        finally { Application.logMessageReceived -= ObserveLog; }
     }
     private static void Capture()
     {
@@ -84,7 +95,8 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         try
         {
             camera.targetTexture = target;
-            camera.Render();
+            if (GraphicsSettings.currentRenderPipeline == null) { camera.Render(); }
+            else { RenderPipeline.SubmitRenderRequest(camera, new RenderPipeline.StandardRequest { destination = target }); }
             RenderTexture.active = target;
             texture.ReadPixels(new Rect(0, 0, 640, 360), 0, 0);
             texture.Apply();

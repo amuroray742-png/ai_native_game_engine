@@ -8,8 +8,17 @@ namespace AiNative.UnityCore.Assets.Editor
 {
     internal static class ResourceCollection
     {
-        internal static (UnityEngine.Object Asset, string Address)[] Collect(ResourceGroup group, ResourceAddressMode mode, List<string> excluded)
+        internal static (UnityEngine.Object Asset, string Address)[] Collect(ResourceGroup group, ResourceAddressMode mode, List<string> excluded,
+            BuildTarget target = BuildTarget.StandaloneWindows64, List<string> decisions = null)
         {
+            var overrides = group.PlatformFilters.Where(x => x.Target == target).ToArray();
+            if (overrides.Length > 1) { throw new AssetException("InvalidFilter", "Duplicate platform filter: " + group.Id + " / " + target); }
+            var platform = overrides.SingleOrDefault();
+            var filter = new ResourceFilter
+            {
+                ExcludedFolders = platform != null && platform.OverrideFolders ? platform.Filter.ExcludedFolders : group.Filter.ExcludedFolders,
+                IncludedTypes = platform != null && platform.OverrideTypes ? platform.Filter.IncludedTypes : group.Filter.IncludedTypes
+            };
             var entries = new SortedDictionary<string, (UnityEngine.Object Asset, string Address)>(StringComparer.Ordinal);
             foreach (var item in group.Assets)
             {
@@ -32,6 +41,13 @@ namespace AiNative.UnityCore.Assets.Editor
                         continue;
                     }
                     if (entries.ContainsKey(assetPath)) { continue; }
+                    string reason = filter.Exclusion(assetPath);
+                    if (reason != null)
+                    {
+                        excluded.Add(assetPath);
+                        decisions?.Add(group.Id + "\t" + assetPath + "\t" + reason);
+                        continue;
+                    }
                     entries.Add(assetPath, (AssetDatabase.LoadMainAssetAtPath(assetPath), Address(group, assetPath, mode)));
                 }
             }

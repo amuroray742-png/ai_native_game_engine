@@ -1,5 +1,7 @@
 # 第三阶段：PhysicsSandbox 接入 Unity Play 实施与验收
 
+当前场景已迁移为 URP 17.3.0 的 3D Forward，使用显式共享 Lit 材质与 `_BaseColor`。本轮双 Domain Reload、暂停、读档续跑及十组 CLI 比较已重跑，仍限 Windows Editor。新增记录见 [资源增强与 URP 示例](assets-enhancement-urp.md)；下文保留原阶段证据。
+
 **状态：Windows x64 Editor 已完成本地实施与验收。** 本阶段交付一个可在 Windows x64、Unity Editor 6000.3.23f1 中操作的 PhysicsSandbox 场景。玩家能生成球和盒、施加冲量、删除刚体、暂停和读档。已有基线分别是 [GridGame 的 Editor Play 验收](unity-play-host.md) 和 [Jolt 的无头验收](managed-physics-migration.md)。独立 Player、IL2CPP 和跨构建存档兼容另立里程碑。
 
 沿用[框架 v2](framework-v2.md) 的文件协议、游戏版本 2 和 Jolt ABI 4。PhysicsSandbox 以 60 Hz 推进，实时输入归入**提交后下一个尚未执行的 Tick**。Jolt 独占物理裁决，Unity 负责采样、推进时机和呈现。验收比较两个宿主实际执行的 v2 操作序列，机器的墙上时间和 Unity 渲染帧号只供诊断。

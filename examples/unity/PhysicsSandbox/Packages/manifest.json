@@ -18,7 +18,8 @@
     "com.unity.modules.screencapture": "1.0.0",
     "com.unity.pipeline": "0.10.0-exp.1",
     "com.ainative.unity": "file:../../../../packages/com.ainative.unity",
-    "com.ainative.unitycore": "file:../../../../packages/com.ainative.unitycore"
+    "com.ainative.unitycore": "file:../../../../packages/com.ainative.unitycore",
+    "com.unity.render-pipelines.universal": "17.3.0"
   },
   "testables": [
     "com.ainative.unitycore"
