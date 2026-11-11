@@ -1,5 +1,6 @@
 """Prepare the standalone GridGame project or compare real PlayMode runs with the CLI."""
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -10,7 +11,7 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
-from unity_packages import copy_verification_project, local_packages
+from unity_packages import copy_verification_project, local_packages, verification_workspace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,7 +71,7 @@ def run_play_tests(output):
     if not editor:
         raise RuntimeError(f"Install Unity Editor {version} to run PlayMode verification.")
     results = {}
-    with tempfile.TemporaryDirectory(prefix="ainative-play-") as work:
+    with contextlib.nullcontext(verification_workspace(output)) as work:
         project = copy_verification_project(PROJECT, Path(work))
         settings = project / "ProjectSettings/EditorSettings.asset"
         original = settings.read_text(encoding="utf-8")

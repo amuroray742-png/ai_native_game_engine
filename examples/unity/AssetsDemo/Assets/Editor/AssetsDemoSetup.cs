@@ -19,6 +19,7 @@ public static class AssetsDemoSetup
     }
     public static void Create()
     {
+        ConfigureBuildSettings();
         const string root = "Assets/Probe";
         var settings = AssetDatabase.LoadAssetAtPath<AssetGroups>("Assets/ResourceGroups.asset");
         if (settings == null)
@@ -71,6 +72,13 @@ public static class AssetsDemoSetup
         AssetDatabase.SaveAssets();
     }
     public static void BuildContent() => BuildContent(null);
+    public static void ConfigureBuildSettings()
+    {
+        // Match ExampleUrpSetup: avoid 6000.3.23f1's native Shader vertex-channel
+        // analysis leak. Preserve all mesh channels in this verification project.
+        PlayerSettings.stripUnusedMeshComponents = false;
+        AssetDatabase.SaveAssets();
+    }
     public static void BuildContentBuiltin() => BuildContent(AssetBuildBackend.Builtin);
     public static void BuildContentSbp() => BuildContent(AssetBuildBackend.ScriptableBuildPipeline);
     private static void BuildContent(AssetBuildBackend? backend)
@@ -80,6 +88,7 @@ public static class AssetsDemoSetup
         try
         {
             if (backend.HasValue) { settings.BuildBackend = backend.Value; }
+            ShaderProbeSetup.Include(settings);
             AssetBuilder.Build(settings, output);
             AssetDeployment.CopyLatestToStreamingAssets(settings);
         }
@@ -94,9 +103,15 @@ public static class AssetsDemoSetup
     {
         var target = UnityEditor.Build.NamedBuildTarget.Standalone;
         var previous = PlayerSettings.GetScriptingBackend(target);
+        bool previousStrict = PlayerSettings.strictShaderVariantMatching;
+        bool previousDefaultApis = PlayerSettings.GetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64);
+        var previousApis = PlayerSettings.GetGraphicsAPIs(BuildTarget.StandaloneWindows64);
         try
         {
             PlayerSettings.SetScriptingBackend(target, backend);
+            PlayerSettings.strictShaderVariantMatching = true;
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { UnityEngine.Rendering.GraphicsDeviceType.Direct3D11 });
             string output = Path.GetFullPath("../../../TestResults/assets-players/" + name + "/AssetsDemo.exe");
             Directory.CreateDirectory(Path.GetDirectoryName(output));
             var options = new BuildPlayerOptions
@@ -108,6 +123,12 @@ public static class AssetsDemoSetup
             var report = standard ? BuildPipeline.BuildPlayer(options) : AssetPlayerBuildSupport.BuildDeployedPlayer(options);
             if (report.summary.result != BuildResult.Succeeded) { throw new Exception("Player build failed: " + report.summary.result); }
         }
-        finally { PlayerSettings.SetScriptingBackend(target, previous); }
+        finally
+        {
+            PlayerSettings.SetScriptingBackend(target, previous);
+            PlayerSettings.strictShaderVariantMatching = previousStrict;
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, previousApis);
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64, previousDefaultApis);
+        }
     }
 }

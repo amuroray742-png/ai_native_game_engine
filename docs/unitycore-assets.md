@@ -1,5 +1,7 @@
 # UnityCore Assets：资源所有权与零冗余分包
 
+新增批量加载、调度、结构化诊断、生产分析及 Shader 流程的当前契约见 [资源增强与 URP 示例](assets-enhancement-urp.md)。三个 Unity 示例现均使用 URP，公共包仍兼容 Built-in；下文原阶段验收不替代本轮证据。
+
 提交前进一步复审发现并修复了回调取消、销毁时序、失败关闭失去所有者和 CRC 零值校验等问题，最新结果见 [提交前复审](unitycore-assets-review.md)。下述首次验收保留为历史记录。
 
 ## 边界与任务

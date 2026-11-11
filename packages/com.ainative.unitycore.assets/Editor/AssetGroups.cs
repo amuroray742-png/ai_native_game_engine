@@ -15,6 +15,10 @@ namespace AiNative.UnityCore.Assets.Editor
         public ResourceAddressMode AddressMode = ResourceAddressMode.FullPath;
         public BundleNamingMode BundleNaming = BundleNamingMode.StableHash;
         public ResourceGroup[] Groups = Array.Empty<ResourceGroup>();
+        [Tooltip("Zero disables the warning. Bytes on disk, not runtime memory.")]
+        public long BundleWarningBytes;
+        public long TotalWarningBytes;
+        public AssetShaderSettings Shaders;
         [SerializeField, HideInInspector] private string _lastBuildPath = "";
         [SerializeField, HideInInspector] private int _lastBuildVersion;
         [SerializeField, HideInInspector] private string _lastBuildCatalogSha256 = "";
@@ -43,6 +47,8 @@ namespace AiNative.UnityCore.Assets.Editor
         [Tooltip("Recursively collected at validation/build time.")]
         public UnityEngine.Object[] Folders = Array.Empty<UnityEngine.Object>();
         public ResourceAddress[] Assets = Array.Empty<ResourceAddress>();
+        public ResourceFilter Filter = new ResourceFilter();
+        public PlatformResourceFilter[] PlatformFilters = Array.Empty<PlatformResourceFilter>();
         internal string EffectiveName => string.IsNullOrWhiteSpace(Name) ? Id : Name;
     }
     [Serializable]

@@ -276,6 +276,21 @@ namespace AiNative.Examples.GridGame.PlayTests
                 Assert.Less(Time.realtimeSinceStartup, deadline, "Game view capture timed out");
                 yield return null;
             }
+            var captured = new Texture2D(2, 2);
+            try
+            {
+                Assert.True(captured.LoadImage(File.ReadAllBytes(png)));
+                int coloredPieces = 0;
+                for (int y = captured.height / 5; y < captured.height * 4 / 5; y++)
+                for (int x = captured.width * 3 / 8; x < captured.width * 5 / 8; x++)
+                {
+                    Color pixel = captured.GetPixel(x, y);
+                    if ((pixel.g > .6f && pixel.r < .6f && pixel.b > .4f) ||
+                        (pixel.r > .7f && pixel.g < .65f && pixel.b < .65f)) { coloredPieces++; }
+                }
+                Assert.Greater(coloredPieces, 20, "Sprite tint/texture must render colored pieces in the board, not white tiles.");
+            }
+            finally { UnityEngine.Object.Destroy(captured); }
             Assert.AreEqual(2, _game.Frames.Presented.Tick);
             Press(hud.EndTurn);
             yield return null;

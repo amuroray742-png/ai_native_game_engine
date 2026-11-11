@@ -1,5 +1,6 @@
 """Real PlayMode and independent CLI evidence for the fixed-step PhysicsSandbox."""
 import hashlib
+import contextlib
 import json
 import os
 from pathlib import Path
@@ -10,7 +11,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from unity_physics import DATA, MANAGED, PROJECT, ROOT, RUNNER
-from unity_packages import copy_verification_project
+from unity_packages import copy_verification_project, verification_workspace
 
 
 def write(path, value):
@@ -139,7 +140,7 @@ def verify(output):
     version = (PROJECT / "ProjectSettings/ProjectVersion.txt").read_text().splitlines()[0].split()[1]
     editor = next(x["location"] for x in inventory["data"]["items"] if x["version"] == version)
     summary["editor"] = version
-    with tempfile.TemporaryDirectory(prefix="ainative-sandbox-") as tmp:
+    with contextlib.nullcontext(verification_workspace(output)) as tmp:
         project = copy_verification_project(PROJECT, Path(tmp))
         for reload in ("on", "off"):
             report = output / ("reload-" + reload)

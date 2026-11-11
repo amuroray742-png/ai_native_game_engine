@@ -8,6 +8,7 @@ namespace AiNative.Examples.GridGame.Play
 {
     public sealed class GridBoard : MonoBehaviour
     {
+        [SerializeField] private Material spriteMaterial = null!;
         private static readonly Color Mint = new Color32(103, 227, 194, 255);
         private static readonly Color Coral = new Color32(255, 145, 112, 255);
         private readonly Dictionary<int, SpriteRenderer> _pieces = new Dictionary<int, SpriteRenderer>();
@@ -29,6 +30,7 @@ namespace AiNative.Examples.GridGame.Play
             root.SetActive(false);
             root.transform.SetParent(transform, false);
             var next = root.AddComponent<GridBoard>();
+            next.spriteMaterial = spriteMaterial;
             try
             {
                 next.Build(view);
@@ -72,13 +74,14 @@ namespace AiNative.Examples.GridGame.Play
             }
         }
 
-        private static SpriteRenderer Add(string name, Sprite sprite, Transform parent, Vector2 pos, float size, int order)
+        private SpriteRenderer Add(string name, Sprite sprite, Transform parent, Vector2 pos, float size, int order)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
             go.transform.localPosition = pos;
             go.transform.localScale = Vector3.one * size;
             var renderer = go.AddComponent<SpriteRenderer>();
+            renderer.sharedMaterial = spriteMaterial;
             renderer.sprite = sprite;
             renderer.sortingOrder = order;
             return renderer;

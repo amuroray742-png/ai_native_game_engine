@@ -7,15 +7,24 @@ import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 
-from unity_packages import copy_verification_project
+from unity_packages import copy_verification_project, verification_workspace
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / "examples/unity/AssetsDemo"
 
 
-def verify(output, players, backend="sbp", baseline_fixture=False):
+def check_native_leaks(log_path):
+    # Unity's test runner can report Passed before native shutdown emits this.
+    # Inspect the complete process log, including its shutdown tail.
+    text = log_path.read_text(encoding="utf-8", errors="replace")
+    if "JobTempAlloc" in text or "TLS Allocator ALLOC_TEMP" in text:
+        raise RuntimeError(f"Native temporary allocation warning: {log_path}")
+
+
+def verify(output, players, backend="sbp", baseline_fixture=False, renderer="forward"):
     output.mkdir(parents=True, exist_ok=False)
-    project = copy_verification_project(PROJECT, output / "workspace")
+    workspace = verification_workspace(output)
+    project = copy_verification_project(PROJECT, workspace)
     if baseline_fixture:
         fixture = subprocess.check_output(["git", "show", "HEAD:examples/unity/AssetsDemo/Assets/ResourceGroups.asset"], cwd=ROOT)
         (project / "Assets/ResourceGroups.asset").write_bytes(fixture)
@@ -40,10 +49,14 @@ def verify(output, players, backend="sbp", baseline_fixture=False):
         (output / (label + ".stderr.txt")).write_bytes(result.stderr)
         if result.returncode:
             raise RuntimeError(f"{label} failed ({result.returncode}); inspect preserved logs in {output}")
+        check_native_leaks(output / (label + ".log"))
 
     def method(label, name):
         run(label, ["run", project, "--timeout", "800", "--log-file", output / (label + ".log"),
                     "--no-tail", "--format", "json", "--", "-executeMethod", name])
+
+    method("select-renderer", "ExampleUrpSetup.ForwardPlus" if renderer == "forward-plus" else "ExampleUrpSetup.Forward")
+    method("shader-fixture", "ShaderProbeSetup.Create")
 
     # Build content from source in isolation, even when the development checkout has prior content.
     content = project / "Assets/StreamingAssets/AiNativeAssets"
@@ -70,7 +83,7 @@ def verify(output, players, backend="sbp", baseline_fixture=False):
                 label = content_backend + "-" + player_backend
                 entry = "AssetsDemoSetup.Build" + player_backend + ("Standard" if content_backend == "sbp" else "")
                 method("build-" + label, entry)
-                executable = output / "workspace/TestResults/assets-players" / player_backend / "AssetsDemo.exe"
+                executable = workspace / "TestResults/assets-players" / player_backend / "AssetsDemo.exe"
                 deployed = executable.parent / "AssetsDemo_Data/StreamingAssets/AiNativeAssets"
                 catalog = json.loads((deployed / "catalog.json").read_bytes())
                 expected = {"catalog.json", *(bundle["Name"] for bundle in catalog["Bundles"])}
@@ -79,12 +92,15 @@ def verify(output, players, backend="sbp", baseline_fixture=False):
                     raise RuntimeError(f"Unexpected Player runtime files: {actual ^ expected}")
                 (output / (label + "-runtime-files.json")).write_text(json.dumps(sorted(actual), indent=2), encoding="utf-8")
                 result_path = output / (label + "-smoke.json")
-                command = [str(executable), "-batchmode", "-assetsSmoke", "-assetsResult", str(result_path), "-logFile", str(output / (label + "-player.log"))]
+                command = [str(executable), "-batchmode", "-force-d3d11", "-assetsSmoke", "-assetsShaderProbe", "-assetsResult", str(result_path), "-logFile", str(output / (label + "-player.log"))]
                 creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
                 subprocess.run(command, cwd=executable.parent, check=True, timeout=90, creationflags=creationflags)
+                check_native_leaks(output / (label + "-player.log"))
                 result = json.loads(result_path.read_bytes())
                 if not result["success"]:
                     raise RuntimeError(str(result))
+                if not result_path.with_suffix(".shader.png").is_file():
+                    raise RuntimeError("Shader pixel verification did not produce its screenshot")
                 summary[label] = result
     (output / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary), flush=True)
@@ -96,5 +112,11 @@ if __name__ == "__main__":
     parser.add_argument("--players", action="store_true", help="Also build and smoke Windows Mono Development and IL2CPP Players")
     parser.add_argument("--backend", choices=("sbp", "builtin", "both"), default="sbp", help="Content backends to verify; each selected backend also builds Players when requested")
     parser.add_argument("--baseline-fixture", action="store_true", help="Use the committed groups fixture only inside the isolated copy; keep local configuration edits untouched")
+    parser.add_argument("--renderers", choices=("forward", "forward-plus", "both"), default="forward", help="URP renderer acceptance matrix")
     args = parser.parse_args()
-    verify(args.output.resolve(), args.players, args.backend, args.baseline_fixture)
+    if args.renderers == "both":
+        args.output.mkdir(parents=True, exist_ok=False)
+        for renderer in ("forward", "forward-plus"):
+            verify((args.output / renderer).resolve(), args.players, args.backend, args.baseline_fixture, renderer)
+    else:
+        verify(args.output.resolve(), args.players, args.backend, args.baseline_fixture, args.renderers)

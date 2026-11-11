@@ -1,0 +1,574 @@
+{
+  "final-forward": {
+    "builtin-PlayMode-reload-On": 55,
+    "builtin-EditMode-reload-On": 102,
+    "builtin-PlayMode-reload-Off": 55,
+    "builtin-EditMode-reload-Off": 102,
+    "builtin-Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "builtin-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-PlayMode-reload-On": 55,
+    "sbp-EditMode-reload-On": 102,
+    "sbp-PlayMode-reload-Off": 55,
+    "sbp-EditMode-reload-Off": 102,
+    "sbp-Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    }
+  },
+  "final-forward-plus": {
+    "builtin-PlayMode-reload-On": 55,
+    "builtin-EditMode-reload-On": 102,
+    "builtin-PlayMode-reload-Off": 55,
+    "builtin-EditMode-reload-Off": 102,
+    "builtin-Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "builtin-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-PlayMode-reload-On": 55,
+    "sbp-EditMode-reload-On": 102,
+    "sbp-PlayMode-reload-Off": 55,
+    "sbp-EditMode-reload-Off": 102,
+    "sbp-Mono": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    }
+  },
+  "grid-urp-r4": {
+    "unityProject": "examples/unity/GridGame",
+    "inputs": {
+      "grid.scenario.json": "a888f7ed5d204d4ffad523a352da11e6a1365d9921d190858810ff19bacba320",
+      "grid.commands.json": "4b1fea6956852402b8a77c95db7922b6b0a1d91de78f106eca03d1a61ba48acd"
+    },
+    "seed": 42,
+    "accepted": 6,
+    "rejected": 1,
+    "winner": "A",
+    "playTests": {
+      "domainReload-on": [
+        "BoardAndHudFinishMatchAndReleaseOnRestartAndUnload",
+        "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart",
+        "FailedCandidatePreservesActiveFrameUntilSuccessfulReplacement",
+        "FastPresentationMatchesActualOperations",
+        "FixedPumpRetainsDebtDuringPauseAndPublishesOrderedInputsOnce",
+        "MovementAndHitFeedbackUseRenderedFramesWithoutExtraTicks",
+        "SlowPresentationMatchesActualOperations"
+      ],
+      "domainReload-off": [
+        "BoardAndHudFinishMatchAndReleaseOnRestartAndUnload",
+        "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart",
+        "FailedCandidatePreservesActiveFrameUntilSuccessfulReplacement",
+        "FastPresentationMatchesActualOperations",
+        "FixedPumpRetainsDebtDuringPauseAndPublishesOrderedInputsOnce",
+        "MovementAndHitFeedbackUseRenderedFramesWithoutExtraTicks",
+        "SlowPresentationMatchesActualOperations"
+      ],
+      "reentry": "TwoPlayEntriesCreateFreshSessionsAndReleaseOnBothExits"
+    },
+    "comparisons": {
+      "on-fast": {
+        "code": "HostTracesMatched",
+        "checkpoints": 16,
+        "frames": {
+          "isPlaying": true,
+          "scene": "Assets/Scenes/GridGame.unity",
+          "peakQueuedTicks": 1,
+          "operationFrames": [
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49
+          ],
+          "presentedFrames": [
+            34,
+            36,
+            38,
+            41,
+            42,
+            44,
+            46,
+            48,
+            50
+          ]
+        }
+      },
+      "on-slow": {
+        "code": "HostTracesMatched",
+        "checkpoints": 16,
+        "frames": {
+          "isPlaying": true,
+          "scene": "Assets/Scenes/GridGame.unity",
+          "peakQueuedTicks": 8,
+          "operationFrames": [
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93
+          ],
+          "presentedFrames": [
+            78,
+            124,
+            172,
+            264,
+            306,
+            351,
+            402,
+            459,
+            558
+          ]
+        }
+      },
+      "off-fast": {
+        "code": "HostTracesMatched",
+        "checkpoints": 16,
+        "frames": {
+          "isPlaying": true,
+          "scene": "Assets/Scenes/GridGame.unity",
+          "peakQueuedTicks": 1,
+          "operationFrames": [
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48
+          ],
+          "presentedFrames": [
+            33,
+            35,
+            37,
+            40,
+            41,
+            43,
+            45,
+            47,
+            49
+          ]
+        }
+      },
+      "off-slow": {
+        "code": "HostTracesMatched",
+        "checkpoints": 16,
+        "frames": {
+          "isPlaying": true,
+          "scene": "Assets/Scenes/GridGame.unity",
+          "peakQueuedTicks": 8,
+          "operationFrames": [
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92
+          ],
+          "presentedFrames": [
+            77,
+            137,
+            185,
+            282,
+            339,
+            400,
+            469,
+            528,
+            635
+          ]
+        }
+      }
+    },
+    "tickHashes": {
+      "1": "ca1ed95acd6e8f3b0c5ae96c9acf55025a65f7b2907feb72b37cb16cb166d631",
+      "2": "27c026eb12ae35292a310e0c8f9ee0a912ce5977ab10613cdbcec76af5246425",
+      "3": "a643499b8bb6533a223e7258ab4cb8151a5d051666224b405c54fcba91499377",
+      "4": "ebe45b4539dc9d0e96d394b54f883cb3dde01970e765f6f25e5df4a28e8c65de",
+      "5": "0afe51811a184b1720cedabf045269b8000e835c6e4d6bb2a16592e3a12c9e66",
+      "6": "e9887c06af4639a96bd6ddb84af8401e7f36f12cfff59981d334c0af006f8de3",
+      "7": "673f9eac08cbadae642d16eb13522fb0f14ac912c96a789d30fc98bd188806cd",
+      "8": "d5ba0ae55780a643f527af84b8e8a1d4f51abf6ed7452543e2da3d5648d839bf"
+    },
+    "unityEnvironment": {
+      "architecture": "x64",
+      "buildHash": "bd58bb212d760498fc33eedb0a8576ecee423e430a317fbe2e776b9ff36fefa6",
+      "components": {
+        "AiNative.Core": "05267499c5f19ee42a889b0a3d9eb07dc2a0abbc55a54dad87bebf6cd7a91e8f",
+        "AiNative.GridGame": "aebc41e142b7044691f590d9720916fdb6dff433cd8eb1ae24dd75037533a9a4",
+        "AiNative.GridGame.Hosting": "fb02bd70bd7546c541a93db04ec251aef9b74c2cead24effef4774262a1e127d",
+        "AiNative.Hosting": "e051a3cf862a4a1b84d6e0c039257b86acf40b91cb5980ad8a0e4430d3469585",
+        "AiNative.Unity": "687119ae6b2c1aa51e05ffa7432d54cc02ebd1eddb20705838c63e77cd913ca8",
+        "GridGame.Play": "10ee7b75cf7b12b9a9bfac86a40202afa80cd06430f20dbc999e907b6e1cd121",
+        "GridGame.PlayTests": "5b225f9f3a1281b7f145df38f756d0657f051921af3a423ac996df928b16439d",
+        "Microsoft.Bcl.AsyncInterfaces": "82c3eb14261e9eda644d66abebc7a57530ea062c0b0813dc36b0681546d26e49",
+        "System.IO.Pipelines": "9f5514995fc52aad781a2f7fc8ef999ecc78e8ccacaa15a6491d550de7f55bcf",
+        "System.Runtime.CompilerServices.Unsafe": "fd67abc4c4af10affbcd42fd68a2a7bc361b26714afe6965d4d0d139459d8297",
+        "System.Text.Encodings.Web": "6630388e3573f1d6500891723b30f21d8545e14370707b4d4328e6f61aaca233",
+        "System.Text.Json": "136262fc12b3473cf408a4f5a3e604c73019b8baa0d3593205a87df67c7c4228",
+        "UnityEngine.CoreModule": "0fa704172fa3538d85d16ee8c0aba3912b23cee3db7f6aa7081b91bc69034207",
+        "UnityEngine.UI": "9f6af8538b3868ebd313182b4378b0f19b5b98eb56b2ae2264ccf2b82effcc58"
+      },
+      "os": "WindowsEditor",
+      "runtime": "Unity Play 6000.3.23f1 / Mono 4.0.30319.42000"
+    },
+    "cliEnvironment": {
+      "architecture": "x64",
+      "buildHash": "fbdf38d46333dd81ebf94508958343a8206073dc295a18b723cda8f61896c641",
+      "components": {
+        "AiNative.Core": "05267499c5f19ee42a889b0a3d9eb07dc2a0abbc55a54dad87bebf6cd7a91e8f",
+        "AiNative.Examples.Runner": "ab22a141f9509496da1bc5dcfbaec5e985df2303f79cec1122a264d88061b554",
+        "AiNative.GridGame": "aebc41e142b7044691f590d9720916fdb6dff433cd8eb1ae24dd75037533a9a4",
+        "AiNative.GridGame.Hosting": "fb02bd70bd7546c541a93db04ec251aef9b74c2cead24effef4774262a1e127d",
+        "AiNative.Headless": "d6672e811b7e4310c04d91892055de8cfce4157bfc9d0ac604c169a182fd3210",
+        "AiNative.Hosting": "e051a3cf862a4a1b84d6e0c039257b86acf40b91cb5980ad8a0e4430d3469585",
+        "System.IO.Pipelines": "7875941c62c402cbb1f3505883bf87ed74088f18171ff3a66d8c8fa06e511836",
+        "System.Text.Encodings.Web": "a2c7ef05abc665de9c07dcb600914889d501c8cfa13973bbe3c60c45367bc291",
+        "System.Text.Json": "9f4fd55056a3ccd6aa5f204933f9b8e3da412b060238cbeb8bb2be2fe4046f2a"
+      },
+      "os": "windows",
+      "runtime": "10.0.13"
+    },
+    "negativeControl": {
+      "code": "CheckpointMismatch",
+      "operationIndex": 2,
+      "tick": "2",
+      "difference": {
+        "path": "$.result.inputs[0].error",
+        "expected": "\"NotYourTurn\"",
+        "actual": "\"Blocked\""
+      }
+    }
+  },
+  "physics-urp-r3": {
+    "scene": "physics.scenario.json",
+    "seed": 42,
+    "workerThreads": 2,
+    "tests": {
+      "on": [
+        "AsyncShutdownFailureStillShutsAllModulesAndPreventsRestart",
+        "CallbackMutationUsesAStableBatch(FixedUpdate)",
+        "CallbackMutationUsesAStableBatch(LateUpdate)",
+        "CallbackMutationUsesAStableBatch(OmegaLateUpdate)",
+        "CallbackMutationUsesAStableBatch(Timer)",
+        "CallbackMutationUsesAStableBatch(Update)",
+        "CatchupAndRestoreBothBoundaries",
+        "ClearAllRemovesActiveAndNotYetDispatchedRegistrations",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(FixedUpdate)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(LateUpdate)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(OmegaLateUpdate)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(Timer)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(Update)",
+        "CloseContinuationCanStartAnotherRunBeforeCloseReturns",
+        "CloseDuringInitializationCancelsAndSharesCleanup",
+        "CloseWaitsForDrainBeforeShutAndPreservesReverseOrder",
+        "CommandFloatHasTheCliBitsAndSpelling(\"-0\",int.MinValue,\"-0\")",
+        "CommandFloatHasTheCliBitsAndSpelling(\"1.0000000596046447753906250000000001\",1065353217,\"1.0000001\")",
+        "CommandFloatHasTheCliBitsAndSpelling(\"1.0000001788139343261718749999999999\",1065353217,\"1.0000001\")",
+        "CommandFloatHasTheCliBitsAndSpelling(\"7.038531E-26\",363742205,\"7.038531E-26\")",
+        "CompletedStepCannotRecursivelyPumpOrReplace",
+        "DefaultLoggerAndPooledInitializationStartTheDrivers",
+        "Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(None)",
+        "Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(ScriptOnly)",
+        "EveryStartupFailureCleansBothEnteredModules",
+        "ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore",
+        "ExitingDuringInitializationCancelsBeforeTheNextPlay",
+        "ExitingPlayReleasesTheOnlyWorld",
+        "ExternalCancellationOnlyControlsStartup",
+        "ExternalCancellationSettlesAllPendingInitializers",
+        "FailedCallbackDoesNotLeaveTheDispatcherReentrantOrTimerAlive",
+        "FailureWaitsForAllInitializersBeforeShuttingAnyModule",
+        "FileSaveAndPausedRestore",
+        "FixedRemovalPreservesLateRegistration",
+        "FractionalPauseAndFailedReplacement",
+        "FrameBudgetRestartsWithoutFixedUpdate",
+        "GameViewPointerQueuesInputWhilePaused",
+        "NotificationExceptionsCannotTurnFailureIntoSuccessOrSkipCleanup",
+        "PausedInputAndDebt",
+        "RegistrationFailureRollsBackAllNewMappings",
+        "RepeatedRegistrationReplacesTheSubscription",
+        "RestartPreservesInstancesAndRegistrationOrder",
+        "RetiredCoreCannotPublishLateInitialization",
+        "RetirementCancelsDrainAndStillShutsEachModuleOnce",
+        "ReturnedModuleErrorPreservesItsCodeAndStopsLaterStages",
+        "SameOrderFollowsRegistrationSequence",
+        "ShutdownFailureStillReleasesOtherModulesAndStopsRestart",
+        "TicketOwnsItsClockAndCannotRemoveReplacement",
+        "TimerOrderReplacementDoesNotLeaveARecycledEntry",
+        "TimerReplacesItselfWithoutDeletingItsSuccessor",
+        "TwoPlaySessionsReleaseRunningModules",
+        "UniformSteps"
+      ],
+      "off": [
+        "AsyncShutdownFailureStillShutsAllModulesAndPreventsRestart",
+        "CallbackMutationUsesAStableBatch(FixedUpdate)",
+        "CallbackMutationUsesAStableBatch(LateUpdate)",
+        "CallbackMutationUsesAStableBatch(OmegaLateUpdate)",
+        "CallbackMutationUsesAStableBatch(Timer)",
+        "CallbackMutationUsesAStableBatch(Update)",
+        "CatchupAndRestoreBothBoundaries",
+        "ClearAllRemovesActiveAndNotYetDispatchedRegistrations",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(FixedUpdate)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(LateUpdate)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(OmegaLateUpdate)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(Timer)",
+        "ClearInsideCallbackInvalidatesTheRestOfTheBatch(Update)",
+        "CloseContinuationCanStartAnotherRunBeforeCloseReturns",
+        "CloseDuringInitializationCancelsAndSharesCleanup",
+        "CloseWaitsForDrainBeforeShutAndPreservesReverseOrder",
+        "CommandFloatHasTheCliBitsAndSpelling(\"-0\",int.MinValue,\"-0\")",
+        "CommandFloatHasTheCliBitsAndSpelling(\"1.0000000596046447753906250000000001\",1065353217,\"1.0000001\")",
+        "CommandFloatHasTheCliBitsAndSpelling(\"1.0000001788139343261718749999999999\",1065353217,\"1.0000001\")",
+        "CommandFloatHasTheCliBitsAndSpelling(\"7.038531E-26\",363742205,\"7.038531E-26\")",
+        "CompletedStepCannotRecursivelyPumpOrReplace",
+        "DefaultLoggerAndPooledInitializationStartTheDrivers",
+        "Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(None)",
+        "Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(ScriptOnly)",
+        "EveryStartupFailureCleansBothEnteredModules",
+        "ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore",
+        "ExitingDuringInitializationCancelsBeforeTheNextPlay",
+        "ExitingPlayReleasesTheOnlyWorld",
+        "ExternalCancellationOnlyControlsStartup",
+        "ExternalCancellationSettlesAllPendingInitializers",
+        "FailedCallbackDoesNotLeaveTheDispatcherReentrantOrTimerAlive",
+        "FailureWaitsForAllInitializersBeforeShuttingAnyModule",
+        "FileSaveAndPausedRestore",
+        "FixedRemovalPreservesLateRegistration",
+        "FractionalPauseAndFailedReplacement",
+        "FrameBudgetRestartsWithoutFixedUpdate",
+        "GameViewPointerQueuesInputWhilePaused",
+        "NotificationExceptionsCannotTurnFailureIntoSuccessOrSkipCleanup",
+        "PausedInputAndDebt",
+        "RegistrationFailureRollsBackAllNewMappings",
+        "RepeatedRegistrationReplacesTheSubscription",
+        "RestartPreservesInstancesAndRegistrationOrder",
+        "RetiredCoreCannotPublishLateInitialization",
+        "RetirementCancelsDrainAndStillShutsEachModuleOnce",
+        "ReturnedModuleErrorPreservesItsCodeAndStopsLaterStages",
+        "SameOrderFollowsRegistrationSequence",
+        "ShutdownFailureStillReleasesOtherModulesAndStopsRestart",
+        "TicketOwnsItsClockAndCannotRemoveReplacement",
+        "TimerOrderReplacementDoesNotLeaveARecycledEntry",
+        "TimerReplacesItselfWithoutDeletingItsSuccessor",
+        "TwoPlaySessionsReleaseRunningModules",
+        "UniformSteps"
+      ]
+    },
+    "comparisons": {
+      "on-uniform": 245,
+      "on-catchup": 245,
+      "on-pause": 14,
+      "on-from-90": 153,
+      "on-from-91": 150,
+      "off-uniform": 245,
+      "off-catchup": 245,
+      "off-pause": 14,
+      "off-from-90": 153,
+      "off-from-91": 150
+    },
+    "negative": {
+      "on": {
+        "operationIndex": 7,
+        "tick": 5,
+        "difference": {
+          "path": "$.result.inputs[1].error",
+          "expected": "\"UnknownBody\"",
+          "actual": "\"StaticBody\""
+        }
+      },
+      "off": {
+        "operationIndex": 7,
+        "tick": 5,
+        "difference": {
+          "path": "$.result.inputs[1].error",
+          "expected": "\"UnknownBody\"",
+          "actual": "\"StaticBody\""
+        }
+      }
+    },
+    "inputs": {
+      "physics.scenario.json": "758a4fe6b3472cdb2e4b009525df73aa634ab32d929349f154e23839b5f4527c",
+      "physics.commands.json": "7a9e2cdda88ed415bf213bf84d0e8e83d57e4775b3ddc690b7d9a620061a8617",
+      "pause.commands.json": "4ecb823baab973f0bfb9e90ac7710277c6cf352de4c9279dac6b834399efb675"
+    },
+    "editor": "6000.3.23f1",
+    "unityEnvironment": {
+      "architecture": "x64",
+      "buildHash": "3f9a2f56d4cca9f6326dc94e4991657b4f93d20d1cbb7d6bdbac99463f997ee9",
+      "components": {
+        "AiNative.Core": "05267499c5f19ee42a889b0a3d9eb07dc2a0abbc55a54dad87bebf6cd7a91e8f",
+        "AiNative.Hosting": "e051a3cf862a4a1b84d6e0c039257b86acf40b91cb5980ad8a0e4430d3469585",
+        "AiNative.Physics": "bbe506a178fa1c11a91b1ac62887f3ffd76c43b2aee6e691d41b5d89b29e25b9",
+        "AiNative.Physics.Jolt": "212bc9a431a2d3e9845536cb04c8ec70e946236707ffa7ee50e307727859663b",
+        "AiNative.PhysicsSandbox": "7be205d68db624f9ddfdf22816bfe0f099d1a15ec70bce68a7f1838846408ad8",
+        "AiNative.PhysicsSandbox.Hosting": "7d4e294f877e4dc09ea429ac77523d4a99dccd9d28315cc73ced014b4774f698",
+        "AiNative.Unity": "778e44924d892d4ab0d5639982593e35dbddd1ec1ac4141159aabb82c4b49ca7",
+        "Microsoft.Bcl.AsyncInterfaces": "82c3eb14261e9eda644d66abebc7a57530ea062c0b0813dc36b0681546d26e49",
+        "PhysicsSandbox.Play": "c972e0c058fbe749ee4529fdcb7062618487a351b76dc59e019f2e52e1d36384",
+        "System.IO.Pipelines": "9f5514995fc52aad781a2f7fc8ef999ecc78e8ccacaa15a6491d550de7f55bcf",
+        "System.Runtime.CompilerServices.Unsafe": "fd67abc4c4af10affbcd42fd68a2a7bc361b26714afe6965d4d0d139459d8297",
+        "System.Text.Encodings.Web": "6630388e3573f1d6500891723b30f21d8545e14370707b4d4328e6f61aaca233",
+        "System.Text.Json": "136262fc12b3473cf408a4f5a3e604c73019b8baa0d3593205a87df67c7c4228",
+        "UnityEngine.CoreModule": "0fa704172fa3538d85d16ee8c0aba3912b23cee3db7f6aa7081b91bc69034207",
+        "UnityEngine.UI": "1b345831df91e3e1877856fc26babc506a5b6e30b7bae2f67c3b5af6fbdbae45",
+        "ainative_jolt.build": "7285dc87cb49dcbd8027e3e2294f369683222bedce97f10e7a5131eb5aefc228",
+        "ainative_jolt.dll": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25"
+      },
+      "os": "WindowsEditor",
+      "runtime": "Unity 6000.3.23f1 / Mono 4.0.30319.42000"
+    },
+    "cliEnvironment": {
+      "architecture": "x64",
+      "buildHash": "dfbd39801ea773ea785457dff9cd75b498c33ef6add60f3adaaec90b0ebbc05e",
+      "components": {
+        "AiNative.Core": "05267499c5f19ee42a889b0a3d9eb07dc2a0abbc55a54dad87bebf6cd7a91e8f",
+        "AiNative.Examples.Runner": "ab22a141f9509496da1bc5dcfbaec5e985df2303f79cec1122a264d88061b554",
+        "AiNative.Headless": "d6672e811b7e4310c04d91892055de8cfce4157bfc9d0ac604c169a182fd3210",
+        "AiNative.Hosting": "e051a3cf862a4a1b84d6e0c039257b86acf40b91cb5980ad8a0e4430d3469585",
+        "AiNative.Physics": "bbe506a178fa1c11a91b1ac62887f3ffd76c43b2aee6e691d41b5d89b29e25b9",
+        "AiNative.Physics.Jolt": "212bc9a431a2d3e9845536cb04c8ec70e946236707ffa7ee50e307727859663b",
+        "AiNative.PhysicsSandbox": "7be205d68db624f9ddfdf22816bfe0f099d1a15ec70bce68a7f1838846408ad8",
+        "AiNative.PhysicsSandbox.Hosting": "7d4e294f877e4dc09ea429ac77523d4a99dccd9d28315cc73ced014b4774f698",
+        "System.IO.Pipelines": "7875941c62c402cbb1f3505883bf87ed74088f18171ff3a66d8c8fa06e511836",
+        "System.Text.Encodings.Web": "a2c7ef05abc665de9c07dcb600914889d501c8cfa13973bbe3c60c45367bc291",
+        "System.Text.Json": "9f4fd55056a3ccd6aa5f204933f9b8e3da412b060238cbeb8bb2be2fe4046f2a",
+        "ainative_jolt.build": "7285dc87cb49dcbd8027e3e2294f369683222bedce97f10e7a5131eb5aefc228",
+        "ainative_jolt.dll": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25"
+      },
+      "os": "windows",
+      "runtime": "10.0.13"
+    }
+  },
+  "builtin-isolated-r2": {
+    "Builtin": 54,
+    "Sbp": 54
+  },
+  "production-final": {
+    "id": "2",
+    "testcasecount": "7",
+    "result": "Passed",
+    "total": "7",
+    "passed": "7",
+    "failed": "0",
+    "inconclusive": "0",
+    "skipped": "0",
+    "asserts": "0",
+    "engine-version": "3.5.0.0",
+    "clr-version": "4.0.30319.42000",
+    "start-time": "2026-11-10 12:39:39Z",
+    "end-time": "2026-11-10 12:39:40Z",
+    "duration": "0.1877104"
+  },
+  "deployment": {
+    "backup": "C:\\work\\github\\ai_native_game_engine\\TestResults\\assets-enhancement\\local-config-validation\\streamingassets-before",
+    "previousFiles": {},
+    "source": "C:/unity-verification/7408aedad361/examples/unity/AssetsDemo/BuildArtifacts/DemoContent/ba68dc16562a4f3f917a5bc81125297e",
+    "validation": "mono-smoke.json",
+    "catalogSha256": "d07466e218bafc3392bc81d9b25c17f46ab632fadfe7a54e22b53d1ed1b260fc",
+    "deployedFiles": {
+      "catalog.json": "d07466e218bafc3392bc81d9b25c17f46ab632fadfe7a54e22b53d1ed1b260fc",
+      "group_a.bundle": "c935a80b7e44ab289e3f76f81c833350ab8eac9c94b57d7c3d25d488f663509f",
+      "group_audio.bundle": "3ed65c0c9bb62dd03896254f38ed2a4ad4ded67b3232295ba805ca0a13365099",
+      "group_b.bundle": "fc9fa3e170437c6eac1ec9d6bb275e4d601b25b762dc620a5819ea9c4c38fe0c",
+      "group_data.bundle": "97ee19cd8f2c156731e9a64c8a87425b584f38aea376df9aa96e41f37c995c00",
+      "group_scene.bundle": "0ca19a30a4c31d0715d66b7c5f964c3a659d6c198c7d09e241fcbe9d5fe7b90c",
+      "group_shaderprobe.bundle": "cbc039d24ef9f42c719649fbb01f9f082b1518524494c0c37227087e8d9ba1b9",
+      "group_sprites.bundle": "bf1135213c53e4bb2a7d1ef4af2e0823fe14e83169b4ca9f82dbf44ebf5699e7",
+      "share_a_b_scene.bundle": "5cf7980d9b797c2b85c14c6ed8c95343bf6b358a5164cb92bc506f72b8d5ddff",
+      "share_a_b_scene_shaderprobe.bundle": "80feccfb52f1a205c243e3b61c5cbb0f69ad45fde8fb79a923224c38678490bb"
+    },
+    "verified": true
+  },
+  "builtin-final": {
+    "Builtin": 55,
+    "Sbp": 55
+  },
+  "post-review-edit": {
+    "id": "2",
+    "testcasecount": "104",
+    "result": "Passed",
+    "total": "104",
+    "passed": "104",
+    "failed": "0",
+    "inconclusive": "0",
+    "skipped": "0",
+    "asserts": "0",
+    "engine-version": "3.5.0.0",
+    "clr-version": "4.0.30319.42000",
+    "start-time": "2026-11-10 13:08:45Z",
+    "end-time": "2026-11-10 13:10:33Z",
+    "duration": "107.6438457"
+  },
+  "builtin-current-PlayMode": {
+    "id": "2",
+    "testcasecount": "55",
+    "result": "Passed",
+    "total": "55",
+    "passed": "55",
+    "failed": "0",
+    "inconclusive": "0",
+    "skipped": "0",
+    "asserts": "0",
+    "engine-version": "3.5.0.0",
+    "clr-version": "4.0.30319.42000",
+    "start-time": "2026-11-10 13:09:14Z",
+    "end-time": "2026-11-10 13:09:14Z",
+    "duration": "0.5826968"
+  }
+}

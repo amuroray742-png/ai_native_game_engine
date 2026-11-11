@@ -4,6 +4,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEditor;
+using UnityEditor.Build.Content;
+using UnityEngine;
 
 namespace AiNative.UnityCore.Assets.Editor
 {
@@ -11,10 +13,12 @@ namespace AiNative.UnityCore.Assets.Editor
     {
         internal readonly SortedDictionary<string, string> Owners = new SortedDictionary<string, string>(StringComparer.Ordinal);
         internal readonly List<string> Excluded = new List<string>();
+        internal readonly List<string> CollectionDecisions = new List<string>();
         internal AssetEntry[] Addresses;
         internal Dictionary<string, HashSet<string>> Dependencies;
         public AssetBundleBuild[] Definitions { get; private set; }
-        public static AssetBuildPlan Create(AssetGroups settings)
+        public static AssetBuildPlan Create(AssetGroups settings) => Create(settings, BuildTarget.StandaloneWindows64);
+        public static AssetBuildPlan Create(AssetGroups settings, BuildTarget target)
         {
             if (settings == null) { throw new ArgumentNullException(nameof(settings)); }
             if (!Enum.IsDefined(typeof(AssetBuildBackend), settings.BuildBackend)) { throw new AssetException("InvalidBuildBackend", "Unknown build backend."); }
@@ -27,11 +31,41 @@ namespace AiNative.UnityCore.Assets.Editor
             var addresses = new List<AssetEntry>();
             var usedAddresses = new Dictionary<string, string>(StringComparer.Ordinal);
             var sceneGroups = new HashSet<string>();
+            // Imported Shader Graph shaders can reference generated fallbacks which the
+            // source-file dependency API does not report. Query actual player objects too.
+            var shaderDependencies = new Dictionary<string, string[]>(StringComparer.Ordinal);
+            string[] DirectDependencies(string path)
+            {
+                var sources = AssetDatabase.GetDependencies(path, false);
+                if (AssetDatabase.GetMainAssetTypeAtPath(path) != typeof(Shader)) { return sources; }
+                if (!shaderDependencies.TryGetValue(path, out var native))
+                {
+                    var objects = ContentBuildInterface.GetPlayerObjectIdentifiersInAsset(new GUID(AssetDatabase.AssetPathToGUID(path)), target);
+                    native = ContentBuildInterface.GetPlayerDependenciesForObjects(objects, target, null)
+                        .Select(x => AssetDatabase.GUIDToAssetPath(x.guid.ToString())).Where(x => !string.IsNullOrEmpty(x) && x != path)
+                        .Distinct().ToArray();
+                    shaderDependencies.Add(path, native);
+                }
+                return sources.Concat(native).Distinct().ToArray();
+            }
+            IEnumerable<string> Dependencies(string path)
+            {
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                var pending = new Stack<string>();
+                pending.Push(path);
+                while (pending.Count != 0)
+                {
+                    string next = pending.Pop();
+                    if (!seen.Add(next)) { continue; }
+                    yield return next;
+                    foreach (string child in DirectDependencies(next)) { pending.Push(child); }
+                }
+            }
             foreach (var group in settings.Groups.OrderBy(x => x.Id, StringComparer.Ordinal))
             {
                 if (string.IsNullOrWhiteSpace(group.Id) || !groups.TryAdd(group.Id, group)) { throw new AssetException("InvalidGroup", "Empty or duplicate group ID."); }
                 bool? scene = null;
-                foreach (var item in ResourceCollection.Collect(group, settings.AddressMode, result.Excluded))
+                foreach (var item in ResourceCollection.Collect(group, settings.AddressMode, result.Excluded, target, result.CollectionDecisions))
                 {
                     string path = AssetDatabase.GetAssetPath(item.Asset);
                     if (string.IsNullOrWhiteSpace(item.Address) || !IsPackable(path) || AssetDatabase.IsSubAsset(item.Asset))
@@ -47,7 +81,7 @@ namespace AiNative.UnityCore.Assets.Editor
                     if (scene.HasValue && scene != isScene) { throw new AssetException("MixedSceneGroup", "Scene and ordinary assets must use separate groups."); }
                     scene = isScene;
                     addresses.Add(new AssetEntry { Address = item.Address, Path = path, IsScene = isScene });
-                    foreach (string dependency in AssetDatabase.GetDependencies(path, true))
+                    foreach (string dependency in Dependencies(path))
                     {
                         if (!IsPackable(dependency)) { result.Excluded.Add(dependency); continue; }
                         if (!references.TryGetValue(dependency, out var users)) { users = new SortedSet<string>(StringComparer.Ordinal); references.Add(dependency, users); }
@@ -99,7 +133,7 @@ namespace AiNative.UnityCore.Assets.Editor
             var graph = result.Definitions.ToDictionary(x => x.assetBundleName, x => new HashSet<string>());
             foreach (var pair in result.Owners)
             {
-                foreach (string dependency in AssetDatabase.GetDependencies(pair.Key, false))
+                foreach (string dependency in DirectDependencies(pair.Key))
                 {
                     if (result.Owners.TryGetValue(dependency, out string owner) && owner != pair.Value) { graph[pair.Value].Add(owner); }
                 }

@@ -24,6 +24,7 @@ namespace AiNative.UnityCore.Assets
     {
         private AssetPool _pool;
         private readonly AssetInstance _instance;
+        internal long DiagnosticId;
         internal PooledAsset(AssetPool pool, AssetInstance instance) { _pool = pool; _instance = instance; }
         internal void Invalidate() { _pool = null; }
         public GameObject Value => _pool != null ? _instance.Value : throw new ObjectDisposedException(nameof(PooledAsset));
@@ -37,6 +38,7 @@ namespace AiNative.UnityCore.Assets
     public sealed class AssetPool
     {
         private readonly AssetScope _scope;
+        private readonly long _id;
         private readonly string _address;
         private readonly int _maxInactive;
         private readonly GameObject _root;
@@ -51,6 +53,7 @@ namespace AiNative.UnityCore.Assets
         internal AssetPool(AssetScope scope, string address, AssetPoolOptions options)
         {
             _scope = scope;
+            _id = scope.Runtime.Ownership.Add("pool", address, scope.Id);
             _address = address;
             _maxInactive = (options ?? throw new ArgumentNullException(nameof(options))).MaxInactive;
             _root = new GameObject("AssetPool:" + address) { hideFlags = HideFlags.HideInHierarchy };
@@ -60,6 +63,7 @@ namespace AiNative.UnityCore.Assets
         private async UniTask<AssetInstance> CreateAsync(CancellationToken token)
         {
             var instance = await _scope.InstantiateAsync(_address, _root.transform, token);
+            _scope.Runtime.Ownership.Change(instance.DiagnosticId, _id, "inactive");
             var transform = instance.Value.transform;
             _transforms.Add(instance, (transform.localPosition, transform.localRotation, transform.localScale));
             instance.Released += () => OnDestroyed(instance);
@@ -93,6 +97,8 @@ namespace AiNative.UnityCore.Assets
                 cancellationToken.ThrowIfCancellationRequested();
                 if (!instance.IsAlive) { throw new AssetException("InstanceDestroyed", "Pool instance destroyed during activation.", _address, stage: "rent"); }
                 var rental = new PooledAsset(this, instance);
+                rental.DiagnosticId = _scope.Runtime.Ownership.Add("rental", _address, _id);
+                _scope.Runtime.Ownership.Change(instance.DiagnosticId, rental.DiagnosticId, "borrowed");
                 _active.Add(instance, rental);
                 return rental;
             }
@@ -102,6 +108,8 @@ namespace AiNative.UnityCore.Assets
         {
             if (!_active.TryGetValue(instance, out var current) || !ReferenceEquals(current, rental)) { return; }
             _active.Remove(instance);
+            _scope.Runtime.Ownership.Remove(rental.DiagnosticId);
+            _scope.Runtime.Ownership.Change(instance.DiagnosticId, _id, "inactive");
             if (_closed != null || !instance.IsAlive) { instance.Dispose(); _transforms.Remove(instance); return; }
             try
             {
@@ -156,6 +164,7 @@ namespace AiNative.UnityCore.Assets
                 _transforms.Clear();
                 UnityEngine.Object.Destroy(_root);
                 await UniTask.WaitUntil(() => _root == null, PlayerLoopTiming.LastPostLateUpdate);
+                _scope.Runtime.Ownership.Remove(_id);
                 Released?.Invoke();
                 Released = null;
                 completion.TrySetResult();
@@ -169,13 +178,15 @@ namespace AiNative.UnityCore.Assets
         }
         private void OnDestroyed(AssetInstance instance)
         {
-            if (_active.TryGetValue(instance, out var rental)) { rental.Invalidate(); _active.Remove(instance); }
+            if (_active.TryGetValue(instance, out var rental))
+            { _scope.Runtime.Ownership.Remove(rental.DiagnosticId); rental.Invalidate(); _active.Remove(instance); }
             _inactive.Remove(instance);
             _transforms.Remove(instance);
         }
         internal void ForceRelease()
         {
             _scope.ForceRelease();
+            _scope.Runtime.Ownership.Remove(_id);
             _active.Clear();
             _inactive.Clear();
             _transforms.Clear();

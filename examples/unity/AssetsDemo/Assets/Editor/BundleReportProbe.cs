@@ -22,7 +22,7 @@ public static class BundleReportProbe
         var material = AssetDatabase.LoadAssetAtPath<Material>(root + "/SharedMaterial.mat");
         if (material == null)
         {
-        material = new Material(Shader.Find("Unlit/Texture")) { mainTexture = texture };
+        material = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { mainTexture = texture };
         AssetDatabase.CreateAsset(material, root + "/SharedMaterial.mat");
         }
         foreach (string name in new[] { "A", "B" })

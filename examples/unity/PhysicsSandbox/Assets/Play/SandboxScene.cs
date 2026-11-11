@@ -32,6 +32,7 @@ namespace AiNative.Examples.PhysicsPlay
         private GameRegistry _registry = null!;
         private string _savePath = "";
         [SerializeField] private SandboxHud hud = null!;
+        [SerializeField] private Material bodyMaterial = null!;
 
         protected override void ConnectScene()
         {
@@ -72,7 +73,7 @@ namespace AiNative.Examples.PhysicsPlay
                     candidate = create();
                     try
                     {
-                        staged = new SandboxDisplay(transform);
+                        staged = new SandboxDisplay(transform, bodyMaterial);
                         var initial = candidate.CaptureObservation();
                         staged.Draw(initial, initial, 1);
                         if (Camera.main == null) { throw new InvalidOperationException("A MainCamera is required."); }
