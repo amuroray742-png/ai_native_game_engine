@@ -10,6 +10,8 @@ namespace AiNative.UnityCore.Assets.Editor
         public bool EnableProcessing;
         public RenderPipelineAsset[] AdditionalPipelines = Array.Empty<RenderPipelineAsset>();
         public Shader[] AdditionalShaders = Array.Empty<Shader>();
+        [Tooltip("Saved Editor play-session recordings merged with scanned materials and Required Variants.")]
+        public ShaderVariantCollection[] RuntimeCollections = Array.Empty<ShaderVariantCollection>();
         public AssetShaderVariant[] RequiredVariants = Array.Empty<AssetShaderVariant>();
         public AssetShaderExclusion[] Exclusions = Array.Empty<AssetShaderExclusion>();
     }
