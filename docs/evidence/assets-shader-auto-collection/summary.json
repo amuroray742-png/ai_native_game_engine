@@ -1,0 +1,62 @@
+{
+  "unity": "6000.3.23f1",
+  "urp": "17.3.0",
+  "sbp": "2.6.2",
+  "platform": "Windows Editor D3D11",
+  "playerCapture": false,
+  "tests": {
+    "reviewed-edit": {
+      "passed": 110,
+      "failed": 0,
+      "nativeTemporaryAllocationWarnings": 0
+    },
+    "reviewed-play": {
+      "passed": 55,
+      "failed": 0,
+      "nativeTemporaryAllocationWarnings": 0
+    },
+    "reviewed-capture-On": {
+      "passed": 6,
+      "failed": 0,
+      "nativeTemporaryAllocationWarnings": 0
+    },
+    "reviewed-capture-Off": {
+      "passed": 6,
+      "failed": 0,
+      "nativeTemporaryAllocationWarnings": 0
+    }
+  },
+  "independentReview": "Passed after fixing test ownership, scene restoration, output rollback and path protection.",
+  "OnGeneration": {
+    "FormatVersion": 1,
+    "UnityVersion": "6000.3.23f1",
+    "MaterialVariants": 23,
+    "RecordedVariants": 21,
+    "RejectedRecordedVariants": 1,
+    "ManualVariants": 0,
+    "Duplicates": 8,
+    "Variants": 35,
+    "Notes": [
+      "Rejected recording Assets/ShaderRecordingTests-8ab7cd4ab3ba4086821646bf0809e62d/Recorded.shadervariants: Hidden/Lit/ProbeGraph/ShadowCaster/_CASTING_PUNCTUAL_LIGHT_SHADOW _EMISSION: passed shader keyword variant not found in shader Hidden/Lit/ProbeGraph pass type 8",
+      "Static material combinations are candidates, not proof of runtime coverage. Record each renderer/quality configuration you use.",
+      "Recordings include all Editor rendering since Begin, including Scene view and shaders outside the resource groups.",
+      "SVC stores PassType, not PassName; variants with identical shader/type/keywords are merged."
+    ]
+  },
+  "OffGeneration": {
+    "FormatVersion": 1,
+    "UnityVersion": "6000.3.23f1",
+    "MaterialVariants": 23,
+    "RecordedVariants": 21,
+    "RejectedRecordedVariants": 1,
+    "ManualVariants": 0,
+    "Duplicates": 8,
+    "Variants": 35,
+    "Notes": [
+      "Rejected recording Assets/ShaderRecordingTests-85466f31db434a228fd1a96fcc62b5cc/Recorded.shadervariants: Hidden/Lit/ProbeGraph/ShadowCaster/_CASTING_PUNCTUAL_LIGHT_SHADOW _EMISSION: passed shader keyword variant not found in shader Hidden/Lit/ProbeGraph pass type 8",
+      "Static material combinations are candidates, not proof of runtime coverage. Record each renderer/quality configuration you use.",
+      "Recordings include all Editor rendering since Begin, including Scene view and shaders outside the resource groups.",
+      "SVC stores PassType, not PassName; variants with identical shader/type/keywords are merged."
+    ]
+  }
+}

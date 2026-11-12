@@ -38,3 +38,5 @@ Inspector 手工构建：选中 ResourceGroups，设置 Version（默认下一�
 `--backend both --players` 现在对每个内容后端分别验证 Mono 与 IL2CPP Player：Builtin 走部署辅助入口，SBP 走标准 BuildPipeline 入口，并检查 Player 运行时目录仅有 catalog 和 Bundle。
 
 本示例关闭 `PlayerSettings.stripUnusedMeshComponents`（Optimize Mesh Data），规避 Unity 6000.3.23f1 在 Builtin Bundle 的 URP Shader 顶点通道分析中遗留 JobTempAlloc 分配的问题。保留未使用的网格通道可能增加包体；不关闭 Shader 变体裁剪、不修改公共资源包的释放逻辑。设置已提交，`AssetsDemoSetup.Create` 与 URP 迁移入口会重现它；已有副本可执行 `AssetsDemoSetup.ConfigureBuildSettings`。验收脚本检查完整进程日志，包括测试报告写出后的退出阶段，发现原生临时分配警告即失败。定位与对照见 [JobTempAlloc 记录](../../../docs/assets-jobtempalloc.md)。
+
+Shader 自动收集入口与操作步骤见 [Shader 自动收集与运行采集](../../../docs/assets-shader-auto-collection.md)。ResourceGroups 的 Generate merged shader variant collection 合并材质扫描、Editor Play 录制和手动 Required Variants；生成的集合需要加入资源组后重新构建。录制与测试不更新本地 StreamingAssets。

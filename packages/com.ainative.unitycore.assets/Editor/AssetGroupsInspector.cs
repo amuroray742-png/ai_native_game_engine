@@ -42,6 +42,28 @@ namespace AiNative.UnityCore.Assets.Editor
                 string path = EditorUtility.SaveFilePanelInProject("New variant collection", "Variants", "shadervariants", "Choose a new asset path; add the result to a resource group.");
                 if (!string.IsNullOrEmpty(path)) { AssetShaderCollection.Generate(groups.Shaders, path); }
             }
+            if (groups.Shaders != null)
+            {
+                EditorGUILayout.HelpBox("Automatic generation merges resource-group materials, Runtime Collections and Required Variants. Add the generated collection to a resource group. Recording uses Editor-wide rendered variants (including Scene view); Begin clears Unity's current tracking list. Exercise Play Mode, then save. This does not change Graphics preloaded shaders or stripping rules.", MessageType.Info);
+                if (GUILayout.Button("Generate merged shader variant collection"))
+                {
+                    string path = EditorUtility.SaveFilePanelInProject("Merged variant collection", "MergedVariants", "shadervariants", "Choose a new asset path.");
+                    if (!string.IsNullOrEmpty(path)) { AssetShaderAutoCollection.Generate(groups, path); }
+                }
+                if (!AssetShaderRecording.IsRecording)
+                {
+                    if (GUILayout.Button("Begin shader recording (clear Unity tracking)")) { AssetShaderRecording.Begin(groups.Shaders); }
+                }
+                else
+                {
+                    if (GUILayout.Button("Save shader recording and attach to original settings"))
+                    {
+                        string path = EditorUtility.SaveFilePanelInProject("Save rendered variants", "RecordedVariants", "shadervariants", "Attached to the settings that started this recording.");
+                        if (!string.IsNullOrEmpty(path)) { AssetShaderRecording.Save(path); }
+                    }
+                    if (GUILayout.Button("Cancel shader recording")) { AssetShaderRecording.Cancel(); }
+                }
+            }
             EditorGUILayout.LabelField("Last published version", groups.LastBuildVersion.ToString());
             EditorGUILayout.LabelField("Last build", groups.LastBuildPath);
             if (GUILayout.Button("Copy latest build to StreamingAssets"))

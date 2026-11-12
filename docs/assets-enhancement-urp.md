@@ -95,3 +95,5 @@ Editor 工具已实际显示 Inspector／分包窗口，并通过 Editor 菜单�
 2026-11-10 的部分批量构建测试退出日志含 `JobTempAlloc`，当时未定位；2026-11-11 后续原生栈与开关对照将其定位到 Unity Builtin Bundle 构建的 Shader 顶点通道分析，工程规避与新回归另见 [JobTempAlloc 记录](assets-jobtempalloc.md)。旧日志原样保留，测试及受管资源所有权检查通过不等于声明整个 Editor 进程没有原生内存泄漏。
 
 本地部署来源和新旧摘要见 ZIP 中 `local-config-validation/deployment-provenance.json`。部署前额外备份位于 `TestResults/assets-enhancement/local-config-validation/streamingassets-before`。原 `AiNativeAssets~` 保留，ResourceGroups、PackageManagerSettings 和本地 SBP 配置与初始备份逐字节一致；部署未改写原配置的下一版本／最近构建记录，也未改变其 AssetDatabase 调试模式。
+
+Shader 流程后续增加了静态材质扫描、Editor Play 实际变体录制与集合合并；旧声明生成入口保留。使用和兼容边界见 [Shader 自动收集与运行采集](assets-shader-auto-collection.md)。
