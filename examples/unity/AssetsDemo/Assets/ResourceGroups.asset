@@ -37,3 +37,4 @@ MonoBehaviour:
     Assets:
     - Address: sprites
       Asset: {fileID: 2800000, guid: 370ae4d4f9d71d049a2ff55fd141d7ed, type: 2}
+  Shaders: {fileID: 11400000, guid: 836f39f523483c44ab968701df765a6a, type: 2}
