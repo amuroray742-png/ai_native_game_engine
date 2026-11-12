@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETStandard,Version=v2.1": {
+      "ainative.unitycore": {
+        "type": "Project"
+      },
+      "ainative.unitycore.assets": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.UnityCore": "[1.0.0, )"
+        }
+      },
+      "ainative.unitycore.assets.editor": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.UnityCore": "[1.0.0, )",
+          "AiNative.UnityCore.Assets": "[1.0.0, )"
+        }
+      },
+      "assetsdemo": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.UnityCore": "[1.0.0, )",
+          "AiNative.UnityCore.Assets": "[1.0.0, )",
+          "AiNative.UnityCore.Assets.Editor": "[1.0.0, )"
+        }
+      },
+      "assetsdemo.editor": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.UnityCore": "[1.0.0, )",
+          "AiNative.UnityCore.Assets": "[1.0.0, )",
+          "AiNative.UnityCore.Assets.Editor": "[1.0.0, )",
+          "AssetsDemo": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}
