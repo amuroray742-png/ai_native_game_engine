@@ -8,6 +8,8 @@ GridGame 和 PhysicsSandbox 各有一个独立 Unity 工程，均已在 Windows 
 
 第三方依赖统一存放在 [`third_party/`](third_party/README.md)：Jolt/joltc源码由原生构建脚本获取，NuGet包由`dotnet restore --locked-mode`恢复到`third_party/nuget/`。
 
+能力状态、分模块历史验收、未覆盖范围及复现入口统一见 [当前验收总索引](docs/acceptance-index.md)。索引不代表当前 HEAD 已重新通过全部验证。
+
 ## 运行
 
 需要 global.json 指定的 .NET 10 SDK。GridGame 不需要原生库：
