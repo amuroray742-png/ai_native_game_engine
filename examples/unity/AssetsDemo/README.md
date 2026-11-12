@@ -40,3 +40,5 @@ Inspector 手工构建：选中 ResourceGroups，设置 Version（默认下一�
 本示例关闭 `PlayerSettings.stripUnusedMeshComponents`（Optimize Mesh Data），规避 Unity 6000.3.23f1 在 Builtin Bundle 的 URP Shader 顶点通道分析中遗留 JobTempAlloc 分配的问题。保留未使用的网格通道可能增加包体；不关闭 Shader 变体裁剪、不修改公共资源包的释放逻辑。设置已提交，`AssetsDemoSetup.Create` 与 URP 迁移入口会重现它；已有副本可执行 `AssetsDemoSetup.ConfigureBuildSettings`。验收脚本检查完整进程日志，包括测试报告写出后的退出阶段，发现原生临时分配警告即失败。定位与对照见 [JobTempAlloc 记录](../../../docs/assets-jobtempalloc.md)。
 
 Shader 自动收集入口与操作步骤见 [Shader 自动收集与运行采集](../../../docs/assets-shader-auto-collection.md)。ResourceGroups 的 Generate merged shader variant collection 合并材质扫描、Editor Play 录制和手动 Required Variants；生成的集合需要加入资源组后重新构建。录制与测试不更新本地 StreamingAssets。
+
+Shader 变体保留／裁剪对照使用独立场景 `Assets/ShaderVariantDemo/Demo.unity`，菜单入口为 `AI Native/Shader Variant Demo`。从 Bundle 持续显示 ShaderProbe，通过手动修改配置观察保留绿色、真实缺失粉色及恢复绿色；[操作步骤与验收边界](../../../docs/assets-shader-variant-demo.md)。

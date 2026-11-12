@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f620af9776af504ab49a215eb26c176, type: 3}
+  m_Name: Groups
+  m_EditorClassIdentifier: AiNative.UnityCore.Assets.Editor::AiNative.UnityCore.Assets.Editor.AssetGroups
+  Version: 1
+  OutputDirectory: '{projectDir}/BuildArtifacts/ShaderVariantDemo/{version}'
+  EditorLoadMode: 0
+  BuildBackend: 0
+  AddressMode: 1
+  BundleNaming: 0
+  Groups:
+  - Id: ShaderDemo
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 3129125828951833770, guid: bad06324cd1e3c34d8dd0f00ce932215, type: 3}
+    - Asset: {fileID: 20000000, guid: f66081975e816724c93e6a40f712fc06, type: 2}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  BundleWarningBytes: 0
+  TotalWarningBytes: 0
+  Shaders: {fileID: 11400000, guid: a13eb33b14ef3d64bb347ff80b138167, type: 2}
+  _lastBuildPath: 
+  _lastBuildVersion: 0
+  _lastBuildCatalogSha256: 
