@@ -1,0 +1,6 @@
+{
+  "name": "AssetsDemo.ShaderVariantTests",
+  "references": ["AssetsDemo", "AssetsDemo.Editor", "AiNative.UnityCore", "AiNative.UnityCore.Assets", "AiNative.UnityCore.Assets.Editor", "UniTask"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

@@ -1,0 +1,94 @@
+{
+  "builtin-retained": {
+    "success": true,
+    "message": "Pixel, expected-error and cleanup checks passed.",
+    "contentVersion": 1,
+    "source": "C:/work/github/ai_native_game_engine/TestResults/shader-variant-demo-reviewed-20261112/builtin-retained/ShaderVariantDemo_Data/StreamingAssets\\AiNativeAssets",
+    "expectedMissingErrors": 0
+  },
+  "builtin-stripped": {
+    "success": true,
+    "message": "Pixel, expected-error and cleanup checks passed.",
+    "contentVersion": 2,
+    "source": "C:/work/github/ai_native_game_engine/TestResults/shader-variant-demo-reviewed-20261112/builtin-stripped/ShaderVariantDemo_Data/StreamingAssets\\AiNativeAssets",
+    "expectedMissingErrors": 2
+  },
+  "builtin-restored": {
+    "success": true,
+    "message": "Pixel, expected-error and cleanup checks passed.",
+    "contentVersion": 3,
+    "source": "C:/work/github/ai_native_game_engine/TestResults/shader-variant-demo-reviewed-20261112/builtin-restored/ShaderVariantDemo_Data/StreamingAssets\\AiNativeAssets",
+    "expectedMissingErrors": 0
+  },
+  "sbp-retained": {
+    "success": true,
+    "message": "Pixel, expected-error and cleanup checks passed.",
+    "contentVersion": 4,
+    "source": "C:/work/github/ai_native_game_engine/TestResults/shader-variant-demo-reviewed-20261112/sbp-retained/ShaderVariantDemo_Data/StreamingAssets\\AiNativeAssets",
+    "expectedMissingErrors": 0
+  },
+  "sbp-stripped": {
+    "success": true,
+    "message": "Pixel, expected-error and cleanup checks passed.",
+    "contentVersion": 5,
+    "source": "C:/work/github/ai_native_game_engine/TestResults/shader-variant-demo-reviewed-20261112/sbp-stripped/ShaderVariantDemo_Data/StreamingAssets\\AiNativeAssets",
+    "expectedMissingErrors": 2
+  },
+  "sbp-restored": {
+    "success": true,
+    "message": "Pixel, expected-error and cleanup checks passed.",
+    "contentVersion": 6,
+    "source": "C:/work/github/ai_native_game_engine/TestResults/shader-variant-demo-reviewed-20261112/sbp-restored/ShaderVariantDemo_Data/StreamingAssets\\AiNativeAssets",
+    "expectedMissingErrors": 0
+  },
+  "editor-On": {
+    "id": "2",
+    "testcasecount": "3",
+    "result": "Passed",
+    "total": "3",
+    "passed": "3",
+    "failed": "0",
+    "inconclusive": "0",
+    "skipped": "0",
+    "asserts": "0",
+    "engine-version": "3.5.0.0",
+    "clr-version": "4.0.30319.42000",
+    "start-time": "2026-11-12 08:32:59Z",
+    "end-time": "2026-11-12 08:33:00Z",
+    "duration": "0.6447148"
+  },
+  "editor-Off": {
+    "id": "2",
+    "testcasecount": "3",
+    "result": "Passed",
+    "total": "3",
+    "passed": "3",
+    "failed": "0",
+    "inconclusive": "0",
+    "skipped": "0",
+    "asserts": "0",
+    "engine-version": "3.5.0.0",
+    "clr-version": "4.0.30319.42000",
+    "start-time": "2026-11-12 08:33:36Z",
+    "end-time": "2026-11-12 08:33:38Z",
+    "duration": "1.5784832"
+  },
+  "baseline-EditMode": {
+    "passed": 110,
+    "failed": 0
+  },
+  "baseline-PlayMode": {
+    "passed": 55,
+    "failed": 0
+  },
+  "versions": {
+    "editor": "6000.3.23f1",
+    "urp": "17.3.0",
+    "sbp": "2.6.2",
+    "player": "Windows Mono D3D11",
+    "pipeline": "Forward"
+  },
+  "review": "Independent read-only review passed after asset-path safety, shutdown error detection and exact expected-log matching fixes.",
+  "scope": "No IL2CPP/Forward+ claim; Editor controls exercised through their API, not mouse automation.",
+  "temporaryAllocatorWarnings": 0
+}
