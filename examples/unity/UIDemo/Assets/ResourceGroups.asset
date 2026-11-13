@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f620af9776af504ab49a215eb26c176, type: 3}
+  m_Name: ResourceGroups
+  m_EditorClassIdentifier: AiNative.UnityCore.Assets.Editor::AiNative.UnityCore.Assets.Editor.AssetGroups
+  Version: 1
+  OutputDirectory: '{projectDir}/BundleBuildOutput/{version}'
+  EditorLoadMode: 0
+  BuildBackend: 0
+  AddressMode: 0
+  BundleNaming: 0
+  Groups:
+  - Id: HomeView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 478607652699557166, guid: 8aeb736c28aa49449b1b636ff0ac40fb, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: GalleryView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 4751419887609874661, guid: c7941d64a05cbf8408a98d6be5c2a71d, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: DetailsView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 6939284974031279111, guid: 68f0aec4f87ef414e84565629b0e95f8, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: TransparentView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 7068776087062036823, guid: 86820ab8bc9f6df4da8a5cc9d17813fa, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: FirstModalView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 2874494131800623600, guid: c76ca3d755f70d94c883b7b556f446fa, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: SecondModalView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 8223967545814618513, guid: 944acf420bf20594ea488975ca68a165, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: HudView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 4025026664974171522, guid: f2d5b44c3e3b39749897101d31a43c21, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: ToastView
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 1915966362086269788, guid: 299ab9ba1ac249e4181c2f645ba180d1, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: Image
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 2800000, guid: 5201b9ff1c44d1048a192d0e9fd0e490, type: 2}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  BundleWarningBytes: 0
+  TotalWarningBytes: 0
+  Shaders: {fileID: 0}
+  _lastBuildPath: 
+  _lastBuildVersion: 0
+  _lastBuildCatalogSha256: 

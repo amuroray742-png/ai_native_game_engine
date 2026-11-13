@@ -1,0 +1,666 @@
+{
+  "date": "2026-11-13",
+  "baseCommit": "31760ceaa46b3525ff55dfe947eb12dd1274117a",
+  "unity": "6000.3.23f1",
+  "unityCli": "1.0.0",
+  "platform": "Windows Editor",
+  "scope": "Task 5: input routing, focus, safe area and built-in unscaled transitions",
+  "project": "examples/unity/UIDemo",
+  "filter": "AiNative.UnityCore.UI.Tests",
+  "workspace": "C:\\unity-verification\\ui-task5-035ff00a",
+  "source": "uncommitted working tree; 147 package source hashes match isolated verification copy",
+  "tests": [
+    {
+      "name": "reload-on-play",
+      "total": 81,
+      "passed": 81,
+      "failed": 0,
+      "skipped": 0,
+      "result": "Passed",
+      "xmlSha256": "658a8c12be29c181cb5132bb8d154393562323825b6a71836ba091c4fc2a2b38"
+    },
+    {
+      "name": "reload-on-edit",
+      "total": 25,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "result": "Passed",
+      "xmlSha256": "cede1e7540421bcc68d9ab542b9ed99ebc18d10a4fe60c0dda7a4283c4ee2e0f"
+    },
+    {
+      "name": "reload-off-play",
+      "total": 81,
+      "passed": 81,
+      "failed": 0,
+      "skipped": 0,
+      "result": "Passed",
+      "xmlSha256": "93e0c461ea2fed1f629771397831e89d50dba2c3561fd9d1bb467d48b10543cf"
+    },
+    {
+      "name": "reload-off-edit",
+      "total": 25,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "result": "Passed",
+      "xmlSha256": "5ed8080958e808baf273bc583d562374a8fca4d80022fce129a5562054ee507e"
+    }
+  ],
+  "totalExecutions": 212,
+  "review": "Independent read-only review passed after correcting lower-modal exit ordering, destroyed default focus, and geometry writes after retirement. Reviewer verified all four final XML results and hashes both locally and inside the archive, 147 source fingerprints, archive contents and design/acceptance/plan documentation. No remaining concrete blockers.",
+  "development": [
+    "red: 3 transition tests failed before implementation",
+    "first: 63 passed",
+    "input: 68 passed, 1 failed because Unity resets overrideSorting before activation",
+    "review: 76 passed, 1 failed on the same fixture assumption",
+    "expanded: 80 passed; edit: 25 passed",
+    "review-final: 81 passed after adding resize-callback retirement regression"
+  ],
+  "knownLogs": [
+    "LicensingClient validation warning; final commands exited 0",
+    "Expected forced Suspend exception and additional Canvas warning matched by LogAssert",
+    "Editor cleanup emitted mono abort_threads and debugger-agent unable-to-listen messages; commands exited 0"
+  ],
+  "notValidated": [
+    "Clear",
+    "complete late-completion and external-destruction matrix",
+    "interactive Demo",
+    "real Bundle backend",
+    "physical mouse/keyboard input backend",
+    "real device notch/rotation acceptance",
+    "screenshots or performance",
+    "Player/IL2CPP/mobile",
+    "remote CI"
+  ],
+  "fingerprints": [
+    {
+      "path": "packages/com.ainative.unitycore.ui/package.json",
+      "sha256": "fdb969c787e96a9428b784f4dddc17839ee9950e115d2df2a5bfb165681f5b62"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/AiNative.UnityCore.UI.asmdef",
+      "sha256": "4f326423802c4a3a2381b3c9615118e31099881435508006ce5f2e1ded6ff967"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/AssemblyInfo.cs",
+      "sha256": "07426a0f61b94b79af50defb5bae6217bd078ce1b62f95467c99dfcd4ee311c7"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/IUI.cs",
+      "sha256": "c58a5137812832db763eda8d93e1c8ed2e11225558ba0ca400fe6de176cd773f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UICanvasInputGate.cs",
+      "sha256": "846f69717f2f0141f41d761d881b1455dd39f6f1518c0c258b3723f7f8aa2f69"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIDiagnostics.cs",
+      "sha256": "e534941ec5281ba1edf50a5e806ea89e6cab0f938933fa17ea7f653dfabf9024"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIHandle.cs",
+      "sha256": "6f53f463f324629fb16d00406187aa87afff11103fbccceb9c75c923a1ef7be3"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIModule.cs",
+      "sha256": "958b7f4e8d1ab8c95d42d7c98a95e7a3d1a72553c5df2e55ce83c089c5cae9dc"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UINavigation.cs",
+      "sha256": "c2f8c3776cff5caf87bd87504d76c2e34f7cfb05b9505d65338cf35e9745ba87"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIOperationException.cs",
+      "sha256": "21ba82fbca5670310d08f910b9387b3beff46bbea845390ea8cb6272fdf4d5cb"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIOptions.cs",
+      "sha256": "e7cd5c9b3904b29c3fbe370ab3fc09d78d296b6ff5cd2510ea08805fb81b793e"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIPresenter.cs",
+      "sha256": "4ae2a6b3207b521c33658cf391747f299d94a578879523fb6bf711b12c73f21c"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIResult.cs",
+      "sha256": "dde089c924c05561678b1414eb987a31a2f1eaa10f9837d19e31ebeadfdf169b"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIRoot.cs",
+      "sha256": "e0e7aba9d3da530eb01c2bd8bb5a1b23891f0f723fdc8f33b0738634999b8370"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIRun.Caching.cs",
+      "sha256": "b0dce9415ef04b7321669a8ddcac36e7656143b019f0442d572319a22b464639"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIRun.Closing.cs",
+      "sha256": "ac100c99f4dfd9123a33590f5b450e26fac4f2f840bb683aced68ad7b2c61750"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIRun.cs",
+      "sha256": "f75aaeef388c7ef7150a0adbfa1e8dc020d6354245356e4112df697a0bfda742"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIRun.Opening.cs",
+      "sha256": "3e96fe095b41ba5139b9c4a0819377e80d8a81f85e48e3c97ec9859d2e3cd123"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIRun.Presentation.cs",
+      "sha256": "cf99f5697612c67ca7fdff369ad58f6e1029d25aa1c1280fde3ff71921202c78"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UISafeArea.cs",
+      "sha256": "51d992442993dff3b6f531480a138a2efc838d48506b85b5e5f5df1043471025"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UITransition.cs",
+      "sha256": "8fa8f4b363f8787f8fceb4737d76d445460d3db5834094969470caed0da1ccb3"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UITransitionOptions.cs",
+      "sha256": "ce39114fe086c15a7f661e641619019e39597f36c6d86c3dead6bc7e7770044d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIView.cs",
+      "sha256": "1c6cb1accf1edb53715760835198d6c74c15097fcd235a04a69f777b14634eef"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIWindowCache.cs",
+      "sha256": "fc30474ead58b91d29dd5ee9f7c6a6673f8e1837e49a6a9606cddd6c85a78083"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIWindowDefinition.cs",
+      "sha256": "55f479e993df1033cc44fba4e38a1c9dd33b03768075f8e7003d3a65b7716d13"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Runtime/UIWindowRecord.cs",
+      "sha256": "bdc644d508cabb70de7cb434609d63525f5684fba379c808ea16b4cfa21f4c7e"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/EditMode/AiNative.UnityCore.UI.EditTests.asmdef",
+      "sha256": "2baa1baf057932137ffed8f3a2a086c8d18c881889528093cf9aa71241034593"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/EditMode/ContractView.cs",
+      "sha256": "1ba62d5c4d1f11333c295bc6b7d451d8c233c87bdb9c4bc3eb1c4e9f8de7c890"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/EditMode/UIContractTests.cs",
+      "sha256": "f155100b90291b5097040aaaf7002909be55b949b51699c038f61c5ced4f035a"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/EditMode/UIPlayCycleTests.cs",
+      "sha256": "9016b23cb569783bccde85a11e8cf9c2d55fc860834791c2b22425e62a2fbc82"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/EditMode/UISafeAreaTests.cs",
+      "sha256": "d55122ab09caf96d39c25dd55bd78ac8e2258bfe96e69a859dc4c952eb5f6cd5"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/AiNative.UnityCore.UI.PlayTests.asmdef",
+      "sha256": "fe1eda661cf3d31164c1cdc7933258af4afdc9947d592f68649973827aad29c9"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/FirstModalView.cs",
+      "sha256": "e100e67b83cf1aac7a829062ea6a28fa199e11eff5afd7870d583f6e4cc568c0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/FirstPageView.cs",
+      "sha256": "2457c1ffb83cecfe6028a7da221702418d0ed4329aa810a841c509741273db9f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/NavigationHudView.cs",
+      "sha256": "11965ff3ad99b21bb74a39ec9aa2475659dcd3a9a9b265657119a0d2d89180c0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/NavigationSelectionProbe.cs",
+      "sha256": "ed6e8960616eec585e3b20cdf9890f3b8c094b214e0e503a10f309e733d91677"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/NavigationView.cs",
+      "sha256": "2b979c73c09751272981093676f5c686e01f4cb11f2dd2791c2572f5cb1db31b"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/OwnershipView.cs",
+      "sha256": "9e6a0c361f7bad2fe9a209103ffcc9cd8b9b9c2a0100f7f1a0b65257a78b5680"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/SecondModalView.cs",
+      "sha256": "d98ea5d12670c33d6922e575a671e33c28973ea263c329b042b59b774e15bd81"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/SecondPageView.cs",
+      "sha256": "43f62c027b7d45b494c62e871dad8f85c0bf9928a0bfc88f7135a5d3ceab2a74"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/ThirdPageView.cs",
+      "sha256": "38140d5ac2a8fe9f352b6c0d6399af43e739dddcb4ed0d9d9a6d4c2b9be118c5"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UICacheTests.cs",
+      "sha256": "764f9922e84e23957b78eae105289087b902605e44d2f67d8cffe7434dcfc264"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UIInputTests.cs",
+      "sha256": "691164cc3a47960f892f25cb27821a95d4e0cabb21b3693de7bbf21ec7c0ac97"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UINavigationTests.cs",
+      "sha256": "05b286bfaf69daa4a09f404a2a83ce6adcdc6ccca3bc3a1813d5981dbb90f610"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UIOwnershipTests.cs",
+      "sha256": "33c13431f317eaa21fb0f52ab32b47127493705efeec0b643ab497b71226716f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UISizeProbe.cs",
+      "sha256": "3b54413135a11d2c6a2be5ea96155d6914a233c65dbcab8289b3e42503d5650d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UITask5Fixture.cs",
+      "sha256": "a55c5ccaa6880e1d9d3ed3e1f85d1a94a40a7f1d704e3d6dc28e73dd73d12892"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.ui/Tests/PlayMode/UITransitionTests.cs",
+      "sha256": "247ba0248ee07abb19a2a6d1883a1d24fb217268edfd9c036d0e74d66ff836c8"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/package.json",
+      "sha256": "8f1c389af0c6bd3362ed16d5a1e9d38f04e4ca68279c0ff00ad519e716c901bf"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/AiNative.UnityCore.asmdef",
+      "sha256": "73ccb9bb30ed2dd88e88cf295f31fa7815fb29d5fc63146f17d219cce4c8645a"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/AssemblyInfo.cs",
+      "sha256": "d497e21dba4bbcfdf26d1aa9719b57f22d32cac023fd9eeae765356f1f5f39b9"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Core.cs",
+      "sha256": "c960104673d1bb2c7d7b16b188d7fee5d26bbdfb4992a9313db7b7beeb30e0a0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/CoreEditorLifetime.cs",
+      "sha256": "f145402064324bd4ee25cd5f13f272baa57da9e3dabfeefb434fd40448031b5f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/CoreLifetime.cs",
+      "sha256": "82cd2cda20570cfd65e9afe870c7a59c20d6acce5585712d015b7f4751c20583"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/CoreRun.cs",
+      "sha256": "c38ee66c8fe8a9fa258277d2d64c1a0a2be95f3767bf6d14272890206ba68d30"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/CoreState.cs",
+      "sha256": "e8c7479fa6cc1495a4edb92dc308dbd57123aa0384caec70a6a13e7850863385"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/ModuleManager.cs",
+      "sha256": "345a4e93556fd6ae603395770fc539843f753689ecfe0d2128e237d0f8a26b1c"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Attributes/ModuleOrderAttribute.cs",
+      "sha256": "64425576538af7e05635c77c612044daee59c3c58c548544c1879653cd72ac45"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Consts/FrameworkConst.cs",
+      "sha256": "7d3fcf5fffdb87e763dee24cfb35a44167098770805c4f0d0ce27e8036742855"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Exceptions/ErrorCode.cs",
+      "sha256": "401228e98ab416bd511d56b7bf4eca10e1b2057114c5efda32a5e0c1d1754bcd"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Exceptions/UniCoreException.cs",
+      "sha256": "5de25adcd6398660b46709d93d599f101589eb4ccb12778569f858239c827f44"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Interfaces/IAsyncShutdownModule.cs",
+      "sha256": "54d24d3fca4dfea20c6c2492c6821c1562d7d26cbc08d8f3c48ff7d66ff0b6be"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Interfaces/ICore.cs",
+      "sha256": "5660f72639b0dcd858202b8065719c08ce93fa0355072984495ca8d17b71c917"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Interfaces/IModule.cs",
+      "sha256": "c192e8cc8ce27fb5b830a5bda0b334ca79abb4f432f8d67a3a0f86c138d0dc36"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Logger/Logger.cs",
+      "sha256": "d06cad3f562663f551e8bb2a1ead4be2d444b5a59877a972d326fe87ebb51f56"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Pool/EasyGameObjectPool.cs",
+      "sha256": "0a81d949768b59efda28f6980949d440c05bc073bf71b7e26b2ab0ece28f1083"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Pool/FastCollectionPool.cs",
+      "sha256": "2aff9636784d13901a39f90a17ca57b0d78c19c05b67a20f1417fa7cd2c6ed6a"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Pool/FastGenericPool.cs",
+      "sha256": "63ae5ad88820a05659a475178ff2940f6c8dbf7f526ed142a7e5fa7deeb12bd0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/AlphaTimeEngine.cs",
+      "sha256": "283644144f5ca22fef3f6fa739ef52cc9bdd137875a5bb6e48d1b5053189837c"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/CallbackGroup.cs",
+      "sha256": "89ba2745c6a6e5d487c4b08918a0a84f6cc57db5ffa2248ad20fe49e52418b8e"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/ITimeMachine.cs",
+      "sha256": "1321669afe7ebc5e59184344c5ca66d7dfd51d09cb5d711310a3af6c43431f30"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/ITimeTicket.cs",
+      "sha256": "5bdcbfc5e2d894756c564de6394e6d208d54b40b369337fc358cf50228ab1d16"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/OmegaTimeEngine.cs",
+      "sha256": "43184d6a83b80e1f455af19748c0d252b78411018a73f36504ed10270829fd4f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/TicketType.cs",
+      "sha256": "b916ca54a20c84b8848cea60bf4dd1eb8ab54472853a4a54c14250c8f4dfbd2f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/TimeMachine.cs",
+      "sha256": "f8d1c8f3e75ad7faac35c9365ac1434b181df3748f64ac587372fa98b7406a2d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/TimeMachine/TimeTicket.cs",
+      "sha256": "da284a937a78547ce7f8db62e12a0a6bc9ce1734dfa653c3d0979e18b850f715"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/UnityExtends/GameObjectExtend.cs",
+      "sha256": "9d7ffd4f12a1ba4491c3ca8ac9838dc634cbc666caf96799349808774c14bd3f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Runtime/Utils/ColorUtil.cs",
+      "sha256": "3f4412929cc68ea2e8cac6df7a8ad675fe2cba569c42a805b1e6572a5d2f06f8"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/EditMode/AiNative.UnityCore.EditTests.asmdef",
+      "sha256": "73aab9a919257cd084b9111e61863f71184830fd4061eb7df455a1065f4dc04d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/EditMode/CorePlayCycleTests.cs",
+      "sha256": "25b6908e159e7723a52cbe3a3b259d1baf4b5838b88258490d344cdc56096201"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/EditMode/LoggerTests.cs",
+      "sha256": "cd4f0c0eb347a3036ed173cb0c1dffd21ea1d9fcff8aa704e5a7835cd20a1915"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/EditMode/TimeMachineTests.cs",
+      "sha256": "578108517ba8964ccd6df5334456e580389d95e79a5924f53bdb8a7d56af827a"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/PlayMode/AiNative.UnityCore.PlayTests.asmdef",
+      "sha256": "b60644e733d3565140467ed849621c350b67f4fca346886f7ea9d2c460da115f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/PlayMode/AsyncShutdownTests.cs",
+      "sha256": "b8d4f31133e66734f3cbb9ad84606a399811430256e6093b272bc15c0db2f1b1"
+    },
+    {
+      "path": "packages/com.ainative.unitycore/Tests/PlayMode/CoreLifecycleTests.cs",
+      "sha256": "9cbc4a4e83275eec1482d39a21710685df9145f18240689b0d1090102a60f45a"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/package.json",
+      "sha256": "8a2fd638ee993c1281f9b4f331fbfb2307bf73bf105fcc35d718dd12160e22e7"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AiNative.UnityCore.Assets.Editor.asmdef",
+      "sha256": "ced05cc0913d95048184814c04ebb5c08a76487e43d3fdcadfbb654a94123aaa"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssemblyInfo.cs",
+      "sha256": "99d9573dedfcccb6c78003c130e45896a8decc67efcde6afba780180b2856d8d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetBuildAnalysis.cs",
+      "sha256": "a41d83061152ed476753edeee7eda4da91c397990ba7042cf32f0d87434c0c56"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetBuilder.cs",
+      "sha256": "9341852a32ab935a130873db2fc5c3ebd16729b483312716c3602f47d00e7bb4"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetBuildOptions.cs",
+      "sha256": "25f5c4017ec145e874f837d1bafb2905cb710b10ed37095264427677792035cf"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetBuildPlan.cs",
+      "sha256": "c08c7d3101028f1e147b6181061c323f35662c660d8010fd49d42b2f6d903232"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetBuildSession.cs",
+      "sha256": "bc0e7609ac6855acc9991c5f28d547e14efa509738f78d0996b70695aef3ccee"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetDeployment.cs",
+      "sha256": "f7f9345874b6eddac24fe1508acd96245ac1e772eba0b93080c3efbd549b48b3"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetDiagnosticsExport.cs",
+      "sha256": "4b9fcf7aed3d82105a2ad03d00b888961daee47a54e2dd901134b9ce7ce93df2"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetGroups.cs",
+      "sha256": "ecc33e6f10ba6e7b131f78adea63e7dfe1e35653db00e33882cc75fbcf52f005"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetGroupsInspector.cs",
+      "sha256": "f1b44adc98ed86410478b201c607cde411c7b6831df59131c4d4b75327f916a6"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetPlayerBuildSupport.cs",
+      "sha256": "024f68cdacfc7bef2340d530014c225ae515d499265477ecaec1d7bfe3467b50"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetShaderAutoCollection.cs",
+      "sha256": "2bfc4d76713fbc667d8afa13925b9fa6fff6e3294ea3447f75198dcfeecafca5"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetShaderBuildSession.cs",
+      "sha256": "42b676506f22cf9a476b84e4b65d4b2e9669f2e7b0a5e4633a09fdf297c38f4d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetShaderCollection.cs",
+      "sha256": "3e010c2f99d83b25636f53b15eeb91e25dcc9db473daba39d3dd164913b302bd"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetShaderRecording.cs",
+      "sha256": "33a64b9b3e5c7391486fd3b1704b6e159c5ba8b211a99de2fe5e09af494032fe"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/AssetShaderSettings.cs",
+      "sha256": "c071552a3c901b90a52ce9fa1ea02506fd6b310eb932a74bf5db9acac670caff"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/BundleDependencyGraph.cs",
+      "sha256": "2a867d700a24ab22a0be8d215c7989d971e621b9ce4f901f95496b0f137638a5"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/DeploymentFiles.cs",
+      "sha256": "a87596d3766dde5b08b96e9bc91fd6a17a2ea3a4b7580e4ddaa16dc36652cb41"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/DeploymentSnapshot.cs",
+      "sha256": "8cfa00fa84383896d66eb5d03dc2c07f4c549b8e91b377e723fd3735a1977994"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/EditorAssets.cs",
+      "sha256": "b79a8b36a1ff1117ac91178dc369b2734dcff65fbc37f936b29039a3f13a6bba"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/ResourceCollection.cs",
+      "sha256": "ebb5f9d487d8ddfbed356fa145d0b516a7214b10e5278d080cd73aa2d269d3e3"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/ResourceFilter.cs",
+      "sha256": "a7f6d6e859576493020fff2277ee10dfc78c2c2b17566099d9095e25a5fdfa23"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/SbpAssetBuild.cs",
+      "sha256": "63df848104bac2b3be313566c2ca7ed77d85e05ea6f42c5fa5e8c0e077692877"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Editor/SbpBuildEvidence.cs",
+      "sha256": "941dfb1c70115342bc95ae756207a6c03bab757ac71ea152325ab45830b22ddb"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AiNative.UnityCore.Assets.asmdef",
+      "sha256": "3e519f213b3c5ad4f3193cd928c6a706a89956de52372ffb042bdedaa1afcebc"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssemblyInfo.cs",
+      "sha256": "9448ead5f92f186b0653c4db7d82c2c6f15c75492087529470cb099047516356"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetBackend.cs",
+      "sha256": "7a98ebf0ac532adcdae1375bc4c787065d2ee68597355ab53f91b379e311eccf"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetBatch.cs",
+      "sha256": "c46db32f1f8f0fd3bbeaa4090432a222fcfe00af4cf3456b97ad30e60c676b92"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetCatalog.cs",
+      "sha256": "e6095e192d99610ae29ce1825226d33aba3eacfda067245ffe189ec4a783f8d0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetDiagnostics.cs",
+      "sha256": "a2024b1ac4062d3fde90da54fa6542404fffbb535be4e311b5d3aedbde61913f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetException.cs",
+      "sha256": "741c83c57d4c281e1ad2b30f638603b1d2507abd36a873775516844c6f777657"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetInstance.cs",
+      "sha256": "31286de1413074def2da62a6128236f3e24eddc3edff0cd0a6c1a16250e93cc0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetLoadOptions.cs",
+      "sha256": "5e3c8070aecacd9a5559fe97bbaea928acbc23ce94bdeb569892bc8d4a992b4d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetLoadScheduler.cs",
+      "sha256": "aa64420380a022fce1b9cce0551a06f771acd153cfd283fba65a17dc0bedca8d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetOwnershipSnapshot.cs",
+      "sha256": "10f61b913c7e06f5c304c8b6710b6f79f3ced92f10f44a49cd7b87b0edda87a1"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetPool.cs",
+      "sha256": "3b11de9ab2b29cd3f36adc533cf7fd6fccc6d1830cfa86c14712850289343628"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetRuntime.cs",
+      "sha256": "f1b7171ec206131ae6abe0f2eafe56b0fad0cb237b891aea58e1c36bf2ecd453"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetScene.cs",
+      "sha256": "4b9fb2cf99242fc09f39b1b1b9297828224ace63c2ddfe35126ea768dcba5f95"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetScope.cs",
+      "sha256": "f4d26d076b91314ad70479789a6246523c704156f0f675e15a3d3a34c531867e"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/AssetsModule.cs",
+      "sha256": "be14e3f30eedfc67e0bad3fdf56e5e9576166680b08a2ff0b22c92b7e84f2e21"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/IAssets.cs",
+      "sha256": "9c8ddb157142460ac9b907dadff8086e02690bfc9144dea457a1b4a6db0932cb"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/InstanceLifetime.cs",
+      "sha256": "234cf9ad041aa64beee7a0ce7da47bfc06b9560a70a5ed63e8dee31058f6330d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Runtime/SceneLoadOperation.cs",
+      "sha256": "27855d9ee9cc5bab2a45f5babc2d4f9551da0e42e0c8d9a35ffd7de5f2d267d0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/AiNative.UnityCore.Assets.EditTests.asmdef",
+      "sha256": "cb6a339d7bcb8566afc2f2530dcdda51238f10241ab1a96745084097615d9095"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/AssetBuildTests.cs",
+      "sha256": "1705805069faebb68f71f23435a15897c6dcd283c650337fda3dd480428c0cb7"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/AssetPlayCycleTests.cs",
+      "sha256": "a6edb6881e2cda7d2954108b161e687d1ea65e0120828133a0d909528421a33b"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/AssetProductionTests.cs",
+      "sha256": "0bffec7d800d70acf6e7079592cc72e7ecfb0668484e43e47052a0d0ce0f50b0"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/AssetShaderAutoCollectionTests.cs",
+      "sha256": "48f544719ed11b5704b357ee1d2942dc321681e76929159cc52c779be592a67f"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/AssetShaderRecordingTests.cs",
+      "sha256": "fb6ff2ba7bb72c5b1d5109d11d34ae88b9ab7bf7ba6849ec950fd35fbc2b838e"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/BuildVersionTests.cs",
+      "sha256": "4ccc13f7b9f2c380a7f21cdbacc9b189f6d2c56bd8b7c018811a3c70cb42dade"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/DeploymentTests.cs",
+      "sha256": "ee9be0d4b688292ebb560c24e2e005697b628bbf1ce9e84a2355a5dd9b77d94b"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/EditorModeOwnershipTests.cs",
+      "sha256": "9eed93153d8123dccf9600f361490bd69b0e55c73f81280d40b21b8a7c6e1529"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/ResourceCollectionTests.cs",
+      "sha256": "dccc2a2e6201569c4d9e5e0a1885b6fd084444357a3d9d8f5499b1996175b3a5"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/SbpBuildTests.cs",
+      "sha256": "1c223f17c7c224778b9cb574e591950f5895d7ee8317e7db19ca69261b7130c1"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/EditMode/SharedPackingTests.cs",
+      "sha256": "8dda2f2131fd9f4c53667892d83c632b3886750df70e959e814d378cc9760044"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/PlayMode/AiNative.UnityCore.Assets.PlayTests.asmdef",
+      "sha256": "a4392c0f45040f3391008044a59d061ea7a133234f52e2fa0c377d0596867864"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/PlayMode/AssetCancellationTests.cs",
+      "sha256": "446de3754f42ef0d82bd65aa8570db60642aba96687c11ce46bec2c52353a1a6"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/PlayMode/AssetLoadingTests.cs",
+      "sha256": "a68c9090b2781b41a287ae6277871878d575b94d7d4dbf16d85eec8b0a53c552"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/PlayMode/AssetOwnershipTests.cs",
+      "sha256": "7c85183f02ed936443694625d41e11b5fd8847deaf9429ae3502096ad42da34d"
+    },
+    {
+      "path": "packages/com.ainative.unitycore.assets/Tests/PlayMode/AssetReentryProbe.cs",
+      "sha256": "91d70f63aa98428c3aae0625a22e57bbe744989b92f76a073594a3ff669431b6"
+    }
+  ]
+}
