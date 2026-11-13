@@ -1,0 +1,1 @@
+{"name":"UIDemo.PlayTests","references":["UIDemo","AiNative.UnityCore","AiNative.UnityCore.UI","AiNative.UnityCore.Assets","AiNative.UnityCore.Assets.Editor","UnityEngine.UI","UniTask"],"optionalUnityReferences":["TestAssemblies"]}

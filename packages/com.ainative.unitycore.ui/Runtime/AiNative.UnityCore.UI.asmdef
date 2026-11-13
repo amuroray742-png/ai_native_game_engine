@@ -1,0 +1,4 @@
+{
+  "name": "AiNative.UnityCore.UI",
+  "references": ["AiNative.UnityCore", "AiNative.UnityCore.Assets", "UniTask", "UnityEngine.UI"]
+}

@@ -8,7 +8,7 @@
 
 工程为不同类型游戏提供可观察、可操作、可复现、可验证的玩法内核与工具链。通用性来自明确的游戏实现与宿主装配边界，不把网格、攻击、回合或刚体强加给所有游戏。GridGame 和 PhysicsSandbox 分别验证手动回合制与固定频率实时物理。
 
-模拟内核 AiNative.Core 保持纯 C#，不依赖 Unity、文件、网络、JSON、物理实现或任何 Example。物理属于可选能力，由需要它的游戏显式调用。Unity 应用侧另建设独立的 [Assets 本地资源包](unitycore-assets.md)，不扩展模拟内核职责。当前不建设 UI、音频业务框架、通用 ECS、模拟系统调度框架、网络同步或插件发现。
+模拟内核 AiNative.Core 保持纯 C#，不依赖 Unity、文件、网络、JSON、物理实现或任何 Example。物理属于可选能力，由需要它的游戏显式调用。Unity 应用侧另建设独立的 [Assets 本地资源包](unitycore-assets.md)，不扩展模拟内核职责。Unity 应用侧正在建设独立的 [uGUI UI 模块](unitycore-ui.md)，单向依赖 UnityCore 与 Assets，不改变模拟职责。当前不建设音频业务框架、通用 ECS、模拟系统调度框架、网络同步或插件发现。
 
 Unity 应用层另有 `AiNative.UnityCore`，用于显式模块装配、日志和表现回调调度。仅其 `Core` 允许应用级单例，模块由该实例拥有，在明确的依赖绑定阶段按接口查询服务。该例外不扩展到纯 C# 内核与玩法，也不接管每局 PlayHost、物理世界或权威 Tick。[UnityCore 生命周期](unitycore-lifecycle.md)
 

@@ -2,6 +2,18 @@
 
 UnityCore Assets 的独立资源包、异步关闭扩展与 Windows 资源验收记录见 [Assets 记录](unitycore-assets.md)。它不改变下述模拟内核和 v2 协议历史基线。
 
+2026-11-13 UnityCore UI 基础生命周期修复与 Windows Editor 双 Domain Reload 验证见 [UI 记录](unitycore-ui.md#基础生命周期收敛2026-11-13)：两种设置各 20 项 PlayMode、19 项 EditMode，共 78 次执行通过。仅覆盖基础窗口关闭、重启、取消及强退解绑，不代表导航、缓存、Bundle、真实输入或 Player 已完成，也不改写下述历史基线。
+
+同日后续 [UI Task 3 验收](unitycore-ui.md#task-3-页面栈模态与事务回滚2026-11-13)完成无动画页面栈、模态、事务回滚及基础输入/焦点；双 Domain Reload 各 43 项 PlayMode、19 项 EditMode，共 124 次执行通过并经独立复核。缓存、动画、Clear、Bundle、真实输入后端及 Player 仍未验收，前一轮 78 次记录保留为生命周期历史基线。
+
+同日后续 [UI Task 4 验收](unitycore-ui.md#task-4-有界缓存lrutrim-与旧会话隔离2026-11-13)完成有界缓存、LRU、Trim 与旧会话句柄隔离，经独立代码审查后双 Domain Reload 各通过 60 项 PlayMode、19 项 EditMode，共 158 次执行，0 失败、0 跳过；包含新增 17 项缓存测试和原导航/生命周期回归。前两轮记录保留为历史基线；Clear、动画、安全区、完整迟到/外部销毁、Bundle、真实输入和 Player 仍未完成。
+
+同日后续 [UI Task 5 验收](unitycore-ui.md#task-5-输入焦点安全区和内置过渡2026-11-13)完成输入路由、焦点、安全区及不受 timeScale 影响的内置过渡，经独立代码审查后双 Domain Reload 各通过 81 项 PlayMode、25 项 EditMode，共 212 次执行，0 失败、0 跳过。新增 21 项 PlayMode 与 6 项 EditMode；输入证据为 RaycastAll/ExecuteEvents，设备安全区、真实鼠标键盘、交互 Demo、Bundle、Player 与 CI 仍不在已验范围。前述记录保留为各阶段历史基线。
+
+同日后续 [UI Task 6 验收](unitycore-ui.md#task-6-clear迟到任务外部销毁与诊断2026-11-13)完成 Clear、迟到任务隔离、外部销毁恢复与不可变诊断，经独立代码审查后双 Domain Reload 各通过 104 项 PlayMode、25 项 EditMode，共 258 次 UI 执行；另有 Core PlayMode 16 项、EditMode 24 项及 Assets 取消 12 项，共计 310 次执行，0 失败、0 跳过。迟到加载采用受控后端配合真实 Core/Assets/UI，组件诊断只记录资源身份、不推断最终渲染材质或批次。Task 7–8、真实 Bundle UI 集成、交互 Demo、设备、Player 与 CI 仍未验收。
+
+同日后续 [UI Task 7 验收](unitycore-ui.md#task-7-独立-uidemo-与真实-bundle-集成2026-11-13)完成独立 UIDemo、真实 SBP Bundle 构建部署及 11 项集成测试；双 Domain Reload 各 UI PlayMode 104 项、EditMode 25 项、Demo 11 项，共 280 次执行通过，0 失败、0 跳过。可见 Windows Editor 另用操作系统注入的原生鼠标/键盘事件验证导航、模态返回、Clear 与 Single 切场景，并保存稳定页、双模态及双页过渡的 Game View screen 截图。Task 8、性能、设备、Player/IL2CPP 与远端 CI 仍未验收。
+
 本记录只声明实际执行的检查。当前实现、协议与复现边界见[v2契约](framework-v2.md)。旧355测试/45次CLI的逐项行为映射见[迁移索引](v2-migration-index.md)。
 
 2026-11-09 的宿主故障分类、编码失败终止、恢复 runtime 核对、退出日志和 Int32 负零修复，独立审查及本机271项 .NET、108次CLI和两个Unity宿主验收见[修复记录](review-fixes-20261109.md)。历史基线仍按下文保留。
