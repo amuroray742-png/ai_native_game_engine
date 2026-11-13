@@ -68,6 +68,7 @@ UnityCore 的应用服务与每局 PlayHost 分别管理生命周期。异步初
 
 ## 2. 代码组织
 
+- 根目录 `AiNative.sln` 只包含已入库的纯 .NET 工程，供无头构建与 CI 使用。Unity 自动生成的 `.csproj`/`.sln` 留在对应 Unity 工程内，不加入根解决方案；Unity 包通过对应 Editor 工程独立编译和验证。
 - 先按责任模块划分，再在模块内按能力组织，例如命令、回放、快照；避免全仓库只有 `Managers`、`Services`、`Helpers` 这类按技术名词堆放的目录。
 - 新建目录必须有实际内容和职责，不按架构图提前生成空目录。未来源代码与测试分开存放，测试结构对应被测模块。
 - 第三方源码和 NuGet 包默认集中到仓库根目录 `third_party/`，下载内容不提交 Git；原生提交由构建脚本固定，包声明和 `packages.lock.json` 保留在所属项目。项目维护的适配、扩展与补丁放在 `native/jolt/`，构建产物放在 `artifacts/`。获取与迁移方式见[第三方依赖说明](../third_party/README.md)。
