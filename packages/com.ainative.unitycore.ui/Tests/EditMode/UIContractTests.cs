@@ -6,6 +6,47 @@ namespace AiNative.UnityCore.UI.Tests
 {
     public sealed class UIContractTests
     {
+        [Test]
+        public void DisplayOptionsKeepDefaultsAndAcceptExplicitValues()
+        {
+            var defaults = new UIOptions();
+            Assert.AreEqual(new Vector2(1920, 1080), defaults.ReferenceResolution);
+            Assert.AreEqual(0.5f, defaults.MatchWidthOrHeight);
+            Assert.AreEqual(new Color(0, 0, 0, 0.5f), defaults.ModalMaskColor);
+            var configured = new UIOptions(referenceResolution: new Vector2(720, 1280),
+                matchWidthOrHeight: 1, modalMaskColor: Color.clear);
+            Assert.AreEqual(new Vector2(720, 1280), configured.ReferenceResolution);
+            Assert.AreEqual(1, configured.MatchWidthOrHeight);
+            Assert.AreEqual(Color.clear, configured.ModalMaskColor);
+        }
+
+        [TestCase(0f)]
+        [TestCase(-1f)]
+        [TestCase(float.NaN)]
+        [TestCase(float.PositiveInfinity)]
+        [TestCase(float.NegativeInfinity)]
+        public void InvalidResolutionComponentIsRejected(float value)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new UIOptions(referenceResolution: new Vector2(value, 1080)));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new UIOptions(referenceResolution: new Vector2(1920, value)));
+        }
+
+        [TestCase(-0.1f)]
+        [TestCase(1.1f)]
+        [TestCase(float.NaN)]
+        [TestCase(float.PositiveInfinity)]
+        [TestCase(float.NegativeInfinity)]
+        public void InvalidMatchOrColorComponentIsRejected(float value)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new UIOptions(matchWidthOrHeight: value));
+            for (int component = 0; component < 4; component++)
+            {
+                var color = Color.black;
+                color[component] = value;
+                Assert.Throws<ArgumentOutOfRangeException>(() => new UIOptions(modalMaskColor: color));
+            }
+        }
+
         [TestCase(-1, 16)]
         [TestCase(8, 0)]
         public void InvalidCapacityIsRejected(int capacity, int depth)

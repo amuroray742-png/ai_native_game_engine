@@ -81,23 +81,25 @@
 
 **Interfaces:** 产出上节全部公共声明；此任务不伪装 Open 已可用，未实现流程不得返回成功。
 
-- [ ] 写 `UIContractTests`：重复定义拒绝、Page-only opaque/AllowHudInput、非法容量/时长/NaN、固定角色映射、失败结果不能读取成功载荷；例如 `Assert.Throws<ArgumentOutOfRangeException>(() => new UIOptions(closedCacheCapacity: -1))`。
-- [ ] 建立相对依赖和测试 asmdef：manifest 显式引用 Core/Assets/UI 三包 `file:../../../../packages/<包名>`、uGUI 2.0.0、OpenUPM UniTask 2.5.11，testables 包含 UI（Core 回归按需增加）。`activeInputHandler=0`，保留 Horizontal/Vertical/Submit/Cancel 轴；不复制 URP/InputSystem 等无用途依赖。在隔离 UIDemo 中编译并运行 EditMode，保存首次缺少类型导致的失败/编译证据；不把编译错误当作已运行断言。
-- [ ] 实现结果/句柄/定义/选项的最小契约，UIHandle 内部存 owner、generation、instance、session；合法配置在登记时校验。
-- [ ] 重跑 UIContractTests，要求全部通过，更新正式文档的确切签名；不提交 Git。
+- [x] 写 `UIContractTests`：重复定义拒绝、Page-only opaque/AllowHudInput、非法容量/时长/NaN、固定角色映射、失败结果不能读取成功载荷；例如 `Assert.Throws<ArgumentOutOfRangeException>(() => new UIOptions(closedCacheCapacity: -1))`。
+- [x] 建立相对依赖和测试 asmdef：manifest 显式引用 Core/Assets/UI 三包 `file:../../../../packages/<包名>`、uGUI 2.0.0、OpenUPM UniTask 2.5.11，testables 包含 UI（Core 回归按需增加）。`activeInputHandler=0`，保留 Horizontal/Vertical/Submit/Cancel 轴；不复制 URP/InputSystem 等无用途依赖。在隔离 UIDemo 中编译并运行 EditMode，保存首次缺少类型导致的失败/编译证据；不把编译错误当作已运行断言。
+- [x] 实现结果/句柄/定义/选项的最小契约，UIHandle 内部存 owner、generation、instance、session；合法配置在登记时校验。
+- [x] 重跑 UIContractTests，要求全部通过，更新正式文档的确切签名；不提交 Git。
 
 ## Task 2：运行上下文、Root 与窗口资源闭环
 
-**Files:** Runtime/UIModule.cs、UIRun.cs、UIRoot.cs、UIWindowRecord.cs、UIView.cs；Tests/PlayMode/UIOwnershipTests.cs、UILifecycleTests.cs、测试资源工厂。
+**Files:** Runtime/UIModule.cs、UIRun.cs、UIRoot.cs、UIWindowRecord.cs、UIView.cs；Tests/PlayMode/UIOwnershipTests.cs、UILateTaskTests.cs、测试资源工厂。
 
 **Consumes:** ICore.RegisterInterface/GetModule、IAssets.CreateScope、AssetScope.InstantiateAsync/CloseAsync；Task 1 定义。
 **Produces:** IUI 的无动画 HUD/Overlay Open/Close/Release 和真实重启/退出；internal 窗口记录及单一提交保护边界，后续导航复用。
 
-- [ ] 写失败测试 `HudOpenOwnsOneScopeAndCloseReleaseReturnsToBaseline`、`InactivePrefabBindsBeforeEnable`、`DuplicateTypeIsRejectedWhileOpening`、`AssetsRegistersBeforeUiAndShutsAfterUi`：实例存活时资源非零，释放后真实 Unity null 且登记回基线。
-- [ ] 跑目标 PlayMode，保存红灯；使用 Assets 的 Editor 配置建立真实资源所有者，不手写假的 AssetScope。
-- [ ] 实现生命周期：Initialize 本地准备，AfterInitialize 缓存 IAssets/TimeMachine，Start 建每轮 Root/scope；登记只在停止时。单根 Canvas+GraphicRaycaster、Content/HUD/Page、Modal、Overlay、禁用 Staging。实例 inactive 绑定，父节点固定一次。
-- [ ] 实现幂等清理进度与独立完成源；所有外部工厂/Presenter/Unity 激活调用受提交保护，异步完成在保护外。保存失败记录，Release 重试；同步 Shut 立即失效/隔离、释放票据，不等待下一帧。
-- [ ] 补 `ForeignOwnerAndRestartInvalidateHandles`、`RepeatedCloseHasIndependentAwaiters`、`PartialStartStillShuts`，重跑全组直至通过。
+- [x] 写失败测试 `HudOpenOwnsOneScopeAndCloseReleaseReturnsToBaseline`、`InactivePrefabBindsBeforeEnable`、`DuplicateTypeIsRejectedWhileOpening`、`CoreCloseUnbindsBeforeAssetsShutdownAndDestroysWindows`：实例存活时资源非零，释放后真实 Unity null 且登记回基线。
+- [x] 跑目标 PlayMode，保存红灯；使用 Assets 的 Editor 配置建立真实资源所有者，不手写假的 AssetScope。
+- [x] 实现生命周期：Initialize 本地准备，AfterInitialize 缓存 IAssets/TimeMachine，Start 建每轮 Root/scope；登记只在停止时。单根 Canvas+GraphicRaycaster、Content/HUD/Page、Modal、Overlay、禁用 Staging。实例 inactive 绑定，父节点固定一次。
+- [x] 实现幂等清理进度与独立完成源；所有外部工厂/Presenter/Unity 激活调用受提交保护，异步完成在保护外。保存失败记录，Release 重试；同步 Shut 立即失效/隔离、释放票据，不等待下一帧。
+- [x] 补 `ForeignOwnerAndRestartInvalidateHandles`、`RepeatedCloseHasIndependentAwaiters`、`CloseDuringCoreStartupDrainsAlreadyStartedUi`，重跑全组直至通过。
+
+2026-11-16 状态校正：Task 1/2 已由公共契约、基础所有权及生命周期实现和回归覆盖。依据为 [公共契约与早期验证](../../unitycore-ui.md#验证记录) 和 [基础生命周期验收](../../unitycore-ui.md#基础生命周期收敛2026-11-13)；本次仅修正复选框，不将历史执行计为本轮验证。
 
 ## Task 3：页面栈、模态与事务回滚
 

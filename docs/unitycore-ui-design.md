@@ -71,7 +71,7 @@ Suspend 与 Unbind 拥有独立清理进度：Suspend 失败仍尝试 Unbind 和
 
 另有始终禁用的 Staging 节点，仅用于实例创建和绑定，不参与显示。
 
-这些层首先是 RectTransform 容器，不是每层一个 Canvas；不默认给每窗口添加 Canvas。根 Canvas 使用 Screen Space Overlay 与 CanvasScaler，配置由显式选项提供。后续只有在测量证据支持时才给热点区域增加子 Canvas。
+这些层首先是 RectTransform 容器，不是每层一个 Canvas；不默认给每窗口添加 Canvas。根 Canvas 使用 Screen Space Overlay 与 CanvasScaler，配置由不可变 UIOptions 显式提供：ReferenceResolution 默认 1920×1080，MatchWidthOrHeight 默认 0.5，ModalMaskColor 默认黑色 alpha 0.5。分辨率分量必须有限且为正，匹配值及颜色 RGBA 分量必须有限且位于 0..1。后续只有在测量证据支持时才给热点区域增加子 Canvas。
 
 **默认 HUD 位于 Page 下方。**“是否需要交互式 HUD 始终位于全屏页面上方”尚未确认；首期不擅自增加该层。若确有需求，应增加明确交互层，不得把交互窗口放入非交互 Overlay。
 
@@ -210,7 +210,7 @@ Core 关闭和退出 Play 跳过动画，不能等待已停止派发的 TimeMach
 
 ### Task 5 实施收敛
 
-绑定前校验 enabled 的根 CanvasGroup、无 ignoreParentGroups 的子组，以及直接位于窗口根下的 SafeArea 和其独立 Visual 后代。SafeArea 不能与 Visual 共用同一节点。业务不得在运行中关闭根组或改写框架输入策略。额外 Canvas 输出风险警告，不修改作者的 sortingOrder、材质或 Canvas 层级；在已有 Canvas 节点附加局部射线过滤，读取窗口根组策略，避免 overrideSorting 使 uGUI 提前停止祖先过滤。此处理覆盖绑定时存在的 Canvas；运行中新增 Canvas 或改变输入层级须由宿主遵守同样约束，当前不提供自动扫描修复。
+绑定前校验 enabled 的根 CanvasGroup、无 ignoreParentGroups 的子组，以及直接位于窗口根下的 SafeArea 和其独立 Visual 后代。SafeArea 不能与 Visual 共用同一节点。业务不得在运行中关闭根组或改写框架输入策略。额外 Canvas 仅允许继承 Root 的排序（overrideSorting=false），仍输出批次风险警告并保留局部射线过滤；不重写作者材质或 Canvas 层级。绑定前、激活/恢复后及打开提交前检查排序，发现 overrideSorting=true 时按原事务失败路径回滚和清理，不能交付跨层窗口。Unity 在 inactive 实例换父级时可能重置该标志，因此激活后的检查不能省略。运行中新增 Canvas 或修改排序/输入层级同样不得绕过约束；框架不逐帧扫描或自动修复业务对层级的改写。
 
 焦点候选须通过 Unity 对象存活、activeInHierarchy、Selectable.IsActive/IsInteractable、窗口归属及当前输入许可检查。默认 Selectable 已销毁时不通过 CLR 空值运算符访问 gameObject；没有合法候选则清空选择。HUD/Overlay 关闭同样刷新焦点。输入测试使用真实 GraphicRaycaster、EventSystem.RaycastAll 与 ExecuteEvents，覆盖双模态遮罩、点击/提交路由、Overlay 穿透与过渡阻断；这些证明事件路由，不能冒充真实鼠标键盘后端验收。
 

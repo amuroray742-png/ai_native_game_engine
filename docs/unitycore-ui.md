@@ -20,12 +20,13 @@
 
 ## 已实现公共契约
 
-- `UIOptions(int closedCacheCapacity = 8, int maxPageDepth = 16)`：容量非负，页面深度为正；参考分辨率 1920×1080、匹配值 0.5、遮罩黑色 alpha 0.5。
+- `UIOptions(int closedCacheCapacity = 8, int maxPageDepth = 16, Vector2? referenceResolution = null, float matchWidthOrHeight = 0.5f, Color? modalMaskColor = null)`：不可变选项；容量非负、页面深度为正。默认参考分辨率 1920×1080、匹配值 0.5、遮罩黑色 alpha 0.5；分辨率须有限且为正，匹配值及颜色 RGBA 须有限且位于 0..1。null 使用默认值，显式 Color.clear 保持透明。
 - `UITransitionOptions(float durationSeconds, bool fade, Vector2 enterOffset, float enterScale)`：时长有限非负、偏移有限、缩放有限且为正；`default` 表示无过渡。
 - `UIWindowDefinition<TView>(string address, UIRole role, Func<TView, IAssets, UIPresenter> presenterFactory, UICachePolicy cachePolicy = UICachePolicy.Release, bool opaqueFullscreen = false, bool allowHudInput = false, UITransitionOptions transition = default)`，其中 `TView : UIView`。
 - `UIRole` 固定为 Hud、Page、Modal、Overlay。只有 Page 可以开启 OpaqueFullscreen 或 AllowHudInput；Overlay 的目标契约为永不交互。
 - `UIModule(UIOptions options, EventSystem eventSystem)` 及 `Register<TView>(UIWindowDefinition<TView> definition)`：同一 View 类型不能重复登记，运行中禁止登记新类型。
 - `UIView` 显式序列化根 CanvasGroup、SafeArea、Visual 和可选默认 Selectable；绑定前校验根 CanvasGroup 位于 View 根且 enabled，子 CanvasGroup 不得 ignoreParentGroups；SafeArea 必须是 View 的直接子节点，Visual 为 SafeArea 的独立后代。
+- 窗口子 Canvas 只能继承 Root 排序；overrideSorting=true 在绑定前、激活/恢复后及打开提交前被拒绝，沿既有回滚/清理路径处理。业务运行中不得修改此排序约束；无逐帧自动扫描修复。
 - `UIResult` 与 `UIOpenResult<TView>` 提供 Error、Succeeded；默认结果不是成功，失败的 Open 结果访问 View/Handle 抛出 InvalidOperationException。
 - `UIHandle` 为不透明值身份，内部区分 owner、generation、instance、session 与 cleanup-only 标志。
 - `UIOperationException(string message, Exception innerException, bool committed, UIHandle? handle = null, UIHandle? cleanupHandle = null)` 保留原始异常、提交状态及可选清理身份。
@@ -384,3 +385,22 @@ UIDemo的359份源码指纹与R3构建一致；最终手动Back版本仅Player�
 证据见[机器摘要](evidence/unitycore-ui/shutdown-20261116/summary.json)、[完整归档](evidence/unitycore-ui/shutdown-20261116/shutdown-evidence.zip)、[独立复核](evidence/unitycore-ui/shutdown-20261116/review.json)。四张正式视口截图：[Mono加载](evidence/unitycore-ui/shutdown-20261116/Mono-loading.png)、[Mono退出](evidence/unitycore-ui/shutdown-20261116/Mono-exiting.png)、[IL2CPP加载](evidence/unitycore-ui/shutdown-20261116/Il2Cpp-loading.png)、[IL2CPP退出](evidence/unitycore-ui/shutdown-20261116/Il2Cpp-exiting.png)。归档包含用户原话、逐帧状态、完整日志/退出码、有效和失败测试XML、两种夹具与历史失败源码、构建内容及哈希。
 
 本轮限定受控加载交付边界与正常系统窗口关闭。强杀成功清理、物理IO在途专项、其他平台/输入后端、性能与远端CI未验收；OS截图/自动标题栏按钮工具也未据此视为修复。
+
+## UI 审查修复（2026-11-16）
+
+收敛固定视觉层级：允许继承排序的子 Canvas，拒绝 overrideSorting，并复查激活回调及打开提交前的候选；输入过滤不能代替视觉层级保证。UIOptions 开放分辨率、宽高匹配与遮罩颜色配置，保留原默认行为并校验有限值及取值范围。实施计划 Task 1/2 按已有验收更新状态，不重写历史结果。
+
+本轮新增配置合法性、配置传递到实际 Canvas/遮罩、子 Canvas 继承排序、激活改写排序失败回滚及重新打开、缓存重开失败后旧句柄释放、Back 恢复 Covered 页面失败后重试回归。独立代码审查已通过，审查建议的缓存与 Covered 恢复回归已补齐。非法排序的缓存候选在失败后仍为冷隐藏，旧句柄可以 Release；框架不擅自修复作者配置。之前的 Player/Editor 证据不计为本轮重跑。
+
+Windows Editor / Unity 6000.3.23f1 / Unity CLI 1.0.0，在独立 UIDemo 副本重新生成内容、构建并部署真实 SBP Bundle，运行双 Domain Reload 矩阵：
+
+| Domain Reload | UI EditMode | UI PlayMode | Bundle Demo |
+| --- | --- | --- | --- |
+| 开启 | 36/36 | 113/113 | 15/15 |
+| 关闭 | 36/36 | 113/113 | 15/15 |
+
+共 **328 次执行通过，0 失败、0 跳过**；436 个源文件与配置指纹和当前工作区完全一致。另有 18 项 Python 验证门禁单测通过；差分空白及本轮文档本地链接目标检查通过。原始最终目录为 `TestResults/ui-review-fixes-verified-20261116`，复现入口仍为 `python scripts/verify_unity_ui.py <全新输出目录>`。
+
+预跑使用未补最后两条回归的快照，6 份 XML 全通过，但期间工作区修改被源码指纹门禁正确拒绝，不能作为最终成功。首轮完整快照的 113 项 PlayMode 有 1 项失败：Back 测试在首次拒绝、栈/焦点/pending 恢复断言通过后，仅修改 inactive Canvas 属性未能使再次 Back 通过；改为移除测试注入的非法组件后，12 项输入专项及最终矩阵通过。没有将尚未单独定位的 Unity 属性行为认定为内部根因，也没有放宽生产排序校验。失败、专项和预跑材料均保留且不计入328次。
+
+证据见[机器摘要](evidence/unitycore-ui/review-fixes-20261116/summary.json)、[完整归档](evidence/unitycore-ui/review-fixes-20261116/review-fixes-evidence.zip)及[独立复核](evidence/unitycore-ui/review-fixes-20261116/review.json)。本轮验证为契约、导航/输入路由和真实 Bundle 集成；未重跑 Player/IL2CPP、原生交互截图、设备安全区、性能或远端 CI。已有使用 overrideSorting 的窗口需调整为继承排序后接入，不能沿用之前仅告警的行为。
