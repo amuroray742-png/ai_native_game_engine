@@ -12,6 +12,36 @@ namespace AiNative.UIDemo.Editor
 {
     public static class UIDemoBuilder
     {
+        public static void BuildMono() { BuildPlayer(ScriptingImplementation.Mono2x, "Mono"); }
+        public static void BuildIl2Cpp() { BuildPlayer(ScriptingImplementation.IL2CPP, "Il2Cpp"); }
+
+        private static void BuildPlayer(ScriptingImplementation backend, string name)
+        {
+            var target = UnityEditor.Build.NamedBuildTarget.Standalone;
+            var previous = PlayerSettings.GetScriptingBackend(target);
+            var stripping = PlayerSettings.GetManagedStrippingLevel(target);
+            try
+            {
+                PlayerSettings.SetScriptingBackend(target, backend);
+                PlayerSettings.SetManagedStrippingLevel(target, ManagedStrippingLevel.Minimal);
+                string output = Path.GetFullPath("../../../TestResults/ui-players/" + name + "/UIDemo.exe");
+                if (Directory.Exists(Path.GetDirectoryName(output))) { throw new InvalidOperationException("Player output already exists: " + output); }
+                var report = AssetPlayerBuildSupport.BuildDeployedPlayer(new BuildPlayerOptions
+                {
+                    scenes = new[] { "Assets/Bootstrap.unity", "Assets/Other.unity" },
+                    locationPathName = output, target = BuildTarget.StandaloneWindows64,
+                    options = BuildOptions.None
+                });
+                if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+                { throw new InvalidOperationException("UIDemo Player build failed: " + report.summary.result); }
+            }
+            finally
+            {
+                PlayerSettings.SetScriptingBackend(target, previous);
+                PlayerSettings.SetManagedStrippingLevel(target, stripping);
+            }
+        }
+
         private static Font Font => Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         public static void ReloadOn() { SetReload(false); }
         public static void ReloadOff() { SetReload(true); }
@@ -123,7 +153,14 @@ namespace AiNative.UIDemo.Editor
         private static void CreateScenes()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // Overlay UI does not clear the Player backbuffer. A persistent clear-only
+            // camera avoids trails in areas exposed by transitions or scene changes.
+            var camera = new GameObject("Background camera").AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.025f, 0.04f, 0.07f);
+            camera.cullingMask = 0;
             var host = new GameObject("UIDemo Host").AddComponent<UIDemoBootstrap>();
+            camera.transform.SetParent(host.transform);
             host.Events = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule)).GetComponent<EventSystem>();
             host.Events.transform.SetParent(host.transform);
             var canvas = Rect("Host controls", host.transform, Vector2.zero, Vector2.zero);

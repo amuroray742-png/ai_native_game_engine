@@ -2,7 +2,13 @@
 
 ## 当前状态
 
-本模块按 [设计记录](unitycore-ui-design.md) 与 [实施计划](superpowers/plans/2026-11-12-unitycore-ui.md) 开发，已有基础窗口所有权及生命周期，并接入页面栈、模态顺序、事务回滚、输入/焦点策略、有界缓存、LRU、Trim、旧会话隔离、安全区更新和内置过渡；实际验证范围见下文。Task 6 已补齐 Clear、迟到任务隔离、外部销毁恢复与组件诊断回归；Task 7 已补齐独立交互 Demo 与真实 Bundle 集成；Task 8 的统一隔离验证脚本与最终交付审查仍待完成。
+本模块按 [设计记录](unitycore-ui-design.md) 与 [实施计划](superpowers/plans/2026-11-12-unitycore-ui.md) 开发，已有基础窗口所有权及生命周期，并接入页面栈、模态顺序、事务回滚、输入/焦点策略、有界缓存、LRU、Trim、旧会话隔离、安全区更新和内置过渡；实际验证范围见下文。Task 6 已补齐 Clear、迟到任务隔离、外部销毁恢复与组件诊断回归；Task 7 已补齐独立交互 Demo 与真实 Bundle 集成；Task 8 已补齐统一隔离验证脚本、层级顺序回归与交付证据；详见末节。
+
+2026-11-16 已补齐 Windows x64 Mono/IL2CPP Release Player 专项，两后端各十组检查通过，并完成双重载296次Editor回归；限定范围见[Player验收](#windows-player-与-il2cpp2026-11-16)，不扩展下方历史证据。
+
+同日后续完成两个后端的[原生鼠标键盘与Alt+F4系统关闭](#windows-player-原生输入与系统窗口关闭2026-11-16)；鼠标由用户执行，键盘与关闭由CUA执行，销毁回调资源归零。抓图及标题栏关闭按钮的工具限制单独记录。
+
+最新一轮已补齐[原生会话客户端截图与用户点击标题栏×关闭](#原生交互截图与标题栏关闭2026-11-16)：Mono/IL2CPP共34张实时PNG、两后端各4个视觉检查点和10个交互检查点通过；退出0且资源归零。
 
 包路径为 `packages/com.ainative.unitycore.ui`，命名空间为 `AiNative.UnityCore.UI`。独立工程为 [UIDemo](../examples/unity/UIDemo/README.md)，包含可点击场景、真实 Bundle 内容构建入口和集成测试。
 
@@ -234,3 +240,147 @@ Game View 从 **source=screen** 捕获 2560×1256 画面并等比例缩为 1280�
 开发期首构建因多个 Label 子资源同类型同名被拒绝，修正唯一命名后构建通过；首 8 项 Demo 通过，扩展到 10 项时一项 LogAssert 错配外层/内层异常，修正后 10 项通过；布局及 Toast 补测后 11 项通过，再运行最终矩阵。Windows 窗口截图两次超时，后续使用 Pipeline screen 捕获和文字焦点；一次探索性 focusedWindow 脚本返回 null，改为明确选择 GameView。所有失败/旧截图保留，不计入最终通过证据。
 
 最终矩阵及构建日志未发现 C# 编译错误/警告、JobTempAlloc/TLS 或 assertion failed。已知许可提示、测试明确匹配的故障注入、Unity 的旧 Input Manager 弃用提示，以及 Editor 退出 Mono/debugger-agent 信息分别保留；所有最终测试命令退出码为 0。Markdown 本地链接、JSON/asmdef、源码/文档空白、342 份指纹及 git diff --check 已检查；Editor 生成的序列化文件保留原格式。Task 8 的统一验证脚本及最终完整交付审查未完成；Frame Debugger/CPU/GPU/overdraw 性能、设备刘海屏/旋转、Player/IL2CPP/移动端与远端 CI 未由本轮代替。
+
+## Task 8 层级顺序、隔离验证与交付（2026-11-13）
+
+本轮收敛 HUD/Overlay 的稳定层级为**成功提交顺序**，包括缓存重开。候选入场时暂置顶，入场完成、输入刷新及存活校验通过后再次置顶；取消候选不重排其余窗口，稳定窗口仍可 BringToFront。Page/Modal 保持导航顺序。新增 4 项 PlayMode 覆盖 HUD/Overlay 的冷开、缓存重开、较晚开始却较早完成的交错及显式置顶。先运行 ConcurrentHudUsesCommitOrder，得到预期的 sibling index 断言失败，再修复生产路径。
+
+新增 [verify_unity_ui.py](../scripts/verify_unity_ui.py) 与 [门禁单测](../scripts/test_verify_unity_ui.py)，复用 unity_packages 的独立复制工具，不复制 Assets 整套验收脚本。新输出目录中保存复制前源码指纹、生成 fixture 后指纹、脚本指纹、完整命令/退出码、XML、日志和 Bundle。重建真实 SBP 内容并核对构建/部署哈希；六组测试采用精确过滤，拒绝失败、跳过、空/不足基线的报告及跨重载测试集合不一致。完整日志包含退出尾部检查，拒绝编译错误、普通运行时异常、Debug.LogError、断言和 JobTempAlloc/TLS 告警。故障注入仅按 suite 允许预期的精确异常链，每行至多一次，并仍要求 XML 通过 LogAssert。版本从实际 Editor 日志提取并核对工程要求；运行期间源码变化使本轮失败。
+
+独立代码审查发现并补强了普通运行时异常日志检测和实际 Editor 版本核对。脚本单测先保存缺少模块的导入失败，随后补齐实现；新增版本用例前一次测试编辑错误造成 NameError，已修正。最终 **10 项验证门禁 Python 单测 + 2 项既有包复制单测全部通过**。开发期失败材料不计为实际行为断言通过。
+
+审查后以最终脚本在 `C:/unity-verification/78b90386a649` 运行，Windows x64、Unity **6000.3.23f1**、Unity CLI **1.0.0**：
+
+| Domain Reload | UI PlayMode | UI EditMode | Bundle Demo PlayMode |
+| --- | --- | --- | --- |
+| 开启 | 108/108 | 25/25 | 11/11 |
+| 关闭 | 108/108 | 25/25 | 11/11 |
+
+共 **288 次 Unity 执行，0 失败、0 跳过**，不把两种设置下的重复运行计成不同测试。真实 SBP 构建部署 **9 个 Bundle**；源目录 346 份包/工程文件与复制时指纹一致，脚本 3 份指纹另列。生成场景/Prefab 和重载设置由隔离 Editor 操作，生成后的指纹单列，不声称生成制品仍与源码逐字节相同。最终六份日志通过门禁，保留已知许可校验、受 LogAssert 匹配的注入异常与 Editor 退出 Mono/debugger-agent 提示；命令退出码全部为 0。
+
+可见截图在本轮首个验证副本 `C:/unity-verification/a6342f25b7d4` 单独执行；其 346 份复制源指纹与最终矩阵相同，额外 Pipeline 1.0.0 仅用于观察，不加入生产 manifest。确认帧计数变化后，使用宿主公开操作形成稳定页、双模态和真实 Gallery 入场；本轮未重新注入原生鼠标/键盘，相关后端证据保持 Task 7 历史范围。Game View 原始 2560×1256，source=screen 等比例输出 1280×628：[稳定页](evidence/unitycore-ui/delivery-20261113/stable.png)、[双模态](evidence/unitycore-ui/delivery-20261113/modals.png)、[过渡](evidence/unitycore-ui/delivery-20261113/transition.png)。暂停时 Home 为 Visible、Gallery 为 Entering、pending=1；恢复后 depth=2、pending=0、宿主无错误，Console error=0。暂停还原 Editor 布局曾使视口比例异常，恢复最大化和重绘后重新截图；初始异常图保留为开发材料。结束时恢复 auto-tick/background override 并正常关闭本轮 Editor。
+
+脚本的 Passed 仅表示自动矩阵，截图需独立观察与复核；其原始 summary 保持截图 Pending，最终交付摘要另汇总本轮已观察证据，不伪造脚本自动截图能力。入口见 [UIDemo README](../examples/unity/UIDemo/README.md) 与 [包 README](../packages/com.ainative.unitycore.ui/README.md)。完整六份 XML、日志、Bundle、Python 结果、红灯材料、截图和状态记录见 [归档](evidence/unitycore-ui/delivery-20261113/delivery-evidence.zip)，指纹及实际数量见 [summary.json](evidence/unitycore-ui/delivery-20261113/summary.json)。本地最终输出 `TestResults/ui-task8-final-20261113/`；首轮与红灯分别保留在 `ui-task8-first-20261113/`、`ui-task8-red-20261113/`。
+
+最终独立审查已复核源码/脚本指纹、六份 XML、完整日志、Bundle、三张截图及状态记录，无剩余阻断项。Frame Debugger/CPU/GPU/overdraw、设备安全区/旋转、Player/IL2CPP/移动端与远端 CI 未执行，仍为独立后续验收。未夹带诊断性能优化、无关引擎测试或自动提交。
+
+## 稳定路径分配与诊断采样（2026-11-13）
+
+在 Task 8 基线上减少已确认的稳定路径分配，不增加公共接口、依赖或缓存层。外部销毁扫描仅在发现失效窗口时创建恢复列表；安全区写入移入 ApplySafeAreas，使捕获回调只在屏幕参数变化时构造。恢复顺序、存活检查和取消保护保持原契约。UIDemo 的完整 UI/Assets 快照改按 unscaled 时间每 0.25 秒采样，计数允许延迟一个采样周期；状态提示和 Toast 到期检查仍逐帧执行。IUI XML 注释补齐主线程、重入、取消、缓存句柄、提交后故障与 Model 替换约束：Clear 必须 await 完成且 UIResult.Succeeded=true 才允许替换 Model，正常完成的拒绝结果不是清理成功。
+
+新增两项回归：稳定屏幕/销毁观察在预热后同帧直接执行 256 次，诊断面板 Update 在同帧采样间隙直接执行 64 次。均使用 [Unity ProfilerRecorder 的当前线程 GC.Alloc 采样](https://docs.unity.com/en-us/engine/6000.0/script-reference/unity/profiling/profilerrecorderoptions/collectonlyoncurrentthread)，先验证 new byte[1024] 阳性对照，再 Reset/Start 测量，避免无效计数器伪造通过。旧 UI 路径记录 512 个样本；旧 Demo 路径断言明确非零（原始 Count=14336 超过请求容量4096，因此只作为存在分配的红灯，不用于精确分配总数或字节量）。修复后两项均为 0；Demo 同时验证 timeScale=0 时导航后计数更新、Clear 后 SESSION 2/根页计数刷新。结论仅适用于这两个受控稳定方法路径，不代表整个 Unity 帧零 GC、完整项目性能达标或 CPU/GPU 改善幅度。
+
+初稿 GC.GetAllocatedBytesForCurrentThread 在旧实现上返回零，未能暴露已知分配，该通过记录已明确排除。首次隔离导入时 ApiUpdater.MovedFromExtractor 子进程退出0x80000003，未执行断言；保留原始日志后，同源码重试恢复。随后 ProfilerRecorder 两项真实红灯与修复后 2/2 定向通过均归档，未将工具失败当作行为测试红灯。
+
+独立代码审查通过后，最终使用统一脚本在 `C:/unity-verification/4fcdb2a7dcfe` 执行，实际 Windows Editor 6000.3.23f1、Unity CLI 1.0.0：
+
+| Domain Reload | UI PlayMode | UI EditMode | Bundle Demo PlayMode |
+| --- | --- | --- | --- |
+| 开启 | 109/109 | 25/25 | 12/12 |
+| 关闭 | 109/109 | 25/25 | 12/12 |
+
+共 **292 次 Unity 执行，0 失败、0 跳过**；**10 项 Python 门禁单测通过**。包含原有导航、生命周期、缓存、外部销毁、安全区与真实 Bundle 回归。脚本最小基线同步升级为109/25/12，实际数量仍从 XML 汇总。346 份包/工程文件复制指纹及 3 份脚本指纹与当前源码匹配；六份最终 XML/完整日志、catalog 与9个 Bundle 的构建部署哈希已校验。日志通过编译/普通运行时错误/断言/临时分配泄漏检查；预期故障注入、许可提示和退出 Mono/debugger-agent 信息保留。
+
+本轮未改变布局，未重新截图或注入原生输入；Task 8 图像与交互记录保持历史归档，不转记成本轮视觉结果。CPU/GPU、Frame Debugger/overdraw、设备、Player/IL2CPP、远端 CI 仍未验收。机器摘要及测量口径见 [summary.json](evidence/unitycore-ui/idle-20261113/summary.json)，完整日志、XML、测量用例/基线源码及失败材料见 [归档](evidence/unitycore-ui/idle-20261113/idle-evidence.zip)。最终独立审查已复核源码/脚本指纹、六份 XML、完整日志、Bundle、测量红灯/绿灯及文档范围，无剩余阻断项。147 个本地链接、8 份 JSON/asmdef、改动及未跟踪文本空白和 git diff --check 已检查；本地材料为 `TestResults/ui-idle-final-20261113/` 与 `ui-idle-red-20261113/`。
+
+## Windows Player 与 IL2CPP（2026-11-16）
+
+新增独立 [Player 验证入口](../scripts/verify_unity_ui_players.py) 与仅由 `-uiSmoke -uiResult` 启用的 [运行检查](../examples/unity/UIDemo/Assets/UIDemoPlayerSmoke.cs)。不改 UI 包运行契约，也不改变模拟内核。构建走 `AssetPlayerBuildSupport.BuildDeployedPlayer`，沿用真实 SBP 部署及 Bundle 类型保留；每轮复制三包和 UIDemo 到新的短路径，在本次生成的场景和内容上构建，拒绝已有输出。两个后端均为 Windows x64 Release、Minimal managed stripping，实际运行 Direct3D11、1280×720，Unity 6000.3.23f1 / CLI 1.0.0。Pillow 10.4.0 完整验证 PNG chunk 和像素解码，拒绝损坏、截断与纯色文件；截图仍需实际查看。
+
+| 实际执行 | 结果 |
+| --- | --- |
+| Mono Release Player | 十组检查通过，运行推进778帧，退出码0 |
+| IL2CPP Release Player | 十组检查通过，运行推进752帧，退出码0；实际 GameAssembly.dll、global-metadata.dat 与运行报告后端匹配 |
+| Domain Reload 开 / 关 | 各109 UI PlayMode、25 UI EditMode、14真实Bundle Demo，合计296次通过，0失败/跳过 |
+| Python 门禁单测 | 12项通过，含错误后端/报告/截图拒绝与禁止覆盖证据 |
+| 屏幕检查 | 两后端 Home、双模态共4张实际屏幕截图；文字、共享图片、遮罩与HUD显示正常，无首轮清屏残影 |
+
+十组 Player 检查覆盖：真实 Bundle 图片与 Model lease 身份、四层页面栈及拒绝结果、双模态阻挡及焦点恢复、同实例缓存/新会话句柄/LRU、动画取消回滚、Toast 到期与穿透、Clear 失败保留 Model 和重试、Single 场景持久化及 timeScale=0 下动画、Trim 释放最后一个图片持有者、显式 CloseAsync 后 UI 窗口/挂起/失败清理及 Assets Bundle/资源/挂起归零。两后端嵌入的 catalog 和9个 Bundle 逐文件匹配本轮构建；退出后的完整日志也通过门禁。输入使用真实 RaycastAll 命中后 ExecuteEvents，只证明 uGUI 事件路由，不是 OS 鼠标键盘或人工体验验收。退出为显式等待 CloseAsync 再 Application.Quit，不覆盖强杀进程或窗口关闭按钮路径。
+
+首次 Mono 运行虽然十组状态断言均满足，但全局错误门禁发现 Toast 自动退出过渡与 Clear 交错产生的取消被宿主记录为失败，因此整体退出1，未发布成功摘要。新增 Editor 回归在旧宿主上复现1项失败。修复只过滤未提交、无 CleanupHandle、内部 AggregateException 非空且全部为 OperationCanceledException 的关闭错误；包含真实清理错误仍报告。修复后14项Demo预跑及最终双重载均通过，另新增自动Toast淘汰缓存时的真实清理故障用例，防止扩大吞异常范围。日志白名单仅增加该用例的精确异常链/次数，XML仍由LogAssert验证。
+
+首次屏幕截图还暴露空场景仅有 Overlay Canvas 时，未清除的背景保留HUD动画残影。Demo场景生成器补充跟随持久宿主的纯清屏 Camera（SolidColor、cullingMask=0）；最终两后端屏幕检查未再出现残影。这是Demo宿主的背景职责，不把摄像机依赖加入UI模块。
+
+证据见 [机器摘要](evidence/unitycore-ui/players-20261116/summary.json)、[完整归档](evidence/unitycore-ui/players-20261116/players-evidence.zip)、[独立审查](evidence/unitycore-ui/players-20261116/review.json)。归档含最终源码快照/脚本、构建/运行日志及命令、6份Editor XML、内容、Player文件哈希、4张截图，以及首次失败和红灯/绿灯材料。Player二进制保留在本机隔离目录 `C:/unity-verification/cbedb3bb803e/TestResults/ui-players/Mono|Il2Cpp`，不将大体积可执行文件加入仓库；归档中的文件哈希可核对本机产物。最终原始目录为 `TestResults/ui-players-final-20261116` 与 `TestResults/ui-player-editor-final-20261116`，首次失败为 `TestResults/ui-players-first-20261116`。
+
+本次未执行原生输入、其他图形API/平台、强退、移动设备安全区、CPU/GPU/overdraw/压力与远端CI验收，也没有替 GridGame/PhysicsSandbox 验收 Player。历史 Editor 记录及其当时的待验范围不改写。
+
+## Windows Player 原生输入与系统窗口关闭（2026-11-16）
+
+在前述双后端自动smoke之外，新增只读 [UIDemoNativeProbe](../examples/unity/UIDemo/Assets/UIDemoNativeProbe.cs) 与 [原生验收脚本](../scripts/verify_unity_ui_native.py)。探针仅由 `-uiNativeResult` 启用，保存实际旧Input Manager的鼠标/Return/方向键、焦点、页面/模态/资源与退出回调；不调用UI命令、CloseAsync或Application.Quit。脚本复用隔离双后端构建，对照源码及Player文件哈希后启动进程，等待外部操作，拒绝已有证据目录。运行门禁验证十个有序稳定状态、前台原始输入、退出前活会话及退出回调后的资源归零，再检查完整日志/实际Unity版本和进程退出码。
+
+本轮实际环境仍为Unity 6000.3.23f1、Windows x64 Release、Minimal stripping、Direct3D11、StandaloneInputModule。两个后端均由用户直接点击鼠标，CUA发送原生Return和Right，并用Alt+F4触发系统窗口关闭；没有使用ExecuteEvents或直接调用UI API代替本轮输入。用户分别确认Gallery、Session 2/Gallery，IL2CPP还确认Duplicate显示AlreadyOpen；原始输入与有序状态记录逐项交叉核对。每个后端的键盘过程是第三页→第一模态→第二模态→返回第一模态→方向键选Back→返回第三页，并恢复Modal按钮焦点。鼠标Clear后切换到Session 2，Single加载Other后Next进入Gallery，Core与资源保持运行。
+
+| 实际执行 | Mono | IL2CPP |
+| --- | --- | --- |
+| 有序稳定状态检查点 | 10通过 | 10通过 |
+| 原始前台输入事件 | MouseDown 7、Return 5、Right 2 | MouseDown 5、Return 5、Right 2 |
+| 系统窗口关闭 | CUA原生Alt+F4，窗口消失，退出0 | CUA原生Alt+F4，窗口消失，退出0 |
+| 退出前 | Session 2 / Other，3窗口、4Bundle、4资源，Core运行，Model未释放 | 同左 |
+| application-quit回调采样 | frame43105，仍持有活会话 | frame13664，仍持有活会话 |
+| destroy回调采样 | 同frame43105，Core停止、Model已释放、窗口/页面/模态/缓存/挂起/失败清理/Bundle/资源归零 | 同frame13664，全部归零 |
+
+原始鼠标计数包含焦点点击、重复点击，不等于业务操作次数。退出观察只声明本轮两个实际进程的结果，不由DefaultExecutionOrder推导所有Unity退出回调的固定顺序。探针不延迟、不拦截退出，也没有提前清空会话；退出前活状态与销毁后归零共同证明本次正常窗口关闭完成资源收尾。
+
+Windows Graphics Capture连续返回 `FrameArrived timed out` / `window capture timed out`；用户确认桌面已解锁且窗口可见后仍失败。可访问性读取可用但偶有超时，标题栏关闭按钮的AX点击又返回 `coordinate input geometry is unavailable`。因此鼠标改由用户执行，键盘由CUA逐步发送并核对记录，关闭改用Alt+F4。**本轮未取得原生交互截图，未验收标题栏关闭按钮点击，不把自动smoke截图冒充原生会话截图。** 故障与操作来源保存在capture-limitation.json和各后端actions.json中；也没有向Unity或其他第三方发送日志。
+
+加入探针后重新构建两个Release后端，各十组自动smoke仍通过。最终Python门禁13项通过，新增原生门禁拒绝状态序列不足、后端不符、无前台输入、缺失模态Back焦点观察、提前清空会话、漏退出回调与资源泄漏等假成功材料。本轮未修改UI/Core/Assets运行实现；上一轮296次Editor结果保留历史范围，没有把它计为本次重跑。新构建与原生结果使用350份源码指纹，实际二进制位于 `C:/unity-verification/f3ac0bdffd02/TestResults/ui-players/Mono|Il2Cpp`。
+
+证据见 [机器摘要](evidence/unitycore-ui/native-20261116/summary.json)、[归档](evidence/unitycore-ui/native-20261116/native-evidence.zip)、[独立审查](evidence/unitycore-ui/native-20261116/review.json)。归档保留原始journal、用户确认和CUA操作对应帧、实际命令/进程退出码、完整构建和Player日志、源码/脚本快照与Player文件哈希；自动smoke的4张截图单列在build目录，限定为自动smoke范围。原始材料目录为 `TestResults/ui-native-first-20261116`，该名称保留了首次启动时的路径，不代表另有未归档的成功重跑。
+
+后续未验范围仍有标题栏关闭按钮、强杀、退出动画/加载中关闭、失焦/多显示器专项、其他输入后端/图形API、设备/移动端、性能与远端CI。
+
+## 原生交互截图与标题栏关闭（2026-11-16）
+
+在前轮Alt+F4验收之外，补齐Mono和IL2CPP的实际原生交互截图与标题栏×关闭。Windows Graphics Capture仍超时，AX按钮点击仍报 `coordinate input geometry is unavailable`；本轮没有修复或绕过这些OS工具接口。新增 `--screenshots` / `-uiNativeScreenshots` 开关，由[只读探针](../examples/unity/UIDemo/Assets/UIDemoNativeProbe.cs)在真实输入后的状态稳定0.35秒、无挂起UI操作时等待帧末，以ScreenCapture捕获实际Player客户端视口。PNG和同一帧的会话、页面、模态、焦点、资源计数一起写入JSONL；不导航、不发送合成UI事件、不调用CloseAsync或Application.Quit，不拦截退出。截图不是Camera RenderTexture，也不是早先smoke图片；**不含Windows标题栏**。
+
+[验证脚本](../scripts/verify_unity_ui_native.py)除原来的十个有序状态外，新增Home、Gallery、双模态、Session 2/Other/Gallery四个有序视觉检查点。逐图检查文件名与帧号一致、1280×720、运行稳定、PNG完整性/像素解码和非纯色；交互检查点须发生在实际输入帧之后。主代理和独立Reviewer另外查看每后端四张代表图，不能只凭PNG存在或哈希一致判断视觉正确。截图记录是显式启用的验收开销，不作为性能采样。
+
+| 实际执行 | Mono | IL2CPP |
+| --- | --- | --- |
+| 正式原生交互门禁 | 10检查点通过 | 10检查点通过 |
+| 视觉检查点 | 4通过 | 4通过 |
+| 实时PNG完整解码 | 19张通过，4张代表图逐张查看 | 15张通过，4张代表图逐张查看 |
+| 前台原始输入 | MouseDown 9、Return 5、Right 2 | MouseDown 6、Return 5、Right 2 |
+| 标题栏关闭 | 用户按明确指令点击右上角×后确认关闭；进程退出0 | 用户明确确认点击标题栏×；进程退出0 |
+| 关闭前 | Session 2/Other，3窗口、4Bundle、4资源，Core运行，Model未释放 | 同左 |
+| 退出收尾 | quit/destroy在frame17176，destroy资源归零、Core停止、Model已释放 | quit/destroy在frame24205，destroy资源归零、Core停止、Model已释放 |
+
+键盘操作由CUA逐步发送Return/Right，按实际Input帧号与稳定状态核对；鼠标由用户执行Duplicate、Next、Clear、Scene、Next，并确认Gallery/Session 2的显示。原始鼠标次数包含额外焦点点击，不能当成业务操作数量。两次正式会话都明确要求等待最终画面截图保存后点击标题栏×，**没有发送Alt+F4**。退出方式由明确操作指令和用户确认佐证，再与正常进程退出及quit→destroy日志交叉核对；不是从客户端截图、退出码或Unity回调单独推断鼠标点了×。
+
+本轮重新构建Unity 6000.3.23f1 Windows x64 Release（Mono/IL2CPP、Minimal stripping、Direct3D11），两个后端各十组自动smoke通过，14项Python门禁单测通过。源码350份，脚本6份指纹；新二进制位于 `C:/unity-verification/987a16014cf3/TestResults/ui-players/Mono|Il2Cpp`。没有更改UI/Core/Assets运行契约，也未重跑历史296次Editor矩阵。正式原始材料在 `TestResults/ui-native-capture-final-20261116`。
+
+起初另复用旧Player诊断工具，用户点×后进程退出0、资源归零，但只执行Home状态，完整门禁正确拒绝为1/10，不计入正式通过次数。该材料位于 `TestResults/ui-native-visual-20261116/Mono`，归档保留其失败结果、工具错误与启动时脚本快照。Mono正式交互期间Computer Use两次报告Esc停止；每次均停止操作并在后续用户输入后恢复，没有把工具中断算成产品故障或另一次成功执行。
+
+证据见[机器摘要](evidence/unitycore-ui/capture-20261116/summary.json)、[完整归档](evidence/unitycore-ui/capture-20261116/capture-evidence.zip)、[独立复核](evidence/unitycore-ui/capture-20261116/review.json)。代表图另列：[Mono Home](evidence/unitycore-ui/capture-20261116/Mono-home.png)、[Gallery](evidence/unitycore-ui/capture-20261116/Mono-gallery.png)、[双模态](evidence/unitycore-ui/capture-20261116/Mono-modals.png)、[Session 2](evidence/unitycore-ui/capture-20261116/Mono-session2.png)；[IL2CPP Home](evidence/unitycore-ui/capture-20261116/Il2Cpp-home.png)、[Gallery](evidence/unitycore-ui/capture-20261116/Il2Cpp-gallery.png)、[双模态](evidence/unitycore-ui/capture-20261116/Il2Cpp-modals.png)、[Session 2](evidence/unitycore-ui/capture-20261116/Il2Cpp-session2.png)。归档含全部34张原生PNG、用户确认/键盘帧、完整日志、命令/退出码、构建内容及源/脚本/Player文件哈希；自动smoke截图仍单列build目录。
+
+本轮完成的是用户实际操作标题栏×后的正常退出，以及原生交互后的Player客户端绘制验收。OS标题栏图像/自动点击工具恢复、强杀、加载或退出动画中关闭、其他输入后端/平台、性能与远端CI仍不在此证据范围。
+
+## 加载与退出动画中关闭（2026-11-16）
+
+Mono/IL2CPP各完成一次Gallery等待加载结果交付时关闭、一次Back退出动画中关闭，共四场通过。用户实际点击标题栏×并确认，关闭请求命中目标挂起阶段；进程均退出0，最终Core停止、Model释放、UI/Assets资源及所有权归零，Console与Assets内部Errors无异常。主代理负责实现与执行，独立Reviewer负责代码和最终证据复核。复现命令见[UIDemo说明](../examples/unity/UIDemo/README.md#加载与退出动画中关闭-player)。
+
+| 后端与场景 | 关闭请求帧 | 请求瞬间 | 最终结果 |
+| --- | --- | --- | --- |
+| Mono 加载 | 2001 | Opening，UI pending 1、Assets pending 1 | 迟到交付被隔离并回收，通过 |
+| Mono 退出动画 | 9762 | Exiting，UI pending 1，alpha 0.472765 | 取消与清理通过 |
+| IL2CPP 加载 | 10231 | Opening，UI pending 1、Assets pending 1 | 迟到交付被隔离并回收，通过 |
+| IL2CPP 手动Back退出动画 | 12723 | Exiting，UI pending 1，alpha 0.725887 | 取消与清理通过 |
+
+新增独立 `UIDemo.Acceptance` 程序集，只有显式命令行参数才启用。常规Demo不依赖此程序集；Assets只向此验收程序集开放既有internal backend工厂，未增加产品公共API。加载夹具使用真实BundleBackend，原生资源完成后暂缓交付，保持UI Opening与Assets pending。关闭后在OnDestroy先观察Core已退休，再交付迟到成功结果并检查回收；不假设OnApplicationQuit回调顺序，不声称物理磁盘仍在读取或原生异步IO能被立即取消。
+
+退出动画复用Gallery的真实转场，仅验收配置将进出时长设为120秒。前三场使用R3夹具（Mono的Back由宿主API触发）；最后IL2CPP场使用手动Back夹具，Gallery就绪后等待用户点击Back，约1秒后可点击×，runner最多等待3600秒。最后一次用Computer Use确认目标窗口并置前。用户反馈“页面似乎卡住、顶部按钮提示Host operation in progress”，记录显示帧与alpha持续推进，这是长转场期间页面禁用交互、宿主拒绝并发命令的预期行为；正常Demo仍为0.35秒。准备步骤使用宿主API，不能计作新的完整原生鼠标键盘导航验收。
+
+`wantsToQuit` 始终返回true，只记录实际关闭请求瞬间；不调用Application.Quit或提前CloseAsync。门禁要求此时仍为Opening/Exiting并有挂起操作；退出动画须观察到alpha下降且关闭时仍介于0和1。帧末截图与阶段状态一起归档。退出后检查Core、Model、窗口、资源、挂起操作和所有权，并拒绝Console异常及Assets内部Errors非空。外部点击×由操作指令和用户确认佐证，客户端截图不包含标题栏。
+
+实际修复两处错误分类：Back退出被关闭打断时，宿主原先将未提交的纯取消UIOperationException误记为失败，现仅在宿主关闭/Core不再运行、未提交、无清理句柄且内部异常全部是取消时识别为正常收尾，混合清理错误仍报告。Assets则在backend成功返回后先检查Runtime.Closed，退休结果按取消隔离，避免Unity退出销毁迟到对象后误报AssetTypeMismatch；backend本身抛出的真实错误仍保留。新增宿主回归及退休销毁结果、运行中空结果、退休后台故障三项Assets回归。
+
+最终有效自动验证为：UIDemo双Domain Reload各25 UI EditMode、109 UI PlayMode、15 Bundle Demo，共298次通过；正确AssetsDemo宿主使用SBP/URP Forward，Core与Assets双重载各58 PlayMode、110 EditMode，共336次通过；均无失败/跳过。18项Python门禁单测通过。R3及手动Back两个源码快照均重新构建Mono/IL2CPP Release，各后端十组自动smoke通过。环境为Unity 6000.3.23f1、Windows x64、Direct3D11、Minimal stripping。
+
+UIDemo的359份源码指纹与R3构建一致；最终手动Back版本仅Player验收探针去掉自动Back，产品运行代码及Editor测试未再改动，不能称四场使用完全相同源码。AssetsDemo另核对322份源码，归档10份验证脚本。R3二进制位于 `C:/unity-verification/e68a09a68c8d/TestResults/ui-players`，手动Back版本位于 `C:/unity-verification/42e919c8a1cd/TestResults/ui-players`；各有Mono 151、IL2CPP 363个文件哈希，二进制本体未打入证据ZIP。
+
+失败和恢复材料全部保留，不纳入通过数：首次Mono加载暴露夹具的quit回调顺序假设；第二次捕获上述AssetTypeMismatch；最初宿主取消回归为红灯。最终UI矩阵的on-demo曾退出1、CLI返回TEST_RUN_ERROR且无XML，原因未确定，保留日志后仅重试未完成项并继续剩余矩阵，298计数来自有效XML。曾误在UIDemo运行Assets全EditMode，产生14失败、6跳过（缺AssetsDemo资源/URP夹具等），该轮不算通过，改用正确宿主的336次结果。两次自动Back的IL2CPP会话因900秒未收到关闭而被runner终止，也不算正常关闭；因此最终改为手动Back，避免消息往返消耗动画窗口。
+
+证据见[机器摘要](evidence/unitycore-ui/shutdown-20261116/summary.json)、[完整归档](evidence/unitycore-ui/shutdown-20261116/shutdown-evidence.zip)、[独立复核](evidence/unitycore-ui/shutdown-20261116/review.json)。四张正式视口截图：[Mono加载](evidence/unitycore-ui/shutdown-20261116/Mono-loading.png)、[Mono退出](evidence/unitycore-ui/shutdown-20261116/Mono-exiting.png)、[IL2CPP加载](evidence/unitycore-ui/shutdown-20261116/Il2Cpp-loading.png)、[IL2CPP退出](evidence/unitycore-ui/shutdown-20261116/Il2Cpp-exiting.png)。归档包含用户原话、逐帧状态、完整日志/退出码、有效和失败测试XML、两种夹具与历史失败源码、构建内容及哈希。
+
+本轮限定受控加载交付边界与正常系统窗口关闭。强杀成功清理、物理IO在途专项、其他平台/输入后端、性能与远端CI未验收；OS截图/自动标题栏按钮工具也未据此视为修复。

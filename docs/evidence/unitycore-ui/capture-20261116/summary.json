@@ -1,0 +1,543 @@
+{
+  "status": "Passed",
+  "date": "2026-11-16",
+  "scope": "Windows x64 Release / Mono and IL2CPP / Direct3D11 / Minimal managed stripping / StandaloneInputModule",
+  "native": {
+    "Mono": {
+      "status": "Passed",
+      "backend": "Mono",
+      "checkpoints": 10,
+      "rawInputs": {
+        "mouseDown": 9,
+        "submitDown": 5,
+        "rightDown": 2
+      },
+      "beforeQuit": {
+        "kind": "state",
+        "backend": "Mono",
+        "unity": "6000.3.23f1",
+        "scene": "Other",
+        "selected": "Third",
+        "result": "Ready",
+        "error": "",
+        "inputModule": "StandaloneInputModule",
+        "screenshot": "",
+        "width": 0,
+        "height": 0,
+        "frame": 15112,
+        "session": 2,
+        "pages": 2,
+        "modals": 0,
+        "cache": 0,
+        "windows": 3,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 4,
+        "resources": 4,
+        "assetPending": 0,
+        "focused": false,
+        "busy": false,
+        "running": true,
+        "modelDisposed": false,
+        "mouseDown": false,
+        "submitDown": false,
+        "leftDown": false,
+        "rightDown": false,
+        "upDown": false,
+        "downDown": false,
+        "mouseX": 0.0,
+        "mouseY": 0.0
+      },
+      "applicationQuit": {
+        "kind": "application-quit",
+        "backend": "Mono",
+        "unity": "6000.3.23f1",
+        "scene": "Other",
+        "selected": "Third",
+        "result": "Ready",
+        "error": "",
+        "inputModule": "StandaloneInputModule",
+        "screenshot": "",
+        "width": 0,
+        "height": 0,
+        "frame": 17176,
+        "session": 2,
+        "pages": 2,
+        "modals": 0,
+        "cache": 0,
+        "windows": 3,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 4,
+        "resources": 4,
+        "assetPending": 0,
+        "focused": false,
+        "busy": false,
+        "running": true,
+        "modelDisposed": false,
+        "mouseDown": false,
+        "submitDown": false,
+        "leftDown": false,
+        "rightDown": false,
+        "upDown": false,
+        "downDown": false,
+        "mouseX": 0.0,
+        "mouseY": 0.0
+      },
+      "shutdown": {
+        "kind": "destroy",
+        "backend": "Mono",
+        "unity": "6000.3.23f1",
+        "scene": "Other",
+        "selected": "",
+        "result": "Ready",
+        "error": "",
+        "inputModule": "",
+        "screenshot": "",
+        "width": 0,
+        "height": 0,
+        "frame": 17176,
+        "session": 2,
+        "pages": 0,
+        "modals": 0,
+        "cache": 0,
+        "windows": 0,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 0,
+        "resources": 0,
+        "assetPending": 0,
+        "focused": false,
+        "busy": false,
+        "running": false,
+        "modelDisposed": true,
+        "mouseDown": false,
+        "submitDown": false,
+        "leftDown": false,
+        "rightDown": false,
+        "upDown": false,
+        "downDown": false,
+        "mouseX": 0.0,
+        "mouseY": 0.0
+      },
+      "journalSha256": "869e9cf9ea92c117b5dad03b6983493bb909c3179d2a233727222c1f03c89b3d",
+      "screenshots": {
+        "checkpoints": 4,
+        "viewportOnly": true,
+        "images": [
+          {
+            "file": "native-frame-76.png",
+            "frame": 76,
+            "sha256": "26ea9b3b2654cfb79b7d8555f37d2e6120d964695d0386a5659517c082de384e",
+            "previousInputFrame": -1
+          },
+          {
+            "file": "native-frame-346.png",
+            "frame": 346,
+            "sha256": "491dc10b1e3a8644627a8427271cd3ef33e3219c4eeae0c801891264629b1e9d",
+            "previousInputFrame": -1
+          },
+          {
+            "file": "native-frame-2821.png",
+            "frame": 2821,
+            "sha256": "491dc10b1e3a8644627a8427271cd3ef33e3219c4eeae0c801891264629b1e9d",
+            "previousInputFrame": -1
+          },
+          {
+            "file": "native-frame-2935.png",
+            "frame": 2935,
+            "sha256": "e36c35f7395d17036aab0205988a3867fc365035a47a6db0beb5a8408aa6974b",
+            "previousInputFrame": 2913
+          },
+          {
+            "file": "native-frame-3337.png",
+            "frame": 3337,
+            "sha256": "26289f6a379275313109022830171b1bd63cf5b2dd219041eb2e830f729ccd8e",
+            "previousInputFrame": 3306
+          },
+          {
+            "file": "native-frame-3633.png",
+            "frame": 3633,
+            "sha256": "30e1e90e421ed21daa5ffa9f2d04f707fe1fb51a10479bfc1863be605cfe0a78",
+            "previousInputFrame": 3586
+          },
+          {
+            "file": "native-frame-3842.png",
+            "frame": 3842,
+            "sha256": "3e8c852610ccb243bc20e899b7187a2b600b282c6e65387d44478316ae176737",
+            "previousInputFrame": 3586
+          },
+          {
+            "file": "native-frame-6250.png",
+            "frame": 6250,
+            "sha256": "3329d98bf41b93d45ec54e2e63074039dbd3b9133b725fd69eda5bd7d85fcac5",
+            "previousInputFrame": 6203
+          },
+          {
+            "file": "native-frame-6933.png",
+            "frame": 6933,
+            "sha256": "ded99bae9d35375cedcad45013cf82bc3570ce45ef6e694b7568616f44376bc9",
+            "previousInputFrame": 6904
+          },
+          {
+            "file": "native-frame-7599.png",
+            "frame": 7599,
+            "sha256": "383b01f231ba8762f83beb034d461a59e4d936cf8dc2a5300f2ae1d1991f7e6a",
+            "previousInputFrame": 7548
+          },
+          {
+            "file": "native-frame-8507.png",
+            "frame": 8507,
+            "sha256": "8a8624d9ace7450748ed552e9fd75749cc999029d8359add06f47ab98708bcb8",
+            "previousInputFrame": 8457
+          },
+          {
+            "file": "native-frame-9598.png",
+            "frame": 9598,
+            "sha256": "664fe3bece9e694cab65664ef57894ec788f0fa89f8c9f6e2467117651c09578",
+            "previousInputFrame": 9551
+          },
+          {
+            "file": "native-frame-10212.png",
+            "frame": 10212,
+            "sha256": "1a0545c186e5d2f38332ceaca024b5258992702b327c9e636d4ad0e9f8a7e59d",
+            "previousInputFrame": 10188
+          },
+          {
+            "file": "native-frame-10864.png",
+            "frame": 10864,
+            "sha256": "3ed8be595fcd8dc1cb06f296378d8bd4f6fcc3f4bc9894cdcbca204421e64911",
+            "previousInputFrame": 10815
+          },
+          {
+            "file": "native-frame-12384.png",
+            "frame": 12384,
+            "sha256": "6f46969852d450776fc25a16f429db929d23907089784d3cc53d1422523c5bc1",
+            "previousInputFrame": 12355
+          },
+          {
+            "file": "native-frame-12474.png",
+            "frame": 12474,
+            "sha256": "8f2000fa5feec8ef2850399cec0aeba198ba8e6e107be4132742dc5bb7262b9f",
+            "previousInputFrame": 12391
+          },
+          {
+            "file": "native-frame-12733.png",
+            "frame": 12733,
+            "sha256": "3d655513695baa3ae144bb2ab1708dbacf7bfa280ce9c5a6e6c635700bd75a6d",
+            "previousInputFrame": 12701
+          },
+          {
+            "file": "native-frame-13800.png",
+            "frame": 13800,
+            "sha256": "651c78acafdb73ed3448aa073e657710a653f9ee46df5a30dca8b8804d169592",
+            "previousInputFrame": 13743
+          },
+          {
+            "file": "native-frame-15136.png",
+            "frame": 15136,
+            "sha256": "651c78acafdb73ed3448aa073e657710a653f9ee46df5a30dca8b8804d169592",
+            "previousInputFrame": 13743
+          }
+        ]
+      },
+      "inputMethod": "Externally supplied OS input; independently review action transcript/screenshots"
+    },
+    "Il2Cpp": {
+      "status": "Passed",
+      "backend": "Il2Cpp",
+      "checkpoints": 10,
+      "rawInputs": {
+        "mouseDown": 6,
+        "submitDown": 5,
+        "rightDown": 2
+      },
+      "beforeQuit": {
+        "kind": "state",
+        "backend": "Il2Cpp",
+        "unity": "6000.3.23f1",
+        "scene": "Other",
+        "selected": "Third",
+        "result": "Ready",
+        "error": "",
+        "inputModule": "StandaloneInputModule",
+        "screenshot": "",
+        "width": 0,
+        "height": 0,
+        "frame": 23439,
+        "session": 2,
+        "pages": 2,
+        "modals": 0,
+        "cache": 0,
+        "windows": 3,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 4,
+        "resources": 4,
+        "assetPending": 0,
+        "focused": true,
+        "busy": false,
+        "running": true,
+        "modelDisposed": false,
+        "mouseDown": false,
+        "submitDown": false,
+        "leftDown": false,
+        "rightDown": false,
+        "upDown": false,
+        "downDown": false,
+        "mouseX": 0.0,
+        "mouseY": 0.0
+      },
+      "applicationQuit": {
+        "kind": "application-quit",
+        "backend": "Il2Cpp",
+        "unity": "6000.3.23f1",
+        "scene": "Other",
+        "selected": "Third",
+        "result": "Ready",
+        "error": "",
+        "inputModule": "StandaloneInputModule",
+        "screenshot": "",
+        "width": 0,
+        "height": 0,
+        "frame": 24205,
+        "session": 2,
+        "pages": 2,
+        "modals": 0,
+        "cache": 0,
+        "windows": 3,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 4,
+        "resources": 4,
+        "assetPending": 0,
+        "focused": true,
+        "busy": false,
+        "running": true,
+        "modelDisposed": false,
+        "mouseDown": false,
+        "submitDown": false,
+        "leftDown": false,
+        "rightDown": false,
+        "upDown": false,
+        "downDown": false,
+        "mouseX": 0.0,
+        "mouseY": 0.0
+      },
+      "shutdown": {
+        "kind": "destroy",
+        "backend": "Il2Cpp",
+        "unity": "6000.3.23f1",
+        "scene": "Other",
+        "selected": "",
+        "result": "Ready",
+        "error": "",
+        "inputModule": "",
+        "screenshot": "",
+        "width": 0,
+        "height": 0,
+        "frame": 24205,
+        "session": 2,
+        "pages": 0,
+        "modals": 0,
+        "cache": 0,
+        "windows": 0,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 0,
+        "resources": 0,
+        "assetPending": 0,
+        "focused": true,
+        "busy": false,
+        "running": false,
+        "modelDisposed": true,
+        "mouseDown": false,
+        "submitDown": false,
+        "leftDown": false,
+        "rightDown": false,
+        "upDown": false,
+        "downDown": false,
+        "mouseX": 0.0,
+        "mouseY": 0.0
+      },
+      "journalSha256": "892d7f79114ec54a58757510e7d4d862451483c5603898794402498616c991df",
+      "screenshots": {
+        "checkpoints": 4,
+        "viewportOnly": true,
+        "images": [
+          {
+            "file": "native-frame-73.png",
+            "frame": 73,
+            "sha256": "491dc10b1e3a8644627a8427271cd3ef33e3219c4eeae0c801891264629b1e9d",
+            "previousInputFrame": -1
+          },
+          {
+            "file": "native-frame-7830.png",
+            "frame": 7830,
+            "sha256": "e36c35f7395d17036aab0205988a3867fc365035a47a6db0beb5a8408aa6974b",
+            "previousInputFrame": 7802
+          },
+          {
+            "file": "native-frame-8085.png",
+            "frame": 8085,
+            "sha256": "26289f6a379275313109022830171b1bd63cf5b2dd219041eb2e830f729ccd8e",
+            "previousInputFrame": 8046
+          },
+          {
+            "file": "native-frame-8326.png",
+            "frame": 8326,
+            "sha256": "3e8c852610ccb243bc20e899b7187a2b600b282c6e65387d44478316ae176737",
+            "previousInputFrame": 8272
+          },
+          {
+            "file": "native-frame-8597.png",
+            "frame": 8597,
+            "sha256": "3e8c852610ccb243bc20e899b7187a2b600b282c6e65387d44478316ae176737",
+            "previousInputFrame": 8272
+          },
+          {
+            "file": "native-frame-10611.png",
+            "frame": 10611,
+            "sha256": "3329d98bf41b93d45ec54e2e63074039dbd3b9133b725fd69eda5bd7d85fcac5",
+            "previousInputFrame": 10564
+          },
+          {
+            "file": "native-frame-11153.png",
+            "frame": 11153,
+            "sha256": "ded99bae9d35375cedcad45013cf82bc3570ce45ef6e694b7568616f44376bc9",
+            "previousInputFrame": 11126
+          },
+          {
+            "file": "native-frame-11843.png",
+            "frame": 11843,
+            "sha256": "383b01f231ba8762f83beb034d461a59e4d936cf8dc2a5300f2ae1d1991f7e6a",
+            "previousInputFrame": 11796
+          },
+          {
+            "file": "native-frame-12576.png",
+            "frame": 12576,
+            "sha256": "8a8624d9ace7450748ed552e9fd75749cc999029d8359add06f47ab98708bcb8",
+            "previousInputFrame": 12528
+          },
+          {
+            "file": "native-frame-13593.png",
+            "frame": 13593,
+            "sha256": "664fe3bece9e694cab65664ef57894ec788f0fa89f8c9f6e2467117651c09578",
+            "previousInputFrame": 13543
+          },
+          {
+            "file": "native-frame-14320.png",
+            "frame": 14320,
+            "sha256": "1a0545c186e5d2f38332ceaca024b5258992702b327c9e636d4ad0e9f8a7e59d",
+            "previousInputFrame": 14292
+          },
+          {
+            "file": "native-frame-14903.png",
+            "frame": 14903,
+            "sha256": "3ed8be595fcd8dc1cb06f296378d8bd4f6fcc3f4bc9894cdcbca204421e64911",
+            "previousInputFrame": 14856
+          },
+          {
+            "file": "native-frame-22705.png",
+            "frame": 22705,
+            "sha256": "8f2000fa5feec8ef2850399cec0aeba198ba8e6e107be4132742dc5bb7262b9f",
+            "previousInputFrame": 22621
+          },
+          {
+            "file": "native-frame-22922.png",
+            "frame": 22922,
+            "sha256": "3d655513695baa3ae144bb2ab1708dbacf7bfa280ce9c5a6e6c635700bd75a6d",
+            "previousInputFrame": 22888
+          },
+          {
+            "file": "native-frame-23463.png",
+            "frame": 23463,
+            "sha256": "651c78acafdb73ed3448aa073e657710a653f9ee46df5a30dca8b8804d169592",
+            "previousInputFrame": 23410
+          }
+        ]
+      },
+      "inputMethod": "Externally supplied OS input; independently review action transcript/screenshots"
+    }
+  },
+  "sourceFileCount": 350,
+  "scriptHashes": {
+    "test_verify_unity_ui_native.py": "ba1037ec6ae283b176239625ba185b811d6e6fe4f285d4dbcadb8353b2918cc3",
+    "test_verify_unity_ui_players.py": "9ea95b0f4779ccd8f51dfcb1863202ea29d745180bad2358e38f34f067a3a8a7",
+    "unity_packages.py": "8e282d44bb78e8a7a31c6b604ee5e95aa1822df701cb59429f338aff2e75b5fd",
+    "verify_unity_ui.py": "e155b397d4b48edd7ad1ce175e4172e09a3fb34a44ddc54dd0a61a0e2d548c5f",
+    "verify_unity_ui_native.py": "5d0ffea1aef8ebc689f4a62d8cffa0c3c85b71b9e0797930c60345ec2522ed59",
+    "verify_unity_ui_players.py": "b813e2b04dfff67569105ea46e5da62f297a1c08e860d98818670da857f68809"
+  },
+  "pythonTests": 14,
+  "screenshots": {
+    "total": 34,
+    "decoded": 34,
+    "representatives": {
+      "Mono": {
+        "home": {
+          "sourceFile": "native-frame-346.png",
+          "file": "Mono-home.png",
+          "sha256": "491dc10b1e3a8644627a8427271cd3ef33e3219c4eeae0c801891264629b1e9d"
+        },
+        "gallery": {
+          "sourceFile": "native-frame-3842.png",
+          "file": "Mono-gallery.png",
+          "sha256": "3e8c852610ccb243bc20e899b7187a2b600b282c6e65387d44478316ae176737"
+        },
+        "modals": {
+          "sourceFile": "native-frame-8507.png",
+          "file": "Mono-modals.png",
+          "sha256": "8a8624d9ace7450748ed552e9fd75749cc999029d8359add06f47ab98708bcb8"
+        },
+        "session2": {
+          "sourceFile": "native-frame-13800.png",
+          "file": "Mono-session2.png",
+          "sha256": "651c78acafdb73ed3448aa073e657710a653f9ee46df5a30dca8b8804d169592"
+        }
+      },
+      "Il2Cpp": {
+        "home": {
+          "sourceFile": "native-frame-73.png",
+          "file": "Il2Cpp-home.png",
+          "sha256": "491dc10b1e3a8644627a8427271cd3ef33e3219c4eeae0c801891264629b1e9d"
+        },
+        "gallery": {
+          "sourceFile": "native-frame-8597.png",
+          "file": "Il2Cpp-gallery.png",
+          "sha256": "3e8c852610ccb243bc20e899b7187a2b600b282c6e65387d44478316ae176737"
+        },
+        "modals": {
+          "sourceFile": "native-frame-12576.png",
+          "file": "Il2Cpp-modals.png",
+          "sha256": "8a8624d9ace7450748ed552e9fd75749cc999029d8359add06f47ab98708bcb8"
+        },
+        "session2": {
+          "sourceFile": "native-frame-23463.png",
+          "file": "Il2Cpp-session2.png",
+          "sha256": "651c78acafdb73ed3448aa073e657710a653f9ee46df5a30dca8b8804d169592"
+        }
+      }
+    },
+    "representativesInspected": 8,
+    "method": "End-of-frame ScreenCapture from actual native-input session; client viewport only, no OS title bar",
+    "visualResult": "Passed"
+  },
+  "closeMethod": "User clicked title-bar X according to explicit instruction and confirmed; correlated with exit 0 and quit/destroy resource snapshots; no Alt+F4 or explicit CloseAsync issued by driver",
+  "binaryLocation": "C:/unity-verification/987a16014cf3/TestResults/ui-players",
+  "binariesArchived": false,
+  "buildSmoke": {
+    "backends": 2,
+    "checksPerBackend": 10,
+    "status": "Passed"
+  },
+  "editorRegression": "Historical 296 not rerun for opt-in screenshot probe addition",
+  "diagnostic": "Initial old-Player tool diagnostic exited 0 but failed complete sequence gate at 1/10; excluded from formal successes",
+  "limitations": [
+    "OS Graphics Capture and automatic AX close-button input tools still fail",
+    "Client screenshots do not independently prove title-bar click; user confirmations retained",
+    "Forced termination, closing during loading/animation, other input backends/platforms, performance and remote CI unverified"
+  ],
+  "archiveSha256": "df59c884a133abd5681de480441de7ad6b98a824fe4e34d26977d77bea11be2a",
+  "independentReview": "See review.json"
+}

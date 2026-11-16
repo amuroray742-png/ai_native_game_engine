@@ -181,12 +181,14 @@
 **Consumes:** 现有 unity_packages.py 隔离复制工具、Unity CLI、Task 7 Demo 构建入口。
 **Produces:** 一条新证据目录的 Editor 验证命令，实际结果与未验证边界记录。
 
-- [ ] Python 单测验证输出已存在拒绝、相对包引用、隔离复制包括三包、失败 XML/日志不算成功、预期测试计数非零且无 skip、日志错误及 JobTempAlloc/TLS 警告检测。先红后实现，不复制整份 Assets 矩阵脚本。
-- [ ] 脚本顺序：调用 `unity_packages.verification_workspace(output)` 与 `copy_verification_project(project, workspace)` 复制独立源码 → 编译/生成 Demo fixture → 构建 Bundle → Domain Reload 开/关各 EditMode+PlayMode → XML/完整日志审查 → 截图/指纹/summary.json/workspace.txt；失败现场保留。使用短路径临时工程，不启动或更改用户已打开工程。过滤仅 `AiNative.UnityCore.UI.Tests` 与 Demo 的精确 fixture；不能用 `AiNative.UnityCore` 宽过滤拉入依赖 AssetsDemo Probe 的整套 Assets 测试，相关 Assets 回归仍在隔离 AssetsDemo 中单独执行。
-- [ ] 运行 `python -m unittest discover -s scripts -p test_verify_unity_ui.py -v`；再运行 `python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>`。不预填通过数量，按 XML 汇总。
-- [ ] 独立只读审查完整 UI 变更；修复后重跑受影响测试，关键契约变动重跑完整 UI 矩阵。单一失败最多三轮假设/修改/验证，保留失败材料，阻塞时报告而非无穷重试。
-- [ ] 检查本地 Markdown 链接、JSON/asmdef、全部新增文件空白及 `git diff --check`；确保未跟踪新文件也被检查。未请求则不 commit/push。
-- [ ] 更新实际验收记录，明确编译/测试数/截图/证据位置。人工 Frame Debugger、CPU/GPU/overdraw 性能对照以及 Player/IL2CPP/移动端未执行则单列，不以结构测试或截图声称性能达标。
+- [x] Python 单测验证输出已存在拒绝、相对包引用、隔离复制包括三包、失败 XML/日志不算成功、预期测试计数非零且无 skip、日志错误及 JobTempAlloc/TLS 警告检测。先红后实现，不复制整份 Assets 矩阵脚本。
+- [x] 脚本顺序：调用 `unity_packages.verification_workspace(output)` 与 `copy_verification_project(project, workspace)` 复制独立源码 → 编译/生成 Demo fixture → 构建 Bundle → Domain Reload 开/关各 EditMode+PlayMode → XML/完整日志审查 → 指纹/summary.json/workspace.txt；可见 Editor 截图独立执行并归档，不将自动矩阵 Passed 冒充视觉检查；失败现场保留。使用短路径临时工程，不启动或更改用户已打开工程。过滤仅 `AiNative.UnityCore.UI.Tests` 与 Demo 的精确 fixture；不能用 `AiNative.UnityCore` 宽过滤拉入依赖 AssetsDemo Probe 的整套 Assets 测试，相关 Assets 回归仍在隔离 AssetsDemo 中单独执行。
+- [x] 运行 `python -m unittest discover -s scripts -p test_verify_unity_ui.py -v`；再运行 `python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>`。不预填通过数量，按 XML 汇总。
+- [x] 独立只读审查完整 UI 变更；修复后重跑受影响测试，关键契约变动重跑完整 UI 矩阵。单一失败最多三轮假设/修改/验证，保留失败材料，阻塞时报告而非无穷重试。
+- [x] 检查本地 Markdown 链接、JSON/asmdef、全部新增文件空白及 `git diff --check`；确保未跟踪新文件也被检查。未请求则不 commit/push。
+- [x] 更新实际验收记录，明确编译/测试数/截图/证据位置。人工 Frame Debugger、CPU/GPU/overdraw 性能对照以及 Player/IL2CPP/移动端未执行则单列，不以结构测试或截图声称性能达标。
+
+2026-11-13：Task 8 实现与验证已完成，最终独立审查已复核源码/脚本指纹、六份 XML、完整日志、Bundle、三张截图及状态记录，无剩余阻断项。HUD/Overlay 按成功提交顺序排序，新增 4 项回归；双 Domain Reload 共 288 次 Unity 执行通过，10 项新 Python 单测及 2 项包复制单测通过。346 份源码指纹匹配；本轮 screen 截图单独验证。实际范围见 [Task 8 验收](../../unitycore-ui.md#task-8-层级顺序隔离验证与交付2026-11-13)。Task 1–2 的历史复选项保留原阶段记录，不代表当前缺失公共契约或生命周期；实际完成范围以累计验收记录为准。
 
 ## 验证策略与执行次序
 

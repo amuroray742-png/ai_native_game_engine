@@ -42,6 +42,38 @@ namespace AiNative.UIDemo.Tests
             text.transform.SetParent(_host.transform); return text;
         }
 
+        [UnityTest]
+        public IEnumerator DiagnosticsBetweenSamplesDoNotAllocateAndRefreshAtTimeScaleZero() => UniTask.ToCoroutine(async () =>
+        {
+            var update = (Action)Delegate.CreateDelegate(typeof(Action), _host,
+                typeof(UIDemoBootstrap).GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
+            update();
+            using var allocations = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Internal,
+                "GC.Alloc", 4096, Unity.Profiling.ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+            GC.KeepAlive(new byte[1024]);
+            allocations.Stop();
+            Assert.Greater(allocations.Count, 0, "The allocation recorder must detect a positive control.");
+            allocations.Reset();
+            allocations.Start();
+            // These calls share the same frame/time, so only the first may sample.
+            for (int i = 0; i < 64; i++) { update(); }
+            allocations.Stop();
+            int allocated = allocations.Count;
+            Assert.Zero(allocated, "The diagnostic panel should not create a full snapshot each Update.");
+            Time.timeScale = 0;
+            try
+            {
+                await _host.ExecuteAsync(DemoAction.Next);
+                await UniTask.WaitUntil(() => _host.Diagnostics.text.Contains("pages 2"))
+                    .Timeout(TimeSpan.FromSeconds(2), DelayType.Realtime);
+                await _host.ExecuteAsync(DemoAction.Clear);
+                await UniTask.WaitUntil(() => _host.Diagnostics.text.Contains("SESSION 2") && _host.Diagnostics.text.Contains("pages 1"))
+                    .Timeout(TimeSpan.FromSeconds(2), DelayType.Realtime);
+                Assert.IsNull(_host.LastError);
+            }
+            finally { Time.timeScale = 1; }
+        });
+
         [UnityTearDown]
         public IEnumerator TearDown() => UniTask.ToCoroutine(async () =>
         {
@@ -224,6 +256,45 @@ namespace AiNative.UIDemo.Tests
             await UniTask.Delay(TimeSpan.FromSeconds(1.5), ignoreTimeScale: true);
             Assert.IsFalse(_host.UI.TryGet<ToastView>(out _, out _));
             Assert.Zero(_host.UI.GetDiagnostics().PendingOperations);
+        });
+
+        [UnityTest]
+        public IEnumerator ClearDuringAutomaticToastExitDoesNotReportHostFailure() => UniTask.ToCoroutine(async () =>
+        {
+            await _host.ExecuteAsync(DemoAction.Toast);
+            await UniTask.WaitUntil(() => !_host.UI.TryGet<ToastView>(out _, out _))
+                .Timeout(TimeSpan.FromSeconds(5), DelayType.Realtime);
+            Assert.Greater(_host.UI.GetDiagnostics().PendingOperations, 0, "Exercise the active exit transition.");
+            await _host.ExecuteAsync(DemoAction.Clear);
+            Assert.IsNull(_host.LastError);
+            Assert.AreEqual(2, _host.Model.Session);
+            Assert.Zero(_host.UI.GetDiagnostics().PendingOperations);
+        });
+
+        [UnityTest]
+        public IEnumerator HostCloseDuringBackExitDoesNotReportCancellationAsFailure() => UniTask.ToCoroutine(async () =>
+        {
+            await _host.ExecuteAsync(DemoAction.Next);
+            _host.Dispatch(DemoAction.Back);
+            Assert.IsTrue(_host.Busy);
+            Assert.IsTrue(_host.UI.GetDiagnostics().Windows.Any(w => w.State == UIWindowState.Exiting));
+            await _host.CloseAsync();
+            Assert.IsNull(_host.LastError);
+            Assert.IsFalse(_host.Busy);
+            Assert.IsTrue(_host.Model.IsDisposed);
+            Assert.Zero(_host.UI.GetDiagnostics().PendingOperations);
+        });
+
+        [UnityTest]
+        public IEnumerator AutomaticToastExitStillReportsCleanupFault() => UniTask.ToCoroutine(async () =>
+        {
+            var cached = await _host.UI.OpenAsync<FirstModalView>();
+            await _host.UI.CloseAsync(cached.Handle);
+            await _host.ExecuteAsync(DemoAction.Toast);
+            _host.Model.FailNextUnbind = true;
+            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("InvalidOperationException: Demo requested one cleanup failure"));
+            await UniTask.WaitUntil(() => _host.LastError != null).Timeout(TimeSpan.FromSeconds(5), DelayType.Realtime);
+            Assert.IsInstanceOf<UIOperationException>(_host.LastError);
         });
 
         [UnityTest]

@@ -187,6 +187,10 @@ namespace AiNative.UnityCore.Assets
                 var bundle = await resource.Pin.Completion.Task;
                 var value = await RunOperation("asset:" + entry.Address, resource.Id, () => Backend.LoadAsync(bundle, entry, key.type, key.subAsset), resource.Priority,
                     () => resource.References > 0 && !Closed);
+                // A successful native result can arrive after retirement, when Unity has
+                // already destroyed its object. It cannot be validated or published then.
+                // Backend failures still propagate from the await above and remain diagnostic.
+                if (Closed) { throw new OperationCanceledException(Lifetime.Token); }
                 if (value == null || !key.type.IsInstanceOfType(value))
                 {
                     throw new AssetException("AssetTypeMismatch", "Asset missing or type differs.", entry.Address, entry.Bundle, "asset");

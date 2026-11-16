@@ -16,6 +16,68 @@ namespace AiNative.UnityCore.UI.Tests
             new UITransitionOptions(seconds, true, new Vector2(80, -30), 0.5f);
 
         [UnityTest]
+        public IEnumerator StableScreenUpdatesDoNotAllocateManagedMemory() => UniTask.ToCoroutine(async () =>
+        {
+            await StartAsync();
+            await UI.OpenAsync<NavigationHudView>();
+            var update = (Action<float>)Delegate.CreateDelegate(typeof(Action<float>), Run,
+                typeof(UIRun).GetMethod("UpdateScreen", BindingFlags.Instance | BindingFlags.NonPublic));
+            // Warm up dimension application and collection access outside the measured interval.
+            for (int i = 0; i < 8; i++) { update(0); }
+            using var allocations = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Internal,
+                "GC.Alloc", 4096, Unity.Profiling.ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+            GC.KeepAlive(new byte[1024]);
+            allocations.Stop();
+            Assert.Greater(allocations.Count, 0, "The allocation recorder must detect a positive control.");
+            allocations.Reset();
+            allocations.Start();
+            for (int i = 0; i < 256; i++) { update(0); }
+            allocations.Stop();
+            int allocated = allocations.Count;
+            Assert.Zero(allocated, "Stable UI screen/destruction observation should not allocate per frame.");
+        });
+
+        [UnityTest]
+        public IEnumerator ConcurrentHudUsesCommitOrder() => UniTask.ToCoroutine(() => CheckCommitOrder(UIRole.Hud, false));
+
+        [UnityTest]
+        public IEnumerator CachedHudUsesCommitOrder() => UniTask.ToCoroutine(() => CheckCommitOrder(UIRole.Hud, true));
+
+        [UnityTest]
+        public IEnumerator ConcurrentOverlayUsesCommitOrder() => UniTask.ToCoroutine(() => CheckCommitOrder(UIRole.Overlay, false));
+
+        [UnityTest]
+        public IEnumerator CachedOverlayUsesCommitOrder() => UniTask.ToCoroutine(() => CheckCommitOrder(UIRole.Overlay, true));
+
+        private async UniTask CheckCommitOrder(UIRole role, bool cached)
+        {
+            Register<FirstPageView>(role, Animated(0.35f));
+            Register<SecondPageView>(role);
+            Core.RegisterModule(Assets).RegisterModule(UI);
+            await Core.RunAsync();
+            UIView original = null;
+            if (cached)
+            {
+                var first = await UI.OpenAsync<FirstPageView>();
+                original = first.View;
+                var second = await UI.OpenAsync<SecondPageView>();
+                await UI.CloseAsync(first.Handle);
+                await UI.CloseAsync(second.Handle);
+            }
+            var slower = UI.OpenAsync<FirstPageView>();
+            var faster = await UI.OpenAsync<SecondPageView>();
+            Assert.AreEqual(UniTaskStatus.Pending, slower.Status);
+            var last = await slower;
+            Assert.IsTrue(last.Succeeded && faster.Succeeded);
+            Assert.AreSame(last.View.transform.parent, faster.View.transform.parent);
+            Assert.Greater(last.View.transform.GetSiblingIndex(), faster.View.transform.GetSiblingIndex());
+            if (cached) { Assert.AreSame(original, last.View); }
+            Assert.IsTrue(UI.BringToFront(faster.Handle).Succeeded);
+            Assert.Greater(faster.View.transform.GetSiblingIndex(), last.View.transform.GetSiblingIndex());
+            Assert.AreEqual(role == UIRole.Hud, last.View.CanvasGroup.interactable);
+        }
+
+        [UnityTest]
         public IEnumerator TransitionCompletesAtTimeScaleZero() => UniTask.ToCoroutine(async () =>
         {
             await StartAsync(Animated());

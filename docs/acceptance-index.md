@@ -8,6 +8,7 @@
 - 整理所依据的代码提交：`d36bb3fcea019c0d21d9733a6ff9c073bfaa4303`；这是阅读基准，不是一次新验收的被测版本。
 - 本次只整理仓库文档、配置及已有证据入口，未重新运行构建、测试、Unity 或远端 CI，未逐文件比对全部历史源码指纹。
 - 下表日期为原记录声明的验收日期。提交时间、整理时间与实际运行时间不能互相替代。
+- 2026-11-13 仅补充 UnityCore UI Task 8 的实际验证与指纹入口；其余模块保持上述历史整理口径，不据 UI 专项声明整仓重验。
 
 | 状态 | 含义 |
 | --- | --- |
@@ -29,6 +30,7 @@
 | GridGame Unity Play：已实现／有历史验收 | 2026-11-10 URP Windows Editor：双 Domain Reload、同域重入、棋盘颜色像素；四条快慢表现轨迹各与 CLI 的 16 检查点一致 | [URP 记录](assets-enhancement-urp.md)及[源码指纹](evidence/assets-enhancement-urp/package-sources.json)；基础契约与历史证据见 [Play 宿主](unity-play-host.md) | 独立 Player、IL2CPP、其他平台及人工玩法体验待单独验收 |
 | PhysicsSandbox Unity Play：已实现／有历史验收 | 2026-11-10 URP Windows Editor：双重载各 27 项及退出／重入；暂停输入、Tick 90／91 恢复与十组 CLI 比较 | [URP 记录](assets-enhancement-urp.md)及[源码指纹](evidence/assets-enhancement-urp/package-sources.json)；基础场景与通过条件见 [PhysicsSandbox](phase-3-physics-sandbox-unity-plan.md) | 同上；AssetsDemo 的 Player 结果不能证明 Jolt 模拟宿主 Player 可用 |
 | UnityCore：已实现／有历史验收 | 2026-11-09 生命周期、取消、关闭、调度及双重载回归；后续日志专项另记；异步关闭与 Assets 的集成还由资源回归覆盖 | [生命周期分轮记录](unitycore-lifecycle.md)、[回归摘要](evidence/unitycore/simplify-20261109/summary.json)、[Assets 集成记录](unitycore-assets.md) | 日志专项不是完整生命周期回归；独立包测试与示例集成不能互相替代 |
+| UnityCore UI：Windows Editor、Mono/IL2CPP Player 已验收 | 2026-11-16最新两后端加载待交付/退出动画中点击×，四场通过、资源归零；UI矩阵298、正确宿主Core/Assets矩阵336、Python18通过，两个夹具快照各双后端10组smoke通过。前三场与最后手动Back场仅验收探针不同 | [UI分轮记录](unitycore-ui.md)、[加载/动画关闭](evidence/unitycore-ui/shutdown-20261116/summary.json)、[前轮原生截图](evidence/unitycore-ui/capture-20261116/summary.json)、[关闭门禁](../scripts/verify_unity_ui_shutdown.py) | 限Windows x64、Direct3D11、Minimal stripping；加载为真实资源完成后的受控交付延迟，不声称物理IO仍在途。截图不含OS标题栏。强杀、其他平台、性能与远端CI未验收；失败及恢复执行单列保留 |
 
 恢复与回放要求同构建、同环境及同物理线程配置；跨平台 `compare` 匹配仅证明两份记录相符，不扩大为跨平台快照互通。历史 v2 基线、协议行为映射和旧阶段入口保留在 [v2 验收](v2-acceptance.md)，不作为当前全仓通过声明。
 

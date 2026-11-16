@@ -29,7 +29,13 @@ namespace AiNative.UnityCore.UI
             _screenWidth = Screen.width;
             _screenHeight = Screen.height;
             _safeArea = Screen.safeArea;
-            Rect normalized = UISafeArea.Normalize(_screenWidth, _screenHeight, _safeArea);
+            ApplySafeAreas(UISafeArea.Normalize(_screenWidth, _screenHeight, _safeArea));
+        }
+
+        // Keep the captured callback off the unchanged-screen path: its closure is
+        // otherwise allocated before UpdateScreen reaches its early return.
+        private void ApplySafeAreas(Rect normalized)
+        {
             try { Commit(() =>
             {
                 foreach (var record in new List<UIWindowRecord>(Windows.Values))

@@ -14,7 +14,19 @@ UnityCore Assets 的独立资源包、异步关闭扩展与 Windows 资源验收
 
 同日后续 [UI Task 7 验收](unitycore-ui.md#task-7-独立-uidemo-与真实-bundle-集成2026-11-13)完成独立 UIDemo、真实 SBP Bundle 构建部署及 11 项集成测试；双 Domain Reload 各 UI PlayMode 104 项、EditMode 25 项、Demo 11 项，共 280 次执行通过，0 失败、0 跳过。可见 Windows Editor 另用操作系统注入的原生鼠标/键盘事件验证导航、模态返回、Clear 与 Single 切场景，并保存稳定页、双模态及双页过渡的 Game View screen 截图。Task 8、性能、设备、Player/IL2CPP 与远端 CI 仍未验收。
 
+同日后续 [UI Task 8 验收](unitycore-ui.md#task-8-层级顺序隔离验证与交付2026-11-13)收敛 HUD/Overlay 成功提交顺序，新增统一隔离验证脚本；最终双 Domain Reload 各 UI PlayMode 108、EditMode 25、Demo 11，共 288 次执行通过，另有 10 项门禁单测与 2 项包复制单测通过。可见 Editor 独立复核稳定/双模态/过渡截图；自动矩阵不冒充视觉验收。性能、设备、Player/IL2CPP 和远端 CI 仍未验收。
+
+同日后续 [UI 稳定路径分配与诊断采样](unitycore-ui.md#稳定路径分配与诊断采样2026-11-13)减少销毁扫描和安全区更新的空闲分配，将 Demo 完整诊断改为0.25秒采样并补充公共 API 文档。双重载各109 UI PlayMode、25 EditMode、12 Bundle Demo，共292次通过，另有10项Python门禁单测通过。受控方法的GC.Alloc检查不代表整帧零分配或完整性能验收；未重新截图，Task 8证据保持历史范围。
+
 本记录只声明实际执行的检查。当前实现、协议与复现边界见[v2契约](framework-v2.md)。旧355测试/45次CLI的逐项行为映射见[迁移索引](v2-migration-index.md)。
+
+2026-11-16 [UI Windows Player 与 IL2CPP专项](unitycore-ui.md#windows-player-与-il2cpp2026-11-16)完成两后端Release构建及运行，各十组真实Bundle/uGUI事件/缓存/Clear/显式退出检查通过，并检查4张Player屏幕截图；双Domain Reload回归296次通过，Python门禁12项通过。限定Windows x64、Direct3D11、Minimal stripping和合成事件路由，不声明原生输入/强退/移动端/远端CI通过，也不扩展两个模拟示例的历史验收范围。
+
+同日后续 [UI原生输入与系统关闭](unitycore-ui.md#windows-player-原生输入与系统窗口关闭2026-11-16)补齐两后端用户鼠标、CUA原生Return/Right与Alt+F4退出：各十个有序状态通过，退出0，销毁回调资源归零。重新构建各十组自动smoke及13项Python门禁通过；未重跑上一轮296次Editor矩阵。抓图与AX关闭按钮工具失败如实保留，未声明本轮原生截图或标题栏按钮点击通过。
+
+同日最新 [UI原生截图与标题栏×](unitycore-ui.md#原生交互截图与标题栏关闭2026-11-16)以帧末ScreenCapture记录真实原生会话客户端画面，Mono/IL2CPP各10交互及4视觉检查点通过，共34张PNG完整解码、8张代表图检查；用户按明确指令点击标题栏×并确认，两进程退出0且资源归零。14项Python与两后端各10组自动smoke通过。截图不含OS标题栏，退出方式另由用户确认与生命周期日志佐证；OS抓图/自动点击工具仍未修复，不冒称Editor矩阵或其他平台重验。
+
+同日后续[UI加载与退出动画中关闭](unitycore-ui.md#加载与退出动画中关闭2026-11-16)完成Mono/IL2CPP共四场挂起状态下点击标题栏×，均退出0且资源/所有权归零；修复宿主将纯取消误报失败及Assets退休迟到对象误报类型错误。有效UI矩阵298、正确AssetsDemo宿主Core/Assets矩阵336、Python18通过；中断恢复、错误宿主与超时失败均保留。最后IL2CPP改用手动Back夹具，产品源码未再改变；加载仅证明受控结果交付延迟边界，不扩展物理IO、强杀或其他平台承诺。
 
 2026-11-09 的宿主故障分类、编码失败终止、恢复 runtime 核对、退出日志和 Int32 负零修复，独立审查及本机271项 .NET、108次CLI和两个Unity宿主验收见[修复记录](review-fixes-20261109.md)。历史基线仍按下文保留。
 

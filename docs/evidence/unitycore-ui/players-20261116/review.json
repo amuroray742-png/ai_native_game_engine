@@ -1,0 +1,24 @@
+{
+  "status": "Passed",
+  "date": "2026-11-16",
+  "reviewer": "independent read-only agent /root/ui_review",
+  "remainingBlockers": [],
+  "verified": {
+    "sourceFingerprints": 348,
+    "playerBackends": ["Mono", "Il2Cpp"],
+    "playerChecksPerBackend": 10,
+    "playerExitCodes": [0, 0],
+    "playerFiles": { "Mono": 149, "Il2Cpp": 359 },
+    "xmlReports": 6,
+    "unityExecutions": 296,
+    "failed": 0,
+    "skipped": 0,
+    "pythonTestsRerun": 12,
+    "bundles": 9,
+    "screenshotsDirectlyInspected": 4,
+    "redTestsFailed": 1,
+    "correctedDemoPreRunPassed": 14
+  },
+  "conclusion": "Current sources, scripts, archive contents and hashes match. Both runtime backend reports, binaries, deployed content, full logs, XML and screenshots verified. First-attempt failure remains rejected. No remaining code or acceptance blockers.",
+  "scope": "Windows x64 Release, Direct3D11, Minimal managed stripping, synthetic uGUI events, explicit graceful shutdown. No OS input, forced termination, other platforms, performance or remote CI claims."
+}

@@ -12,15 +12,18 @@ namespace AiNative.UnityCore.UI
         private void ObserveDestroyedWindows()
         {
             if (!Accepting || Committing || Navigation.Busy || _recovering) { return; }
-            var destroyed = new List<UIWindowRecord>();
+            List<UIWindowRecord> destroyed = null;
             foreach (var record in Windows.Values)
             {
                 if (record.Instance != null && (!record.Instance.IsAlive || record.View == null) &&
                     !record.Opening && !record.Releasing &&
                     (record.Closing == null || record.Closing.Task.Status != UniTaskStatus.Pending))
-                { destroyed.Add(record); }
+                {
+                    if (destroyed == null) { destroyed = new List<UIWindowRecord>(); }
+                    destroyed.Add(record);
+                }
             }
-            if (destroyed.Count != 0) { RecoverDestroyedAsync(destroyed).Forget(); }
+            if (destroyed != null) { RecoverDestroyedAsync(destroyed).Forget(); }
         }
 
         private async UniTask RecoverDestroyedAsync(List<UIWindowRecord> destroyed)
