@@ -1,0 +1,21 @@
+{
+  "status": "Passed",
+  "date": "2026-11-16",
+  "reviewer": "independent read-only agent /root/ui_review",
+  "remainingBlockers": [],
+  "verified": {
+    "sourceFingerprints": 350,
+    "scriptFingerprints": 6,
+    "playerFiles": { "Mono": 149, "Il2Cpp": 359 },
+    "nativeCheckpointsPerBackend": 10,
+    "nativeExitCodes": [0, 0],
+    "explicitSmokeChecksPerBackend": 10,
+    "pythonTestsRerun": 13,
+    "nativeKeyboardActionsCrossCheckedPerBackend": 7,
+    "editorMatrixRerun": false,
+    "nativeSessionScreenshots": 0
+  },
+  "conclusion": "Source/scripts/archive hashes, binary files, native journals, exact keyboard frames, user action confirmations, full logs and process exit codes verified. Both backends exited from a live session to zero owned resources and a disposed model. No implementation or evidence blockers.",
+  "scope": "User mouse input, CUA native Return/Right, and native Alt+F4 window close. Windows capture and AX close-button geometry failures are retained; no native screenshot or title-bar button acceptance claim.",
+  "documentationCorrection": "Changed automatic gate wording to missing modal Back focus observation. Returning to the page Modal selection is independently cross-checked from actual actions/journals, not claimed as a dedicated automated assertion."
+}

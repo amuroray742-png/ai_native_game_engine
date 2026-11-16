@@ -100,6 +100,9 @@ namespace AiNative.UnityCore.UI
                     if (navigating) { Navigation.Open(record, linked.Token); }
                     else { Navigation.RefreshInput(linked.Token); }
                     EnsureAlive(record);
+                    // Independent windows can finish loading/entering out of order.
+                    // Their stable stacking order follows successful commits, including cache hits.
+                    if (!navigating) { record.View.transform.SetAsLastSibling(); }
                     committed = true;
                 });
                 if (navigating) { NotifyModalChange(hadModal); }

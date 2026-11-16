@@ -177,6 +177,62 @@ namespace AiNative.UnityCore.Assets.Tests
             UnityEngine.Object.Destroy(texture);
         });
         [UnityTest]
+        public IEnumerator RetiredDestroyedResultIsCancelledWithoutTypeFailureOrOwnership() => UniTask.ToCoroutine(async () =>
+        {
+            var backend = new ControlledBackend();
+            var scope = Scope(backend);
+            var texture = new Texture2D(1, 1);
+            var request = scope.LoadAsync<Texture2D>("asset");
+            scope.Runtime.Closed = true;
+            scope.Runtime.Lifetime.Cancel();
+            scope.ForceRelease();
+            Assert.True((await request.SuppressCancellationThrow()).IsCanceled);
+            UnityEngine.Object.DestroyImmediate(texture);
+            backend.Asset.TrySetResult(texture);
+            Assert.Zero(scope.GetDiagnostics().Errors.Count);
+            Assert.Zero(scope.GetDiagnostics().PendingOperations);
+            Assert.Zero(scope.GetDiagnostics().Ownership.Owners.Count);
+            Assert.Zero(scope.GetDiagnostics().Bundles.Count);
+            Assert.Zero(scope.GetDiagnostics().Resources.Count);
+            Assert.AreEqual(1, backend.Unloads);
+        });
+
+        [UnityTest]
+        public IEnumerator LiveNullResultStillReportsTypeFailure() => UniTask.ToCoroutine(async () =>
+        {
+            var backend = new ControlledBackend();
+            var scope = Scope(backend);
+            var request = scope.LoadAsync<Texture2D>("asset");
+            backend.Asset.TrySetResult(null);
+            Exception failure = null;
+            try { await request; } catch (Exception error) { failure = error; }
+            Assert.IsInstanceOf<AssetException>(failure);
+            Assert.AreEqual("AssetTypeMismatch", ((AssetException)failure).Code);
+            Assert.AreEqual(1, scope.GetDiagnostics().Errors.Count);
+            await scope.CloseAsync();
+            Assert.Zero(scope.GetDiagnostics().Ownership.Owners.Count);
+            Assert.AreEqual(1, backend.Unloads);
+        });
+
+        [UnityTest]
+        public IEnumerator RetiredBackendFailureStillRemainsDiagnostic() => UniTask.ToCoroutine(async () =>
+        {
+            var backend = new ControlledBackend();
+            var scope = Scope(backend);
+            var request = scope.LoadAsync<Texture2D>("asset");
+            scope.Runtime.Closed = true;
+            scope.Runtime.Lifetime.Cancel();
+            scope.ForceRelease();
+            Assert.True((await request.SuppressCancellationThrow()).IsCanceled);
+            backend.Asset.TrySetException(new InvalidOperationException("late native failure"));
+            Assert.AreEqual(1, scope.GetDiagnostics().Errors.Count);
+            StringAssert.Contains("late native failure", scope.GetDiagnostics().Errors[0]);
+            Assert.Zero(scope.GetDiagnostics().PendingOperations);
+            Assert.Zero(scope.GetDiagnostics().Ownership.Owners.Count);
+            Assert.AreEqual(1, backend.Unloads);
+        });
+
+        [UnityTest]
         public IEnumerator ForcedExitDuringInstantiationCollectsWithoutAnotherFrame() => UniTask.ToCoroutine(async () =>
         {
             var backend = new ControlledBackend();

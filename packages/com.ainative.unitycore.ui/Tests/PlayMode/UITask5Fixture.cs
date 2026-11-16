@@ -112,7 +112,7 @@ namespace AiNative.UnityCore.UI.Tests
             return rect;
         }
 
-        private void Register<T>(UIRole role, UITransitionOptions transition = default) where T : UIView
+        protected void Register<T>(UIRole role, UITransitionOptions transition = default) where T : UIView
         {
             var probe = new Probe();
             Probes.Add(typeof(T), probe);

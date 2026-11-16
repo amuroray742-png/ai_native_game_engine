@@ -19,6 +19,8 @@ namespace AiNative.UIDemo
         public Text Diagnostics;
         public DemoCommand[] Commands;
         public bool AutoStart = true;
+        // Configure before InitializeAsync; acceptance can make Gallery transitions observable.
+        internal float GalleryTransitionSeconds { get; set; } = 0.35f;
         public Core Core { get; private set; }
         public AssetsModule Assets { get; private set; }
         public UIModule UI { get; private set; }
@@ -31,6 +33,8 @@ namespace AiNative.UIDemo
         private float _toastUntil;
         private UIHandle _toastHandle;
         private DemoModel _toastSession;
+        private const double DiagnosticsIntervalSeconds = 0.25;
+        private double _nextDiagnosticsAt;
         private readonly CancellationTokenSource _lifetime = new CancellationTokenSource();
 
         private void Awake() { DontDestroyOnLoad(gameObject); }
@@ -84,7 +88,8 @@ namespace AiNative.UIDemo
             UI.Register(new UIWindowDefinition<T>(Content + typeof(T).Name, role,
                 (view, scope) => new DemoPresenter(view, Model, Dispatch), UICachePolicy.Cache,
                 opaqueFullscreen: opaque, allowHudInput: role == UIRole.Page,
-                transition: new UITransitionOptions(0.35f, true, new Vector2(110, 0), 0.96f)));
+                transition: new UITransitionOptions(typeof(T) == typeof(GalleryView) ? GalleryTransitionSeconds : 0.35f,
+                    true, new Vector2(110, 0), 0.96f)));
         }
 
         private async UniTask CreateSessionAsync()
@@ -103,6 +108,12 @@ namespace AiNative.UIDemo
         {
             try { await ExecuteAsync(action); }
             catch (OperationCanceledException) { LastResult = "Cancelled; previous page retained."; }
+            catch (UIOperationException error) when ((_closing || (Core != null && !Core.IsRunning)) && IsCancelledClose(error))
+            {
+                // Back/Hud exit can be interrupted by host shutdown just like toast exit.
+                // Do not hide committed operations, cleanup ownership, or mixed failures.
+                LastResult = "Cancelled during host shutdown.";
+            }
             catch (Exception error) { ReportError(error); }
         }
 
@@ -181,6 +192,11 @@ namespace AiNative.UIDemo
                 _toastSession = null;
                 if (current) { CloseToastAsync(_toastHandle).Forget(Debug.LogException); }
             }
+            // Full UI/Assets diagnostics traverse components and allocate snapshots.
+            // Keep status and toast processing per-frame, but sample the panel at 4 Hz.
+            double now = Time.unscaledTimeAsDouble;
+            if (now < _nextDiagnosticsAt) { return; }
+            _nextDiagnosticsAt = now + DiagnosticsIntervalSeconds;
             var ui = UI.GetDiagnostics();
             var assets = Assets.GetDiagnostics();
             Diagnostics.text = $"SESSION {_session}   |   pages {ui.PageDepth} / modals {ui.ModalCount} / cache {ui.ClosedCacheCount} / pending {ui.PendingOperations} / failed {ui.FailedCleanupCount}   |   bundles {assets.Bundles.Count}";
@@ -193,7 +209,21 @@ namespace AiNative.UIDemo
                 var result = await UI.CloseAsync(handle);
                 if (!result.Succeeded && result.Error != UIError.InvalidHandle) { SetResult(result.Error); }
             }
+            catch (UIOperationException error) when (IsCancelledClose(error))
+            {
+                // Clear/shutdown owns the interrupted exit. Only cancellation-only,
+                // uncommitted failures are expected; cleanup faults remain observable.
+            }
             catch (Exception error) { ReportError(error); }
+        }
+
+        private static bool IsCancelledClose(UIOperationException error)
+        {
+            if (error.Committed || error.CleanupHandle.HasValue || !(error.InnerException is AggregateException aggregate)) { return false; }
+            var failures = aggregate.Flatten().InnerExceptions;
+            if (failures.Count == 0) { return false; }
+            foreach (var failure in failures) { if (!(failure is OperationCanceledException)) { return false; } }
+            return true;
         }
 
         private void OnDestroy()

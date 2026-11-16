@@ -50,6 +50,8 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | packages/com.ainative.unity | 场景生命周期、手动与固定步长推进、类型化 Tick 交付 |
 | packages/com.ainative.unitycore | Unity 应用模块生命周期、日志与表现回调，PhysicsSandbox 直接引用仓库中的源码及测试 |
 | packages/com.ainative.unitycore.assets | 本地资源句柄、作用域、共享 AssetBundle、实例池、场景及 Editor 分包/校验工具 |
+| packages/com.ainative.unitycore.ui | uGUI 窗口所有权、页面/模态导航、缓存、输入焦点与过渡；[包入口](packages/com.ainative.unitycore.ui/README.md) |
+| examples/unity/UIDemo | 独立 UI 交互示例、真实 Bundle 集成与双 Domain Reload 验收 |
 | examples/unity/AssetsDemo | 独立资源示例及 Windows Player 冒烟入口，不依赖 Jolt |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
 | examples/unity/PhysicsSandbox | 独立 Windows Editor 工程，提供 Jolt 沙盒、实时输入、存读档和逐 Tick 对照 |
@@ -65,6 +67,16 @@ PhysicsSandbox 安装了 Unity CLI 的 `com.unity.pipeline` 插件，固定版�
 从旧版升级时，先备份并移走示例工程 `Packages/com.ainative.unity`、`Packages/com.ainative.unitycore` 中实际存在的旧内嵌副本（检查其中是否有未合并的手动修改）。这些忽略目录不会随 Git 更新消失，而且会遮蔽 manifest 的本地引用。今后统一编辑仓库根目录 `packages/`；开启 Unity Preferences 中的 Auto Refresh。验收副本由脚本复制为独立目录结构，开发工程不再复制公共包。
 
 ## 验证
+
+**UnityCore UI**。在新证据目录运行 `python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>`，自动复制独立 UIDemo 与三包，重新构建 Bundle 并执行双 Domain Reload 精确 UI/Demo 矩阵。可见 screen 截图独立验证，自动矩阵 Passed 不替代视觉验收。[启动说明](examples/unity/UIDemo/README.md) · [契约与验收](docs/unitycore-ui.md)
+
+Windows x64 Player 另运行 `python scripts/verify_unity_ui_players.py TestResults/ui-players-<唯一后缀>`，分别构建与启动 Mono、IL2CPP Release Player，校验实际后端、Bundle、交互路由、资源清理与屏幕截图。需要 Windows IL2CPP/Visual C++ 工具链及 Pillow；完整范围见 [Player 入口](examples/unity/UIDemo/README.md#windows-player-验收入口)。
+
+原生鼠标键盘与系统窗口关闭使用 [交互验收入口](examples/unity/UIDemo/README.md#原生输入与窗口关闭验收入口)：`verify_unity_ui_native.py prepare` 构建隔离 Player，`run --backend Mono|Il2Cpp` 等待外部操作并验证只读输入/退出记录。已验证用户鼠标、CUA键盘及Alt+F4；关闭按钮与抓图工具限制见[实际记录](docs/unitycore-ui.md#windows-player-原生输入与系统窗口关闭2026-11-16)。
+
+加载结果待交付、退出动画中的窗口关闭另用 `verify_unity_ui_shutdown.py <构建证据目录> --backend Mono|Il2Cpp --scenario loading|exiting`。退出场景等待操作人点击Back后再点标题栏×；受控加载边界、修复和证据见[加载/动画关闭验收](docs/unitycore-ui.md#加载与退出动画中关闭2026-11-16)。
+
+追加 `--screenshots` 可记录真实原生输入后的Player客户端画面。两后端的客户端截图与用户实际点击标题栏×退出已在[后续专项](docs/unitycore-ui.md#原生交互截图与标题栏关闭2026-11-16)完成；截图不含OS标题栏，Windows抓图/自动按钮点击工具故障仍单独保留。
 
 **试玩 GridGame**。安装并授权 Unity 6000.3.23f1，在仓库根目录准备公共包、DLL 和场景数据，再打开 GridGame 工程。
 
