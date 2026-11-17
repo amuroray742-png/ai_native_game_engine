@@ -404,3 +404,26 @@ Windows Editor / Unity 6000.3.23f1 / Unity CLI 1.0.0，在独立 UIDemo 副本�
 预跑使用未补最后两条回归的快照，6 份 XML 全通过，但期间工作区修改被源码指纹门禁正确拒绝，不能作为最终成功。首轮完整快照的 113 项 PlayMode 有 1 项失败：Back 测试在首次拒绝、栈/焦点/pending 恢复断言通过后，仅修改 inactive Canvas 属性未能使再次 Back 通过；改为移除测试注入的非法组件后，12 项输入专项及最终矩阵通过。没有将尚未单独定位的 Unity 属性行为认定为内部根因，也没有放宽生产排序校验。失败、专项和预跑材料均保留且不计入328次。
 
 证据见[机器摘要](evidence/unitycore-ui/review-fixes-20261116/summary.json)、[完整归档](evidence/unitycore-ui/review-fixes-20261116/review-fixes-evidence.zip)及[独立复核](evidence/unitycore-ui/review-fixes-20261116/review.json)。本轮验证为契约、导航/输入路由和真实 Bundle 集成；未重跑 Player/IL2CPP、原生交互截图、设备安全区、性能或远端 CI。已有使用 overrideSorting 的窗口需调整为继承排序后接入，不能沿用之前仅告警的行为。
+
+## 合并后 Windows Player 回归（2026-11-17）
+
+以PR #30合并后的 `main` 提交 `3c886701ef39073af1e2a3d25522eb5a8e0d059b` 为基线，在全新隔离工程重新生成场景、构建真实SBP Bundle并构建Windows x64 Release Mono/IL2CPP。UI/Core/Assets三个产品包未修改；本轮扩展UIDemo的显式验收夹具、宿主内部显示选项注入和Python报告门禁。普通交互Demo仍使用原默认配置，不能将带新增夹具的Player描述为未经任何变更的合并提交二进制。
+
+| 验收项 | Mono | IL2CPP |
+| --- | --- | --- |
+| 自动Player检查 | 14/14通过 | 14/14通过 |
+| 运行帧数 | 967 | 966 |
+| 首页/双模态截图 | 2张，完整解码并逐张查看 | 2张，完整解码并逐张查看 |
+| 最终UI窗口/挂起/清理失败 | 全部0 | 全部0 |
+| 最终Assets Bundle/资源/挂起/所有权/内部错误 | 全部0 | 全部0 |
+| 进程退出码 | 0 | 0 |
+
+在原十组基础检查上，增加四组：非默认显示配置传递到实际CanvasScaler/遮罩、继承排序Canvas的模态输入阻挡、缓存窗口OnEnable产生非法排序时的拒绝及旧句柄释放、Covered页恢复非法排序时的Back回滚与修正后重试。显示配置为2000×1125、宽高匹配0.25、遮罩RGBA(0.1,0.2,0.3,0.65)，结果保存实际数值并由Python独立校验；窗口栈、焦点、冷隐藏、pending与清理失败状态都有运行时断言。新实例首次激活拒绝专项仍为上一轮Editor覆盖，本轮未新增对应Player断言。
+
+正式结果共28组Player检查通过，另18项Python门禁单测通过；环境为Unity 6000.3.23f1、Unity CLI 1.0.1、Direct3D11、Minimal stripping。440份源码/配置、4份验证脚本指纹在执行前后匹配；两个Player文件清单分别151/363份，部署Bundle与本次SBP构建一致。最终原始目录 `TestResults/ui-players-merged-accepted-20261117`，二进制保留于 `C:/unity-verification/eff48e276fe7/TestResults/ui-players/Mono|Il2Cpp`，归档保存文件哈希，不包含可执行文件本体。复现入口见[UIDemo说明](../examples/unity/UIDemo/README.md#windows-player-验收入口)。
+
+失败与中间材料分别保留，不计入正式28组：首次 `ui-players-merged-20261117` 因两个新增夹具文件缺少namespace闭合括号导致编译失败，没有运行Player；`ui-players-merged-final-20261117` 两后端自动检查均通过，但1600×900验收配置裁切固定布局HUD，截图复核后被替代，保留其原始Passed报告；`ui-players-merged-verified-20261117` 的Mono在缓存排序专项失败，前一专项已有Canvas未可靠移除，导致重复AddComponent和OnEnable空引用。最终夹具通过ReleaseAsync完全释放上一专项实例并确认Unity null，再创建新实例进行注入，未放宽产品断言，也未认定尚未单独定位的Unity内部销毁根因。
+
+证据见[机器摘要](evidence/unitycore-ui/merged-players-20261117/summary.json)、[完整归档](evidence/unitycore-ui/merged-players-20261117/merged-players-evidence.zip)与[独立复核](evidence/unitycore-ui/merged-players-20261117/review.json)。四张最终截图：[Mono首页](evidence/unitycore-ui/merged-players-20261117/Mono-home.png)、[Mono双模态](evidence/unitycore-ui/merged-players-20261117/Mono-modals.png)、[IL2CPP首页](evidence/unitycore-ui/merged-players-20261117/Il2Cpp-home.png)、[IL2CPP双模态](evidence/unitycore-ui/merged-players-20261117/Il2Cpp-modals.png)。归档包含最终及失败/中间轮命令、完整日志、报告、截图、源码/脚本快照及内容哈希。
+
+本轮事件由RaycastAll/ExecuteEvents触发，退出为CloseAsync后Application.Quit；没有重跑OS原生鼠标键盘、标题栏关闭、加载/退出动画中关闭、完整Editor矩阵、性能、设备安全区或远端Unity CI。上述历史证据保留原版本与范围，不并入本轮通过数。

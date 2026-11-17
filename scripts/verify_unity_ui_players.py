@@ -1,6 +1,7 @@
 """Build and run isolated Windows x64 UIDemo release Players (Mono and IL2CPP)."""
 import argparse
 import json
+import math
 from pathlib import Path
 import shutil
 import sys
@@ -9,7 +10,9 @@ from PIL import Image
 from unity_packages import copy_verification_project, local_packages, verification_workspace
 from verify_unity_ui import ROOT, PROJECT, PACKAGES, check_log, digest, fingerprint, read_unity_version, run_command, write_json
 
-CHECKS = ["bundle-shared-image", "raycast-page-stack", "modal-input-focus", "cache-session-lru",
+CHECKS = ["bundle-shared-image", "raycast-page-stack", "modal-input-focus",
+          "configured-display-options", "inherited-canvas-modal-input", "invalid-cached-canvas-rollback",
+          "invalid-covered-canvas-back-retry", "cache-session-lru",
           "transition-cancellation", "toast-expiry-input", "clear-failure-retry",
           "scene-persistence-unscaled-transition", "trim-last-owner", "explicit-shutdown-zero-resources"]
 
@@ -20,6 +23,18 @@ def validate_report(path, backend, unity):
             report.get("unity") != unity or report.get("graphics") != "Direct3D11" or
             report.get("checks") != CHECKS or report.get("frames", 0) < 10 or report.get("error")):
         raise RuntimeError(f"Invalid Player acceptance report: {path}: {report}")
+    expected = {"referenceResolution": {"x": 2000, "y": 1125},
+                "modalMaskColor": {"r": 0.1, "g": 0.2, "b": 0.3, "a": 0.65}}
+    for field, components in expected.items():
+        actual = report.get(field, {})
+        if not isinstance(actual, dict) or any(not isinstance(actual.get(key), (int, float)) or
+                not math.isclose(actual[key], value, rel_tol=0, abs_tol=1e-6) for key, value in components.items()):
+            raise RuntimeError(f"Unexpected Player display configuration: {field}")
+    if report.get("matchWidthOrHeight") != 0.25:
+        raise RuntimeError("Unexpected CanvasScaler match")
+    if any(report.get(key) != 0 for key in ("windows", "uiPending", "failedCleanup", "bundles", "resources",
+                                           "assetPending", "owners", "assetErrors")):
+        raise RuntimeError("Player shutdown did not report clean resources and ownership")
     for name in ("home", "modals"):
         screenshot = path.with_suffix(f".{name}.png")
         try:

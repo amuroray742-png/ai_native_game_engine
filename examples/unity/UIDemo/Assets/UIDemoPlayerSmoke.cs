@@ -19,6 +19,10 @@ namespace AiNative.UIDemo
             public bool success;
             public string backend, unity, graphics, error;
             public int frames, width, height;
+            public Vector2 referenceResolution;
+            public float matchWidthOrHeight;
+            public Color modalMaskColor;
+            public int windows, uiPending, failedCleanup, bundles, resources, assetPending, owners, assetErrors;
             public List<string> checks = new List<string>();
         }
 
@@ -37,6 +41,7 @@ namespace AiNative.UIDemo
             var driver = new GameObject("UIDemo Player acceptance").AddComponent<UIDemoPlayerSmoke>();
             DontDestroyOnLoad(driver.gameObject);
             driver._result = Path.GetFullPath(args[index + 1]);
+            FindFirstObjectByType<UIDemoBootstrap>().DisplayOptions = UIDemoPlayerContracts.Options;
             driver.RunAsync().Forget(Debug.LogException);
         }
 
@@ -94,6 +99,13 @@ namespace AiNative.UIDemo
                 Require(!_host.UI.HasModal && _host.Events.currentSelectedGameObject == home.DefaultSelection.gameObject, "Focus restoration");
                 Passed("modal-input-focus");
 
+                await UIDemoPlayerContracts.VerifyAsync(_host, Passed);
+                var uiRoot = home.GetComponentInParent<Canvas>();
+                var scaler = uiRoot.GetComponent<UnityEngine.UI.CanvasScaler>();
+                _report.referenceResolution = scaler.referenceResolution;
+                _report.matchWidthOrHeight = scaler.matchWidthOrHeight;
+                _report.modalMaskColor = uiRoot.transform.Find("Modal/ModalMask").GetComponent<UnityEngine.UI.Image>().color;
+
                 _host.UI.TryGet<HudView>(out var hud, out var oldHud);
                 await Click<HudView>(DemoAction.Hud);
                 var reopened = await _host.UI.OpenAsync<HudView>();
@@ -150,6 +162,17 @@ namespace AiNative.UIDemo
                 await _host.ReplaceSessionAsync();
                 await _host.CloseAsync();
                 await UniTask.Yield();
+                var finalUi = _host.UI.GetDiagnostics();
+                var finalAssets = _host.Assets.GetDiagnostics();
+                _report.windows = finalUi.WindowCount;
+                _report.uiPending = finalUi.PendingOperations;
+                _report.failedCleanup = finalUi.FailedCleanupCount;
+                _report.bundles = finalAssets.Bundles.Count;
+                _report.resources = finalAssets.Resources.Count;
+                _report.assetPending = finalAssets.PendingOperations;
+                _report.owners = finalAssets.Ownership.Owners.Count;
+                _report.assetErrors = finalAssets.Errors.Count;
+                Require(_report.owners == 0 && _report.assetErrors == 0, "Shutdown retained ownership or asset errors");
                 Require(_host.Model.IsDisposed && !core.IsRunning && _host.UI.GetDiagnostics().WindowCount == 0 &&
                     _host.UI.GetDiagnostics().PendingOperations == 0 && _host.UI.GetDiagnostics().FailedCleanupCount == 0 &&
                     _host.Assets.GetDiagnostics().Bundles.Count == 0 && _host.Assets.GetDiagnostics().Resources.Count == 0 &&

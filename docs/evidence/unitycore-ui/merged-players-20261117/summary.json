@@ -1,0 +1,169 @@
+{
+  "status": "Passed",
+  "platform": "Windows x64 Player",
+  "players": [
+    {
+      "backend": "Mono",
+      "report": {
+        "success": true,
+        "backend": "Mono",
+        "unity": "6000.3.23f1",
+        "graphics": "Direct3D11",
+        "error": "",
+        "frames": 967,
+        "width": 1280,
+        "height": 720,
+        "referenceResolution": {
+          "x": 2000.0,
+          "y": 1125.0
+        },
+        "matchWidthOrHeight": 0.25,
+        "modalMaskColor": {
+          "r": 0.10000000149011612,
+          "g": 0.20000000298023224,
+          "b": 0.30000001192092896,
+          "a": 0.6499999761581421
+        },
+        "windows": 0,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 0,
+        "resources": 0,
+        "assetPending": 0,
+        "owners": 0,
+        "assetErrors": 0,
+        "checks": [
+          "bundle-shared-image",
+          "raycast-page-stack",
+          "modal-input-focus",
+          "configured-display-options",
+          "inherited-canvas-modal-input",
+          "invalid-cached-canvas-rollback",
+          "invalid-covered-canvas-back-retry",
+          "cache-session-lru",
+          "transition-cancellation",
+          "toast-expiry-input",
+          "clear-failure-retry",
+          "scene-persistence-unscaled-transition",
+          "trim-last-owner",
+          "explicit-shutdown-zero-resources"
+        ]
+      },
+      "resultSha256": "64b8ad6541d2d439cd4d05ca14116336cfcd9e6c36975fed3e13c81882f97119",
+      "filesSha256": "52f2ed7a7c51d9b535bba0d321b991dae7806bfb7c5d6d1d0049a4ba0bfe8603",
+      "screenshots": {
+        "home": "9785fdc6ff53ee57521cf45da94c0b85b1881ede670efd5dc9c55b109bf9c341",
+        "modals": "316146f8aa04e8b658c91427422b09f3635f4daedc6c2149c1a6cd40f2811425"
+      }
+    },
+    {
+      "backend": "Il2Cpp",
+      "report": {
+        "success": true,
+        "backend": "Il2Cpp",
+        "unity": "6000.3.23f1",
+        "graphics": "Direct3D11",
+        "error": "",
+        "frames": 966,
+        "width": 1280,
+        "height": 720,
+        "referenceResolution": {
+          "x": 2000.0,
+          "y": 1125.0
+        },
+        "matchWidthOrHeight": 0.25,
+        "modalMaskColor": {
+          "r": 0.10000000149011612,
+          "g": 0.20000000298023224,
+          "b": 0.30000001192092896,
+          "a": 0.6499999761581421
+        },
+        "windows": 0,
+        "uiPending": 0,
+        "failedCleanup": 0,
+        "bundles": 0,
+        "resources": 0,
+        "assetPending": 0,
+        "owners": 0,
+        "assetErrors": 0,
+        "checks": [
+          "bundle-shared-image",
+          "raycast-page-stack",
+          "modal-input-focus",
+          "configured-display-options",
+          "inherited-canvas-modal-input",
+          "invalid-cached-canvas-rollback",
+          "invalid-covered-canvas-back-retry",
+          "cache-session-lru",
+          "transition-cancellation",
+          "toast-expiry-input",
+          "clear-failure-retry",
+          "scene-persistence-unscaled-transition",
+          "trim-last-owner",
+          "explicit-shutdown-zero-resources"
+        ]
+      },
+      "resultSha256": "4e7c05959cbc4c8d67f5a7c538e66f5701a9495536b20187b38db17037fc8e67",
+      "filesSha256": "3a63571921ba672a6d1c3c40b19bc72e3a4dcf4d98d04197540db7c6a619728e",
+      "screenshots": {
+        "home": "9785fdc6ff53ee57521cf45da94c0b85b1881ede670efd5dc9c55b109bf9c341",
+        "modals": "316146f8aa04e8b658c91427422b09f3635f4daedc6c2149c1a6cd40f2811425"
+      }
+    }
+  ],
+  "scope": "Release, Minimal managed stripping, Direct3D11; synthetic uGUI raycasts/clicks; explicit graceful shutdown",
+  "unverified": [
+    "OS mouse/keyboard input",
+    "Forced process termination",
+    "Other graphics APIs/platforms",
+    "Remote CI"
+  ],
+  "workspace": "C:\\unity-verification\\eff48e276fe7",
+  "project": "C:\\unity-verification\\eff48e276fe7\\examples\\unity\\UIDemo",
+  "unity": "6000.3.23f1",
+  "content": {
+    "catalog.json": "95b1a461abf4d9aa0592bd73590864d6b4280e8a3fbfe512300374f120dc4ce0",
+    "group_0570f829e31c2d568350d48d886ffd95a4c82ab56984c75dff27dd0063f6ed90.bundle": "097f9e6b9f26eae20cbbae416bbd612d6f5c8215c7086edffe522ba742ad6c1c",
+    "group_08c46de6a5670d7d4c3470d4b88bef3c69646d6b2ff16849f0022a5e145fce9c.bundle": "e44e61cf3f0af17fd6f9e0c648a9c7befdf36e6e2f927b077bbe63f3ae50a31b",
+    "group_09fef70a9a021d75fc305ee5d8e428df6e03f3475bf664e637410d1bbeb013a2.bundle": "f3ada3144ddfd0b6e14fb7a36f144d3559d86ea631de60b5ed561cff01e25eaf",
+    "group_1e96276c618612cc9ef14477890d40e2dd460b18f5bb0f807d2f8f9503fb8bc3.bundle": "974ebe752bb46bcd6bed1a8601e0ebecd19b46bb9f518e62c526e318347ab105",
+    "group_23c2affa7824d2a90ccd60e2e649e52da20e962fa7fa60b11cc33e78366849ce.bundle": "4c93c691e284e4ee6f7ec6f3cda00344183256623b770292c7a107d678825568",
+    "group_4aa9e5f4938fca17db3d730e87f467d4aa8c53ecadc8339239399f5f2aea0763.bundle": "a4b56182e6603a5b3301b2de11958d084a6b9fc4ebbf4e9077fb60ab7715080e",
+    "group_60c25b6139f5dcb29ae66af66e1da4ed8b0071632970a2bb167dd999c567b03e.bundle": "3d85b40c35b9fcc87763825053192aea385a368d9f2b575e9e960a39997eb1a3",
+    "group_8050b8ea720dabde0698159bf3c358c0ae3d6a021c8408be154826ca3d805d93.bundle": "0d20ba25f90b810a5523baad3a3a0e6faacc78522bae473f5f25df20b27c7142",
+    "group_cc76a8d9a3a90283ba8027b4c6872f4e043af8828e11f0fbb853bf89296e227e.bundle": "02001e52d5da758036ffbf58a3d11b8c6234909cc2d1c69028755c35715300d1"
+  },
+  "date": "2026-11-17",
+  "baseCommit": "3c886701ef39073af1e2a3d25522eb5a8e0d059b",
+  "productPackagesUnchanged": true,
+  "sourceFiles": 440,
+  "scriptFiles": 4,
+  "totalChecks": 28,
+  "pythonTests": 18,
+  "evidenceArchive": {
+    "file": "merged-players-evidence.zip",
+    "sha256": "64a4f40f637e850b2ce3c1fffe68189be4f1d47c05e4b128d70bab71986e9690",
+    "entries": 596
+  },
+  "visualReview": "Four final screenshots inspected separately by primary agent; independent review recorded in review.json",
+  "excludedAttempts": [
+    {
+      "directory": "ui-players-merged-20261117",
+      "reason": "Two new fixture files missing closing namespace braces; compile failed, no Player ran"
+    },
+    {
+      "directory": "ui-players-merged-final-20261117",
+      "reason": "Both automatic suites passed, but 1600x900 reference resolution cropped fixed-layout HUD; superseded by final 2000x1125 run"
+    },
+    {
+      "directory": "ui-players-merged-verified-20261117",
+      "reason": "Mono fixture attempted to inject Canvas while prior scenario Canvas still existed; isolated scenarios using Release then a fresh instance"
+    }
+  ],
+  "limitations": [
+    "Synthetic EventSystem raycasts/clicks, not new OS input evidence",
+    "CloseAsync plus Application.Quit, not new title-bar or interrupted-close evidence",
+    "New-instance first activation rejection remains Editor-only coverage",
+    "No new Editor matrix, performance, mobile/device safe area or remote Unity CI run"
+  ]
+}

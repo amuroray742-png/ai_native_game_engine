@@ -21,6 +21,7 @@ namespace AiNative.UIDemo
         public bool AutoStart = true;
         // Configure before InitializeAsync; acceptance can make Gallery transitions observable.
         internal float GalleryTransitionSeconds { get; set; } = 0.35f;
+        internal UIOptions DisplayOptions { get; set; } = new UIOptions(closedCacheCapacity: 1);
         public Core Core { get; private set; }
         public AssetsModule Assets { get; private set; }
         public UIModule UI { get; private set; }
@@ -62,7 +63,7 @@ namespace AiNative.UIDemo
             {
                 Core = Core.Inst;
                 Assets = assets;
-                UI = new UIModule(new UIOptions(closedCacheCapacity: 1), Events);
+                UI = new UIModule(DisplayOptions, Events);
                 RegisterWindows();
                 Core.RegisterModule(Assets).RegisterModule(UI);
                 await Core.RunAsync(_lifetime.Token);
