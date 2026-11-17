@@ -23,6 +23,10 @@ namespace AiNative.Examples.GridGame.PlayTests
                 yield return new EnterPlayMode(expectDomainReload: false);
                 Assert.True(Application.isPlaying);
                 var bootstrap = UnityEngine.Object.FindFirstObjectByType<GridGameBootstrap>();
+                float deadline = Time.realtimeSinceStartup + 20;
+                while (!bootstrap.UIReady && bootstrap.UIError == null && Time.realtimeSinceStartup < deadline) { yield return null; }
+                Assert.IsNull(bootstrap.UIError);
+                Assert.True(bootstrap.UIReady);
                 var session = bootstrap.Session;
                 Assert.AreEqual(0, session.Tick);
                 bootstrap.Advance();

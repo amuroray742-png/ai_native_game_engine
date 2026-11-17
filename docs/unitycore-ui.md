@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+GridGame 已接入本模块：HUD由真实Bundle加载，Presenter管理绑定，场景与应用服务寿命分离；Windows Editor及玩法轨迹验证见[GridGame UI接入](unity-play-host.md#gridgame-ui-模块接入2026-11-17)。UIDemo的Player证据不自动扩展为GridGame Player验收。
+
 本模块按 [设计记录](unitycore-ui-design.md) 与 [实施计划](superpowers/plans/2026-11-12-unitycore-ui.md) 开发，已有基础窗口所有权及生命周期，并接入页面栈、模态顺序、事务回滚、输入/焦点策略、有界缓存、LRU、Trim、旧会话隔离、安全区更新和内置过渡；实际验证范围见下文。Task 6 已补齐 Clear、迟到任务隔离、外部销毁恢复与组件诊断回归；Task 7 已补齐独立交互 Demo 与真实 Bundle 集成；Task 8 已补齐统一隔离验证脚本、层级顺序回归与交付证据；详见末节。
 
 2026-11-16 已补齐 Windows x64 Mono/IL2CPP Release Player 专项，两后端各十组检查通过，并完成双重载296次Editor回归；限定范围见[Player验收](#windows-player-与-il2cpp2026-11-16)，不扩展下方历史证据。

@@ -73,6 +73,15 @@ def run_play_tests(output):
     results = {}
     with contextlib.nullcontext(verification_workspace(output)) as work:
         project = copy_verification_project(PROJECT, Path(work))
+        build_command = ["unity", "run", str(project), "--timeout", "600", "--format", "json",
+                         "--log-file", str(output / "ui-content.log"), "--no-tail", "--", "-executeMethod",
+                         "AiNative.Examples.GridGame.Play.Editor.GridUiBuilder.BuildContent"]
+        build = subprocess.run(build_command, cwd=ROOT, capture_output=True, timeout=630)
+        (output / "ui-content.stdout.json").write_bytes(build.stdout)
+        (output / "ui-content.stderr.txt").write_bytes(build.stderr)
+        (output / "ui-content.command.json").write_text(json.dumps({"command": build_command, "exitCode": build.returncode}, indent=2))
+        if build.returncode != 0:
+            raise RuntimeError(f"UI bundle build failed; see {output / 'ui-content.log'}")
         settings = project / "ProjectSettings/EditorSettings.asset"
         original = settings.read_text(encoding="utf-8")
         for reload in ("on", "off"):
@@ -94,7 +103,11 @@ def run_play_tests(output):
                         "MovementAndHitFeedbackUseRenderedFramesWithoutExtraTicks",
                         "FixedPumpRetainsDebtDuringPauseAndPublishesOrderedInputsOnce",
                         "FailedCandidatePreservesActiveFrameUntilSuccessfulReplacement",
-                        "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart"}
+                        "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart",
+                        "UiModuleOwnsHudAndReleasesResourcesOnDisconnect",
+                        "LoadingDisconnectAndImmediateReattachKeepOnlyCurrentHud",
+                        "SceneReloadReusesApplicationAndReplacesHudSession",
+                        "HudWithoutMatchAllowsRetryWhenReadyAndRevokesCommandsOnDetach"}
             names = {case.get("name") for case in cases}
             if not required <= names or any(case.get("result") != "Passed" for case in cases):
                 raise RuntimeError(f"Incomplete PlayMode acceptance, see {xml}")

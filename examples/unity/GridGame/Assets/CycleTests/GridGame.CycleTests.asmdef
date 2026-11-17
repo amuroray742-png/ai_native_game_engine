@@ -1,8 +1,25 @@
 {
   "name": "GridGame.CycleTests",
-  "references": ["GridGame.Play", "AiNative.Unity"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"],
+  "references": [
+    "GridGame.Play",
+    "AiNative.Unity",
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Assets",
+    "AiNative.UnityCore.UI",
+    "UniTask"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
   "overrideReferences": true,
-  "precompiledReferences": ["nunit.framework.dll", "AiNative.Core.dll", "AiNative.GridGame.dll", "AiNative.GridGame.Hosting.dll", "AiNative.Hosting.dll"]
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "AiNative.Core.dll",
+    "AiNative.GridGame.dll",
+    "AiNative.GridGame.Hosting.dll",
+    "AiNative.Hosting.dll"
+  ]
 }

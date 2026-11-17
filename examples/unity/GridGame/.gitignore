@@ -16,3 +16,7 @@
 /Assets/StreamingAssets/grid.scenario.json.meta
 /Assets/StreamingAssets/grid.commands.json
 /Assets/StreamingAssets/grid.commands.json.meta
+
+/BuildArtifacts/
+/Assets/StreamingAssets/AiNativeAssets/
+/Assets/StreamingAssets/AiNativeAssets.meta

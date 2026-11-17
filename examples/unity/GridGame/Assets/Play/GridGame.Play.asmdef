@@ -1,1 +1,11 @@
-{"name":"GridGame.Play","references":["AiNative.Unity","UnityEngine.UI"]}
+{
+  "name": "GridGame.Play",
+  "references": [
+    "AiNative.Unity",
+    "UnityEngine.UI",
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Assets",
+    "AiNative.UnityCore.UI",
+    "UniTask"
+  ]
+}
