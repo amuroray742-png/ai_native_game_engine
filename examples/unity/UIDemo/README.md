@@ -37,7 +37,9 @@ python scripts/verify_unity_ui_players.py TestResults/ui-players-<唯一后缀>
 
 脚本在新隔离工程重新生成场景与 SBP 内容，依次构建 Windows x64 Release Mono、IL2CPP Player，采用 Minimal managed stripping，实际运行 Direct3D11。构建通过 Assets 的 BuildDeployedPlayer 保留 Bundle 引用类型；构建目录已存在时拒绝覆盖。正常交互启动不会创建验收对象，只有 `-uiSmoke -uiResult <新JSON路径>` 启用驱动。
 
-每个 Player 执行十组检查：共享图片真实 Bundle、页面栈、双模态阻挡与焦点、缓存会话/LRU、过渡取消、Toast 到期/输入穿透、Clear 故障重试、Single 切场景/暂停动画、Trim 最后持有者、显式关闭资源归零。事件输入使用 RaycastAll 后 ExecuteEvents，不能冒充 OS 鼠标键盘；退出证据为 CloseAsync 后 Application.Quit，不包含任务管理器强杀。
+每个 Player 执行十四组检查：共享图片真实 Bundle、页面栈、双模态阻挡与焦点、非默认显示配置、继承排序 Canvas 的模态输入、缓存重开非法排序回滚、Covered 页面恢复非法排序及 Back 重试、缓存会话/LRU、过渡取消、Toast 到期/输入穿透、Clear 故障重试、Single 切场景/暂停动画、Trim 最后持有者、显式关闭资源归零。事件输入使用 RaycastAll 后 ExecuteEvents，不能冒充 OS 鼠标键盘；退出证据为 CloseAsync 后 Application.Quit，不包含任务管理器强杀。
+
+仅 `-uiSmoke` 在宿主初始化前设置 `UIOptions` 为参考分辨率2000×1125、宽高匹配0.25、遮罩RGBA(0.1,0.2,0.3,0.65)，断言实际 CanvasScaler/遮罩值并写入结果；普通Demo保留原默认配置。排序夹具在冷隐藏或Covered实例上挂接一次激活注入组件，验证真实OnEnable后的拒绝与回滚；Back重试前销毁注入组件并等待下一帧。新实例首次激活拒绝仍由Editor测试覆盖，不将其计入本轮Player专项。最终结果还必须报告UI挂起/清理、Assets资源/所有权和内部错误全部归零。
 
 输出保存命令/退出码、完整构建与 Player 日志、运行后端/版本报告、源码和脚本指纹、Player 文件哈希、内容哈希与 Home/双模态屏幕截图。实际可执行文件保留在 `workspace.txt` 指向的隔离目录 `TestResults/ui-players`。运行时后端必须与磁盘 Mono/IL2CPP 产物一致，部署 Bundle 必须逐个匹配本次构建。截图执行 PNG 完整性/解码检查，视觉正确性另行查看；不能仅凭 PNG 存在宣布通过。失败保留现场并仅写 failure.json。
 

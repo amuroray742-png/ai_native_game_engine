@@ -90,3 +90,5 @@ PhysicsSandbox 同轮本地无头回归通过 249 项 .NET 测试、108 次 CLI 
 独立Reviewer已复核最终本地222项测试、80次CLI与原生探针，确认所有代码阻断项收口。随后双平台CI与制品核验完成，见上表；本轮六项改造的实现和验收均已收口。
 
 2026-11-16 [UI 审查修复](unitycore-ui.md#ui-审查修复2026-11-16)收敛子 Canvas 继承排序约束，开放显示配置并校正实施计划状态；独立代码审查后在隔离 UIDemo 运行双 Domain Reload，各36项 UI EditMode、113项 UI PlayMode、15项真实Bundle Demo，共328次通过，另18项Python门禁通过。436个源码与配置文件指纹匹配；本轮未重跑Player/IL2CPP、截图、性能或远端CI，历史证据保留原范围。
+
+2026-11-17 [合并后UI Player回归](unitycore-ui.md#合并后-windows-player-回归2026-11-17)以PR #30合并提交为产品包基线，补充验收夹具后重新构建Windows Mono/IL2CPP，各14组自动检查通过，共28组；另18项Python门禁通过，4张截图逐张复核。覆盖显示配置、继承排序、缓存及Covered恢复回滚，440份源码/配置指纹匹配。未重跑原生输入、系统窗口关闭、Editor矩阵、性能、设备或远端Unity CI，不改变v2模拟及协议历史基线。
