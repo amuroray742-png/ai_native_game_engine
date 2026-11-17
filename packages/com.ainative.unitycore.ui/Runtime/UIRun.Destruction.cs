@@ -65,6 +65,7 @@ namespace AiNative.UnityCore.UI
         {
             if (record.Instance == null || !record.Instance.IsAlive || record.View == null)
             { throw new InvalidOperationException("Window was externally destroyed before operation commit."); }
+            ValidateCanvasSorting(record.View);
         }
     }
 }

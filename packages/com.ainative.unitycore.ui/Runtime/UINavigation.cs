@@ -196,6 +196,7 @@ namespace AiNative.UnityCore.UI
             }
             record.View.gameObject.SetActive(visible);
             token.ThrowIfCancellationRequested();
+            if (visible) { UIRun.ValidateCanvasSorting(record.View); }
             record.Visible = visible;
         }
 

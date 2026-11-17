@@ -87,24 +87,20 @@ namespace AiNative.UnityCore.UI.Tests
         });
 
         [UnityTest]
-        public IEnumerator OverrideSortingCanvasCannotBypassWindowInputPolicy() => UniTask.ToCoroutine(async () =>
+        public IEnumerator InheritedCanvasPreservesModalInputAndSorting() => UniTask.ToCoroutine(async () =>
         {
             ModifyPrefab<FirstPageView>(view =>
             {
                 var canvas = view.Visual.gameObject.AddComponent<Canvas>();
-                canvas.overrideSorting = true;
-                canvas.sortingOrder = 99;
+                canvas.overrideSorting = false;
                 view.Visual.gameObject.AddComponent<GraphicRaycaster>();
             });
             await StartAsync();
             LogAssert.Expect(LogType.Warning, "UI window contains an additional Canvas; review sorting and batching manually.");
             var page = await UI.PushAsync<FirstPageView>();
-            // Unity resets this flag when moving an inactive Canvas out of staging.
-            // Establish the bypass condition after activation, then verify the gate.
             var extraCanvas = page.View.Visual.GetComponent<Canvas>();
-            extraCanvas.overrideSorting = true;
-            extraCanvas.sortingOrder = 99;
-            Assert.IsTrue(extraCanvas.overrideSorting);
+            Assert.IsFalse(extraCanvas.overrideSorting);
+            Assert.AreSame(page.View.GetComponentInParent<Canvas>(), extraCanvas.rootCanvas);
             await UniTask.Yield();
             Assert.AreSame(page.View.DefaultSelection.gameObject, Hits(Center(page.View))[0].gameObject);
             var modal = await UI.OpenAsync<FirstModalView>();
@@ -112,8 +108,113 @@ namespace AiNative.UnityCore.UI.Tests
             var hits = Hits(Center(page.View));
             Assert.IsFalse(hits.Exists(hit => hit.gameObject.transform.IsChildOf(page.View.transform)));
             Assert.AreSame(modal.View.DefaultSelection.gameObject, hits[0].gameObject);
-            Assert.IsTrue(page.View.Visual.GetComponent<Canvas>().overrideSorting);
-            Assert.AreEqual(99, page.View.Visual.GetComponent<Canvas>().sortingOrder);
+            Assert.IsFalse(extraCanvas.overrideSorting);
+        });
+
+        [UnityTest]
+        public IEnumerator OverrideSortingFromActivationRollsBackBeforeDelivery() => UniTask.ToCoroutine(async () =>
+        {
+            await StartAsync();
+            var page = await UI.PushAsync<FirstPageView>();
+            NavigationView.Activation = (view, active) =>
+            {
+                if (!active || !(view is SecondPageView)) { return; }
+                var canvas = view.Visual.gameObject.AddComponent<Canvas>();
+                canvas.overrideSorting = true;
+                canvas.sortingOrder = 99;
+            };
+            Exception failure = null;
+            try { await UI.PushAsync<SecondPageView>(); }
+            catch (Exception error) { failure = error; }
+            Assert.IsInstanceOf<InvalidOperationException>(failure);
+            StringAssert.Contains("overrideSorting", failure.Message);
+            Assert.IsFalse(UI.TryGet<SecondPageView>(out _, out _));
+            Assert.AreEqual(1, UI.GetDiagnostics().WindowCount);
+            Assert.AreEqual(1, UI.GetDiagnostics().PageDepth);
+            Assert.AreEqual(0, UI.GetDiagnostics().PendingOperations);
+            Assert.AreEqual(1, Probes[typeof(SecondPageView)].Unbinds);
+            Assert.AreSame(page.View.DefaultSelection.gameObject, Events.currentSelectedGameObject);
+            Assert.IsTrue(page.View.CanvasGroup.interactable);
+            NavigationView.Activation = null;
+            Assert.IsTrue((await UI.PushAsync<SecondPageView>()).Succeeded);
+        });
+
+        [UnityTest]
+        public IEnumerator InvalidSortingOnCacheReopenRetainsReleasableOldHandle() => UniTask.ToCoroutine(async () =>
+        {
+            await StartAsync();
+            var modal = await UI.OpenAsync<FirstModalView>();
+            Assert.IsTrue((await UI.CloseAsync(modal.Handle)).Succeeded);
+            NavigationView.Activation = (view, active) =>
+            {
+                if (!active || !(view is FirstModalView)) { return; }
+                view.Visual.gameObject.AddComponent<Canvas>().overrideSorting = true;
+            };
+            Exception failure = null;
+            try { await UI.OpenAsync<FirstModalView>(); }
+            catch (Exception error) { failure = error; }
+            Assert.IsInstanceOf<InvalidOperationException>(failure);
+            Assert.IsFalse(UI.HasModal);
+            Assert.AreEqual(0, UI.GetDiagnostics().PendingOperations);
+            Assert.AreEqual(1, UI.GetDiagnostics().ClosedCacheCount);
+            Assert.IsFalse(modal.View.gameObject.activeSelf);
+            Assert.IsTrue((await UI.ReleaseAsync(modal.Handle)).Succeeded);
+            Assert.AreEqual(0, UI.GetDiagnostics().WindowCount);
+            Assert.AreEqual(1, Probes[typeof(FirstModalView)].Unbinds);
+        });
+
+        [UnityTest]
+        public IEnumerator InvalidSortingOnCoveredPageRestoreKeepsCurrentPageAndCanRetry() => UniTask.ToCoroutine(async () =>
+        {
+            await StartAsync();
+            var first = await UI.PushAsync<FirstPageView>();
+            var second = await UI.PushAsync<SecondPageView>();
+            Canvas invalidCanvas = null;
+            NavigationView.Activation = (view, active) =>
+            {
+                if (!active || !(view is FirstPageView)) { return; }
+                invalidCanvas = view.Visual.gameObject.AddComponent<Canvas>();
+                invalidCanvas.overrideSorting = true;
+            };
+            UIOperationException failure = null;
+            try { await UI.BackAsync(); }
+            catch (UIOperationException error) { failure = error; }
+            Assert.IsNotNull(failure);
+            Assert.IsFalse(failure.Committed);
+            StringAssert.Contains("overrideSorting", failure.ToString());
+            Assert.AreEqual(2, UI.GetDiagnostics().PageDepth);
+            Assert.AreEqual(0, UI.GetDiagnostics().PendingOperations);
+            Assert.IsFalse(first.View.gameObject.activeSelf);
+            Assert.IsTrue(second.View.gameObject.activeSelf);
+            Assert.IsTrue(second.View.CanvasGroup.interactable);
+            Assert.AreSame(second.View.DefaultSelection.gameObject, Events.currentSelectedGameObject);
+            NavigationView.Activation = null;
+            // Explicitly remove the injected invalid configuration before retrying,
+            // rather than relying on a property edit while the Canvas is inactive.
+            UnityEngine.Object.DestroyImmediate(invalidCanvas);
+            Assert.IsTrue((await UI.BackAsync()).Succeeded);
+            Assert.AreEqual(1, UI.GetDiagnostics().PageDepth);
+            Assert.IsTrue(first.View.gameObject.activeSelf);
+            Assert.AreSame(first.View.DefaultSelection.gameObject, Events.currentSelectedGameObject);
+        });
+
+        [UnityTest]
+        public IEnumerator ConfiguredDisplayOptionsReachCanvasAndModalMask() => UniTask.ToCoroutine(async () =>
+        {
+            var color = new Color(0.2f, 0.3f, 0.4f, 0.7f);
+            UI = new UIModule(new UIOptions(referenceResolution: new Vector2(720, 1280),
+                matchWidthOrHeight: 0, modalMaskColor: color), Events);
+            await StartAsync();
+            var modal = await UI.OpenAsync<FirstModalView>();
+            var root = modal.View.GetComponentInParent<Canvas>();
+            var scaler = root.GetComponent<CanvasScaler>();
+            Assert.AreEqual(CanvasScaler.ScaleMode.ScaleWithScreenSize, scaler.uiScaleMode);
+            Assert.AreEqual(new Vector2(720, 1280), scaler.referenceResolution);
+            Assert.AreEqual(0, scaler.matchWidthOrHeight);
+            var mask = root.transform.Find("Modal/ModalMask").GetComponent<Image>();
+            Assert.AreEqual(color, mask.color);
+            Assert.IsTrue(mask.gameObject.activeInHierarchy);
+            Assert.IsTrue(mask.raycastTarget);
         });
 
         [UnityTest]

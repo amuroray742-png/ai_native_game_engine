@@ -83,6 +83,7 @@ namespace AiNative.UnityCore.UI
                     record.View.CanvasGroup.blocksRaycasts = false;
                     record.View.gameObject.SetActive(true);
                     linked.Token.ThrowIfCancellationRequested();
+                    ValidateCanvasSorting(record.View);
                     if (definition.Transition.DurationSeconds > 0)
                     {
                         record.Transitioning = true;
@@ -168,6 +169,7 @@ namespace AiNative.UnityCore.UI
 
         private static void ValidateInputHierarchy(UIView view)
         {
+            ValidateCanvasSorting(view);
             if (view.CanvasGroup == null || view.CanvasGroup.gameObject != view.gameObject || !view.CanvasGroup.enabled)
             {
                 throw new InvalidOperationException("UIView requires its root CanvasGroup.");
@@ -188,6 +190,17 @@ namespace AiNative.UnityCore.UI
                 gate = canvas.gameObject.AddComponent<UICanvasInputGate>();
                 gate.Owner = view.CanvasGroup;
                 UnityEngine.Debug.LogWarning("UI window contains an additional Canvas; review sorting and batching manually.", canvas);
+            }
+        }
+
+        internal static void ValidateCanvasSorting(UIView view)
+        {
+            foreach (var canvas in view.GetComponentsInChildren<UnityEngine.Canvas>(true))
+            {
+                if (canvas.overrideSorting)
+                {
+                    throw new InvalidOperationException("Window Canvas must inherit sorting from the UI root; overrideSorting is not supported.");
+                }
             }
         }
 

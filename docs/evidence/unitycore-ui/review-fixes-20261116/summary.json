@@ -1,0 +1,78 @@
+{
+  "status": "Passed",
+  "date": "2026-11-16",
+  "scope": "Windows Editor / Unity 6000.3.23f1 / dual Domain Reload / real SBP Bundle",
+  "unityCli": "1.0.0",
+  "totalExecutions": 328,
+  "tests": [
+    {
+      "name": "on-ui-edit",
+      "total": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "ff2af9f0f74f990e93515556075279494fe3eae2f049645fa8f9e43eba3a982d"
+    },
+    {
+      "name": "on-ui-play",
+      "total": 113,
+      "passed": 113,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "a81d8a8b7a9f38cd187a055b4de1e8c6af0b54bc17eb3bf21a3560daa328c0f2"
+    },
+    {
+      "name": "on-demo",
+      "total": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "6ec91c3d1875b83ae1eb198236f84054dd43c39de2b01c2577222aae46c8eff8"
+    },
+    {
+      "name": "off-ui-edit",
+      "total": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "b779a73bdeb0985e394e965373da4e16d214a23e65f0fbecf15b86dfd55b0f37"
+    },
+    {
+      "name": "off-ui-play",
+      "total": 113,
+      "passed": 113,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "5b3f116f054a37bdbb712b381123da256805297bfe5a9381b0cc5149c103f014"
+    },
+    {
+      "name": "off-demo",
+      "total": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "04fede115cd009d5d1bb8c628a79d106bbb71940a2e233e3629970d1e78c81e1"
+    }
+  ],
+  "sourceFiles": 436,
+  "sourceHashesMatch": true,
+  "pythonTests": 18,
+  "targetedInputTests": 12,
+  "finalOutput": "TestResults\\ui-review-fixes-verified-20261116",
+  "unverified": [
+    "Player/IL2CPP rerun",
+    "Native input and screenshots",
+    "Device safe area",
+    "Performance",
+    "Remote CI"
+  ],
+  "excludedAttempts": [
+    "Preliminary matrix passed all six XML suites but rejected working-source change",
+    "First final matrix: one Back retry fixture failure; original rollback assertions passed"
+  ],
+  "changes": [
+    "Reject window Canvas overrideSorting at prepare, activation/restoration and open commit checks",
+    "Expose immutable resolution, width/height match and modal mask color with validation",
+    "Correct Task 1/2 completion and actual test names"
+  ]
+}

@@ -4,6 +4,8 @@ Unity 6000.3.23f1 的 uGUI 应用服务；单向依赖 UnityCore、Assets、UniT
 
 宿主提供覆盖整个运行周期的 EventSystem，先登记 AssetsModule，再登记 UIModule。停止时显式 Register 窗口定义，Presenter 工厂通过闭包取得业务依赖；不自动扫描或绑定。
 
+- UIOptions 可显式配置 referenceResolution、matchWidthOrHeight、modalMaskColor；默认 1920×1080、0.5、黑色 alpha 0.5。分辨率有限且为正，匹配值及颜色各分量有限且位于 0..1。
+- 子 Canvas 必须继承 Root 排序（overrideSorting=false）；绑定前、激活/恢复后及打开提交前拒绝独立排序并回滚。运行期间不得改写此约束，框架不逐帧扫描修复。
 - Page 用 PushAsync，HUD/Modal/Overlay 用 OpenAsync；同一 View 类型只允许一个实例。
 - HUD/Overlay 的稳定层级按成功提交顺序排列，缓存重开同样置于层内最上方。入场中候选暂置顶，取消不会重排已有窗口；BringToFront 可显式调整已打开窗口。Page/Modal 顺序由导航管理。
 - Open token 只控制提交前，成功后取消不关窗。Close 成功表示按策略缓存或实际释放；Release 仅用于已关闭窗口和失败清理。
