@@ -1,5 +1,7 @@
 # Unity Play 宿主
 
+GridGame HUD 已迁移到 UnityCore UI，当前装配与结果见[UI 接入验收](#gridgame-ui-模块接入2026-11-17)。下文早期场景 HUD 描述与截图保留历史含义。
+
 当前示例已迁移到 URP 17.3.0 的 3D Forward；新增说明与本轮验收见 [资源增强与 URP 示例](assets-enhancement-urp.md)。下文旧截图和测试归档保留历史含义。本轮 GridGame 已重跑双 Domain Reload、颜色像素、快慢表现及四组 CLI 轨迹比较，不扩大到 Player／IL2CPP。
 
 两个示例复用 `AiNative.Unity`，各自维护场景、包清单、配置和插件。GridGame 在玩家操作时手动推进。PhysicsSandbox 在 Windows x64 Editor 中按 60 Hz 推进，由 Jolt 更新刚体。下文保留 GridGame 的复现步骤与原始证据。沙盒的暂停输入、读档首帧与 CLI 续跑另有完整记录。[PhysicsSandbox 实施与验收](phase-3-physics-sandbox-unity-plan.md)
@@ -58,3 +60,28 @@ Windows x64、Unity 6000.3.23f1。Domain Reload 开、关各通过 7 项 PlayMod
 - 固定步长测试验证零步、单步、按 4+4+2 消费积压、暂停和输入顺序。候选创建、初始观察、场景表现准备以及旧会话释放均有失败用例。无头回归通过 239 项 .NET 测试、108 次 CLI 进程验收及原生损坏探针。本次 Play 验收为本地运行。
 
 ![GridGame 在 Game 视图完成移动和攻击后的 Tick 2](evidence/phase-3/grid-play/game-tick-2.png)
+
+## GridGame UI 模块接入（2026-11-17）
+
+场景内直接绑定的 GridHud 改为 UIView Prefab，由 UIModule 的 Hud 角色与 Assets 真实 SBP Bundle 加载。GridUiApplication 在明确的场景装配入口创建一次并跨场景保存，拥有 Core、Assets、UIModule 和 EventSystem，没有新增静态单例。GridHudPresenter 管理按钮和展示订阅，GridHudModel 仅保存展示观察与可撤销命令，不持有 GridHost。原 PlayHost 和 GridGameBootstrap 仍负责玩法提交、推进与释放，规则包及公共 UI/Core/Assets 包未改动。
+
+每次启用创建新展示模型；停用先同步撤销命令、取消加载，再串行等待打开收尾和 Clear。新场景等待旧清理完成，旧句柄、旧按钮与迟到加载不能操作新对局。重开可保留 HUD，因为 Presenter 不持有被替换的对局。就绪通知独立于 Draw，初次配置失败时仍可通过 New match 重试。参考分辨率保持900×650，原有信息和按钮行为不变。[接入与复现说明](../examples/unity/GridGame/README.md#ui-模块接入)
+
+Windows Editor、Unity 6000.3.23f1、Unity CLI 1.0.1、URP 17.3.0 Forward，在仓库外副本重新构建部署真实SBP内容后执行：
+
+| 检查 | 实际结果 |
+| --- | --- |
+| Domain Reload 开启 | 11/11 PlayMode通过 |
+| Domain Reload 关闭 | 11/11 PlayMode通过 |
+| 同进程连续进出Play两次 | 1/1 EditMode通过 |
+| CLI与Unity快/慢轨迹 | 四组各16检查点一致；8 Tick、6接受、1拒绝、A获胜 |
+| 单字段负对照 | 定位Tick 2的输入错误字段差异 |
+| Game视图 | 两张1240×407 PNG完整解码、像素检查通过并逐张查看，内容相同 |
+
+共23次执行通过，0失败、0跳过。新增四项覆盖真实Bundle所有权与排空、加载中停用后同帧重连、场景重载与旧句柄，以及无观察数据时的重开重试。原有移动、攻击、终局、重开、HUD射线阻挡、快慢表现、候选失败和时钟测试保留。Clear后窗口、Bundle、资源、挂起操作和清理错误归零，应用仍运行，保留application与新UI generation两个空scope。
+
+独立审查发现并修复了“就绪不通知Presenter导致初始对局失败后按钮无法重试”的问题。初次编译的Core命名空间歧义和Editor程序集引用缺失，以及首次隔离构建的两个Label节点重名失败，均保留原始日志，不计入23次通过。
+
+有效原始输出为 `TestResults/grid-ui-second-20261117`，副本路径记录在workspace.txt。184份源码、程序集定义、资源和包清单与工作区逐文件匹配；另保留SBP生成预过滤字段后的Forward.asset，工作区恢复原管线文件。Domain Reload配置、URP自动输入轴等生成设置保留在验证副本范围。日志有Unity许可、URP导入依赖和Mono退出提示，测试日志无C#编译错误或未预期的产品异常，不宣称所有Editor日志完全无警告。
+
+证据见[摘要](evidence/grid-ui-20261117/summary.json)、[归档](evidence/grid-ui-20261117/grid-ui-evidence.zip)、[独立复核](evidence/grid-ui-20261117/review.json)和[HUD截图](evidence/grid-ui-20261117/game-tick-2.png)。本轮使用EventSystem射线/事件与测试调用，未验收新的OS原生输入、GridGame Player/IL2CPP、设备安全区、性能或远端Unity CI。

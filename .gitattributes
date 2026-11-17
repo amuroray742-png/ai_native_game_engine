@@ -11,3 +11,8 @@ examples/unity/AssetsDemo/**/*.unity whitespace=-blank-at-eol
 examples/unity/AssetsDemo/**/*.mat whitespace=-blank-at-eol
 packages/com.ainative.unitycore.assets/**/*.meta whitespace=-blank-at-eol
 packages/com.ainative.unitycore.assets/package.json.meta whitespace=-blank-at-eol
+
+# GridGame UI content uses the same Unity empty-field serialization.
+examples/unity/GridGame/**/*.meta whitespace=-blank-at-eol
+examples/unity/GridGame/**/*.asset whitespace=-blank-at-eol
+examples/unity/GridGame/**/*.prefab whitespace=-blank-at-eol

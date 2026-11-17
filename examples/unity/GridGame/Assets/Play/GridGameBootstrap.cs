@@ -16,7 +16,10 @@ namespace AiNative.Examples.GridGame.Play
     {
         [SerializeField] private Camera boardCamera = null!;
         [SerializeField] private GridBoard board = null!;
-        [SerializeField] private GridHud hud = null!;
+        private GridHudModel _hud = null!;
+        internal GridUiApplication UiApplication { get; private set; } = null!;
+        internal bool UIReady => _hud != null && _hud.Ready;
+        internal Exception? UIError => _hud?.Error ?? UiApplication.LastError;
         [SerializeField, Min(0)] private float secondsPerEvent = 0.18f;
 
         private TickResult<GridGameView>? _active;
@@ -33,8 +36,15 @@ namespace AiNative.Examples.GridGame.Play
 
         protected override void ConnectScene()
         {
-            hud.EndTurn.onClick.AddListener(EndTurn);
-            hud.Restart.onClick.AddListener(Restart);
+            // Resolve the application composition only at the scene binding boundary.
+            UiApplication = FindFirstObjectByType<GridUiApplication>();
+            if (UiApplication == null)
+            {
+                UiApplication = new GameObject("Grid UI Application").AddComponent<GridUiApplication>();
+                UiApplication.Initialize();
+            }
+            _hud = new GridHudModel(EndTurn, Restart);
+            UiApplication.Attach(_hud);
             Restart();
         }
 
@@ -49,7 +59,7 @@ namespace AiNative.Examples.GridGame.Play
             catch (Exception error)
             {
                 _feedback = error.Message;
-                hud.ShowFailure(_feedback);
+                _hud.ShowFailure(_feedback);
                 Debug.LogException(error, this);
             }
         }
@@ -111,8 +121,7 @@ namespace AiNative.Examples.GridGame.Play
 
         protected override void DisconnectScene()
         {
-            hud.EndTurn.onClick.RemoveListener(EndTurn);
-            hud.Restart.onClick.RemoveListener(Restart);
+            if (_hud != null) { UiApplication.Detach(_hud); }
             RemoveDisplay();
             _active = null;
             Session = null!;
@@ -153,12 +162,12 @@ namespace AiNative.Examples.GridGame.Play
         {
             _display!.Fit(Frames.Presented.State, boardCamera);
             _display.Draw(Frames.Presented.State, _selected, _active, progress);
-            hud.Show(Frames.Presented, _selected, _feedback, Frames.PendingCount == 0);
+            _hud.Show(Frames.Presented, _selected, _feedback, Frames.PendingCount == 0);
         }
 
         internal void HandlePointer(Vector2 screen)
         {
-            if (hud.BlocksPointer(screen) || Frames.PendingCount != 0 || Frames.Presented.State.Winner.HasValue)
+            if (!UIReady || UiApplication.BlocksPointer(screen) || Frames.PendingCount != 0 || Frames.Presented.State.Winner.HasValue)
             {
                 return;
             }

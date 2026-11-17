@@ -1,5 +1,7 @@
 # 通用框架 v2 验收
 
+2026-11-17 GridGame接入UnityCore UI，Windows Editor双重载各11项PlayMode及1项重入测试通过，四组快慢表现各16检查点与CLI一致；范围与证据见[GridGame UI接入](unity-play-host.md#gridgame-ui-模块接入2026-11-17)，不扩展为GridGame Player验收。
+
 UnityCore Assets 的独立资源包、异步关闭扩展与 Windows 资源验收记录见 [Assets 记录](unitycore-assets.md)。它不改变下述模拟内核和 v2 协议历史基线。
 
 2026-11-13 UnityCore UI 基础生命周期修复与 Windows Editor 双 Domain Reload 验证见 [UI 记录](unitycore-ui.md#基础生命周期收敛2026-11-13)：两种设置各 20 项 PlayMode、19 项 EditMode，共 78 次执行通过。仅覆盖基础窗口关闭、重启、取消及强退解绑，不代表导航、缓存、Bundle、真实输入或 Player 已完成，也不改写下述历史基线。

@@ -1,0 +1,17 @@
+{
+  "changes": [
+    {
+      "path": "examples/unity/GridGame/Assets/Play/GridUiApplication.cs",
+      "verifiedSha256": "0002f5f42a9c3dbbb52b3c80c353aeceeb64bf28cf8c3817e060273280f62d59",
+      "preparedSha256": "4444152cc462c0f40ef5fbf3a1ee80338ead8c2d7b16d4f54beaa704e84ba1a2",
+      "change": "Remove extra EOF blank line only"
+    },
+    {
+      "path": "examples/unity/GridGame/Assets/Play/Editor/GridGame.UI.Editor.asmdef",
+      "verifiedSha256": "ce24a3d60a421a6bc87672026bca8df5535aab1fb917c8421d4e05f849d24c8b",
+      "preparedSha256": "f15d9af35f32ef2ed3917e212498f54c881a77883ae651e19a423bfafcc675e2",
+      "change": "Remove extra EOF blank line only"
+    }
+  ],
+  "note": "Original acceptance archive and fingerprints remain unchanged; only EOF whitespace changed after verification. Added matching Unity serialization whitespace attributes; no runtime behavior changed."
+}

@@ -36,6 +36,7 @@ namespace AiNative.Examples.GridGame.PlayTests
             yield return null;
             _game = Object.FindFirstObjectByType<GridGameBootstrap>();
             Assert.NotNull(_game);
+            yield return WaitForHud(_game);
             Assert.AreEqual(0, _game.Frames.Presented.Tick);
             _output = Environment.GetEnvironmentVariable("AINATIVE_GRID_EVIDENCE") ?? Path.Combine(Application.temporaryCachePath, "grid-verification");
             _inputs = Environment.GetEnvironmentVariable("AINATIVE_GRID_INPUTS") ?? Application.streamingAssetsPath;
@@ -53,8 +54,130 @@ namespace AiNative.Examples.GridGame.PlayTests
 #endif
         }
 
+        private static IEnumerator WaitForHud(GridGameBootstrap game)
+        {
+            float deadline = Time.realtimeSinceStartup + 20;
+            while (!game.UIReady && game.UIError == null && Time.realtimeSinceStartup < deadline) { yield return null; }
+            Assert.IsNull(game.UIError);
+            Assert.True(game.UIReady, "HUD did not finish loading");
+            yield return null; // refresh presentation after the Open commit
+        }
+
         [UnityTest] public IEnumerator FastPresentationMatchesActualOperations() => Record(false);
         [UnityTest] public IEnumerator SlowPresentationMatchesActualOperations() => Record(true);
+
+        private static IEnumerator WaitForUiIdle(GridUiApplication app)
+        {
+            float deadline = Time.realtimeSinceStartup + 20;
+            while (!app.Idle && Time.realtimeSinceStartup < deadline) { yield return null; }
+            Assert.True(app.Idle, "UI cleanup did not drain");
+            Assert.IsNull(app.LastError);
+        }
+
+        [UnityTest]
+        public IEnumerator UiModuleOwnsHudAndReleasesResourcesOnDisconnect()
+        {
+            var app = _game.UiApplication;
+            Assert.True(app.Core.IsRunning);
+            Assert.True(app.UI.TryGet<GridHud>(out var hud, out var handle));
+            Assert.AreEqual(1, app.UI.GetDiagnostics().WindowCount);
+            Assert.Greater(app.Assets.GetDiagnostics().Bundles.Count, 0, "HUD must come from real bundles");
+            var oldEndTurn = hud.EndTurn.onClick;
+            var oldRestart = hud.Restart.onClick;
+            var oldSession = _game.Session;
+            _game.enabled = false;
+            oldEndTurn.Invoke(); oldRestart.Invoke();
+            Assert.Throws<ObjectDisposedException>(() => oldSession.CaptureObservation());
+            yield return WaitForUiIdle(app);
+            Assert.AreEqual(0, app.UI.GetDiagnostics().WindowCount);
+            Assert.AreEqual(0, app.UI.GetDiagnostics().PendingOperations);
+            Assert.AreEqual(0, app.UI.GetDiagnostics().FailedCleanupCount);
+            var assets = app.Assets.GetDiagnostics();
+            Assert.AreEqual(0, assets.Bundles.Count);
+            Assert.AreEqual(0, assets.Resources.Count);
+            Assert.AreEqual(0, assets.PendingOperations);
+            Assert.AreEqual(0, assets.Errors.Count);
+            Assert.AreEqual(2, assets.Ownership.Owners.Count, "only application and fresh UI scopes remain");
+            Assert.True(assets.Ownership.Owners.All(owner => owner.Kind == "scope"));
+            Assert.True(hud == null);
+            _game.enabled = true;
+            yield return WaitForHud(_game);
+            oldEndTurn.Invoke(); oldRestart.Invoke();
+            Assert.AreEqual(0, _game.Session.Tick);
+            Assert.AreEqual(AiNative.UnityCore.UI.UIError.InvalidHandle, app.UI.BringToFront(handle).Error);
+            Assert.True(app.UI.TryGet<GridHud>(out var next, out _));
+            next.EndTurn.onClick.Invoke();
+            Assert.AreEqual(1, _game.Session.Tick, "exactly one current Presenter handles the command");
+        }
+
+        [UnityTest]
+        public IEnumerator LoadingDisconnectAndImmediateReattachKeepOnlyCurrentHud()
+        {
+            var app = _game.UiApplication;
+            _game.enabled = false;
+            yield return WaitForUiIdle(app);
+            _game.enabled = true;
+            Assert.False(_game.UIReady, "real bundle load should still be pending in this frame");
+            var abandoned = _game.Session;
+            _game.enabled = false;
+            _game.enabled = true;
+            Assert.Throws<ObjectDisposedException>(() => abandoned.CaptureObservation());
+            yield return WaitForHud(_game);
+            yield return WaitForUiIdle(app);
+            Assert.AreEqual(1, app.UI.GetDiagnostics().WindowCount);
+            Assert.AreEqual(0, app.UI.GetDiagnostics().PendingOperations);
+            Assert.AreEqual(0, app.UI.GetDiagnostics().FailedCleanupCount);
+            Assert.AreEqual(1, Object.FindObjectsByType<GridHud>(FindObjectsSortMode.None).Length);
+            Assert.AreEqual(1, Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None).Length);
+            Assert.AreEqual(0, _game.Session.Tick);
+            Assert.AreEqual(0, app.Assets.GetDiagnostics().Errors.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator SceneReloadReusesApplicationAndReplacesHudSession()
+        {
+            var app = _game.UiApplication;
+            var events = app.Events;
+            var oldSession = _game.Session;
+            Assert.True(app.UI.TryGet<GridHud>(out var oldHud, out var oldHandle));
+            yield return SceneManager.LoadSceneAsync("GridGame");
+            _game = Object.FindFirstObjectByType<GridGameBootstrap>();
+            yield return WaitForHud(_game);
+            Assert.AreSame(app, _game.UiApplication);
+            Assert.AreSame(events, app.Events);
+            Assert.True(oldHud == null);
+            Assert.Throws<ObjectDisposedException>(() => oldSession.CaptureObservation());
+            Assert.AreEqual(AiNative.UnityCore.UI.UIError.InvalidHandle, app.UI.BringToFront(oldHandle).Error);
+            Assert.AreEqual(1, app.UI.GetDiagnostics().WindowCount);
+            Assert.AreEqual(1, Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None).Length);
+            Assert.AreEqual(0, _game.Session.Tick);
+        }
+
+        [Test]
+        public void HudWithoutMatchAllowsRetryWhenReadyAndRevokesCommandsOnDetach()
+        {
+            Assert.True(_game.UiApplication.UI.TryGet<GridHud>(out var source, out _));
+            var view = Object.Instantiate(source);
+            int restarts = 0;
+            var model = new GridHudModel(() => Assert.Fail("No match may advance"), () => restarts++);
+            var presenter = new GridHudPresenter(view, model);
+            try
+            {
+                presenter.Bind(); presenter.Resume();
+                model.ShowFailure("Scenario could not be loaded");
+                Assert.False(view.Restart.interactable);
+                model.MarkReady();
+                Assert.True(view.Restart.interactable, "Retry must not depend on a later gameplay Draw");
+                Assert.False(view.EndTurn.interactable);
+                view.Restart.onClick.Invoke();
+                Assert.AreEqual(1, restarts);
+                model.Dispose();
+                Assert.False(view.Restart.interactable);
+                view.Restart.onClick.Invoke(); view.EndTurn.onClick.Invoke();
+                Assert.AreEqual(1, restarts);
+            }
+            finally { presenter.Suspend(); presenter.Unbind(); model.Dispose(); Object.DestroyImmediate(view.gameObject); }
+        }
 
         [UnityTest]
         public IEnumerator MovementAndHitFeedbackUseRenderedFramesWithoutExtraTicks()
@@ -256,7 +379,7 @@ namespace AiNative.Examples.GridGame.PlayTests
             var destination = Camera.main.WorldToScreenPoint(new Vector3(1, 0));
             overlay.position += (Vector3)((Vector2)destination - RectTransformUtility.WorldToScreenPoint(null, overlay.TransformPoint(overlay.rect.center)));
             Canvas.ForceUpdateCanvases();
-            Assert.True(hud.BlocksPointer(destination));
+            Assert.True(_game.UiApplication.BlocksPointer(destination));
             _game.HandlePointer(destination);
             Assert.AreEqual(0, _game.Session.Tick);
             overlay.position = originalPosition;
@@ -347,6 +470,7 @@ namespace AiNative.Examples.GridGame.PlayTests
             _game.enabled = false;
             Assert.Throws<ObjectDisposedException>(() => next.CaptureObservation());
             _game.enabled = true;
+            yield return WaitForHud(_game);
             next = _game.Session;
             yield return SceneManager.LoadSceneAsync("GridGame");
             Assert.Throws<ObjectDisposedException>(() => next.CaptureObservation());

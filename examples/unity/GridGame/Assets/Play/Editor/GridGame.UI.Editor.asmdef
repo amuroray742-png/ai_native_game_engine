@@ -1,0 +1,5 @@
+{
+  "name": "GridGame.UI.Editor",
+  "references": ["GridGame.Play", "AiNative.UnityCore.UI", "AiNative.UnityCore.Assets.Editor", "AiNative.UnityCore.Assets", "UnityEngine.UI"],
+  "includePlatforms": ["Editor"]
+}

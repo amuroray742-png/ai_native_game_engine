@@ -1,0 +1,297 @@
+{
+  "unityProject": "examples/unity/GridGame",
+  "inputs": {
+    "grid.scenario.json": "a888f7ed5d204d4ffad523a352da11e6a1365d9921d190858810ff19bacba320",
+    "grid.commands.json": "4b1fea6956852402b8a77c95db7922b6b0a1d91de78f106eca03d1a61ba48acd"
+  },
+  "seed": 42,
+  "accepted": 6,
+  "rejected": 1,
+  "winner": "A",
+  "playTests": {
+    "domainReload-on": [
+      "BoardAndHudFinishMatchAndReleaseOnRestartAndUnload",
+      "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart",
+      "FailedCandidatePreservesActiveFrameUntilSuccessfulReplacement",
+      "FastPresentationMatchesActualOperations",
+      "FixedPumpRetainsDebtDuringPauseAndPublishesOrderedInputsOnce",
+      "HudWithoutMatchAllowsRetryWhenReadyAndRevokesCommandsOnDetach",
+      "LoadingDisconnectAndImmediateReattachKeepOnlyCurrentHud",
+      "MovementAndHitFeedbackUseRenderedFramesWithoutExtraTicks",
+      "SceneReloadReusesApplicationAndReplacesHudSession",
+      "SlowPresentationMatchesActualOperations",
+      "UiModuleOwnsHudAndReleasesResourcesOnDisconnect"
+    ],
+    "domainReload-off": [
+      "BoardAndHudFinishMatchAndReleaseOnRestartAndUnload",
+      "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart",
+      "FailedCandidatePreservesActiveFrameUntilSuccessfulReplacement",
+      "FastPresentationMatchesActualOperations",
+      "FixedPumpRetainsDebtDuringPauseAndPublishesOrderedInputsOnce",
+      "HudWithoutMatchAllowsRetryWhenReadyAndRevokesCommandsOnDetach",
+      "LoadingDisconnectAndImmediateReattachKeepOnlyCurrentHud",
+      "MovementAndHitFeedbackUseRenderedFramesWithoutExtraTicks",
+      "SceneReloadReusesApplicationAndReplacesHudSession",
+      "SlowPresentationMatchesActualOperations",
+      "UiModuleOwnsHudAndReleasesResourcesOnDisconnect"
+    ],
+    "reentry": "TwoPlayEntriesCreateFreshSessionsAndReleaseOnBothExits"
+  },
+  "comparisons": {
+    "on-fast": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 1,
+        "operationFrames": [
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59
+        ],
+        "presentedFrames": [
+          44,
+          46,
+          48,
+          51,
+          52,
+          54,
+          56,
+          58,
+          60
+        ]
+      }
+    },
+    "on-slow": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 8,
+        "operationFrames": [
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143
+        ],
+        "presentedFrames": [
+          128,
+          174,
+          232,
+          348,
+          411,
+          475,
+          541,
+          600,
+          719
+        ]
+      }
+    },
+    "off-fast": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 1,
+        "operationFrames": [
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58
+        ],
+        "presentedFrames": [
+          43,
+          45,
+          47,
+          50,
+          51,
+          53,
+          55,
+          57,
+          59
+        ]
+      }
+    },
+    "off-slow": {
+      "code": "HostTracesMatched",
+      "checkpoints": 16,
+      "frames": {
+        "isPlaying": true,
+        "scene": "Assets/Scenes/GridGame.unity",
+        "peakQueuedTicks": 8,
+        "operationFrames": [
+          127,
+          128,
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142
+        ],
+        "presentedFrames": [
+          127,
+          182,
+          236,
+          345,
+          406,
+          463,
+          526,
+          587,
+          707
+        ]
+      }
+    }
+  },
+  "tickHashes": {
+    "1": "ca1ed95acd6e8f3b0c5ae96c9acf55025a65f7b2907feb72b37cb16cb166d631",
+    "2": "27c026eb12ae35292a310e0c8f9ee0a912ce5977ab10613cdbcec76af5246425",
+    "3": "a643499b8bb6533a223e7258ab4cb8151a5d051666224b405c54fcba91499377",
+    "4": "ebe45b4539dc9d0e96d394b54f883cb3dde01970e765f6f25e5df4a28e8c65de",
+    "5": "0afe51811a184b1720cedabf045269b8000e835c6e4d6bb2a16592e3a12c9e66",
+    "6": "e9887c06af4639a96bd6ddb84af8401e7f36f12cfff59981d334c0af006f8de3",
+    "7": "673f9eac08cbadae642d16eb13522fb0f14ac912c96a789d30fc98bd188806cd",
+    "8": "d5ba0ae55780a643f527af84b8e8a1d4f51abf6ed7452543e2da3d5648d839bf"
+  },
+  "unityEnvironment": {
+    "architecture": "x64",
+    "buildHash": "f056ce6d83c8963cca412a8da63427c82e193a47ad31f9634e96e954c12e0d7d",
+    "components": {
+      "AiNative.Core": "19e6c00fa58f0b141fb04c9cf19d172b14f2edfe26aa95c3754a339a3cb093cb",
+      "AiNative.GridGame": "7bd62d03c643961916fa6391d18826649f158e335c6a2cc581603f827fd78f64",
+      "AiNative.GridGame.Hosting": "0f1dc2973249c819eb88bc06e2dca5f0f0b30e26d9226ab28b8528df929cbc80",
+      "AiNative.Hosting": "ad0782c3f873dc779d79e5b4479cd68b8d526f2ac8cfa1c5298a74a82a77016f",
+      "AiNative.Unity": "fcbcf85e68b1a86bdf378e7f40fd0bce962d6bccf5d5a2d4f4f1bfb5842c5683",
+      "GridGame.Play": "f816e0a5a5cf458e5014758cd429439d2184a3f2b220f12fd3221a780e4b1c6c",
+      "GridGame.PlayTests": "2f8e08a0d691135ab018e06f57778cb5c0b473488e07cfc7a126a3f61d0423de",
+      "Microsoft.Bcl.AsyncInterfaces": "82c3eb14261e9eda644d66abebc7a57530ea062c0b0813dc36b0681546d26e49",
+      "System.IO.Pipelines": "9f5514995fc52aad781a2f7fc8ef999ecc78e8ccacaa15a6491d550de7f55bcf",
+      "System.Runtime.CompilerServices.Unsafe": "fd67abc4c4af10affbcd42fd68a2a7bc361b26714afe6965d4d0d139459d8297",
+      "System.Text.Encodings.Web": "6630388e3573f1d6500891723b30f21d8545e14370707b4d4328e6f61aaca233",
+      "System.Text.Json": "136262fc12b3473cf408a4f5a3e604c73019b8baa0d3593205a87df67c7c4228",
+      "UnityEngine.CoreModule": "0fa704172fa3538d85d16ee8c0aba3912b23cee3db7f6aa7081b91bc69034207",
+      "UnityEngine.UI": "00f6ec8ebc0103b5b41952aef67dc7ec3519ae2d04c1a3c7cce4c2bfe055ffb2"
+    },
+    "os": "WindowsEditor",
+    "runtime": "Unity Play 6000.3.23f1 / Mono 4.0.30319.42000"
+  },
+  "cliEnvironment": {
+    "architecture": "x64",
+    "buildHash": "6e8e37a81a5486417e90e4397411499b14a2368c7be52aaa1b647c0bf0e75899",
+    "components": {
+      "AiNative.Core": "19e6c00fa58f0b141fb04c9cf19d172b14f2edfe26aa95c3754a339a3cb093cb",
+      "AiNative.Examples.Runner": "5fb87b4a44f8ee4e4d85f584a9ac495e516b1dc5d8eabbd8cbdaf584f1696b6b",
+      "AiNative.GridGame": "7bd62d03c643961916fa6391d18826649f158e335c6a2cc581603f827fd78f64",
+      "AiNative.GridGame.Hosting": "0f1dc2973249c819eb88bc06e2dca5f0f0b30e26d9226ab28b8528df929cbc80",
+      "AiNative.Headless": "d40cd5c58e84ff2a0e2fb34e9058924e0b94fe30e134719dd3ab9bb9ad7d5328",
+      "AiNative.Hosting": "ad0782c3f873dc779d79e5b4479cd68b8d526f2ac8cfa1c5298a74a82a77016f",
+      "System.IO.Pipelines": "7875941c62c402cbb1f3505883bf87ed74088f18171ff3a66d8c8fa06e511836",
+      "System.Text.Encodings.Web": "a2c7ef05abc665de9c07dcb600914889d501c8cfa13973bbe3c60c45367bc291",
+      "System.Text.Json": "9f4fd55056a3ccd6aa5f204933f9b8e3da412b060238cbeb8bb2be2fe4046f2a"
+    },
+    "os": "windows",
+    "runtime": "10.0.13"
+  },
+  "negativeControl": {
+    "code": "CheckpointMismatch",
+    "operationIndex": 2,
+    "tick": "2",
+    "difference": {
+      "path": "$.result.inputs[0].error",
+      "expected": "\"NotYourTurn\"",
+      "actual": "\"Blocked\""
+    }
+  },
+  "result": "Passed",
+  "testExecutions": 23,
+  "testMatrix": [
+    11,
+    11,
+    1
+  ],
+  "unity": "6000.3.23f1",
+  "unityCli": "1.0.1",
+  "rawOutput": "C:\\work\\github\\ai_native_game_engine\\TestResults\\grid-ui-second-20261117",
+  "verificationWorkspace": "C:\\unity-verification\\ba4d5c4c46b0",
+  "matchingSourceFiles": 184,
+  "generatedVariation": {
+    "path": "examples/unity/GridGame/Assets/Rendering/Forward.asset",
+    "workspaceSha256": "a3fde317ba96883c075f636a2a79ff632aba6829e58e0fc1f5f1679c7715ddaf",
+    "testedAfterSbpSha256": "db8757feca6be15aede88b238a838d54649df133f94a597c005dff1eba5e31c8",
+    "reason": "SBP generated URP prefilter metadata; workspace restored to original authored asset"
+  },
+  "scriptFingerprints": {
+    "scripts/unity_grid.py": "05a63badcaf726375a395e5c67247288d6c825c71ec4ed63fe9d11ecf5854a23",
+    "scripts/unity_packages.py": "8e282d44bb78e8a7a31c6b604ee5e95aa1822df701cb59429f338aff2e75b5fd"
+  },
+  "screenshots": {
+    "dimensions": [
+      1240,
+      407
+    ],
+    "sha256": "6a776166e6d8c3e61efcde7e6f6a1be5073d3c5da9726a0dc90ce2ba19f2e031",
+    "bothReloadsByteIdentical": true
+  },
+  "limitations": [
+    "Windows Editor only",
+    "EventSystem events and test calls, not new OS input acceptance",
+    "No GridGame Player/IL2CPP, mobile safe-area, performance or remote Unity CI"
+  ],
+  "excludedAttempts": [
+    "grid-ui-migrate.log: Core namespace ambiguity",
+    "grid-ui-migrate-2.log: missing Assets runtime assembly reference",
+    "grid-ui-first-20261117: duplicate Label names rejected during bundle build"
+  ],
+  "archive": {
+    "file": "grid-ui-evidence.zip",
+    "sha256": "843ee5878bcba4e384a57e15cc0b1363780ac7ae279943f1af1fac04eb6c812c"
+  }
+}
