@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Reject masked AssetsDemo cleanup failures
+        run: python -m unittest discover -v -s scripts -p test_verify_unity_assets.py
       - name: Build pinned joltc bridge and verify thread-start failures
         run: python scripts/build_native.py
       - run: dotnet restore --locked-mode
