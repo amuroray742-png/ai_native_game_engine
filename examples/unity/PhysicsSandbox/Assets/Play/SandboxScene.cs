@@ -48,8 +48,7 @@ namespace AiNative.Examples.PhysicsPlay
             ApplicationHost = FindFirstObjectByType<SandboxApplication>();
             if (ApplicationHost == null)
             {
-                ApplicationHost = new GameObject("Sandbox Application").AddComponent<SandboxApplication>();
-                ApplicationHost.Initialize();
+                ApplicationHost = SandboxApplication.Create();
             }
             ApplicationHost.Attach(this);
         }

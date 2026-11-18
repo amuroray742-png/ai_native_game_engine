@@ -25,18 +25,37 @@ namespace AiNative.Examples.PhysicsPlay
         internal bool Idle => _operation.IsCompleted;
         internal AssetDiagnostics Diagnostics => _assets.GetDiagnostics();
 
-        internal void Initialize()
+        internal static SandboxApplication Create()
         {
-            DontDestroyOnLoad(gameObject);
-            var input = new GameObject("Sandbox EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            input.transform.SetParent(transform, false);
+            var root = new GameObject("Sandbox Application");
+            root.SetActive(false);
+            try
+            {
+                var app = root.AddComponent<SandboxApplication>();
+                app.Initialize();
+                DontDestroyOnLoad(root);
+                root.SetActive(true);
+                return app;
+            }
+            catch
+            {
+                Destroy(root);
+                throw;
+            }
+        }
+
+        private void Initialize()
+        {
+            var input = gameObject.AddComponent<EventSystem>();
+            gameObject.AddComponent<StandaloneInputModule>();
             _ui = new UIModule(new UIOptions(closedCacheCapacity: 0, referenceResolution: new Vector2(1000, 510),
-                matchWidthOrHeight: .55f), input.GetComponent<EventSystem>());
+                matchWidthOrHeight: .55f), input);
             _ui.Register(new UIWindowDefinition<SandboxHud>("Assets/Presentation/SandboxHud", UIRole.Hud,
                 (view, _) => new SandboxHudPresenter(view, _presenterScene, _presenterToken)));
-            _core = AppCore.Inst;
-            _core.RegisterModule(_assets).RegisterModule(_ui);
-            _operation = _core.RunAsync().AsTask();
+            var core = AppCore.Inst;
+            core.RegisterModule(_assets).RegisterModule(_ui);
+            _operation = core.RunAsync().AsTask();
+            _core = core;
         }
 
         internal void Attach(SandboxScene scene)

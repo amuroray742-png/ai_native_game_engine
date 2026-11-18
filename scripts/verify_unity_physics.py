@@ -64,7 +64,7 @@ def play(project, editor, output, reload):
                     "-testResults", str(cycle_xml),
                     "-logFile", str(output / "exit.log")], cwd=ROOT, env=env, check=True, timeout=300)
     cycles = ET.parse(cycle_xml).findall(".//test-case")
-    required_edit = {"ExitingPlayReleasesTheOnlyWorld", "TwoPlaySessionsReleaseRunningModules",
+    required_edit = {"RejectedSceneLeavesForeignCoreAndInputAlive", "ExitingPlayReleasesTheOnlyWorld", "TwoPlaySessionsReleaseRunningModules",
                      "ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore",
                      "ExitingDuringInitializationCancelsBeforeTheNextPlay", "FixedRemovalPreservesLateRegistration",
                      "TicketOwnsItsClockAndCannotRemoveReplacement", "TimerOrderReplacementDoesNotLeaveARecycledEntry"}
