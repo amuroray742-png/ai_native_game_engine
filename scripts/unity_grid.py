@@ -105,6 +105,7 @@ def run_play_tests(output):
                         "FailedCandidatePreservesActiveFrameUntilSuccessfulReplacement",
                         "BrokenOldCleanupReleasesCandidateAndAllowsFreshStart",
                         "UiModuleOwnsHudAndReleasesResourcesOnDisconnect",
+                        "MissingBoardReleasesHudAndAllowsNextConnection",
                         "LoadingDisconnectAndImmediateReattachKeepOnlyCurrentHud",
                         "SceneReloadReusesApplicationAndReplacesHudSession",
                         "HudWithoutMatchAllowsRetryWhenReadyAndRevokesCommandsOnDetach"}

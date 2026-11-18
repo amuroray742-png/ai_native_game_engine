@@ -28,6 +28,15 @@ MonoBehaviour:
       ExcludedFolders: []
       IncludedTypes: []
     PlatformFilters: []
+  - Id: GridBoard
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 11400000, guid: 5f38630ceed048d69ce45ee75aeb2040, type: 2}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
   BundleWarningBytes: 0
   TotalWarningBytes: 0
   Shaders: {fileID: 0}

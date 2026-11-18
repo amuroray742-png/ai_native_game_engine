@@ -82,6 +82,11 @@ namespace AiNative.Examples.GridGame.PlayTests
             Assert.True(app.UI.TryGet<GridHud>(out var hud, out var handle));
             Assert.AreEqual(1, app.UI.GetDiagnostics().WindowCount);
             Assert.Greater(app.Assets.GetDiagnostics().Bundles.Count, 0, "HUD must come from real bundles");
+            var tile = GameObject.Find("Tile 0,0").GetComponent<SpriteRenderer>();
+            var unit = GameObject.Find("A1").GetComponent<SpriteRenderer>();
+            Assert.AreEqual("Square", tile.sprite.name);
+            Assert.AreEqual("Tower", unit.sprite.name);
+            Assert.AreSame(tile.sharedMaterial, unit.sharedMaterial);
             var oldEndTurn = hud.EndTurn.onClick;
             var oldRestart = hud.Restart.onClick;
             var oldSession = _game.Session;
@@ -118,10 +123,9 @@ namespace AiNative.Examples.GridGame.PlayTests
             yield return WaitForUiIdle(app);
             _game.enabled = true;
             Assert.False(_game.UIReady, "real bundle load should still be pending in this frame");
-            var abandoned = _game.Session;
+            Assert.IsNull(_game.Session, "The match starts after board resources load");
             _game.enabled = false;
             _game.enabled = true;
-            Assert.Throws<ObjectDisposedException>(() => abandoned.CaptureObservation());
             yield return WaitForHud(_game);
             yield return WaitForUiIdle(app);
             Assert.AreEqual(1, app.UI.GetDiagnostics().WindowCount);
@@ -131,6 +135,41 @@ namespace AiNative.Examples.GridGame.PlayTests
             Assert.AreEqual(1, Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None).Length);
             Assert.AreEqual(0, _game.Session.Tick);
             Assert.AreEqual(0, app.Assets.GetDiagnostics().Errors.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator DuplicateApplicationLeavesCurrentMatchAndInputAlive()
+        {
+            var owner = _game.UiApplication;
+            Assert.Throws<InvalidOperationException>(() => GridUiApplication.Create());
+            yield return null;
+            Assert.True(owner.Core.IsRunning);
+            Assert.AreSame(owner.Events, EventSystem.current);
+            Assert.AreEqual(1, Object.FindObjectsByType<GridUiApplication>(FindObjectsSortMode.None).Length);
+            Assert.IsTrue(owner.UI.TryGet<GridHud>(out var hud, out _));
+            hud.EndTurn.onClick.Invoke();
+            Assert.AreEqual(1, _game.Session.Tick);
+        }
+
+        [UnityTest]
+        public IEnumerator MissingBoardReleasesHudAndAllowsNextConnection()
+        {
+            var app = _game.UiApplication;
+            _game.enabled = false;
+            yield return WaitForUiIdle(app);
+            var model = new GridHudModel(() => Assert.Fail(), () => Assert.Fail());
+            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("MissingBoard"));
+            app.Attach(model, "Assets/Art/MissingBoard", _ => Assert.Fail("Missing artwork started a match"));
+            yield return WaitForUiIdle(app);
+            Assert.NotNull(model.Error);
+            Assert.False(model.Ready);
+            Assert.AreEqual(0, app.UI.GetDiagnostics().WindowCount);
+            Assert.AreEqual(0, app.Assets.GetDiagnostics().Resources.Count);
+            Assert.AreEqual(0, app.Assets.GetDiagnostics().Bundles.Count);
+            app.Detach(model);
+            _game.enabled = true;
+            yield return WaitForHud(_game);
+            Assert.AreEqual(0, _game.Session.Tick);
         }
 
         [UnityTest]

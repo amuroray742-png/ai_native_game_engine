@@ -16,7 +16,7 @@ unity run examples/unity/GridGame -- -executeMethod AiNative.Examples.GridGame.P
 unity open examples/unity/GridGame
 ```
 
-修改 HUD Prefab 后也需重新构建内容。`verify` 会在隔离副本中自动构建部署 Bundle，不使用旧部署内容充当本次构建。生成的 Bundle 与构建目录不提交 Git。`GridUiBuilder.Migrate` 是旧场景的迁移入口，仓库场景已迁移，正常试玩无需重复执行。
+修改 HUD 预制体、棋盘图形或材质后需重新构建内容。`verify` 会在隔离副本中自动构建部署 Bundle，不使用旧部署内容充当本次构建。生成的 Bundle 与构建目录不提交 Git。`GridUiBuilder.Migrate` 是旧场景的迁移入口，仓库场景已迁移，正常试玩无需重复执行。
 
 职责如下：
 
@@ -28,4 +28,6 @@ unity open examples/unity/GridGame
 
 Clear 后窗口、Bundle、资源与挂起操作归零；应用仍在运行，因此保留 application 和新一代 UI 两个空 scope。退出 Play 时由 Core 关闭应用服务。运行错误保留在 `UIError`/`LastError` 并写入日志，不把失败当作就绪。
 
-管线重建入口为 `ExampleUrpSetup.Apply`，公共 helper 来源为 `scripts/unity/ExampleUrpSetup.cs`。迁移详情见 [资源增强与 URP 示例](../../../docs/assets-enhancement-urp.md)，历史宿主证据见 [GridGame Play 宿主](../../../docs/unity-play-host.md)。本轮范围是 Windows Editor，不新增 Player／IL2CPP 已通过声明。
+管线重建入口为 `ExampleUrpSetup.Apply`，公共 helper 来源为 `scripts/unity/ExampleUrpSetup.cs`。迁移详情见 [资源增强与 URP 示例](../../../docs/assets-enhancement-urp.md)，历史宿主证据见 [GridGame Play 宿主](../../../docs/unity-play-host.md)。
+
+棋盘资源由同一套内容构建。场景连接时通过独立的 AssetScope 加载 Assets/Art/GridBoardArt，取得格子、双方棋子精灵和共享材质后创建首局。重开复用该场景的美术资源，停用场景时释放。Windows IL2CPP 复现命令为 python scripts/verify_unity_players.py TestResults/grid-player-new --examples grid --backends Il2Cpp。

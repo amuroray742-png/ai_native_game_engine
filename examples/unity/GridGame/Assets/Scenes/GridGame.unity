@@ -323,7 +323,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f7912eebda858a8836b5abeb5dc227c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GridGame.Play::AiNative.Examples.GridGame.Play.GridBoard
-  spriteMaterial: {fileID: 2100000, guid: a132cc36a49da1047add7a98f239a67a, type: 2}
 --- !u!4 &1367791327
 Transform:
   m_ObjectHideFlags: 0

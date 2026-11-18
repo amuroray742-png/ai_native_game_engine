@@ -24,6 +24,7 @@ namespace AiNative.Examples.GridGame.Play
 
         private TickResult<GridGameView>? _active;
         private GridBoard? _display;
+        private GridBoardArt? _art;
         private double _start;
         private int? _selected;
         private string _feedback = "";
@@ -40,16 +41,19 @@ namespace AiNative.Examples.GridGame.Play
             UiApplication = FindFirstObjectByType<GridUiApplication>();
             if (UiApplication == null)
             {
-                UiApplication = new GameObject("Grid UI Application").AddComponent<GridUiApplication>();
-                UiApplication.Initialize();
+                UiApplication = GridUiApplication.Create();
             }
             _hud = new GridHudModel(EndTurn, Restart);
-            UiApplication.Attach(_hud);
-            Restart();
+            UiApplication.Attach(_hud, "Assets/Art/GridBoardArt", art =>
+            {
+                _art = art;
+                Restart();
+            });
         }
 
         public void Restart()
         {
+            if (_art == null) { return; }
             try
             {
                 string file = Path.Combine(Application.streamingAssetsPath, "grid.scenario.json");
@@ -75,7 +79,7 @@ namespace AiNative.Examples.GridGame.Play
                     candidate = Module.CreatePlay(config, 42);
                     try
                     {
-                        staged = board.Stage(candidate.CaptureObservation().State, boardCamera);
+                        staged = board.Stage(candidate.CaptureObservation().State, boardCamera, _art!);
                         return candidate;
                     }
                     catch
@@ -121,8 +125,9 @@ namespace AiNative.Examples.GridGame.Play
 
         protected override void DisconnectScene()
         {
-            if (_hud != null) { UiApplication.Detach(_hud); }
             RemoveDisplay();
+            _art = null;
+            if (_hud != null) { UiApplication.Detach(_hud); }
             _active = null;
             Session = null!;
         }
