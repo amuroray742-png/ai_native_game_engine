@@ -23,7 +23,7 @@ namespace AiNative.Examples.PhysicsPlayTests
             bool reload = !EditorSettings.enterPlayModeOptionsEnabled ||
                 !EditorSettings.enterPlayModeOptions.HasFlag(EnterPlayModeOptions.DisableDomainReload);
             yield return new EnterPlayMode(expectDomainReload: reload);
-            var owner = Core.Inst;
+            var owner = AiNative.UnityCore.Core.Inst;
             yield return owner.RunAsync().ToCoroutine();
             var root = owner.RootGameObject;
             var input = new GameObject("Other application's input").AddComponent<EventSystem>();
