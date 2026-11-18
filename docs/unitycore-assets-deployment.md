@@ -44,3 +44,7 @@ python scripts/verify_unity_assets.py TestResults/deploy-new --backend both --ba
 首轮复现 Unity Mono 长路径读取失败（File.Copy 已成功，但摘要读取失败），随后缩短临时目录并为已复现的摘要、存在性和属性检查加 Windows 扩展路径。第二轮仅余路径分隔符比较差异，规范化后专项测试 9/9 通过，再执行最终回归。失败 XML/日志一并归档，不宣称任意深度 Windows 工程路径均受支持。
 
 证据：[机器摘要](evidence/unitycore-assets/deployment/summary.json)、[原始归档](evidence/unitycore-assets/deployment/deployment-evidence.zip)、[被测源码指纹](evidence/unitycore-assets/deployment/sources.json)。归档包含最终 XML/日志、两后端运行时内容及独立证据、Player 文件清单与指纹、批处理和菜单探针、实现期间失败记录及复现脚本。Player 二进制留在本机 TestResults。GUI 未通过时没有猜测点击，也未操作用户原有 Editor；标准 Build Profiles 的鼠标流程未单独验收。进程崩溃时不保证跨目录事务恢复，未新增 CI。
+
+## Windows Player 人工验收（2026-11-18）
+
+用户通过 ResourceGroups Inspector 构建并部署版本 1，使用 Windows Build Profiles 构建 AssetsDemo，运行清理检查通过。[验收记录](phase-4-delivery.md#windows-人工验收)

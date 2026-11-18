@@ -27,8 +27,8 @@
 | --- | --- | --- | --- |
 | Core／Hosting／Headless：已实现／有历史验收 | 2026-11-09 Windows 本机：271 项 .NET、108 次真实 CLI、原生损坏探针；包含故障分类、编码失败终止、恢复 runtime 核对及 Int32 负零回归 | [修复记录](review-fixes-20261109.md)；[摘要与源文件指纹](evidence/review-fixes-20261109/summary.json)，记录基准提交及最终受影响源码 SHA-256 | 该轮未执行 Linux、远端 CI、Player／IL2CPP；当前 HEAD 未在本次重验 |
 | ABI 4 托管物理分层：已实现／有历史验收 | 2026-11-04 Windows／Linux CI 各 236 项测试、108 次 CLI，两类原生探针与五组平台比较 | 被测提交 `f746ead912ebb160643c9939e9ce838d11ee344f`；[迁移记录与 CI 41837315399](managed-physics-migration.md) | 原生 Add 内存耗尽回滚未做注入验收；该固定提交结果不替代后续代码验证 |
-| GridGame Unity Play：已实现／有历史验收 | 2026-11-10 URP Windows Editor：双 Domain Reload、同域重入、棋盘颜色像素；四条快慢表现轨迹各与 CLI 的 16 检查点一致 | [URP 记录](assets-enhancement-urp.md)及[源码指纹](evidence/assets-enhancement-urp/package-sources.json)；基础契约与历史证据见 [Play 宿主](unity-play-host.md) | 独立 Player、IL2CPP、其他平台及人工玩法体验待单独验收 |
-| PhysicsSandbox Unity Play：已实现／有历史验收 | 2026-11-10 URP Windows Editor：双重载各 27 项及退出／重入；暂停输入、Tick 90／91 恢复与十组 CLI 比较 | [URP 记录](assets-enhancement-urp.md)及[源码指纹](evidence/assets-enhancement-urp/package-sources.json)；基础场景与通过条件见 [PhysicsSandbox](phase-3-physics-sandbox-unity-plan.md) | 同上；AssetsDemo 的 Player 结果不能证明 Jolt 模拟宿主 Player 可用 |
+| GridGame Unity Play：已实现／有历史验收 | 2026-11-10 URP Windows Editor：双 Domain Reload、同域重入、棋盘颜色像素；四条快慢表现轨迹各与 CLI 的 16 检查点一致 | [URP 记录](assets-enhancement-urp.md)及[源码指纹](evidence/assets-enhancement-urp/package-sources.json)；基础契约与历史证据见 [Play 宿主](unity-play-host.md) | Windows IL2CPP Player 已完成人工试玩，见[Windows 人工验收](phase-4-delivery.md#windows-人工验收)。其他平台待验收 |
+| PhysicsSandbox Unity Play：已实现／有历史验收 | 2026-11-10 URP Windows Editor：双重载各 27 项及退出／重入；暂停输入、Tick 90／91 恢复与十组 CLI 比较 | [URP 记录](assets-enhancement-urp.md)及[源码指纹](evidence/assets-enhancement-urp/package-sources.json)；基础场景与通过条件见 [PhysicsSandbox](phase-3-physics-sandbox-unity-plan.md) | Windows IL2CPP Player 已完成暂停、存读档人工试玩，见[Windows 人工验收](phase-4-delivery.md#windows-人工验收)。其他平台待验收 |
 | UnityCore：已实现／有历史验收 | 2026-11-09 生命周期、取消、关闭、调度及双重载回归；后续日志专项另记；异步关闭与 Assets 的集成还由资源回归覆盖 | [生命周期分轮记录](unitycore-lifecycle.md)、[回归摘要](evidence/unitycore/simplify-20261109/summary.json)、[Assets 集成记录](unitycore-assets.md) | 日志专项不是完整生命周期回归；独立包测试与示例集成不能互相替代 |
 | UnityCore UI：Windows Editor、Mono/IL2CPP Player 已验收 | 2026-11-16最新两后端加载待交付/退出动画中点击×，四场通过、资源归零；UI矩阵298、正确宿主Core/Assets矩阵336、Python18通过，两个夹具快照各双后端10组smoke通过。前三场与最后手动Back场仅验收探针不同 | [UI分轮记录](unitycore-ui.md)、[加载/动画关闭](evidence/unitycore-ui/shutdown-20261116/summary.json)、[前轮原生截图](evidence/unitycore-ui/capture-20261116/summary.json)、[关闭门禁](../scripts/verify_unity_ui_shutdown.py) | 限Windows x64、Direct3D11、Minimal stripping；加载为真实资源完成后的受控交付延迟，不声称物理IO仍在途。截图不含OS标题栏。强杀、其他平台、性能与远端CI未验收；失败及恢复执行单列保留 |
 
@@ -42,7 +42,7 @@
 | --- | --- | --- | --- |
 | Assets 句柄、作用域、共享请求、实例／池／场景：已实现／有历史验收 | 2026-11-10 模式所有权复审：双重载各 96 EditMode／45 PlayMode，SBP Mono／IL2CPP Player；后续资源增强及 Shader 轮次另有回归 | [所有权复审说明](unitycore-assets.md#模式切换所有权复审)、[摘要](evidence/unitycore-assets/mode-ownership-review/summary.json)、[源码指纹](evidence/unitycore-assets/mode-ownership-review/sources.json) | 不将较早 Player 结果视为最新源码全矩阵通过；长期压力和性能预算未验收 |
 | 双后端构建、版本与发布：已实现／有历史验收 | 2026-11-10 两后端构建、配置持久化、取消、发布及保存失败等；最终 80 EditMode／45 PlayMode | [SBP 契约](unitycore-assets-sbp.md)、[版本记录](unitycore-assets.md#构建版本与输出目录)、[摘要](evidence/unitycore-assets/build-version/summary.json)、[源码指纹](evidence/unitycore-assets/build-version/sources.json) | 不承诺 Player 内置内容与 Bundle 全局零重复；原生 BuildReport 文件映射歧义尚缺单独注入测试，见 [复审记录](unitycore-assets-review.md) |
-| 精简部署与裁剪证据：已实现／有历史验收 | 2026-11-10 两后端×双重载；Builtin／SBP 各 Mono／IL2CPP，共四个 Player；白名单目录、批处理和菜单 API | [部署契约及验收](unitycore-assets-deployment.md)、[摘要](evidence/unitycore-assets/deployment/summary.json)、[源码指纹](evidence/unitycore-assets/deployment/sources.json) | Inspector／标准 Build Profiles 鼠标流程待验证；Builtin 标准入口须有匹配 Manifest；进程崩溃不保证跨目录事务恢复 |
+| 精简部署与裁剪证据：已实现／有历史验收 | 2026-11-10 两后端×双重载；Builtin／SBP 各 Mono／IL2CPP，共四个 Player；白名单目录、批处理和菜单 API | [部署契约及验收](unitycore-assets-deployment.md)、[摘要](evidence/unitycore-assets/deployment/summary.json)、[源码指纹](evidence/unitycore-assets/deployment/sources.json) | SBP 的 Inspector 部署与标准 Build Profiles 构建已通过，见[Windows 人工验收](phase-4-delivery.md#windows-人工验收)；Builtin 标准入口须有匹配 Manifest；进程崩溃不保证跨目录事务恢复 |
 | URP 与资源增强：已实现／有历史验收 | 2026-11-10 Forward／Forward+×两后端×双重载；两渲染配置×两后端×Mono／IL2CPP 八个 Windows D3D11 Player；无 URP 夹具兼容性与最终补测另记 | [分轮结果与补测边界](assets-enhancement-urp.md)、[摘要](evidence/assets-enhancement-urp/summary.json)、[矩阵指纹](evidence/assets-enhancement-urp/package-sources.json)、[交付指纹](evidence/assets-enhancement-urp/current-sources.json) | 部分最终变更只做针对性补测；早期日志含 JobTempAlloc，须结合下一行，不宣称原矩阵全进程无警告 |
 | JobTempAlloc 工程规避与日志门禁：已实现／有历史验收 | 2026-11-11 Forward、关闭 Domain Reload：104 EditMode／55 PlayMode；两后端新 Bundle 与两个 Mono D3D11 Player；最终完整日志无目标警告 | [定位与适用边界](assets-jobtempalloc.md)、[摘要](evidence/assets-jobtempalloc/summary.json)、[源码指纹](evidence/assets-jobtempalloc/sources.json) | 是锁定 Editor 下的工程规避，不是 Unity 原生修复；未重跑 IL2CPP、Forward+、双重载全矩阵 |
 | Shader 自动收集与合并：已实现／有历史验收 | 2026-11-11 Editor D3D11：110 EditMode／55 PlayMode；双重载各六项专项；Forward／Forward+ 实际像素；两后端真实集合加载与 WarmUp | [收集契约及验收](assets-shader-auto-collection.md)、[摘要](evidence/assets-shader-auto-collection/summary.json)、[源码指纹](evidence/assets-shader-auto-collection/sources.json) | 没有 Player 端采集导出；不覆盖未执行的动态分支；该轮未重跑 Player／IL2CPP |
@@ -57,23 +57,23 @@
 | 无头 CI | [工作流](../.github/workflows/build.yml)已配置 Windows／Linux 原生构建、锁定恢复、构建、测试、只读格式、真实 CLI 及平台比较；有固定提交历史成功记录 | 要声明新版本通过，必须定位该被测提交的 run、日志及制品；本次未查询最新远端状态 |
 | Unity CI | 待接入；当前工作流没有 Unity 作业 | 按授权与执行环境另行决定；本地脚本存在不等于 CI 已执行 |
 | 阶段 1／2／2.5 | 已有历史验收，当前执行统一 v2 | 查 [v2 索引](v2-acceptance.md)及其历史链接，不使用退役 v1 命令验证当前版本 |
-| 阶段 3 | 两个模拟示例已有 Windows Editor 证据；本分支补充 Windows Mono／IL2CPP Player 自动检查，见[本轮记录](phase-4-delivery.md#本轮执行记录2026-11-18) | 其他平台与人工体验各自独立验收；场景相机截图不覆盖 Overlay HUD |
-| 阶段 4 | [三类案例索引](phase-4-delivery.md)已建立，独立复核已通过，各例人工体验待签收 | 数值调整、规则变更、Bug 修复各一例：需求、改动、独立审查、自动验证、人工验收及版本／复现入口；不将历史审查移作后来变更的审查 |
+| 阶段 3 | 两个模拟示例已有 Windows Editor 证据；本分支补充 Windows Mono／IL2CPP Player 自动检查，见[本轮记录](phase-4-delivery.md#本轮执行记录2026-11-18) | Windows IL2CPP 人工体验通过。其他平台待验收 |
+| 阶段 4 | [三类案例索引](phase-4-delivery.md)已建立，独立复核已通过，本轮三项人工验收通过 | 数值调整、规则变更、Bug 修复各一例：需求、改动、独立审查、自动验证、人工验收及版本／复现入口；不将历史审查移作后来变更的审查 |
 | 阶段 5／范围外能力 | 未因此启动 | 网络、ECS／GAS、远端更新、更多平台等先有产品需求或性能证据，再独立设计 |
 
 远端平台制品按当前工作流保留七天，不能假定旧下载链接仍可用。仓库历史 ZIP、源码指纹及机器摘要提供定位信息；本地 `TestResults/` 路径仅帮助原机器定位，不是跨机器可用的交付链接。本次未重新校验历史归档哈希或远端制品可下载性。
 
-## 5. 当前待补清单
+## 5. 验收事项与剩余工作
 
-以下是证据与交付缺口，不是新批准的开发计划，也不把静态观察当成已复现缺陷。
+A2–A4 已完成本轮验收。其余事项按表中范围跟进。
 
-| 编号 | 待补事项 | 收口依据 |
+| 编号 | 事项 | 收口依据 |
 | --- | --- | --- |
 | A1 | 为拟交付版本执行受影响范围的验证并对齐版本 | 记录提交／未提交源码指纹、配置、环境、实际命令、成功与失败材料；未跑的矩阵继续明确保留 |
 | A2 | AssetsDemo 入口失败／销毁清理 | 本分支统一关闭 Core，Mono／IL2CPP Player 的失败注入与销毁检查见[本轮记录](phase-4-delivery.md#本轮执行记录2026-11-18)；独立复核已确认三项审查问题关闭 |
-| A3 | 两个模拟示例的 Player／IL2CPP 与人工体验 | Windows Mono／IL2CPP 自动 Player 输入、暂停／恢复与退出结果见[本轮记录](phase-4-delivery.md#本轮执行记录2026-11-18)；原生桥部署和身份已核对；人工体验仍需签收 |
-| A4 | 构建部署 GUI 实操 | [本轮隔离 Editor 操作](phase-4-delivery.md#待人工完成的验收)受窗口捕获超时和输入几何不可用阻断；真实 Inspector 与标准 Build Profiles 鼠标流程仍待完成，API／菜单调用不替代该验收 |
-| A5 | 第 4 阶段三类交付索引及成本基线 | [案例索引](phase-4-delivery.md)已建立；独立审查已完成，人工验收和统一口径的耗时／介入成本基线待补，不虚构历史测量 |
+| A3 | 两个模拟示例的 Player／IL2CPP 与人工体验 | Windows Mono／IL2CPP 自动 Player 输入、暂停／恢复与退出结果见[本轮记录](phase-4-delivery.md#本轮执行记录2026-11-18)；原生桥部署和身份已核对；用户已完成两个 IL2CPP Player 的操作验收，见[Windows 人工验收](phase-4-delivery.md#windows-人工验收) |
+| A4 | 构建部署 GUI 实操 | 用户已在 Inspector 构建、部署资源并通过标准 Build Profiles 构建 Player，清理检查通过。见[Windows 人工验收](phase-4-delivery.md#windows-人工验收) |
+| A5 | 第 4 阶段三类交付索引及成本基线 | [案例索引](phase-4-delivery.md)已建立；独立审查和人工验收已完成，统一口径的耗时／介入成本基线待补，不虚构历史测量 |
 | A6 | 性能、压力及发布范围决策 | 先确定目标资源规模、场景、时长与预算，再测量；不将功能用例或少量对象内存采样当作性能验收 |
 
 ## 6. 当前复现入口
