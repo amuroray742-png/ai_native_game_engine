@@ -1,4 +1,9 @@
 using System.Collections;
+using System;
+using System.Linq;
+using System.Threading;
+using UnityEngine.UI;
+using Object = UnityEngine.Object;
 using System.Text.RegularExpressions;
 using AiNative.UnityCore;
 using Cysharp.Threading.Tasks;
@@ -31,6 +36,27 @@ namespace AiNative.UnityCore.AssetsDemoTests
             Assert.AreEqual(CoreState.Running, owner.State);
             Assert.AreSame(root, owner.RootGameObject);
             yield return owner.CloseAsync().ToCoroutine();
+        }
+
+        [UnityTest]
+        public IEnumerator CleanupButtonReleasesResourcesAndShowsResult()
+        {
+            EditorSceneManager.OpenScene("Assets/Bootstrap.unity");
+            bool reload = !EditorSettings.enterPlayModeOptionsEnabled ||
+                (EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) == 0;
+            yield return new EnterPlayMode(expectDomainReload: reload);
+            yield return UniTask.ToCoroutine(async () =>
+            {
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                var host = Object.FindFirstObjectByType<AssetsDemoBootstrap>();
+                await UniTask.WaitUntil(() => GameObject.Find("Run cleanup checks")?.GetComponent<Button>().IsInteractable() == true,
+                    cancellationToken: timeout.Token);
+                GameObject.Find("Run cleanup checks").GetComponent<Button>().onClick.Invoke();
+                await UniTask.WaitUntil(() => host.GetComponentsInChildren<Text>().Any(label =>
+                    label.isActiveAndEnabled && label.text.StartsWith("PASS:", StringComparison.Ordinal)),
+                    cancellationToken: timeout.Token);
+                Assert.IsEmpty(AssetBundle.GetAllLoadedAssetBundles());
+            });
         }
 
         [UnityTearDown]

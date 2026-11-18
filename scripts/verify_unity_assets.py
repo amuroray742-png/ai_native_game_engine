@@ -39,7 +39,8 @@ def verify(output, players, backend="sbp", baseline_fixture=False, renderer="for
     if not cli:
         raise RuntimeError("Install Unity CLI before running verification")
     fingerprints = {}
-    for base in (ROOT / "packages/com.ainative.unitycore", ROOT / "packages/com.ainative.unitycore.assets", PROJECT / "Assets"):
+    for base in (ROOT / "packages/com.ainative.unitycore", ROOT / "packages/com.ainative.unitycore.assets",
+                 ROOT / "packages/com.ainative.unitycore.ui", PROJECT / "Assets", PROJECT / "Packages"):
         for path in sorted(base.rglob("*")):
             if path.is_file() and "StreamingAssets" not in path.parts:
                 fingerprints[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()

@@ -20,6 +20,17 @@
         "com.unity.scriptablebuildpipeline": "2.6.2"
       }
     },
+    "com.ainative.unitycore.ui": {
+      "version": "file:../../../../packages/com.ainative.unitycore.ui",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.ainative.unitycore": "0.1.0",
+        "com.ainative.unitycore.assets": "0.1.0",
+        "com.cysharp.unitask": "2.5.11",
+        "com.unity.ugui": "2.0.0"
+      }
+    },
     "com.cysharp.unitask": {
       "version": "2.5.11",
       "depth": 1,

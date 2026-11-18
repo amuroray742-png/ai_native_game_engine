@@ -19,6 +19,7 @@ public static class ShaderVariantDemoSetup
     public static void Create()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) { throw new InvalidOperationException("Exit Play first."); }
+        DemoControlsSetup.CreateMissingControls();
         if (!AssetDatabase.IsValidFolder(Root)) { AssetDatabase.CreateFolder("Assets", "ShaderVariantDemo"); }
         var shader = AssetDatabase.LoadAssetAtPath<Shader>("Assets/Rendering/KeywordProbe.shader");
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Rendering/ShaderProbe.prefab");
@@ -48,7 +49,7 @@ public static class ShaderVariantDemoSetup
             groups.AddressMode = ResourceAddressMode.GroupAndAssetName;
             groups.OutputDirectory = "{projectDir}/BuildArtifacts/ShaderVariantDemo/{version}";
             groups.Groups = new[] { new ResourceGroup { Id = "ShaderDemo", Assets = new[] {
-                new ResourceAddress { Asset = prefab }, new ResourceAddress { Asset = collection } } } };
+                new ResourceAddress { Asset = prefab }, new ResourceAddress { Asset = collection } } }, DemoControlsSetup.Group(DemoControlsSetup.ShaderPanel) };
             AssetDatabase.CreateAsset(groups, GroupsPath);
         }
         if (!File.Exists(ScenePath)) { RequireNewAssetPath(ScenePath); CreateScene(); }
@@ -63,7 +64,7 @@ public static class ShaderVariantDemoSetup
         {
             var host = new GameObject("Shader Variant Demo");
             SceneManager.MoveGameObjectToScene(host, scene);
-            host.AddComponent<ShaderVariantDemo>();
+            DemoControlsSetup.AddStatus(host.AddComponent<ShaderVariantDemo>());
             var cameraObject = new GameObject("Demo Camera");
             SceneManager.MoveGameObjectToScene(cameraObject, scene);
             cameraObject.transform.SetParent(host.transform);
@@ -134,7 +135,8 @@ public static class ShaderVariantDemoSetup
         var apis = PlayerSettings.GetGraphicsAPIs(BuildTarget.StandaloneWindows64);
         try
         {
-            PlayerSettings.SetScriptingBackend(target, ScriptingImplementation.Mono2x);
+            PlayerSettings.SetScriptingBackend(target, Array.IndexOf(Environment.GetCommandLineArgs(), "-variantIl2Cpp") >= 0
+                ? ScriptingImplementation.IL2CPP : ScriptingImplementation.Mono2x);
             PlayerSettings.strictShaderVariantMatching = true;
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64, false);
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { GraphicsDeviceType.Direct3D11 });

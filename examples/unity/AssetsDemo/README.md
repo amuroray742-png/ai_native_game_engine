@@ -4,7 +4,7 @@
 
 本轮接口、生产规则、重建与验收范围见 [资源增强与 URP 示例](../../../docs/assets-enhancement-urp.md)。完整新矩阵加 `--renderers both --baseline-fixture`；Builtin/SBP 在此表示构建后端。历史验收不能代表本轮结果。
 
-Unity 6000.3.23f1，Windows x64，直接引用仓库中的 UnityCore 与 Assets 包。打开 `Assets/Bootstrap.unity`，示例显示 A/B 两个共享材质、贴图的对象；点击 **Run cleanup checks** 执行池、场景、重启与关闭检查。`Assets/ResourceGroups.asset` 是可编辑配置。
+Unity 6000.3.23f1，Windows x64，直接引用仓库中的 UnityCore、Assets 和 UI 包。打开 `Assets/Bootstrap.unity`，示例显示 A/B 两个共享材质、贴图的对象；点击 **Run cleanup checks** 执行池、场景、重启与关闭检查。`Assets/ResourceGroups.asset` 是可编辑配置。
 
 Editor 中选中 `Assets/ResourceGroups.asset`，通过 **Editor Load Mode** 切换：`AssetDatabase` 直接读取源资源，无需构建或部署；默认的 `AssetBundle` 读取已部署内容。示例启动时调用 `EditorAssets.CreateConfigured(groups)`，切换后需退出并重新进入 Play。此开关不改变打包后端，Player 始终加载 Bundle。
 
@@ -25,7 +25,7 @@ unity open examples/unity/AssetsDemo
 python scripts/verify_unity_assets.py TestResults/assets-verification-new --backend both --players
 ```
 
-目标目录必须不存在。脚本复制工程和两个源码包，重新构建内容，在开关 Domain Reload 两种设置下分别运行 EditMode/PlayMode 测试，再构建并运行两种 Player。保留源文件摘要、命令、XML、日志、原始 Bundle 报告、Player 结果与渲染截图。测试会生成故意重复或损坏的内容，仅在隔离副本/临时目录使用。
+目标目录必须不存在。脚本复制工程和三个源码包，重新构建内容，在开关 Domain Reload 两种设置下分别运行 EditMode/PlayMode 测试，再构建并运行两种 Player。保留源文件摘要、命令、XML、日志、原始 Bundle 报告、Player 结果与渲染截图。测试会生成故意重复或损坏的内容，仅在隔离副本/临时目录使用。
 
 `BundleReportProbe.Run` 是原生 A/B/shared 最小报告探针，输出 `TestResults/assets-probe/bundles`。完整构建的严格归属检查由 `AssetBuilder` 执行。该样例不参与模拟内核或 PlayHost 的玩法装配。
 
@@ -42,3 +42,13 @@ Inspector 手工构建：选中 ResourceGroups，设置 Version（默认下一�
 Shader 自动收集入口与操作步骤见 [Shader 自动收集与运行采集](../../../docs/assets-shader-auto-collection.md)。ResourceGroups 的 Generate merged shader variant collection 合并材质扫描、Editor Play 录制和手动 Required Variants；生成的集合需要加入资源组后重新构建。录制与测试不更新本地 StreamingAssets。
 
 Shader 变体保留／裁剪对照使用独立场景 `Assets/ShaderVariantDemo/Demo.unity`，菜单入口为 `AI Native/Shader Variant Demo`。从 Bundle 持续显示 ShaderProbe，通过手动修改配置观察保留绿色、真实缺失粉色及恢复绿色；[操作步骤与验收边界](../../../docs/assets-shader-variant-demo.md)。
+
+## 示例界面
+
+主场景通过 `Assets/DemoControls/AssetsPanel` 打开资源清理 HUD。Shader 场景使用独立目录中的 `Controls/ShaderPanel`，可切换 Base、PROBE_GREEN 和关闭演示。两个窗口都由 UI 模块加载，按钮绑定随窗口释放。运行期间状态由窗口展示，启动和关闭后的结果由场景持有的只读文本展示。修改控件后重新构建对应场景的内容包。
+
+Shader 变体在 Windows IL2CPP 下的隔离验收命令如下。脚本分别构建并运行保留、剥离和恢复绿色变体的 Player，然后验证双 Domain Reload 下的 Editor 操作。
+
+```powershell
+python scripts/verify_shader_variant_demo.py TestResults/shader-controls-new --backend sbp --il2cpp
+```

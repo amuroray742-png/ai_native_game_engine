@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.ainative.unitycore": "file:../../../../packages/com.ainative.unitycore",
+    "com.ainative.unitycore.ui": "file:../../../../packages/com.ainative.unitycore.ui",
     "com.ainative.unitycore.assets": "file:../../../../packages/com.ainative.unitycore.assets",
     "com.unity.collab-proxy": "2.13.6",
     "com.unity.feature.development": "1.0.2",

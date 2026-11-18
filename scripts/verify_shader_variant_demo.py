@@ -1,4 +1,4 @@
-"""Isolated ShaderProbe variant stripping demo (Windows Mono, D3D11)."""
+"""Isolated ShaderProbe variant stripping demo (Windows Mono or IL2CPP, D3D11)."""
 import argparse
 import hashlib
 import json
@@ -13,7 +13,7 @@ from verify_unity_assets import check_native_leaks
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def verify(output, backend, current, expectation):
+def verify(output, backend, current, expectation, il2cpp=False):
     output.mkdir(parents=True, exist_ok=False)
     workspace = verification_workspace(output)
     project = copy_verification_project(ROOT / 'examples/unity/AssetsDemo', workspace)
@@ -61,7 +61,7 @@ def verify(output, backend, current, expectation):
                 raise RuntimeError('Green exclusion rule was not observed removing variants')
             (output / (label + '-green-rules.json')).write_text(json.dumps(green_rules))
             executable = output / label / 'ShaderVariantDemo.exe'
-            method(label + '-build', 'ShaderVariantDemoSetup.BuildPlayer', ['-variantPlayerOutput', executable])
+            method(label + '-build', 'ShaderVariantDemoSetup.BuildPlayer', ['-variantPlayerOutput', executable, *(['-variantIl2Cpp'] if il2cpp else [])])
             result_path = output / (label + '.json')
             log_path = output / (label + '-player.log')
             print(label + '-player', flush=True)
@@ -112,5 +112,6 @@ if __name__ == '__main__':
     parser.add_argument('--backend', choices=['builtin', 'sbp', 'both'], default='both')
     parser.add_argument('--current', action='store_true', help='Build your current manual demo configuration, without changing its variants')
     parser.add_argument('--expect', choices=['present', 'missing'], default='present')
+    parser.add_argument('--il2cpp', action='store_true', help='Build and run the Windows IL2CPP Player for each content case')
     args = parser.parse_args()
-    verify(args.output.resolve(), args.backend, args.current, args.expect)
+    verify(args.output.resolve(), args.backend, args.current, args.expect, args.il2cpp)
