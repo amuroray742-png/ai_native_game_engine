@@ -38,8 +38,9 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
 #else
             _module = new AssetsModule();
 #endif
-            _core = Core.Inst;
-            _core.RegisterModule(_module);
+            var core = Core.Inst;
+            core.RegisterModule(_module);
+            _core = core;
             await _core.RunAsync(destruction);
             FailAt("after-start");
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsShaderProbe") >= 0)
@@ -83,7 +84,6 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             second.Dispose();
             await _core.RestartAsync(destruction);
             using (var again = await _module.LoadAsync<GameObject>("Assets/Probe/A", destruction)) { if (again.Value == null) { throw new Exception("Restart failed."); } }
-            if (renderingError != null) { throw new Exception("Player logged an error during acceptance: " + renderingError); }
             completed = "PASS: shared resources, pool, scene, script types, restart and cleanup";
         }
         catch (OperationCanceledException) when (_destroyed && expectedDestroy)
@@ -97,6 +97,7 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             {
                 try { await _core.CloseAsync(); }
                 catch (Exception error) { failure = failure == null ? error : new AggregateException(failure, error); }
+                finally { _core = null; }
             }
             if (_module != null)
             {
@@ -106,7 +107,9 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             }
             Application.logMessageReceived -= ObserveLog;
         }
-        if (_destroyed && !expectedDestroy) { return; }
+        if (renderingError != null)
+        { failure = new InvalidOperationException("Player logged an error during acceptance: " + renderingError, failure); }
+        if (_destroyed && !expectedDestroy && failure == null) { return; }
         _status = failure == null ? completed : failure.ToString();
         if (failure == null) { Debug.Log(_status); }
         else { Debug.LogException(failure); }

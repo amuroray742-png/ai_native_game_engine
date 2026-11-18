@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.8655917">
+  <test-suite type="TestSuite" id="1000" name="AssetsDemo" fullname="AssetsDemo" runstate="Runnable" testcasecount="114" result="Failed" site="Child" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.865592" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1153" name="AssetsDemo.ShaderVariantTests.dll" fullname="C:/unity-verification/be0a7f31a66e/examples/unity/AssetsDemo/Library/ScriptAssemblies/AssetsDemo.ShaderVariantTests.dll" runstate="Runnable" testcasecount="4" result="Failed" site="Child" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.857408" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="41548" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1154" name="AiNative" fullname="AiNative" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.855364" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1155" name="UnityCore" fullname="AiNative.UnityCore" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.854901" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1156" name="AssetsDemoTests" fullname="AiNative.UnityCore.AssetsDemoTests" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.854484" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1151" name="BootstrapOwnershipTests" fullname="AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests" classname="AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.853544" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1152" name="RejectedBootstrapLeavesRunningCoreAlive" fullname="AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests.RejectedBootstrapLeavesRunningCoreAlive" methodname="RejectedBootstrapLeavesRunningCoreAlive" classname="AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests" runstate="Runnable" seed="1495306610" result="Failed" start-time="2026-11-18 04:01:47Z" end-time="2026-11-18 04:01:48Z" duration="0.841357" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[  Expected: Running
+  But was:  Stopped
+]]></message>
+                  <stack-trace><![CDATA[at AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests+<RejectedBootstrapLeavesRunningCoreAlive>d__0.MoveNext () [0x0013e] in C:\unity-verification\be0a7f31a66e\examples\unity\AssetsDemo\Assets\Tests\Editor\BootstrapOwnershipTests.cs:31
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0004e] in .\Library\PackageCache\com.unity.test-framework@bd7f943e9647\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+                </failure>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 12:01:48 382] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+InvalidOperationException: Core must be stopped, current state: Running.
+AiNative.UnityCore.Core.EnsureStopped () (at C:/unity-verification/be0a7f31a66e/packages/com.ainative.unitycore/Runtime/Core.cs:326)
+AiNative.UnityCore.Core.RegisterModule (AiNative.UnityCore.Interfaces.IModule module) (at C:/unity-verification/be0a7f31a66e/packages/com.ainative.unitycore/Runtime/Core.cs:53)
+AssetsDemoBootstrap.Start () (at Assets/AssetsDemoBootstrap.cs:42)
+UnityEngine.Debug:LogException(Exception)
+<Start>d__6:MoveNext() (at Assets/AssetsDemoBootstrap.cs:112)
+Cysharp.Threading.Tasks.CompilerServices.AsyncUniTaskVoidMethodBuilder:Start(<Start>d__6&) (at ./Library/PackageCache/com.cysharp.unitask@182a3b1e0e11/Runtime/CompilerServices/AsyncUniTaskVoidMethodBuilder.cs:110)
+AssetsDemoBootstrap:Start()
+
+Saving results to: C:/Users/wepie/AppData/LocalLow/DefaultCompany/AssetsDemo\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

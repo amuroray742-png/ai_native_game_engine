@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="58" result="Passed" total="58" passed="58" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.6565236">
+  <test-suite type="TestSuite" id="1076" name="AssetsDemo" fullname="AssetsDemo" runstate="Runnable" testcasecount="58" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.656524" total="58" passed="58" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1046" name="AiNative.UnityCore.Assets.PlayTests.dll" fullname="C:/unity-verification/895218bb05ba/examples/unity/AssetsDemo/Library/ScriptAssemblies/AiNative.UnityCore.Assets.PlayTests.dll" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.458416" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="138876" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1047" name="AiNative" fullname="AiNative" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.456281" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1048" name="UnityCore" fullname="AiNative.UnityCore" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.455015" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1049" name="Assets" fullname="AiNative.UnityCore.Assets" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.454192" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1050" name="Tests" fullname="AiNative.UnityCore.Assets.Tests" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.453511" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1001" name="AssetCancellationTests" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.135751" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1015" name="AllCancelledAssetWaitersDrainAndCollectLateResult" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.AllCancelledAssetWaitersDrainAndCollectLateResult" methodname="AllCancelledAssetWaitersDrainAndCollectLateResult" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="536133638" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.047239" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1002" name="AlreadyCancelledSceneDoesNotStartBundleLoads" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.AlreadyCancelledSceneDoesNotStartBundleLoads" methodname="AlreadyCancelledSceneDoesNotStartBundleLoads" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="534891854" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.003211" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1014" name="CloseWaitsForAlreadyStartedSceneAfterCallerCancels" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.CloseWaitsForAlreadyStartedSceneAfterCallerCancels" methodname="CloseWaitsForAlreadyStartedSceneAfterCallerCancels" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="2086932272" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.014214" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1016" name="CompletionCanReleaseAndReloadWithoutOldFinallyRemovingSuccessor" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.CompletionCanReleaseAndReloadWithoutOldFinallyRemovingSuccessor" methodname="CompletionCanReleaseAndReloadWithoutOldFinallyRemovingSuccessor" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="846286937" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.005438" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1003" name="FailedCloseRetainsSceneOwnershipAndCanBeRetried" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.FailedCloseRetainsSceneOwnershipAndCanBeRetried" methodname="FailedCloseRetainsSceneOwnershipAndCanBeRetried" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="464658892" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.006361" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1013" name="FailedPoolCallbackDestroysCandidate" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.FailedPoolCallbackDestroysCandidate" methodname="FailedPoolCallbackDestroysCandidate" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="1594594709" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.013962" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1011" name="ForcedExitDuringInstantiationCollectsWithoutAnotherFrame" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.ForcedExitDuringInstantiationCollectsWithoutAnotherFrame" methodname="ForcedExitDuringInstantiationCollectsWithoutAnotherFrame" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="854177990" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.002752" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1007" name="LateForcedResultCannotModifyNewGeneration" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.LateForcedResultCannotModifyNewGeneration" methodname="LateForcedResultCannotModifyNewGeneration" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="1302040440" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.003702" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1009" name="LiveNullResultStillReportsTypeFailure" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.LiveNullResultStillReportsTypeFailure" methodname="LiveNullResultStillReportsTypeFailure" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="51134777" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.001785" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1005" name="OnEnableSelfDestructionCannotPublishDeadRental" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.OnEnableSelfDestructionCannotPublishDeadRental" methodname="OnEnableSelfDestructionCannotPublishDeadRental" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="943570463" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.002061" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1004" name="PoolCallbacksCannotPublishAfterCancellingRequest" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.PoolCallbacksCannotPublishAfterCancellingRequest" methodname="PoolCallbacksCannotPublishAfterCancellingRequest" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="967986240" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.008564" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1006" name="PrewarmCancellationDrainsBeforePoolCloses" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.PrewarmCancellationDrainsBeforePoolCloses" methodname="PrewarmCancellationDrainsBeforePoolCloses" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="2079902022" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:48Z" duration="0.004971" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1010" name="RetiredBackendFailureStillRemainsDiagnostic" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.RetiredBackendFailureStillRemainsDiagnostic" methodname="RetiredBackendFailureStillRemainsDiagnostic" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="760144554" result="Passed" start-time="2026-11-18 03:48:48Z" end-time="2026-11-18 03:48:49Z" duration="0.002453" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1008" name="RetiredDestroyedResultIsCancelledWithoutTypeFailureOrOwnership" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.RetiredDestroyedResultIsCancelledWithoutTypeFailureOrOwnership" methodname="RetiredDestroyedResultIsCancelledWithoutTypeFailureOrOwnership" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="1131105736" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002344" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1012" name="ReturningCanClosePoolFromOnDisable" fullname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests.ReturningCanClosePoolFromOnDisable" methodname="ReturningCanClosePoolFromOnDisable" classname="AiNative.UnityCore.Assets.Tests.AssetCancellationTests" runstate="Runnable" seed="581670999" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003505" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1017" name="AssetLoadingTests" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.063190" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1021" name="BatchDuplicatesCommitBeforeSuccessNotificationAndSnapshotsAreIsolated" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.BatchDuplicatesCommitBeforeSuccessNotificationAndSnapshotsAreIsolated" methodname="BatchDuplicatesCommitBeforeSuccessNotificationAndSnapshotsAreIsolated" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="1757939385" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.019800" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1018" name="BatchRollbackPreservesOtherConsumersAndTracksCancellation" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.BatchRollbackPreservesOtherConsumersAndTracksCancellation" methodname="BatchRollbackPreservesOtherConsumersAndTracksCancellation" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="883083612" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.008402" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1025" name="CancelledDependencyGraphCanBeRetriedBeforeItDrains" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.CancelledDependencyGraphCanBeRetriedBeforeItDrains" methodname="CancelledDependencyGraphCanBeRetriedBeforeItDrains" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="1769519887" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.007456" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1020" name="CancelledQueuedSceneClosesWithoutWaitingForUnrelatedLoad" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.CancelledQueuedSceneClosesWithoutWaitingForUnrelatedLoad" methodname="CancelledQueuedSceneClosesWithoutWaitingForUnrelatedLoad" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="1939903547" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002004" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1019" name="FailedDependencyStillDrainsSibling" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.FailedDependencyStillDrainsSibling" methodname="FailedDependencyStillDrainsSibling" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="1971822108" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002747" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1022" name="InstanceBudgetAndForcedRetirementKeepPrefabOwned" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.InstanceBudgetAndForcedRetirementKeepPrefabOwned" methodname="InstanceBudgetAndForcedRetirementKeepPrefabOwned" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="1718171233" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003485" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1024" name="MixedSubAssetsAndThrowingProgressKeepTheirResults" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.MixedSubAssetsAndThrowingProgressKeepTheirResults" methodname="MixedSubAssetsAndThrowingProgressKeepTheirResults" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="289154784" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.004370" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1027" name="SchedulerHonorsBoundFairnessAndSynchronousCancellation" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.SchedulerHonorsBoundFairnessAndSynchronousCancellation" methodname="SchedulerHonorsBoundFairnessAndSynchronousCancellation" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="213068361" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.005554" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1023" name="SynchronousProgressCancellationNeverStartsLaterBatchItems" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.SynchronousProgressCancellationNeverStartsLaterBatchItems" methodname="SynchronousProgressCancellationNeverStartsLaterBatchItems" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="811982953" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002566" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1026" name="WarmupBetweenCollectionsIsCancelledByOwnerClose" fullname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests.WarmupBetweenCollectionsIsCancelledByOwnerClose" methodname="WarmupBetweenCollectionsIsCancelledByOwnerClose" classname="AiNative.UnityCore.Assets.Tests.AssetLoadingTests" runstate="Runnable" seed="793871251" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003697" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1028" name="AssetOwnershipTests" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" testcasecount="17" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.252552" total="17" passed="17" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1034" name="AudioAndSpriteSubAssetsLoadFromRealBundles" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.AudioAndSpriteSubAssetsLoadFromRealBundles" methodname="AudioAndSpriteSubAssetsLoadFromRealBundles" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="1330327649" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.032847" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 081] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1036" name="ConcurrentRequestsOwnIndependentLeases" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.ConcurrentRequestsOwnIndependentLeases" methodname="ConcurrentRequestsOwnIndependentLeases" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="502483167" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.013958" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 108] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1032" name="CorruptRealBundleRollsBackDependencyPins" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.CorruptRealBundleRollsBackDependencyPins" methodname="CorruptRealBundleRollsBackDependencyPins" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="852312131" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.024960" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 123] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+
+IgnoreFailingMessages:true
+Failed to read data for the AssetBundle 'C:\Users\wepie\AppData\Local\Temp\DefaultCompany\AssetsDemo\CorruptAssets-3c6afce2c47e4d4a9a6461d63d0f2303\group_3addd7d5a0987fa76ecfdf280e2e9f69460c03de3be8802e3ee0fdc6b6e88471.bundle'.
+
+IgnoreFailingMessages:false
+]]></output>
+                </test-case>
+                <test-case id="1030" name="DependenciesRemainOwnedThroughoutBusinessOnDestroy" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.DependenciesRemainOwnedThroughoutBusinessOnDestroy" methodname="DependenciesRemainOwnedThroughoutBusinessOnDestroy" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="2003093640" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.021064" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 148] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1043" name="ExternalDestroyInvalidatesPoolRentalAndIdleCapacity" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.ExternalDestroyInvalidatesPoolRentalAndIdleCapacity" methodname="ExternalDestroyInvalidatesPoolRentalAndIdleCapacity" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="1659226032" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.023531" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 169] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1033" name="ExternalSceneUnloadReleasesSharedDependencies" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.ExternalSceneUnloadReleasesSharedDependencies" methodname="ExternalSceneUnloadReleasesSharedDependencies" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="531143180" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.015143" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 193] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1039" name="NeverActivatedPrewarmObjectsAreReleased" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.NeverActivatedPrewarmObjectsAreReleased" methodname="NeverActivatedPrewarmObjectsAreReleased" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="240560267" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.007430" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 208] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1037" name="OneCancelledWaiterDoesNotCancelAnother" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.OneCancelledWaiterDoesNotCancelAnother" methodname="OneCancelledWaiterDoesNotCancelAnother" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="196747796" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.006280" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 215] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1042" name="PoolCapacityDestroysOverflow" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.PoolCapacityDestroysOverflow" methodname="PoolCapacityDestroysOverflow" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="718828532" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.010290" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 222] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1040" name="RentalIsIdempotentAndCannotReturnSuccessor" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.RentalIsIdempotentAndCannotReturnSuccessor" methodname="RentalIsIdempotentAndCannotReturnSuccessor" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="1427177946" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.008956" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 233] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1041" name="RepeatedLeasesAndScopesLeaveNoHistoricalRecords" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.RepeatedLeasesAndScopesLeaveNoHistoricalRecords" methodname="RepeatedLeasesAndScopesLeaveNoHistoricalRecords" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="658352737" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.025050" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 241] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1044" name="RestartInvalidatesOldLeases" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.RestartInvalidatesOldLeases" methodname="RestartInvalidatesOldLeases" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="434180440" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.011782" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 267] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 273] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1045" name="SceneRejectsDuplicateAndReleasesOnUnload" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.SceneRejectsDuplicateAndReleasesOnUnload" methodname="SceneRejectsDuplicateAndReleasesOnUnload" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="7329911" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.012630" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 279] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1038" name="ScopeCancelsAndDrainsSceneRequest" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.ScopeCancelsAndDrainsSceneRequest" methodname="ScopeCancelsAndDrainsSceneRequest" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="363991959" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003902" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 292] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1035" name="SharedMaterialLivesUntilLastOwner" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.SharedMaterialLivesUntilLastOwner" methodname="SharedMaterialLivesUntilLastOwner" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="1222439014" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.009706" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 295] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1031" name="WrongTypeRollsBackAndCanRetryCorrectType" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.WrongTypeRollsBackAndCanRetryCorrectType" methodname="WrongTypeRollsBackAndCanRetryCorrectType" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="338303922" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.010323" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 306] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1029" name="ZeroCrcCannotDisableBundleIntegrityChecking" fullname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests.ZeroCrcCannotDisableBundleIntegrityChecking" methodname="ZeroCrcCannotDisableBundleIntegrityChecking" classname="AiNative.UnityCore.Assets.Tests.AssetOwnershipTests" runstate="Runnable" seed="1015034075" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.009469" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 316] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1069" name="AiNative.UnityCore.PlayTests.dll" fullname="C:/unity-verification/895218bb05ba/examples/unity/AssetsDemo/Library/ScriptAssemblies/AiNative.UnityCore.PlayTests.dll" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.191114" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="138876" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1070" name="AiNative" fullname="AiNative" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.189997" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1071" name="UnityCore" fullname="AiNative.UnityCore" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.189477" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1072" name="Tests" fullname="AiNative.UnityCore.Tests" runstate="Runnable" testcasecount="16" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.188966" total="16" passed="16" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1051" name="AsyncShutdownTests" fullname="AiNative.UnityCore.Tests.AsyncShutdownTests" classname="AiNative.UnityCore.Tests.AsyncShutdownTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.010703" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1053" name="AsyncShutdownFailureStillShutsAllModulesAndPreventsRestart" fullname="AiNative.UnityCore.Tests.AsyncShutdownTests.AsyncShutdownFailureStillShutsAllModulesAndPreventsRestart" methodname="AsyncShutdownFailureStillShutsAllModulesAndPreventsRestart" classname="AiNative.UnityCore.Tests.AsyncShutdownTests" runstate="Runnable" seed="1799127450" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.004690" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 332] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1052" name="CloseWaitsForDrainBeforeShutAndPreservesReverseOrder" fullname="AiNative.UnityCore.Tests.AsyncShutdownTests.CloseWaitsForDrainBeforeShutAndPreservesReverseOrder" methodname="CloseWaitsForDrainBeforeShutAndPreservesReverseOrder" classname="AiNative.UnityCore.Tests.AsyncShutdownTests" runstate="Runnable" seed="47029054" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002416" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 336] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1054" name="RetirementCancelsDrainAndStillShutsEachModuleOnce" fullname="AiNative.UnityCore.Tests.AsyncShutdownTests.RetirementCancelsDrainAndStillShutsEachModuleOnce" methodname="RetirementCancelsDrainAndStillShutsEachModuleOnce" classname="AiNative.UnityCore.Tests.AsyncShutdownTests" runstate="Runnable" seed="1332047186" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002381" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 338] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1055" name="CoreLifecycleTests" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.177457" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1061" name="CloseContinuationCanStartAnotherRunBeforeCloseReturns" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.CloseContinuationCanStartAnotherRunBeforeCloseReturns" methodname="CloseContinuationCanStartAnotherRunBeforeCloseReturns" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="979829718" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003828" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 346] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 347] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1060" name="CloseDuringInitializationCancelsAndSharesCleanup" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.CloseDuringInitializationCancelsAndSharesCleanup" methodname="CloseDuringInitializationCancelsAndSharesCleanup" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="1202242479" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.004793" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 350] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1056" name="DefaultLoggerAndPooledInitializationStartTheDrivers" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.DefaultLoggerAndPooledInitializationStartTheDrivers" methodname="DefaultLoggerAndPooledInitializationStartTheDrivers" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="1337844101" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.109536" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 359] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1057" name="EveryStartupFailureCleansBothEnteredModules" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.EveryStartupFailureCleansBothEnteredModules" methodname="EveryStartupFailureCleansBothEnteredModules" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="1220096192" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.008750" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 465] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 467] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 468] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 468] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 469] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 471] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1062" name="ExternalCancellationOnlyControlsStartup" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.ExternalCancellationOnlyControlsStartup" methodname="ExternalCancellationOnlyControlsStartup" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="2095490247" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.006860" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 478] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1063" name="ExternalCancellationSettlesAllPendingInitializers" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.ExternalCancellationSettlesAllPendingInitializers" methodname="ExternalCancellationSettlesAllPendingInitializers" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="1253544025" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002298" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 481] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1064" name="FailureWaitsForAllInitializersBeforeShuttingAnyModule" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.FailureWaitsForAllInitializersBeforeShuttingAnyModule" methodname="FailureWaitsForAllInitializersBeforeShuttingAnyModule" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="351046963" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002196" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 483] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1058" name="NotificationExceptionsCannotTurnFailureIntoSuccessOrSkipCleanup" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.NotificationExceptionsCannotTurnFailureIntoSuccessOrSkipCleanup" methodname="NotificationExceptionsCannotTurnFailureIntoSuccessOrSkipCleanup" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="1683822337" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.011170" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 486] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 487] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 487] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1068" name="RegistrationFailureRollsBackAllNewMappings" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.RegistrationFailureRollsBackAllNewMappings" methodname="RegistrationFailureRollsBackAllNewMappings" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="2068334426" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.002136" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1065" name="RestartPreservesInstancesAndRegistrationOrder" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.RestartPreservesInstancesAndRegistrationOrder" methodname="RestartPreservesInstancesAndRegistrationOrder" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="743977458" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003525" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 500] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 500] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1067" name="RetiredCoreCannotPublishLateInitialization" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.RetiredCoreCannotPublishLateInitialization" methodname="RetiredCoreCannotPublishLateInitialization" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="545205083" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.005275" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 503] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 504] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1059" name="ReturnedModuleErrorPreservesItsCodeAndStopsLaterStages" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.ReturnedModuleErrorPreservesItsCodeAndStopsLaterStages" methodname="ReturnedModuleErrorPreservesItsCodeAndStopsLaterStages" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="977422734" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.003678" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 509] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 510] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+              </test-case>
+              <test-case id="1066" name="ShutdownFailureStillReleasesOtherModulesAndStopsRestart" fullname="AiNative.UnityCore.Tests.CoreLifecycleTests.ShutdownFailureStillReleasesOtherModulesAndStopsRestart" methodname="ShutdownFailureStillReleasesOtherModulesAndStopsRestart" classname="AiNative.UnityCore.Tests.CoreLifecycleTests" runstate="Runnable" seed="674315325" result="Passed" start-time="2026-11-18 03:48:49Z" end-time="2026-11-18 03:48:49Z" duration="0.005678" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:48:49 512] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+Saving results to: C:/Users/wepie/AppData/LocalLow/DefaultCompany/AssetsDemo\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

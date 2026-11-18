@@ -21,6 +21,12 @@ def check_native_leaks(log_path):
         raise RuntimeError(f"Native temporary allocation warning: {log_path}")
 
 
+def is_expected_injection(result, stage):
+    first_line = result["message"].partition("\n")[0].rstrip("\r")
+    return result["success"] is False and first_line == (
+        "System.InvalidOperationException: Injected AssetsDemo failure at " + stage)
+
+
 def verify(output, players, backend="sbp", baseline_fixture=False, renderer="forward"):
     output.mkdir(parents=True, exist_ok=False)
     workspace = verification_workspace(output)
@@ -112,7 +118,7 @@ def verify(output, players, backend="sbp", baseline_fixture=False, renderer="for
                     if failed.returncode != 1 or not failure_path.is_file():
                         raise RuntimeError(f"Expected Player failure at {stage}, exit={failed.returncode}")
                     failure_result = json.loads(failure_path.read_bytes())
-                    if failure_result["success"] or "Injected AssetsDemo failure at " + stage not in failure_result["message"]:
+                    if not is_expected_injection(failure_result, stage):
                         raise RuntimeError(f"Unexpected Player failure result at {stage}: {failure_result}")
                     summary[label + "-failure-" + stage] = {"exitCode": failed.returncode, "result": failure_result}
                 destroyed_path = output / (label + "-destroy.json")
