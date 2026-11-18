@@ -51,6 +51,7 @@ namespace AiNative.Examples.PhysicsPlay
         {
             try
             {
+                // Publish the operation before a startup error can disable and detach the scene.
                 await UniTask.Yield();
                 await previous;
                 token.ThrowIfCancellationRequested();
@@ -65,7 +66,11 @@ namespace AiNative.Examples.PhysicsPlay
                 scene.StartWorld(box.Value, sphere.Value);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested) { }
-            catch (Exception error) { scene.ReportStartupFailure(error); }
+            catch (Exception error)
+            {
+                if (token.IsCancellationRequested) { Debug.LogException(error); }
+                else { scene.ReportStartupFailure(error); }
+            }
         }
 
         internal void Detach(SandboxScene scene)
@@ -76,6 +81,7 @@ namespace AiNative.Examples.PhysicsPlay
             _lifetime = null;
             lifetime.Cancel();
             _operation = ClearAsync(_operation, lifetime).AsTask();
+            _operation.AsUniTask().Forget(Debug.LogException);
         }
 
         private async UniTask ClearAsync(Task previous, CancellationTokenSource lifetime)
