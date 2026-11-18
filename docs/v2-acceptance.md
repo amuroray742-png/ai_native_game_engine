@@ -1,5 +1,23 @@
 # 通用框架 v2 验收
 
+## Unity 示例框架迁移（2026-11-18）
+
+两个游戏继续由 v2 PlayHost 管理每局模拟。GridGame 从场景资源作用域取得棋盘和棋子精灵，PhysicsSandbox 从 Bundle 取得 HUD 和无碰撞体的显示预制体。AssetsDemo 的两个交互面板均通过 UnityCore UI 打开。UIDemo 沿用原有装配。
+
+| Windows Editor 6000.3.23f1 | 本轮验证 |
+| --- | --- |
+| GridGame | 两种 Domain Reload 各通过 13 项 PlayMode，重入测试通过。快慢表现的四组回放各有 16 个检查点与 CLI 一致。覆盖棋盘资源缺失后重连、重复宿主注册、真实 Bundle 释放。[结果](evidence/unity-examples-20261118/grid-editor.json) · [Tick 2 画面](evidence/unity-examples-20261118/grid-tick-2.png) |
+| PhysicsSandbox | 两种 Domain Reload 各通过 28 项 PlayMode、26 项 EditMode。10 组 CLI 轨迹比较通过，两个负例定位到预期分歧。[结果](evidence/phase-3/physics-play/framework-20261118/summary.json) · [读档首帧](evidence/phase-3/physics-play/framework-20261118/restored-90.png) |
+| AssetsDemo 主场景 | 两种 Domain Reload 各通过 2 项真实场景测试，覆盖 Core 所有权、加载中停用、按钮恢复和清理后的结果显示。 |
+| Shader Variant 场景 | 两种 Domain Reload 各通过 3 项测试；三次独立 Windows IL2CPP 构建分别验证绿色变体保留、剥离和恢复。剥离时捕获两条预期的缺失变体日志，画面像素和关闭后清理均通过。[结果](evidence/unity-examples-20261118/shader.json) · [剥离画面](evidence/unity-examples-20261118/sbp-stripped.missing.png) · [恢复画面](evidence/unity-examples-20261118/sbp-restored.green.png) |
+| UIDemo | 两种 Domain Reload 各通过 36 项 UI EditMode、113 项 UI PlayMode、15 项真实 Bundle Demo 测试，共 328 次。[结果](evidence/unity-examples-20261118/ui-editor.json) |
+
+Windows x64 IL2CPP 实测中，GridGame 完成移动、攻击、结束回合和重开，断开后 Bundle 数为零。PhysicsSandbox 从存档恢复到 Tick 1 的四个物体，重开及退出后原生世界与表现资源均已释放。AssetsDemo 主场景验证了清理按钮、共享资源、对象池、场景、Core 重启和销毁取消；两次注入故障分别以预期错误退出。[Player 结果](evidence/unity-examples-20261118/players.json) · [GridGame 截图](evidence/unity-examples-20261118/grid-player.png) · [PhysicsSandbox 截图](evidence/unity-examples-20261118/physics-player.png)
+
+复现步骤见 [GridGame](../examples/unity/GridGame/README.md)、[PhysicsSandbox](../examples/unity/PhysicsSandbox/README.md)、[AssetsDemo](../examples/unity/AssetsDemo/README.md) 和 [UIDemo](../examples/unity/UIDemo/README.md)。本轮使用自动输入与按钮事件，未新增人工试玩或远端 CI 记录。
+
+## 历史验收
+
 2026-11-17 GridGame接入UnityCore UI，Windows Editor双重载各11项PlayMode及1项重入测试通过，四组快慢表现各16检查点与CLI一致；范围与证据见[GridGame UI接入](unity-play-host.md#gridgame-ui-模块接入2026-11-17)，不扩展为GridGame Player验收。
 
 UnityCore Assets 的独立资源包、异步关闭扩展与 Windows 资源验收记录见 [Assets 记录](unitycore-assets.md)。它不改变下述模拟内核和 v2 协议历史基线。
