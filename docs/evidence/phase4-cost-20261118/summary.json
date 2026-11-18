@@ -1,0 +1,128 @@
+{
+  "baseCommit": "70fc6a7f3fa6578a98cecef4c920e7d9971cb5f6",
+  "redBootstrapCommit": "afe41cc108b7be912cf6d3fd64e2e1394ff5b832",
+  "test": "AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests.RejectedBootstrapLeavesRunningCoreAlive",
+  "os": "Windows-10-10.0.19044-SP0",
+  "unityCli": "1.0.1",
+  "steps": {
+    "red": {
+      "command": [
+        "unity",
+        "test",
+        "C:\\unity-verification\\3c8b2ac5527a\\examples\\unity\\AssetsDemo",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests.RejectedBootstrapLeavesRunningCoreAlive",
+        "--output",
+        "C:\\work\\a5-bootstrap-20261118\\red.xml",
+        "--timeout",
+        "900",
+        "--json",
+        "--",
+        "-logFile",
+        "C:\\work\\a5-bootstrap-20261118\\red.log"
+      ],
+      "exitCode": 8,
+      "wallSeconds": 96.196,
+      "caseSeconds": 6.249595
+    },
+    "green": {
+      "command": [
+        "unity",
+        "test",
+        "C:\\unity-verification\\3c8b2ac5527a\\examples\\unity\\AssetsDemo",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "AiNative.UnityCore.AssetsDemoTests.BootstrapOwnershipTests.RejectedBootstrapLeavesRunningCoreAlive",
+        "--output",
+        "C:\\work\\a5-bootstrap-20261118\\green.xml",
+        "--timeout",
+        "900",
+        "--json",
+        "--",
+        "-logFile",
+        "C:\\work\\a5-bootstrap-20261118\\green.log"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 25.581,
+      "caseSeconds": 3.979082
+    },
+    "renderer": {
+      "command": [
+        "unity",
+        "run",
+        "C:\\unity-verification\\3c8b2ac5527a\\examples\\unity\\AssetsDemo",
+        "--timeout",
+        "900",
+        "--log-file",
+        "C:\\work\\a5-bootstrap-20261118\\renderer.log",
+        "--no-tail",
+        "--json",
+        "--",
+        "-executeMethod",
+        "ExampleUrpSetup.Forward"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 19.778
+    },
+    "fixture": {
+      "command": [
+        "unity",
+        "run",
+        "C:\\unity-verification\\3c8b2ac5527a\\examples\\unity\\AssetsDemo",
+        "--timeout",
+        "900",
+        "--log-file",
+        "C:\\work\\a5-bootstrap-20261118\\fixture.log",
+        "--no-tail",
+        "--json",
+        "--",
+        "-executeMethod",
+        "ShaderProbeSetup.Create"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 16.155
+    },
+    "content": {
+      "command": [
+        "unity",
+        "run",
+        "C:\\unity-verification\\3c8b2ac5527a\\examples\\unity\\AssetsDemo",
+        "--timeout",
+        "900",
+        "--log-file",
+        "C:\\work\\a5-bootstrap-20261118\\content.log",
+        "--no-tail",
+        "--json",
+        "--",
+        "-executeMethod",
+        "AssetsDemoSetup.BuildContentSbp"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 28.918
+    },
+    "build": {
+      "command": [
+        "unity",
+        "run",
+        "C:\\unity-verification\\3c8b2ac5527a\\examples\\unity\\AssetsDemo",
+        "--timeout",
+        "900",
+        "--log-file",
+        "C:\\work\\a5-bootstrap-20261118\\build.log",
+        "--no-tail",
+        "--json",
+        "--",
+        "-executeMethod",
+        "AssetsDemoSetup.BuildMonoStandard"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 52.838
+    }
+  },
+  "reproductionSeconds": 96.487,
+  "playerSha256": "56c28afba054092826b7a8a80ba3767daa87967f182c0c562eb2f98799175b7a",
+  "editor": "m_EditorVersion: 6000.3.23f1"
+}
