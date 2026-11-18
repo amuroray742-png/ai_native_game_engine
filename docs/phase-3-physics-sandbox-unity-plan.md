@@ -1,5 +1,7 @@
 # 第三阶段：PhysicsSandbox 接入 Unity Play 实施与验收
 
+2026-11-18 的 HUD 和刚体资源接入见[本文的 UnityCore 迁移验收](#unitycore-迁移验收)。
+
 当前场景已迁移为 URP 17.3.0 的 3D Forward，使用显式共享 Lit 材质与 `_BaseColor`。本轮双 Domain Reload、暂停、读档续跑及十组 CLI 比较已重跑，仍限 Windows Editor。新增记录见 [资源增强与 URP 示例](assets-enhancement-urp.md)；下文保留原阶段证据。
 
 **状态：Windows x64 Editor 已完成本地实施与验收。** 本阶段交付一个可在 Windows x64、Unity Editor 6000.3.23f1 中操作的 PhysicsSandbox 场景。玩家能生成球和盒、施加冲量、删除刚体、暂停和读档。已有基线分别是 [GridGame 的 Editor Play 验收](unity-play-host.md) 和 [Jolt 的无头验收](managed-physics-migration.md)。独立 Player、IL2CPP 和跨构建存档兼容另立里程碑。
@@ -92,3 +94,14 @@ python scripts/unity_physics.py verify --output TestResults/physics-play
 ## Windows Player 人工验收（2026-11-18）
 
 用户在 Windows IL2CPP Player 中确认暂停排队、存档和读档正常。[验收记录](phase-4-delivery.md#windows-人工验收)
+
+## UnityCore 迁移验收
+
+2026-11-18 在 Windows x64、Unity 6000.3.23f1 的隔离工程使用新构建的资源 Bundle 验证了 PhysicsSandbox。场景打开框架 HUD，并在创建物理世界前取得两种渲染预制体。加载、快速重进和停止 Play 的生命周期回归覆盖以下边界。
+
+- 旧按钮在断开时同步解绑。快速重新启用后只有一套窗口和输入系统。停用后物理世界、Bundle、资源、挂起操作及清理错误计数均为零。
+- 其他应用已运行 Core 时，示例场景装配被拒绝，原 Core 和输入系统继续运行，候选应用与物理世界数量为零。
+- 开启与关闭 Domain Reload 各通过 28 项 PlayMode 和 26 项 EditMode，共 108 次。匀速推进、追帧、暂停以及分别从 Tick 90、91 恢复的五条轨迹在两种设置下均与 CLI 一致，每组分别比较 245、245、14、153、150 个检查点。
+- 两次有意修改拒绝码的负例都定位到操作 7、Tick 5 的输入错误。读档截图可见目标 ID、暂停状态和观察中的刚体外观。
+
+复现命令为 `python scripts/unity_physics.py verify --output TestResults/framework-migration-physics-accepted`，需使用新的输出目录。该目录保存测试 XML、日志、逐 Tick 记录、比较结果和恢复截图。[机器摘要](evidence/phase-3/physics-play/framework-20261118/summary.json) · [Tick 90 截图](evidence/phase-3/physics-play/framework-20261118/restored-90.png)
