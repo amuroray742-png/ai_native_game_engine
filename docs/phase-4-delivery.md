@@ -24,7 +24,7 @@
 | GridGame Player | Mono 与 IL2CPP 实际输入、Tick、攻击、HUD 注册、重开及退出清理通过；两后端 Tick 3，Bundle／scope 清理计数为 0，见[结果](evidence/player-phase4-20261118/players-summary.json)、[源码指纹](evidence/player-phase4-20261118/grid-sources.json)和[IL2CPP 场景截图](evidence/player-phase4-20261118/grid-Il2Cpp.png) | 截图来自场景相机，不包含 Overlay HUD；不能据此认定人工视觉体验通过 |
 | PhysicsSandbox Player | Mono 与 IL2CPP 暂停排队、存档拒绝、恢复及世界清理通过；恢复 Tick 1、4 个刚体，断开后世界数 0；部署的 Jolt DLL 与 manifest 哈希一致，见[结果](evidence/player-phase4-20261118/players-summary.json)、[源码指纹](evidence/player-phase4-20261118/physics-sources.json)和[IL2CPP 场景截图](evidence/player-phase4-20261118/physics-Il2Cpp.png) | 自动检查不替代人操作体验 |
 
-构建、测试和复现耗时未以统一方式测量，本页不提供推测的成本基线。CI 对本分支的状态需以提交后的实际工作流为准；Unity CI 尚未接入。
+PR #33 的历史矩阵记录结果和版本。合并后对 Bootstrap 所有权问题重新计时，见下文的 [A5 成本基线](#a5-成本基线)。
 
 从仓库根目录使用不存在的输出目录重新生成本轮自动证据（前置 Unity 与原生工具见各示例文档）：
 
@@ -56,3 +56,26 @@ AssetsDemo 的重复入口在注册失败后可能关闭已有 Core。修复将�
 另两处修复覆盖清理错误的报告。Player 在 CloseAsync 完成后检查 Unity 错误日志。故障注入脚本核对顶层异常首行，独立的 Python 负对照覆盖 Close 失败和资源残留两种包装异常。修复后在隔离工程重跑 SBP Forward，Domain Reload 开关合计 336 项通过。Mono 和 IL2CPP 的成功、两处故障、销毁路径均通过。所有权回归在另一个隔离工程单独运行。[执行摘要](evidence/player-phase4-20261118/review/summary.json) · [源码指纹](evidence/player-phase4-20261118/review/sources.json)
 
 独立复核已确认两项 P1 和一项 P2 均已关闭，没有剩余代码阻断。
+
+## A5 成本基线
+
+2026-11-18，在合并 PR #33 后的 `70fc6a7` 上复现重复入口关闭已有 Core 的问题。脚本导出 AssetsDemo 及其两个本地包，仅将 `AssetsDemoBootstrap.cs` 替换为 `afe41cc` 中的版本。创建并销毁被拒绝的第二个入口后，同一条 EditMode 测试在旧实现上读到 `Stopped`，预期为 `Running`，CLI 退出码为 8。恢复基准提交的文件后，测试确认原 Core 仍在运行，CLI 退出码为 0。[红灯 XML](evidence/phase4-cost-20261118/red.xml) · [绿灯 XML](evidence/phase4-cost-20261118/green.xml)
+
+| 成本指标 | 本次实测 | 计量范围 |
+| --- | ---: | --- |
+| 问题复现 | 96.487 秒 | 从开始导出固定提交到核对红灯 XML 的测试名、结果及断言。包含首次导入工程和红灯测试命令的 96.196 秒。 |
+| 定向测试 | 25.581 秒 | 修复后复用同一工程，从启动 Unity 测试命令到退出。XML 的用例耗时分别为红灯 6.249595 秒、绿灯 3.979082 秒。 |
+| Player 构建 | 52.838 秒 | 从启动标准 Windows x64 Mono Development Player 构建命令到退出。构建前另用 64.851 秒准备 URP Forward、测试资源及 SBP 内容。 |
+| 人工介入 | 0 次 | 按本轮执行记录统计，从启动脚本到首次生成摘要，期间无需人工输入、点击或重试。脚本启动前的环境配置、历史修复和独立审查另计。 |
+
+本次为单机单次采样。环境为 Windows 10 19044、i7-13700K、24 个逻辑处理器、63.7 GiB 内存、Python 3.12.7、Unity CLI 1.0.1 和 Unity 6000.3.23f1。红绿测试的 Editor 使用 Direct3D 12 并启用 Domain Reload，Windows Player 构建目标使用 Direct3D 11。红灯从新的项目 Library 开始，绿灯和首次 Player 构建复用该 Library，机器级缓存沿用。后续比较应复用相同的步骤和缓存条件。[各步命令、墙钟时间及 Player SHA-256](evidence/phase4-cost-20261118/summary.json)
+
+在具备上述 Unity 环境且本地 Git 历史包含两个提交的 Windows 机器上，从仓库根目录运行以下命令，传入尚未创建的输出目录。目录内的 `workspace.txt` 指向保留的隔离工程，`summary.json`、XML 与日志可交叉核对。[复现脚本](../scripts/measure_bootstrap_ownership.py)
+
+```powershell
+python scripts/measure_bootstrap_ownership.py C:/work/a5-ownership-new
+```
+
+独立复核确认两版 Bootstrap 的源码、红绿两份 XML、各步退出码、时长和成品哈希一致。审查者还独立执行了 Python 负对照，并用会误判内层注入消息的匹配逻辑验证了测试能捕获两种回归：外层报告关闭失败，以及外层报告资源残留。[负对照用例](../scripts/test_verify_unity_assets.py)
+
+第 4 阶段按三类案例、三项 Windows 人工验收、独立复核和上述成本基线收口。`908e5cf` 的 Windows、Linux 无头 CI 均按完整测试名运行 Python 负对照，两平台作业和平台比较全部通过。本次 Unity 红绿复现及 Player 构建在本地 Windows 执行。[CI 运行 44254824458](https://github.com/amuroray742-png/ai_native_game_engine/actions/runs/44254824458)
