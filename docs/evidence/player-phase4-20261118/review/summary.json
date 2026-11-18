@@ -1,0 +1,50 @@
+{
+  "sbp-PlayMode-reload-On": 58,
+  "sbp-EditMode-reload-On": 110,
+  "sbp-PlayMode-reload-Off": 58,
+  "sbp-EditMode-reload-Off": 110,
+  "sbp-Mono": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "sbp-Mono-failure-after-start": {
+    "exitCode": 1,
+    "result": {
+      "success": false,
+      "message": "System.InvalidOperationException: Injected AssetsDemo failure at after-start\r\n  at AssetsDemoBootstrap.FailAt (System.String stage) [0x00043] in C:\\unity-verification\\895218bb05ba\\examples\\unity\\AssetsDemo\\Assets\\AssetsDemoBootstrap.cs:125 \r\n  at AssetsDemoBootstrap.Start () [0x0021c] in C:\\unity-verification\\895218bb05ba\\examples\\unity\\AssetsDemo\\Assets\\AssetsDemoBootstrap.cs:45 "
+    }
+  },
+  "sbp-Mono-failure-after-first-load": {
+    "exitCode": 1,
+    "result": {
+      "success": false,
+      "message": "System.InvalidOperationException: Injected AssetsDemo failure at after-first-load\r\n  at AssetsDemoBootstrap.FailAt (System.String stage) [0x00043] in C:\\unity-verification\\895218bb05ba\\examples\\unity\\AssetsDemo\\Assets\\AssetsDemoBootstrap.cs:125 \r\n  at AssetsDemoBootstrap.Start () [0x0034f] in C:\\unity-verification\\895218bb05ba\\examples\\unity\\AssetsDemo\\Assets\\AssetsDemoBootstrap.cs:49 "
+    }
+  },
+  "sbp-Mono-destroy": {
+    "success": true,
+    "message": "PASS: scene destruction cancelled work and released resources"
+  },
+  "sbp-Il2Cpp": {
+    "success": true,
+    "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+  },
+  "sbp-Il2Cpp-failure-after-start": {
+    "exitCode": 1,
+    "result": {
+      "success": false,
+      "message": "System.InvalidOperationException: Injected AssetsDemo failure at after-start\r\n  at AssetsDemoBootstrap.FailAt (System.String stage) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AssetsDemoBootstrap.Start () [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AssetsDemoBootstrap.Start () [0x00000] in <00000000000000000000000000000000>:0 "
+    }
+  },
+  "sbp-Il2Cpp-failure-after-first-load": {
+    "exitCode": 1,
+    "result": {
+      "success": false,
+      "message": "System.InvalidOperationException: Injected AssetsDemo failure at after-first-load\r\n  at AssetsDemoBootstrap.FailAt (System.String stage) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AssetsDemoBootstrap.Start () [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetScope.InstantiateAsync (System.String address, UnityEngine.Transform parent, System.Threading.CancellationToken cancellationToken) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetScope.LoadSubAssetAsync[T] (System.String address, System.String name, System.Threading.CancellationToken cancellationToken) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetScope.LoadOwnedAsync[T] (System.String address, System.String name, AiNative.UnityCore.Assets.AssetLoadOptions options, System.Threading.CancellationToken cancellationToken, System.Type requestedType) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetRuntime.LoadAsync[T] (System.String address, System.String subAsset, System.Threading.CancellationToken token, System.Action`1[T] track, AiNative.UnityCore.Assets.AssetPriority priority, System.Type requestedType) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskExtensions+AttachExternalCancellationSource`1[T].RunTask (Cysharp.Threading.Tasks.UniTask`1[T] task) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSource`1[T].TrySignalCompletion (Cysharp.Threading.Tasks.UniTaskStatus status) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetRuntime.LoadResourceAsync (System.ValueTuple`3[T1,T2,T3] key, AiNative.UnityCore.Assets.AssetRuntime+Resource resource, AiNative.UnityCore.Assets.AssetEntry entry) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetRuntime.RunOperation[T] (System.String name, System.Int64 owner, System.Func`1[TResult] operation, System.Func`1[TResult] priority, System.Func`1[TResult] wanted) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSource`1[T].TrySignalCompletion (Cysharp.Threading.Tasks.UniTaskStatus status) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetLoadScheduler.Execute[T] (System.Func`1[TResult] operation, Cysharp.Threading.Tasks.UniTaskCompletionSource`1[T] completion) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.AssetRuntime+<>c__DisplayClass28_0`1[T].<RunOperation>g__Start|0 () [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.UniTaskCompletionSourceCore`1[TResult].TrySetResult (TResult result) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at AiNative.UnityCore.Assets.BundleBackend.LoadAsync (UnityEngine.AssetBundle bundle, AiNative.UnityCore.Assets.AssetEntry entry, System.Type type, System.String subAsset) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at Cysharp.Threading.Tasks.Internal.PooledDelegate`1[T].Run (T _) [0x00000] in <00000000000000000000000000000000>:0 \r\n  at UnityEngine.AsyncOperation.InvokeCompletionEvent () [0x00000] in <00000000000000000000000000000000>:0 "
+    }
+  },
+  "sbp-Il2Cpp-destroy": {
+    "success": true,
+    "message": "PASS: scene destruction cancelled work and released resources"
+  }
+}

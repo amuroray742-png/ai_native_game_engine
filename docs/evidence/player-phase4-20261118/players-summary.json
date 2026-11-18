@@ -1,0 +1,52 @@
+{
+  "baseCommit": "a653f79030a53a558cbd46dbf975f440e2e6833a",
+  "grid": {
+    "Mono": {
+      "result": {
+        "success": true,
+        "message": "Grid Player input, HUD, restart, screenshot and cleanup passed.",
+        "completedTick": 3,
+        "bundlesAfterDisconnect": 0,
+        "scopesAfterClose": 0
+      },
+      "screenshotSha256": "371818a5130d5901f14313cd484278ad515a8dc83e674d62ae1ad1a2e03addb1"
+    },
+    "Il2Cpp": {
+      "result": {
+        "success": true,
+        "message": "Grid Player input, HUD, restart, screenshot and cleanup passed.",
+        "completedTick": 3,
+        "bundlesAfterDisconnect": 0,
+        "scopesAfterClose": 0
+      },
+      "screenshotSha256": "371818a5130d5901f14313cd484278ad515a8dc83e674d62ae1ad1a2e03addb1"
+    }
+  },
+  "physics": {
+    "Mono": {
+      "result": {
+        "success": true,
+        "message": "Physics Player pause, input, save, restore, screenshot and cleanup passed.",
+        "restoredTick": 1,
+        "restoredBodies": 4,
+        "worldsAfterDisconnect": 0
+      },
+      "screenshotSha256": "6ccc6e6ca46f3e4fa059f2481eac3f866086ecd306f53cabf51eb77ff92b1db0",
+      "nativeBinaryHash": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25",
+      "nativeRelativePath": "PhysicsSandbox_Data/Plugins/x86_64/ainative_jolt.dll"
+    },
+    "Il2Cpp": {
+      "result": {
+        "success": true,
+        "message": "Physics Player pause, input, save, restore, screenshot and cleanup passed.",
+        "restoredTick": 1,
+        "restoredBodies": 4,
+        "worldsAfterDisconnect": 0
+      },
+      "screenshotSha256": "6ccc6e6ca46f3e4fa059f2481eac3f866086ecd306f53cabf51eb77ff92b1db0",
+      "nativeBinaryHash": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25",
+      "nativeRelativePath": "PhysicsSandbox_Data/Plugins/x86_64/ainative_jolt.dll"
+    }
+  },
+  "evidenceScope": "Windows x64 D3D11 batch Player scene camera; GUI/human acceptance separate"
+}

@@ -85,3 +85,7 @@ Windows Editor、Unity 6000.3.23f1、Unity CLI 1.0.1、URP 17.3.0 Forward，在�
 有效原始输出为 `TestResults/grid-ui-second-20261117`，副本路径记录在workspace.txt。184份源码、程序集定义、资源和包清单与工作区逐文件匹配；另保留SBP生成预过滤字段后的Forward.asset，工作区恢复原管线文件。Domain Reload配置、URP自动输入轴等生成设置保留在验证副本范围。日志有Unity许可、URP导入依赖和Mono退出提示，测试日志无C#编译错误或未预期的产品异常，不宣称所有Editor日志完全无警告。
 
 证据见[摘要](evidence/grid-ui-20261117/summary.json)、[归档](evidence/grid-ui-20261117/grid-ui-evidence.zip)、[独立复核](evidence/grid-ui-20261117/review.json)和[HUD截图](evidence/grid-ui-20261117/game-tick-2.png)。本轮使用EventSystem射线/事件与测试调用，未验收新的OS原生输入、GridGame Player/IL2CPP、设备安全区、性能或远端Unity CI。
+
+## Windows Player 人工验收（2026-11-18）
+
+用户在 Windows IL2CPP Player 中确认移动、攻击和回合切换正常，点击 **New Match** 可重新开局。[验收记录](phase-4-delivery.md#windows-人工验收)

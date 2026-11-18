@@ -88,3 +88,7 @@ python scripts/unity_physics.py verify --output TestResults/physics-play
 [Tick 90 读档首帧](evidence/phase-3/physics-play/restored-90.png) · [Tick 91 读档首帧](evidence/phase-3/physics-play/restored-91.png)
 
 本轮复用本机已有的固定版本 Windows 原生构建。独立审查已复核输入序号、每步检查点、候选释放和场景按钮绑定。人工试玩、Player、IL2CPP 和本次改动的远端 CI 状态均不在上述结果内。
+
+## Windows Player 人工验收（2026-11-18）
+
+用户在 Windows IL2CPP Player 中确认暂停排队、存档和读档正常。[验收记录](phase-4-delivery.md#windows-人工验收)

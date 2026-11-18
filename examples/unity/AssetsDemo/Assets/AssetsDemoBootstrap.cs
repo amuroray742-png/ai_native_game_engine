@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using AiNative.UnityCore;
 using AiNative.UnityCore.Assets;
 using Cysharp.Threading.Tasks;
@@ -11,9 +12,17 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
     private string _status = "Starting";
     private bool _continue;
     private bool _showContinue;
+    private Core _core;
+    private AssetsModule _module;
+    private bool _destroyed;
     private async UniTaskVoid Start()
     {
         Application.runInBackground = true;
+        CancellationToken destruction = this.GetCancellationTokenOnDestroy();
+        bool smoke = Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0;
+        bool expectedDestroy = Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsDestroyAfterFirstLoad") >= 0;
+        Exception failure = null;
+        string completed = null;
         string renderingError = null;
         void ObserveLog(string message, string stack, LogType type)
         {
@@ -25,15 +34,25 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         {
 #if UNITY_EDITOR
             var groups = UnityEditor.AssetDatabase.LoadAssetAtPath<AiNative.UnityCore.Assets.Editor.AssetGroups>("Assets/ResourceGroups.asset");
-            var module = AiNative.UnityCore.Assets.Editor.EditorAssets.CreateConfigured(groups);
+            _module = AiNative.UnityCore.Assets.Editor.EditorAssets.CreateConfigured(groups);
 #else
-            var module = new AssetsModule();
+            _module = new AssetsModule();
 #endif
-            Core.Inst.RegisterModule(module);
-            await Core.Inst.RunAsync();
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsShaderProbe") >= 0) { await ShaderProbeVerification.Run(module); }
-            var first = await module.InstantiateAsync("Assets/Probe/A");
-            var second = await module.InstantiateAsync("Assets/Probe/B");
+            var core = Core.Inst;
+            core.RegisterModule(_module);
+            _core = core;
+            await _core.RunAsync(destruction);
+            FailAt("after-start");
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsShaderProbe") >= 0)
+            { await ShaderProbeVerification.Run(_module, destruction); }
+            var first = await _module.InstantiateAsync("Assets/Probe/A", cancellationToken: destruction);
+            FailAt("after-first-load");
+            if (expectedDestroy)
+            {
+                Destroy(gameObject);
+                await UniTask.WaitUntil(() => false, cancellationToken: destruction);
+            }
+            var second = await _module.InstantiateAsync("Assets/Probe/B", cancellationToken: destruction);
             first.Value.transform.position = Vector3.left;
             second.Value.transform.position = Vector3.right;
             var material = first.Value.GetComponent<Renderer>().sharedMaterial;
@@ -41,47 +60,73 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             if (material.mainTexture != second.Value.GetComponent<Renderer>().sharedMaterial.mainTexture) { throw new Exception("Shared texture identity differs."); }
             _status = "A and B share one material and texture. Continue to test pool, scene and cleanup.";
             Capture();
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") < 0)
+            if (!smoke)
             {
                 _showContinue = true;
-                await UniTask.WaitUntil(() => _continue, cancellationToken: this.GetCancellationTokenOnDestroy());
+                await UniTask.WaitUntil(() => _continue, cancellationToken: destruction);
                 _showContinue = false;
             }
             first.Dispose();
             await UniTask.Yield();
             if (second.Value.GetComponent<Renderer>().sharedMaterial != material) { throw new Exception("Releasing A destroyed B dependencies."); }
-            var data = await module.LoadAsync<ScriptableObject>("Assets/Probe/Data");
+            var data = await _module.LoadAsync<ScriptableObject>("Assets/Probe/Data", destruction);
             if (data.Value.GetType().Name != "DemoData" || !Equals(data.Value.GetType().GetField("Value")?.GetValue(data.Value), 42)) { throw new Exception("Bundle script type failed."); }
             data.Dispose();
-            var pool = module.CreatePool("Assets/Probe/A", new AssetPoolOptions(2));
-            await pool.PrewarmAsync(2);
-            var rental = await pool.RentAsync();
+            var pool = _module.CreatePool("Assets/Probe/A", new AssetPoolOptions(2));
+            await pool.PrewarmAsync(2, destruction);
+            var rental = await pool.RentAsync(cancellationToken: destruction);
             rental.Dispose();
             await pool.CloseAsync();
-            var scene = await module.LoadSceneAsync("Assets/Probe/Content");
+            var scene = await _module.LoadSceneAsync("Assets/Probe/Content", destruction);
             var sceneRenderer = scene.Value.GetRootGameObjects()[0].GetComponentInChildren<Renderer>();
             if (sceneRenderer.sharedMaterial != material) { throw new Exception("Scene external material identity differs."); }
             await scene.UnloadAsync();
             second.Dispose();
-            await Core.Inst.RestartAsync();
-            using (var again = await module.LoadAsync<GameObject>("Assets/Probe/A")) { if (again.Value == null) { throw new Exception("Restart failed."); } }
-            await Core.Inst.CloseAsync();
-            var diagnostics = module.GetDiagnostics();
-            if (diagnostics.Bundles.Count != 0 || diagnostics.PendingOperations != 0 || diagnostics.Scopes.Count != 0) { throw new Exception("Resources remain after shutdown."); }
-            _status = "PASS: shared resources, pool, scene, script types, restart and cleanup";
-            if (renderingError != null) { throw new Exception("Player logged an error during acceptance: " + renderingError); }
-            Debug.Log(_status);
-            WriteResult(true, _status);
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0) { Application.Quit(0); }
+            await _core.RestartAsync(destruction);
+            using (var again = await _module.LoadAsync<GameObject>("Assets/Probe/A", destruction)) { if (again.Value == null) { throw new Exception("Restart failed."); } }
+            completed = "PASS: shared resources, pool, scene, script types, restart and cleanup";
         }
-        catch (Exception error)
+        catch (OperationCanceledException) when (_destroyed && expectedDestroy)
+        { completed = "PASS: scene destruction cancelled work and released resources"; }
+        catch (OperationCanceledException) when (_destroyed) { }
+        catch (Exception error) { failure = error; }
+        finally
         {
-            _status = error.ToString();
-            Debug.LogException(error);
-            WriteResult(false, _status);
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsSmoke") >= 0) { Application.Quit(1); }
+            _showContinue = false;
+            if (_core != null)
+            {
+                try { await _core.CloseAsync(); }
+                catch (Exception error) { failure = failure == null ? error : new AggregateException(failure, error); }
+                finally { _core = null; }
+            }
+            if (_module != null)
+            {
+                var diagnostics = _module.GetDiagnostics();
+                if (diagnostics.Bundles.Count != 0 || diagnostics.PendingOperations != 0 || diagnostics.Scopes.Count != 0)
+                { failure = new InvalidOperationException("Resources remain after shutdown.", failure); }
+            }
+            Application.logMessageReceived -= ObserveLog;
         }
-        finally { Application.logMessageReceived -= ObserveLog; }
+        if (renderingError != null)
+        { failure = new InvalidOperationException("Player logged an error during acceptance: " + renderingError, failure); }
+        if (_destroyed && !expectedDestroy && failure == null) { return; }
+        _status = failure == null ? completed : failure.ToString();
+        if (failure == null) { Debug.Log(_status); }
+        else { Debug.LogException(failure); }
+        WriteResult(failure == null, _status);
+        if (smoke) { Application.Quit(failure == null ? 0 : 1); }
+    }
+    private static void FailAt(string stage)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        int index = Array.IndexOf(args, "-assetsFailAt");
+        if (index >= 0 && index + 1 < args.Length && args[index + 1] == stage)
+        { throw new InvalidOperationException("Injected AssetsDemo failure at " + stage); }
+    }
+    private void OnDestroy()
+    {
+        _destroyed = true;
+        if (_core != null) { _core.CloseAsync().Forget(Debug.LogException); }
     }
     private static void Capture()
     {

@@ -1,0 +1,5 @@
+{
+  "name": "PhysicsSandbox.Player.Editor",
+  "references": ["PhysicsSandbox.Play"],
+  "includePlatforms": ["Editor"]
+}

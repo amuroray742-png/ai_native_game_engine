@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="110" result="Passed" total="110" passed="110" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.4042481">
+  <test-suite type="TestSuite" id="1000" name="AssetsDemo" fullname="AssetsDemo" runstate="Runnable" testcasecount="113" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.404248" total="110" passed="110" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1106" name="AiNative.UnityCore.Assets.EditTests.dll" fullname="C:/unity-verification/5a38e0c4fcf7/examples/unity/AssetsDemo/Library/ScriptAssemblies/AiNative.UnityCore.Assets.EditTests.dll" runstate="Runnable" testcasecount="86" result="Passed" start-time="2026-11-18 03:10:22Z" end-time="2026-11-18 03:11:23Z" duration="60.997739" total="86" passed="86" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="35436" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1107" name="AiNative" fullname="AiNative" runstate="Runnable" testcasecount="86" result="Passed" start-time="2026-11-18 03:10:22Z" end-time="2026-11-18 03:11:23Z" duration="60.996925" total="86" passed="86" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1108" name="UnityCore" fullname="AiNative.UnityCore" runstate="Runnable" testcasecount="86" result="Passed" start-time="2026-11-18 03:10:22Z" end-time="2026-11-18 03:11:23Z" duration="60.996303" total="86" passed="86" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1109" name="Assets" fullname="AiNative.UnityCore.Assets" runstate="Runnable" testcasecount="86" result="Passed" start-time="2026-11-18 03:10:22Z" end-time="2026-11-18 03:11:23Z" duration="60.994712" total="86" passed="86" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1110" name="Editor" fullname="AiNative.UnityCore.Assets.Editor" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-11-18 03:09:05Z" end-time="2026-11-18 03:09:13Z" duration="7.571877" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestSuite" id="1111" name="Tests" fullname="AiNative.UnityCore.Assets.Editor.Tests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-11-18 03:09:05Z" end-time="2026-11-18 03:09:13Z" duration="7.571114" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-suite type="TestFixture" id="1001" name="AssetProductionTests" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.153646" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1003" name="AnalysisWarningsMeasureDeduplicatedDependencyFilesAndKeepLegacyLoadingSeparate" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.AnalysisWarningsMeasureDeduplicatedDependencyFilesAndKeepLegacyLoadingSeparate" methodname="AnalysisWarningsMeasureDeduplicatedDependencyFilesAndKeepLegacyLoadingSeparate" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="1712083755" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.067357" asserts="0">
+                    <properties />
+                    <output><![CDATA[Total bundle file bytes exceed threshold: 30
+group_3addd7d5a0987fa76ecfdf280e2e9f69460c03de3be8802e3ee0fdc6b6e88471.bundle exceeds file byte threshold: 10
+group_90a74e6deac7ae00abb4554efe6aab028fc07cb985b5ea8a38e8739f1c117716.bundle exceeds file byte threshold: 10
+shared_73b87d2d8784fa591d799c5e736d805a7c508790e071635815c5c08aca1d4c98.bundle exceeds file byte threshold: 10
+]]></output>
+                  </test-case>
+                  <test-case id="1007" name="BuildComparisonUsesGuidForMovesAndDigestForBundleChanges" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.BuildComparisonUsesGuidForMovesAndDigestForBundleChanges" methodname="BuildComparisonUsesGuidForMovesAndDigestForBundleChanges" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="1494060569" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.001665" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1004" name="DiagnosticExportAndDifferencePreserveSnapshotAndGeneration" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.DiagnosticExportAndDifferencePreserveSnapshotAndGeneration" methodname="DiagnosticExportAndDifferencePreserveSnapshotAndGeneration" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="1634873585" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.016504" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1002" name="EditorFactoryPreservesLegacyDefaultLiteralAndAcceptsFixedOptions" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.EditorFactoryPreservesLegacyDefaultLiteralAndAcceptsFixedOptions" methodname="EditorFactoryPreservesLegacyDefaultLiteralAndAcceptsFixedOptions" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="979398786" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.002815" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1006" name="PlatformFiltersAffectAutoCollectionButNotExplicitEntriesOrDependencies" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.PlatformFiltersAffectAutoCollectionButNotExplicitEntriesOrDependencies" methodname="PlatformFiltersAffectAutoCollectionButNotExplicitEntriesOrDependencies" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="2141077168" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.012805" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1009" name="RequiredShaderVariantsCannotBeExcluded" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.RequiredShaderVariantsCannotBeExcluded" methodname="RequiredShaderVariantsCannotBeExcluded" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="827257627" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.002272" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1008" name="ShaderRulesMatchPassAndKeywordsWithoutAssumingWhitelist" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.ShaderRulesMatchPassAndKeywordsWithoutAssumingWhitelist" methodname="ShaderRulesMatchPassAndKeywordsWithoutAssumingWhitelist" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="1099421507" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.000293" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1005" name="ShaderSessionRestoresContextAfterFailureAndReportsUnobservedVariants" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests.ShaderSessionRestoresContextAfterFailureAndReportsUnobservedVariants" methodname="ShaderSessionRestoresContextAfterFailureAndReportsUnobservedVariants" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetProductionTests" runstate="Runnable" seed="785811102" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.037505" asserts="0">
+                    <properties />
+                  </test-case>
+                </test-suite>
+                <test-suite type="TestFixture" id="1010" name="AssetShaderAutoCollectionTests" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:02Z" duration="1.057056" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1013" name="AutoConflictFailsWithoutPublishingAnAsset" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests.AutoConflictFailsWithoutPublishingAnAsset" methodname="AutoConflictFailsWithoutPublishingAnAsset" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" runstate="Runnable" seed="2118221407" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.285288" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1014" name="MissingRecordingFailsAndSessionCannotBeNested" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests.MissingRecordingFailsAndSessionCannotBeNested" methodname="MissingRecordingFailsAndSessionCannotBeNested" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" runstate="Runnable" seed="1589724516" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:01Z" duration="0.180190" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1012" name="RecordingsAndManualDeclarationsMergeAndDeduplicate" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests.RecordingsAndManualDeclarationsMergeAndDeduplicate" methodname="RecordingsAndManualDeclarationsMergeAndDeduplicate" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" runstate="Runnable" seed="230006787" result="Passed" start-time="2026-11-18 03:09:01Z" end-time="2026-11-18 03:09:02Z" duration="0.197334" asserts="0">
+                    <properties />
+                    <output><![CDATA[Generated 2 shader variants; rejected recorded combinations: 0. See Assets/AutoCollectionTests-e8abcbd20f744a549bae2acd14c87c60/Merged.shadervariants.generation.json
+]]></output>
+                  </test-case>
+                  <test-case id="1015" name="StaleRecordedPassIsReportedInsteadOfClaimedAsCoverage" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests.StaleRecordedPassIsReportedInsteadOfClaimedAsCoverage" methodname="StaleRecordedPassIsReportedInsteadOfClaimedAsCoverage" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" runstate="Runnable" seed="1133511155" result="Passed" start-time="2026-11-18 03:09:02Z" end-time="2026-11-18 03:09:02Z" duration="0.188406" asserts="0">
+                    <properties />
+                    <output><![CDATA[Generated 1 shader variants; rejected recorded combinations: 1. See Assets/AutoCollectionTests-ac2c1def0a4f4a519ef1a66732745a0e/Filtered.shadervariants.generation.json
+]]></output>
+                  </test-case>
+                  <test-case id="1011" name="StaticScanGeneratesWithoutManualDeclarations" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests.StaticScanGeneratesWithoutManualDeclarations" methodname="StaticScanGeneratesWithoutManualDeclarations" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderAutoCollectionTests" runstate="Runnable" seed="3796257" result="Passed" start-time="2026-11-18 03:09:02Z" end-time="2026-11-18 03:09:02Z" duration="0.202293" asserts="0">
+                    <properties />
+                    <output><![CDATA[Generated 1 shader variants; rejected recorded combinations: 0. See Assets/AutoCollectionTests-bad7a5338ed7482d90c0a06e4b008286/Static.shadervariants.generation.json
+]]></output>
+                  </test-case>
+                </test-suite>
+                <test-suite type="TestFixture" id="1016" name="AssetShaderRecordingTests" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderRecordingTests" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderRecordingTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-11-18 03:09:05Z" end-time="2026-11-18 03:09:13Z" duration="7.562464" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1017" name="ActualUrpFramesRecordRuntimeKeywordsAndSurvivePlayTransition" fullname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderRecordingTests.ActualUrpFramesRecordRuntimeKeywordsAndSurvivePlayTransition" methodname="ActualUrpFramesRecordRuntimeKeywordsAndSurvivePlayTransition" classname="AiNative.UnityCore.Assets.Editor.Tests.AssetShaderRecordingTests" runstate="Runnable" seed="1296649320" result="Passed" start-time="2026-11-18 03:09:02Z" end-time="2026-11-18 03:09:13Z" duration="10.632543" asserts="0">
+                    <properties>
+                      <property name="_JOINTYPE" value="UnityCombinatorial" />
+                    </properties>
+                    <output><![CDATA[Reduced additional punctual light shadows resolution by 2 to make 6 shadow maps fit in the 2048x2048 shadow atlas. To avoid this, increase shadow atlas size, decrease big shadow resolutions, or reduce the number of shadow maps active in the same frame
+Reduced additional punctual light shadows resolution by 2 to make 6 shadow maps fit in the 2048x2048 shadow atlas. To avoid this, increase shadow atlas size, decrease big shadow resolutions, or reduce the number of shadow maps active in the same frame
+Recorded 26 variants. Attached to Assets/ShaderRecordingTests-f284dbaed5264ac2b0367b520c3bd9a0/Settings.asset
+Generated 40 shader variants; rejected recorded combinations: 0. See Assets/ShaderRecordingTests-f284dbaed5264ac2b0367b520c3bd9a0/Merged.shadervariants.generation.json
+Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                </test-suite>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestSuite" id="1112" name="Tests" fullname="AiNative.UnityCore.Assets.Tests" runstate="Runnable" testcasecount="72" result="Passed" start-time="2026-11-18 03:10:22Z" end-time="2026-11-18 03:11:23Z" duration="60.983083" total="72" passed="72" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1018" name="AssetBuildTests" fullname="AiNative.UnityCore.Assets.Tests.AssetBuildTests" classname="AiNative.UnityCore.Assets.Tests.AssetBuildTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:13Z" duration="0.024715" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1021" name="DuplicateAddressFailsBeforeBuild" fullname="AiNative.UnityCore.Assets.Tests.AssetBuildTests.DuplicateAddressFailsBeforeBuild" methodname="DuplicateAddressFailsBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.AssetBuildTests" runstate="Runnable" seed="758745478" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:13Z" duration="0.005303" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1019" name="ErrorContextPreservesFailedDependencyBundle" fullname="AiNative.UnityCore.Assets.Tests.AssetBuildTests.ErrorContextPreservesFailedDependencyBundle" methodname="ErrorContextPreservesFailedDependencyBundle" classname="AiNative.UnityCore.Assets.Tests.AssetBuildTests" runstate="Runnable" seed="461355637" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:13Z" duration="0.001874" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1022" name="InvalidCatalogAndCyclesAreRejected" fullname="AiNative.UnityCore.Assets.Tests.AssetBuildTests.InvalidCatalogAndCyclesAreRejected" methodname="InvalidCatalogAndCyclesAreRejected" classname="AiNative.UnityCore.Assets.Tests.AssetBuildTests" runstate="Runnable" seed="1177204198" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:13Z" duration="0.000463" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1020" name="SharedDependenciesHaveOneOwnerAndStablePacking" fullname="AiNative.UnityCore.Assets.Tests.AssetBuildTests.SharedDependenciesHaveOneOwnerAndStablePacking" methodname="SharedDependenciesHaveOneOwnerAndStablePacking" classname="AiNative.UnityCore.Assets.Tests.AssetBuildTests" runstate="Runnable" seed="760802118" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:13Z" duration="0.015038" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1023" name="AssetPlayCycleTests" fullname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" classname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-18 03:09:25Z" end-time="2026-11-18 03:09:25Z" duration="0.330342" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1025" name="ConfiguredBundleModeHonorsExplicitDirectoryWithoutFallback" fullname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests.ConfiguredBundleModeHonorsExplicitDirectoryWithoutFallback" methodname="ConfiguredBundleModeHonorsExplicitDirectoryWithoutFallback" classname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" runstate="Runnable" seed="530582509" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:13Z" duration="0.002180" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1026" name="ConfiguredDirectModeCapturesSelectionAndIgnoresBundleDirectory" fullname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests.ConfiguredDirectModeCapturesSelectionAndIgnoresBundleDirectory" methodname="ConfiguredDirectModeCapturesSelectionAndIgnoresBundleDirectory" classname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" runstate="Runnable" seed="498151087" result="Passed" start-time="2026-11-18 03:09:13Z" end-time="2026-11-18 03:09:16Z" duration="3.152323" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:09:15 891] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1027" name="DirectModeReleasesOwnershipWithoutDestroyingSource" fullname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests.DirectModeReleasesOwnershipWithoutDestroyingSource" methodname="DirectModeReleasesOwnershipWithoutDestroyingSource" classname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" runstate="Runnable" seed="1381582228" result="Passed" start-time="2026-11-18 03:09:16Z" end-time="2026-11-18 03:09:19Z" duration="3.114159" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:09:19 055] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+                <test-case id="1024" name="EditorModeDefaultsAndInvalidInputs" fullname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests.EditorModeDefaultsAndInvalidInputs" methodname="EditorModeDefaultsAndInvalidInputs" classname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" runstate="Runnable" seed="972145816" result="Passed" start-time="2026-11-18 03:09:19Z" end-time="2026-11-18 03:09:19Z" duration="0.005262" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1028" name="PlayExitWithBorrowedObjectsReleasesRealBundlesAcrossSessions" fullname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests.PlayExitWithBorrowedObjectsReleasesRealBundlesAcrossSessions" methodname="PlayExitWithBorrowedObjectsReleasesRealBundlesAcrossSessions" classname="AiNative.UnityCore.Assets.Tests.AssetPlayCycleTests" runstate="Runnable" seed="43661988" result="Passed" start-time="2026-11-18 03:09:19Z" end-time="2026-11-18 03:09:25Z" duration="6.380171" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                  <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:09:22 276] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:09:25 446] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+]]></output>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1029" name="BuildVersionTests" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-11-18 03:09:25Z" end-time="2026-11-18 03:09:43Z" duration="17.695685" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1052" name="BackendFailureDoesNotAdvanceVersionAndReleasesSession" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.BackendFailureDoesNotAdvanceVersionAndReleasesSession" methodname="BackendFailureDoesNotAdvanceVersionAndReleasesSession" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="749768377" result="Passed" start-time="2026-11-18 03:09:25Z" end-time="2026-11-18 03:09:27Z" duration="2.207685" asserts="0">
+                  <properties />
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1047" name="ConsecutiveBuildsPublishAndPersistNextVersion" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.ConsecutiveBuildsPublishAndPersistNextVersion" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:09:27Z" end-time="2026-11-18 03:09:37Z" duration="9.857249" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1045" name="ConsecutiveBuildsPublishAndPersistNextVersion(Builtin)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.ConsecutiveBuildsPublishAndPersistNextVersion(Builtin)" methodname="ConsecutiveBuildsPublishAndPersistNextVersion" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="99651433" result="Passed" start-time="2026-11-18 03:09:27Z" end-time="2026-11-18 03:09:32Z" duration="4.315779" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                  <test-case id="1046" name="ConsecutiveBuildsPublishAndPersistNextVersion(ScriptableBuildPipeline)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.ConsecutiveBuildsPublishAndPersistNextVersion(ScriptableBuildPipeline)" methodname="ConsecutiveBuildsPublishAndPersistNextVersion" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1355217516" result="Passed" start-time="2026-11-18 03:09:32Z" end-time="2026-11-18 03:09:37Z" duration="5.535614" asserts="0">
+                    <properties />
+                  </test-case>
+                </test-suite>
+                <test-case id="1048" name="ExplicitOutputOverridesTemplateAndTransientVersionOnlyChangesInMemory" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.ExplicitOutputOverridesTemplateAndTransientVersionOnlyChangesInMemory" methodname="ExplicitOutputOverridesTemplateAndTransientVersionOnlyChangesInMemory" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="2041670719" result="Passed" start-time="2026-11-18 03:09:37Z" end-time="2026-11-18 03:09:40Z" duration="2.535559" asserts="0">
+                  <properties />
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1040" name="InvalidTemplatesFailBeforeBuild" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.007031" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1034" name="InvalidTemplatesFailBeforeBuild(&quot;&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild(&quot;&quot;)" methodname="InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1258656469" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.001076" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1035" name="InvalidTemplatesFailBeforeBuild(&quot;BundleBuildOutput&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild(&quot;BundleBuildOutput&quot;)" methodname="InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="936985136" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000384" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1036" name="InvalidTemplatesFailBeforeBuild(&quot;{ProjectDir}/{version}&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild(&quot;{ProjectDir}/{version}&quot;)" methodname="InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1176381493" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000323" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1037" name="InvalidTemplatesFailBeforeBuild(&quot;{projectDir}/{Version}&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild(&quot;{projectDir}/{Version}&quot;)" methodname="InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="2023307151" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000322" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1038" name="InvalidTemplatesFailBeforeBuild(&quot;{unknown}/{version}&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild(&quot;{unknown}/{version}&quot;)" methodname="InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1822246577" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000319" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1039" name="InvalidTemplatesFailBeforeBuild(&quot;{version}/bad{&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidTemplatesFailBeforeBuild(&quot;{version}/bad{&quot;)" methodname="InvalidTemplatesFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="506263275" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000313" asserts="0">
+                    <properties />
+                  </test-case>
+                </test-suite>
+                <test-suite type="ParameterizedMethod" id="1044" name="InvalidVersionsFailBeforeBuild" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidVersionsFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.002398" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1041" name="InvalidVersionsFailBeforeBuild(0)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidVersionsFailBeforeBuild(0)" methodname="InvalidVersionsFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="397017525" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000629" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1042" name="InvalidVersionsFailBeforeBuild(-1)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidVersionsFailBeforeBuild(-1)" methodname="InvalidVersionsFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="649135745" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000374" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1043" name="InvalidVersionsFailBeforeBuild(int.MaxValue)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.InvalidVersionsFailBeforeBuild(int.MaxValue)" methodname="InvalidVersionsFailBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="439611372" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000357" asserts="0">
+                    <properties />
+                  </test-case>
+                </test-suite>
+                <test-case id="1030" name="OldSerializedConfigurationUsesDefaultsWithoutRewriting" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.OldSerializedConfigurationUsesDefaultsWithoutRewriting" methodname="OldSerializedConfigurationUsesDefaultsWithoutRewriting" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1705352970" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.096348" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1051" name="ReadOnlyConfigurationFailsBeforeBuild" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.ReadOnlyConfigurationFailsBeforeBuild" methodname="ReadOnlyConfigurationFailsBeforeBuild" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1197007067" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.059675" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1054" name="SaveFailureAfterPublicationKeepsContentAndNextVersion" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.SaveFailureAfterPublicationKeepsContentAndNextVersion" methodname="SaveFailureAfterPublicationKeepsContentAndNextVersion" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1862101514" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.117034" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1050" name="SessionRejectsReentryAndReleasesRegistrationAfterFailure" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.SessionRejectsReentryAndReleasesRegistrationAfterFailure" methodname="SessionRejectsReentryAndReleasesRegistrationAfterFailure" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1165091320" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000839" asserts="0">
+                  <properties />
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1033" name="TemplatesResolveAgainstUnityProject" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.TemplatesResolveAgainstUnityProject" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.002056" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1031" name="TemplatesResolveAgainstUnityProject(&quot;{projectDir}/BundleBuildOutput/{version}&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.TemplatesResolveAgainstUnityProject(&quot;{projectDir}/BundleBuildOutput/{version}&quot;)" methodname="TemplatesResolveAgainstUnityProject" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="305062014" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000527" asserts="0">
+                    <properties />
+                  </test-case>
+                  <test-case id="1032" name="TemplatesResolveAgainstUnityProject(&quot;BundleBuildOutput/{version}&quot;)" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.TemplatesResolveAgainstUnityProject(&quot;BundleBuildOutput/{version}&quot;)" methodname="TemplatesResolveAgainstUnityProject" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="162928530" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:40Z" duration="0.000349" asserts="0">
+                    <properties />
+                  </test-case>
+                </test-suite>
+                <test-case id="1049" name="ValidationAndPublicationFailuresDoNotAdvanceVersion" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.ValidationAndPublicationFailuresDoNotAdvanceVersion" methodname="ValidationAndPublicationFailuresDoNotAdvanceVersion" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="262264818" result="Passed" start-time="2026-11-18 03:09:40Z" end-time="2026-11-18 03:09:43Z" duration="2.640392" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1053" name="VersionPersistenceDoesNotSaveOtherDirtyAssets" fullname="AiNative.UnityCore.Assets.Tests.BuildVersionTests.VersionPersistenceDoesNotSaveOtherDirtyAssets" methodname="VersionPersistenceDoesNotSaveOtherDirtyAssets" classname="AiNative.UnityCore.Assets.Tests.BuildVersionTests" runstate="Runnable" seed="1659138168" result="Passed" start-time="2026-11-18 03:09:43Z" end-time="2026-11-18 03:09:43Z" duration="0.165009" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1055" name="DeploymentTests" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-11-18 03:09:43Z" end-time="2026-11-18 03:10:10Z" duration="26.896425" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-suite type="ParameterizedMethod" id="1058" name="DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:09:43Z" end-time="2026-11-18 03:09:49Z" duration="6.417250" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1056" name="DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence(Builtin)" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence(Builtin)" methodname="DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="1196967603" result="Passed" start-time="2026-11-18 03:09:43Z" end-time="2026-11-18 03:09:46Z" duration="2.955464" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+A meta data file (.meta) exists but its folder 'Assets/StreamingAssets/AiNativeAssets' can't be found, and has been created. Empty directories cannot be stored in version control, so it's assumed that the meta data file is for an empty directory in version control. When moving or deleting folders outside of Unity, please ensure that the corresponding .meta file is moved or deleted along with it.
+Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\e3a596e5a6aa4210885b3292ef4fea54\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197949 bytes).
+]]></output>
+                  </test-case>
+                  <test-case id="1057" name="DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence(ScriptableBuildPipeline)" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence(ScriptableBuildPipeline)" methodname="DeploysOnlyRuntimeFilesAndPreservesIndependentPlayerEvidence" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="851131746" result="Passed" start-time="2026-11-18 03:09:46Z" end-time="2026-11-18 03:09:49Z" duration="3.460658" asserts="0">
+                    <properties />
+                    <output><![CDATA[Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\24d9e4312c6c47bf924467a86eaae651\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197803 bytes).
+]]></output>
+                  </test-case>
+                </test-suite>
+                <test-case id="1063" name="EvidenceDamageAndUnexpectedRuntimeFilesBlockPlayerBuild" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.EvidenceDamageAndUnexpectedRuntimeFilesBlockPlayerBuild" methodname="EvidenceDamageAndUnexpectedRuntimeFilesBlockPlayerBuild" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="1602392742" result="Passed" start-time="2026-11-18 03:09:49Z" end-time="2026-11-18 03:09:53Z" duration="3.235072" asserts="0">
+                  <properties />
+                  <output><![CDATA[Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\a973c8da4f734b3ebb7f7c456bcb8322\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197803 bytes).
+Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\a973c8da4f734b3ebb7f7c456bcb8322\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197803 bytes).
+]]></output>
+                </test-case>
+                <test-case id="1066" name="LinkedOldContentIsRejectedWithoutTouchingExternalDirectory" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.LinkedOldContentIsRejectedWithoutTouchingExternalDirectory" methodname="LinkedOldContentIsRejectedWithoutTouchingExternalDirectory" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="1249438541" result="Passed" start-time="2026-11-18 03:09:53Z" end-time="2026-11-18 03:09:56Z" duration="3.308154" asserts="0">
+                  <properties />
+                  <output><![CDATA[Assets/StreamingAssets/AiNativeAssets/junction is a symbolic link. Using symlinks in Unity projects may cause your project to become corrupted if you create multiple references to the same asset, use recursive symlinks or use symlinks to share assets between projects used with different versions of Unity. Make sure you know what you are doing.
+Disabling directory monitoring for current editor session. Found symlinks in project which cannot be used with directory monitoring. Directory monitoring settings can be changed in preferences.
+]]></output>
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1062" name="MissingOrCorruptSourceLeavesOldContentIntact" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.MissingOrCorruptSourceLeavesOldContentIntact" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:09:56Z" end-time="2026-11-18 03:10:03Z" duration="7.561891" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1060" name="MissingOrCorruptSourceLeavesOldContentIntact(False)" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.MissingOrCorruptSourceLeavesOldContentIntact(False)" methodname="MissingOrCorruptSourceLeavesOldContentIntact" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="891018586" result="Passed" start-time="2026-11-18 03:09:56Z" end-time="2026-11-18 03:10:00Z" duration="3.673520" asserts="0">
+                    <properties />
+                    <output><![CDATA[Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\b06338d7d27c4aa484cbb9a99fc66b9b\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197803 bytes).
+]]></output>
+                  </test-case>
+                  <test-case id="1061" name="MissingOrCorruptSourceLeavesOldContentIntact(True)" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.MissingOrCorruptSourceLeavesOldContentIntact(True)" methodname="MissingOrCorruptSourceLeavesOldContentIntact" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="490610171" result="Passed" start-time="2026-11-18 03:10:00Z" end-time="2026-11-18 03:10:03Z" duration="3.885979" asserts="0">
+                    <properties />
+                    <output><![CDATA[Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\0812fc9d0d204653b554354e4d2ca8f5\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197803 bytes).
+]]></output>
+                  </test-case>
+                </test-suite>
+                <test-case id="1059" name="NoLatestRecordRequiresBuildAndFailedBuildKeepsPreviousRecord" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.NoLatestRecordRequiresBuildAndFailedBuildKeepsPreviousRecord" methodname="NoLatestRecordRequiresBuildAndFailedBuildKeepsPreviousRecord" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="1431449260" result="Passed" start-time="2026-11-18 03:10:03Z" end-time="2026-11-18 03:10:06Z" duration="2.878940" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1065" name="OverlapAndLockedSourceAreRejectedWithoutReplacingContent" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.OverlapAndLockedSourceAreRejectedWithoutReplacingContent" methodname="OverlapAndLockedSourceAreRejectedWithoutReplacingContent" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="868851754" result="Passed" start-time="2026-11-18 03:10:06Z" end-time="2026-11-18 03:10:10Z" duration="3.335537" asserts="0">
+                  <properties />
+                  <output><![CDATA[Deployed version 7 from C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\BuildArtifacts\DeploymentTests\73d17f6bd49840a5a7137b7cec420102\source to C:\unity-verification\5a38e0c4fcf7\examples\unity\AssetsDemo\Assets\StreamingAssets\AiNativeAssets (8 files, 197803 bytes).
+]]></output>
+                </test-case>
+                <test-case id="1064" name="ReplacementFailureRollsBackOldDirectory" fullname="AiNative.UnityCore.Assets.Tests.DeploymentTests.ReplacementFailureRollsBackOldDirectory" methodname="ReplacementFailureRollsBackOldDirectory" classname="AiNative.UnityCore.Assets.Tests.DeploymentTests" runstate="Runnable" seed="1331489362" result="Passed" start-time="2026-11-18 03:10:10Z" end-time="2026-11-18 03:10:10Z" duration="0.155804" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1067" name="EditorModeOwnershipTests" fullname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests" classname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-18 03:10:22Z" end-time="2026-11-18 03:10:23Z" duration="0.348988" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1068" name="IndependentLeasesCancellationAndFailureRollback" fullname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests.IndependentLeasesCancellationAndFailureRollback" methodname="IndependentLeasesCancellationAndFailureRollback" classname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests" runstate="Runnable" seed="162355485" result="Passed" start-time="2026-11-18 03:10:10Z" end-time="2026-11-18 03:10:13Z" duration="3.226169" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                </test-case>
+                <test-case id="1071" name="PoolCloseWaitsForRootAndBorrowedObjects" fullname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests.PoolCloseWaitsForRootAndBorrowedObjects" methodname="PoolCloseWaitsForRootAndBorrowedObjects" classname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests" runstate="Runnable" seed="475750814" result="Passed" start-time="2026-11-18 03:10:13Z" end-time="2026-11-18 03:10:16Z" duration="3.151042" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                </test-case>
+                <test-case id="1069" name="SceneCancellationAndExternalUnloadDrainOwnership" fullname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests.SceneCancellationAndExternalUnloadDrainOwnership" methodname="SceneCancellationAndExternalUnloadDrainOwnership" classname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests" runstate="Runnable" seed="1873555120" result="Passed" start-time="2026-11-18 03:10:16Z" end-time="2026-11-18 03:10:20Z" duration="3.271042" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                </test-case>
+                <test-case id="1070" name="ScopeCloseAndNewGenerationInvalidateOldOwners" fullname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests.ScopeCloseAndNewGenerationInvalidateOldOwners" methodname="ScopeCloseAndNewGenerationInvalidateOldOwners" classname="AiNative.UnityCore.Assets.Tests.EditorModeOwnershipTests" runstate="Runnable" seed="1202105298" result="Passed" start-time="2026-11-18 03:10:20Z" end-time="2026-11-18 03:10:23Z" duration="3.093342" asserts="0">
+                  <properties>
+                    <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1072" name="ResourceCollectionTests" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-11-18 03:10:23Z" end-time="2026-11-18 03:10:30Z" duration="7.498428" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1079" name="AmbiguousAddressesAndCrossGroupOwnershipAreRejected" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.AmbiguousAddressesAndCrossGroupOwnershipAreRejected" methodname="AmbiguousAddressesAndCrossGroupOwnershipAreRejected" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="202417714" result="Passed" start-time="2026-11-18 03:10:23Z" end-time="2026-11-18 03:10:23Z" duration="0.231610" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1077" name="EmptyConfigurationStillValidatesGlobalMode" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.EmptyConfigurationStillValidatesGlobalMode" methodname="EmptyConfigurationStillValidatesGlobalMode" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="487842910" result="Passed" start-time="2026-11-18 03:10:23Z" end-time="2026-11-18 03:10:23Z" duration="0.144117" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1075" name="ExtensionRemovalCollisionReportsBothSourcePaths" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.ExtensionRemovalCollisionReportsBothSourcePaths" methodname="ExtensionRemovalCollisionReportsBothSourcePaths" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="1506028986" result="Passed" start-time="2026-11-18 03:10:23Z" end-time="2026-11-18 03:10:24Z" duration="0.474054" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1076" name="FolderOrderAndMovesRecomputeDeterministicAddresses" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.FolderOrderAndMovesRecomputeDeterministicAddresses" methodname="FolderOrderAndMovesRecomputeDeterministicAddresses" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="119000845" result="Passed" start-time="2026-11-18 03:10:24Z" end-time="2026-11-18 03:10:24Z" duration="0.185618" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1078" name="GlobalModeAppliesToAllGroupsAndIgnoresLegacyManualAddresses" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.GlobalModeAppliesToAllGroupsAndIgnoresLegacyManualAddresses" methodname="GlobalModeAppliesToAllGroupsAndIgnoresLegacyManualAddresses" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="94892230" result="Passed" start-time="2026-11-18 03:10:24Z" end-time="2026-11-18 03:10:24Z" duration="0.152945" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1083" name="ReadableSharedNamesAreStableAndActuallyBuild" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.ReadableSharedNamesAreStableAndActuallyBuild" methodname="ReadableSharedNamesAreStableAndActuallyBuild" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="841480804" result="Passed" start-time="2026-11-18 03:10:24Z" end-time="2026-11-18 03:10:27Z" duration="2.762935" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1073" name="RecursiveFoldersAndExplicitEntriesShareGlobalAddressMode" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.RecursiveFoldersAndExplicitEntriesShareGlobalAddressMode" methodname="RecursiveFoldersAndExplicitEntriesShareGlobalAddressMode" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="1225325288" result="Passed" start-time="2026-11-18 03:10:27Z" end-time="2026-11-18 03:10:27Z" duration="0.182698" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1081" name="SceneDependencyNameCannotAliasAnotherSharedGroupSet" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.SceneDependencyNameCannotAliasAnotherSharedGroupSet" methodname="SceneDependencyNameCannotAliasAnotherSharedGroupSet" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="124378268" result="Passed" start-time="2026-11-18 03:10:27Z" end-time="2026-11-18 03:10:27Z" duration="0.243781" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1082" name="SharedNameConcatenationCollisionIsRejected" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.SharedNameConcatenationCollisionIsRejected" methodname="SharedNameConcatenationCollisionIsRejected" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="633451617" result="Passed" start-time="2026-11-18 03:10:27Z" end-time="2026-11-18 03:10:27Z" duration="0.276091" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1074" name="UnknownFileIsNotCollectedAsBundleSource" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.UnknownFileIsNotCollectedAsBundleSource" methodname="UnknownFileIsNotCollectedAsBundleSource" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="1073397354" result="Passed" start-time="2026-11-18 03:10:27Z" end-time="2026-11-18 03:10:30Z" duration="2.668203" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1080" name="UnknownGlobalModeAndNonFolderReferencesAreRejected" fullname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests.UnknownGlobalModeAndNonFolderReferencesAreRejected" methodname="UnknownGlobalModeAndNonFolderReferencesAreRejected" classname="AiNative.UnityCore.Assets.Tests.ResourceCollectionTests" runstate="Runnable" seed="2054759914" result="Passed" start-time="2026-11-18 03:10:30Z" end-time="2026-11-18 03:10:30Z" duration="0.171671" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1084" name="SbpBuildTests" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-11-18 03:10:30Z" end-time="2026-11-18 03:11:09Z" duration="38.494156" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1095" name="ActualDuplicatedSbpSourcesCannotPassValidation" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.ActualDuplicatedSbpSourcesCannotPassValidation" methodname="ActualDuplicatedSbpSourcesCannotPassValidation" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1096691302" result="Passed" start-time="2026-11-18 03:10:30Z" end-time="2026-11-18 03:10:33Z" duration="2.406824" asserts="0">
+                  <properties />
+                </test-case>
+                <test-suite type="ParameterizedMethod" id="1089" name="BackendsProduceEquivalentCatalogSemantics" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.BackendsProduceEquivalentCatalogSemantics" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-18 03:10:33Z" end-time="2026-11-18 03:10:54Z" duration="21.173727" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1085" name="BackendsProduceEquivalentCatalogSemantics(StableHash,FullPath)" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.BackendsProduceEquivalentCatalogSemantics(StableHash,FullPath)" methodname="BackendsProduceEquivalentCatalogSemantics" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1903521354" result="Passed" start-time="2026-11-18 03:10:33Z" end-time="2026-11-18 03:10:38Z" duration="5.206377" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                  <test-case id="1086" name="BackendsProduceEquivalentCatalogSemantics(GroupName,FullPath)" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.BackendsProduceEquivalentCatalogSemantics(GroupName,FullPath)" methodname="BackendsProduceEquivalentCatalogSemantics" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="2061599075" result="Passed" start-time="2026-11-18 03:10:38Z" end-time="2026-11-18 03:10:43Z" duration="5.285911" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                  <test-case id="1087" name="BackendsProduceEquivalentCatalogSemantics(StableHash,GroupAndAssetName)" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.BackendsProduceEquivalentCatalogSemantics(StableHash,GroupAndAssetName)" methodname="BackendsProduceEquivalentCatalogSemantics" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1479352838" result="Passed" start-time="2026-11-18 03:10:43Z" end-time="2026-11-18 03:10:48Z" duration="5.148515" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                  <test-case id="1088" name="BackendsProduceEquivalentCatalogSemantics(GroupName,GroupAndAssetName)" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.BackendsProduceEquivalentCatalogSemantics(GroupName,GroupAndAssetName)" methodname="BackendsProduceEquivalentCatalogSemantics" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1631630197" result="Passed" start-time="2026-11-18 03:10:48Z" end-time="2026-11-18 03:10:54Z" duration="5.495805" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                </test-suite>
+                <test-case id="1090" name="CachedBuildTracksChangedMovedAndDeletedFolderAssets" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.CachedBuildTracksChangedMovedAndDeletedFolderAssets" methodname="CachedBuildTracksChangedMovedAndDeletedFolderAssets" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="2082687433" result="Passed" start-time="2026-11-18 03:10:54Z" end-time="2026-11-18 03:11:06Z" duration="11.894017" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1094" name="DependencyClosureReductionRejectsMissingEdgesAndCycles" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.DependencyClosureReductionRejectsMissingEdgesAndCycles" methodname="DependencyClosureReductionRejectsMissingEdgesAndCycles" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1218324514" result="Passed" start-time="2026-11-18 03:11:06Z" end-time="2026-11-18 03:11:06Z" duration="0.005284" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1091" name="MissingEvidenceMappingAndPreservationFailClosed" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.MissingEvidenceMappingAndPreservationFailClosed" methodname="MissingEvidenceMappingAndPreservationFailClosed" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1113955508" result="Passed" start-time="2026-11-18 03:11:06Z" end-time="2026-11-18 03:11:09Z" duration="2.949548" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1092" name="PublicationIsAtomicEvenWhenUnityRetainsSourceHandles" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.PublicationIsAtomicEvenWhenUnityRetainsSourceHandles" methodname="PublicationIsAtomicEvenWhenUnityRetainsSourceHandles" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1505444441" result="Passed" start-time="2026-11-18 03:11:09Z" end-time="2026-11-18 03:11:09Z" duration="0.012075" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1093" name="SbpExceptionRestoresReportPreferences" fullname="AiNative.UnityCore.Assets.Tests.SbpBuildTests.SbpExceptionRestoresReportPreferences" methodname="SbpExceptionRestoresReportPreferences" classname="AiNative.UnityCore.Assets.Tests.SbpBuildTests" runstate="Runnable" seed="1649336723" result="Passed" start-time="2026-11-18 03:11:09Z" end-time="2026-11-18 03:11:09Z" duration="0.008933" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1096" name="SharedPackingTests" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-18 03:11:09Z" end-time="2026-11-18 03:11:23Z" duration="14.628454" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-suite type="ParameterizedMethod" id="1099" name="AB_AC_ABC_AreDistinctAndExplicitOwnerWins" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.AB_AC_ABC_AreDistinctAndExplicitOwnerWins" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:11:09Z" end-time="2026-11-18 03:11:19Z" duration="9.846399" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                  <properties />
+                  <test-case id="1097" name="AB_AC_ABC_AreDistinctAndExplicitOwnerWins(Builtin)" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.AB_AC_ABC_AreDistinctAndExplicitOwnerWins(Builtin)" methodname="AB_AC_ABC_AreDistinctAndExplicitOwnerWins" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="1059309848" result="Passed" start-time="2026-11-18 03:11:09Z" end-time="2026-11-18 03:11:12Z" duration="3.819821" asserts="0">
+                    <properties />
+                    <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                  </test-case>
+                  <test-case id="1098" name="AB_AC_ABC_AreDistinctAndExplicitOwnerWins(ScriptableBuildPipeline)" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.AB_AC_ABC_AreDistinctAndExplicitOwnerWins(ScriptableBuildPipeline)" methodname="AB_AC_ABC_AreDistinctAndExplicitOwnerWins" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="177559884" result="Passed" start-time="2026-11-18 03:11:12Z" end-time="2026-11-18 03:11:19Z" duration="6.025607" asserts="0">
+                    <properties />
+                  </test-case>
+                </test-suite>
+                <test-case id="1100" name="ActualCrossGroupDependencyCycleIsRejected" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.ActualCrossGroupDependencyCycleIsRejected" methodname="ActualCrossGroupDependencyCycleIsRejected" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="804660465" result="Passed" start-time="2026-11-18 03:11:19Z" end-time="2026-11-18 03:11:19Z" duration="0.230931" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1105" name="ExistingPublishedDirectoryIsNeverOverwritten" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.ExistingPublishedDirectoryIsNeverOverwritten" methodname="ExistingPublishedDirectoryIsNeverOverwritten" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="144255565" result="Passed" start-time="2026-11-18 03:11:19Z" end-time="2026-11-18 03:11:19Z" duration="0.005874" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1101" name="IncompleteRealReportCoverageCannotPass" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.IncompleteRealReportCoverageCannotPass" methodname="IncompleteRealReportCoverageCannotPass" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="830813248" result="Passed" start-time="2026-11-18 03:11:19Z" end-time="2026-11-18 03:11:21Z" duration="2.570284" asserts="0">
+                  <properties />
+                  <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                </test-case>
+                <test-case id="1103" name="MissingReportCannotPassOwnershipVerification" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.MissingReportCannotPassOwnershipVerification" methodname="MissingReportCannotPassOwnershipVerification" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="1678683085" result="Passed" start-time="2026-11-18 03:11:21Z" end-time="2026-11-18 03:11:21Z" duration="0.010025" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="1104" name="RealDuplicatedDependenciesFailArtifactVerification" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.RealDuplicatedDependenciesFailArtifactVerification" methodname="RealDuplicatedDependenciesFailArtifactVerification" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="1273247646" result="Passed" start-time="2026-11-18 03:11:21Z" end-time="2026-11-18 03:11:23Z" duration="1.861832" asserts="0">
+                  <properties />
+                  <output><![CDATA[Pipeline: this build does not include the Pipeline (Project Settings > Pipeline > Runtime), so its assemblies and settings are excluded from it.
+]]></output>
+                </test-case>
+                <test-case id="1102" name="SameTypeAndNameSubAssetsAreRejected" fullname="AiNative.UnityCore.Assets.Tests.SharedPackingTests.SameTypeAndNameSubAssetsAreRejected" methodname="SameTypeAndNameSubAssetsAreRejected" classname="AiNative.UnityCore.Assets.Tests.SharedPackingTests" runstate="Runnable" seed="305874275" result="Passed" start-time="2026-11-18 03:11:23Z" end-time="2026-11-18 03:11:23Z" duration="0.097985" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1143" name="AiNative.UnityCore.EditTests.dll" fullname="C:/unity-verification/5a38e0c4fcf7/examples/unity/AssetsDemo/Library/ScriptAssemblies/AiNative.UnityCore.EditTests.dll" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.327883" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="35436" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1144" name="AiNative" fullname="AiNative" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.327013" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1145" name="UnityCore" fullname="AiNative.UnityCore" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.326587" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1146" name="Tests" fullname="AiNative.UnityCore.Tests" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.326183" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1113" name="CorePlayCycleTests" fullname="AiNative.UnityCore.Tests.CorePlayCycleTests" classname="AiNative.UnityCore.Tests.CorePlayCycleTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:42Z" duration="0.269451" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1116" name="ExitingDuringInitializationCancelsBeforeTheNextPlay" fullname="AiNative.UnityCore.Tests.CorePlayCycleTests.ExitingDuringInitializationCancelsBeforeTheNextPlay" methodname="ExitingDuringInitializationCancelsBeforeTheNextPlay" classname="AiNative.UnityCore.Tests.CorePlayCycleTests" runstate="Runnable" seed="1190867177" result="Passed" start-time="2026-11-18 03:11:23Z" end-time="2026-11-18 03:11:30Z" duration="6.414471" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:11:26 798] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:26 822] - <color=#00FF18>Module shutdown diagnostic</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:26 822] - <color=#00FF18>Module shutdown diagnostic</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:11:29 960] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:29 976] - <color=#00FF18>Module shutdown diagnostic</color>
+]]></output>
+              </test-case>
+              <test-case id="1114" name="ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore" fullname="AiNative.UnityCore.Tests.CorePlayCycleTests.ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore" methodname="ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore" classname="AiNative.UnityCore.Tests.CorePlayCycleTests" runstate="Runnable" seed="851865758" result="Passed" start-time="2026-11-18 03:11:30Z" end-time="2026-11-18 03:11:36Z" duration="6.439177" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:11:33 298] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:33 314] - <color=#00FF18>Module shutdown diagnostic</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:33 328] - <color=#00FF18>Scene destruction diagnostic</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:33 554] - <color=#00FF18>Editor diagnostic after Play exit</color>
+]]></output>
+              </test-case>
+              <test-case id="1115" name="TwoPlaySessionsReleaseRunningModules" fullname="AiNative.UnityCore.Tests.CorePlayCycleTests.TwoPlaySessionsReleaseRunningModules" methodname="TwoPlaySessionsReleaseRunningModules" classname="AiNative.UnityCore.Tests.CorePlayCycleTests" runstate="Runnable" seed="1172617320" result="Passed" start-time="2026-11-18 03:11:36Z" end-time="2026-11-18 03:11:42Z" duration="6.295193" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:11:39 601] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:39 615] - <color=#00FF18>Module shutdown diagnostic</color>
+<color=#0099bc><b>[debug]</b></color>[2026-11-18 11:11:42 733] - <color=#FFFFFF>[AiNative.UnityCore] Framework - Ver.0.0.1</color>
+<color=#0099bc><b>[info]</b></color>[2026-11-18 11:11:42 747] - <color=#00FF18>Module shutdown diagnostic</color>
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1117" name="LoggerTests" fullname="AiNative.UnityCore.Tests.LoggerTests" classname="AiNative.UnityCore.Tests.LoggerTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:42Z" duration="0.007023" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="ParameterizedMethod" id="1120" name="Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage" fullname="AiNative.UnityCore.Tests.LoggerTests.Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage" classname="AiNative.UnityCore.Tests.LoggerTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:42Z" duration="0.006245" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1118" name="Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(None)" fullname="AiNative.UnityCore.Tests.LoggerTests.Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(None)" methodname="Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage" classname="AiNative.UnityCore.Tests.LoggerTests" runstate="Runnable" seed="268534930" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:42Z" duration="0.004363" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#ff7f50><b>[error]</b></color>[2026-11-18 11:11:42 991] - <color=#FF0000>Logger stack trace regression 42</color>
+]]></output>
+                </test-case>
+                <test-case id="1119" name="Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(ScriptOnly)" fullname="AiNative.UnityCore.Tests.LoggerTests.Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage(ScriptOnly)" methodname="Error_UsesUnityStackTraceSettingWithoutAddingStackToMessage" classname="AiNative.UnityCore.Tests.LoggerTests" runstate="Runnable" seed="136281113" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:42Z" duration="0.000852" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[<color=#ff7f50><b>[error]</b></color>[2026-11-18 11:11:42 994] - <color=#FF0000>Logger stack trace regression 42</color>
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1121" name="TimeMachineTests" fullname="AiNative.UnityCore.Tests.TimeMachineTests" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" testcasecount="19" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.047090" total="19" passed="19" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="ParameterizedMethod" id="1130" name="CallbackMutationUsesAStableBatch" fullname="AiNative.UnityCore.Tests.TimeMachineTests.CallbackMutationUsesAStableBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.011377" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1125" name="CallbackMutationUsesAStableBatch(Update)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.CallbackMutationUsesAStableBatch(Update)" methodname="CallbackMutationUsesAStableBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1804594533" result="Passed" start-time="2026-11-18 03:11:42Z" end-time="2026-11-18 03:11:43Z" duration="0.003683" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1126" name="CallbackMutationUsesAStableBatch(LateUpdate)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.CallbackMutationUsesAStableBatch(LateUpdate)" methodname="CallbackMutationUsesAStableBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1418685083" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000241" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1127" name="CallbackMutationUsesAStableBatch(FixedUpdate)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.CallbackMutationUsesAStableBatch(FixedUpdate)" methodname="CallbackMutationUsesAStableBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="376554643" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000233" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1128" name="CallbackMutationUsesAStableBatch(OmegaLateUpdate)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.CallbackMutationUsesAStableBatch(OmegaLateUpdate)" methodname="CallbackMutationUsesAStableBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1781106329" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.002779" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1129" name="CallbackMutationUsesAStableBatch(Timer)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.CallbackMutationUsesAStableBatch(Timer)" methodname="CallbackMutationUsesAStableBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="2065661311" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.002745" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1137" name="ClearAllRemovesActiveAndNotYetDispatchedRegistrations" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearAllRemovesActiveAndNotYetDispatchedRegistrations" methodname="ClearAllRemovesActiveAndNotYetDispatchedRegistrations" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="512983934" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000800" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1136" name="ClearInsideCallbackInvalidatesTheRestOfTheBatch" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearInsideCallbackInvalidatesTheRestOfTheBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.002761" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1131" name="ClearInsideCallbackInvalidatesTheRestOfTheBatch(Update)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearInsideCallbackInvalidatesTheRestOfTheBatch(Update)" methodname="ClearInsideCallbackInvalidatesTheRestOfTheBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1772653260" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000370" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1132" name="ClearInsideCallbackInvalidatesTheRestOfTheBatch(LateUpdate)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearInsideCallbackInvalidatesTheRestOfTheBatch(LateUpdate)" methodname="ClearInsideCallbackInvalidatesTheRestOfTheBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1761346800" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000120" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1133" name="ClearInsideCallbackInvalidatesTheRestOfTheBatch(FixedUpdate)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearInsideCallbackInvalidatesTheRestOfTheBatch(FixedUpdate)" methodname="ClearInsideCallbackInvalidatesTheRestOfTheBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1290933435" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000100" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1134" name="ClearInsideCallbackInvalidatesTheRestOfTheBatch(OmegaLateUpdate)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearInsideCallbackInvalidatesTheRestOfTheBatch(OmegaLateUpdate)" methodname="ClearInsideCallbackInvalidatesTheRestOfTheBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="100965940" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000099" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1135" name="ClearInsideCallbackInvalidatesTheRestOfTheBatch(Timer)" fullname="AiNative.UnityCore.Tests.TimeMachineTests.ClearInsideCallbackInvalidatesTheRestOfTheBatch(Timer)" methodname="ClearInsideCallbackInvalidatesTheRestOfTheBatch" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="117643075" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000099" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1141" name="FailedCallbackDoesNotLeaveTheDispatcherReentrantOrTimerAlive" fullname="AiNative.UnityCore.Tests.TimeMachineTests.FailedCallbackDoesNotLeaveTheDispatcherReentrantOrTimerAlive" methodname="FailedCallbackDoesNotLeaveTheDispatcherReentrantOrTimerAlive" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="151455335" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.002326" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1122" name="FixedRemovalPreservesLateRegistration" fullname="AiNative.UnityCore.Tests.TimeMachineTests.FixedRemovalPreservesLateRegistration" methodname="FixedRemovalPreservesLateRegistration" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="550108756" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000289" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1142" name="FrameBudgetRestartsWithoutFixedUpdate" fullname="AiNative.UnityCore.Tests.TimeMachineTests.FrameBudgetRestartsWithoutFixedUpdate" methodname="FrameBudgetRestartsWithoutFixedUpdate" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="726307545" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.024017" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1124" name="RepeatedRegistrationReplacesTheSubscription" fullname="AiNative.UnityCore.Tests.TimeMachineTests.RepeatedRegistrationReplacesTheSubscription" methodname="RepeatedRegistrationReplacesTheSubscription" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1538543036" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000477" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1140" name="SameOrderFollowsRegistrationSequence" fullname="AiNative.UnityCore.Tests.TimeMachineTests.SameOrderFollowsRegistrationSequence" methodname="SameOrderFollowsRegistrationSequence" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="922687266" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000760" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1123" name="TicketOwnsItsClockAndCannotRemoveReplacement" fullname="AiNative.UnityCore.Tests.TimeMachineTests.TicketOwnsItsClockAndCannotRemoveReplacement" methodname="TicketOwnsItsClockAndCannotRemoveReplacement" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="831018390" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000389" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1138" name="TimerOrderReplacementDoesNotLeaveARecycledEntry" fullname="AiNative.UnityCore.Tests.TimeMachineTests.TimerOrderReplacementDoesNotLeaveARecycledEntry" methodname="TimerOrderReplacementDoesNotLeaveARecycledEntry" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1433202442" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000393" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1139" name="TimerReplacesItselfWithoutDeletingItsSuccessor" fullname="AiNative.UnityCore.Tests.TimeMachineTests.TimerReplacesItselfWithoutDeletingItsSuccessor" methodname="TimerReplacesItselfWithoutDeletingItsSuccessor" classname="AiNative.UnityCore.Tests.TimeMachineTests" runstate="Runnable" seed="1506341829" result="Passed" start-time="2026-11-18 03:11:43Z" end-time="2026-11-18 03:11:43Z" duration="0.000277" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/wepie/AppData/LocalLow/DefaultCompany/AssetsDemo\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
