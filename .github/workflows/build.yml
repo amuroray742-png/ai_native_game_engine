@@ -24,7 +24,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Reject masked AssetsDemo cleanup failures
-        run: python -m unittest discover -v -s scripts -p test_verify_unity_assets.py
+        working-directory: scripts
+        run: python -m unittest -v test_verify_unity_assets.InjectedFailureTests.test_inner_injection_does_not_mask_cleanup_failure
       - name: Build pinned joltc bridge and verify thread-start failures
         run: python scripts/build_native.py
       - run: dotnet restore --locked-mode
