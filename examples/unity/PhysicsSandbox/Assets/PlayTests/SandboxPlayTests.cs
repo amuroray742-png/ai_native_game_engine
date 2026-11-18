@@ -44,6 +44,7 @@ namespace AiNative.Examples.PhysicsPlayTests
                 _nextSeconds = 0;
                 return elapsed;
             };
+            yield return SandboxHudTests.WaitForWorld(_scene);
             _scene.Restart();
             _scene.EventsPresented += _events.Add;
             _output = Environment.GetEnvironmentVariable("AINATIVE_PHYSICS_EVIDENCE")
@@ -357,6 +358,7 @@ namespace AiNative.Examples.PhysicsPlayTests
             _scene.enabled = false;
             Assert.AreEqual(0, JoltWorldFactory.ActiveWorldCount);
             _scene.enabled = true;
+            yield return SandboxHudTests.WaitForWorld(_scene);
             Assert.AreEqual(1, JoltWorldFactory.ActiveWorldCount);
             Assert.AreEqual(0, _scene.Session.Tick);
         }

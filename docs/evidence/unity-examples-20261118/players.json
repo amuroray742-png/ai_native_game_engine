@@ -1,0 +1,62 @@
+{
+  "grid": {
+    "project": "examples/unity/GridGame",
+    "sourceFiles": 126,
+    "backends": {
+      "Il2Cpp": {
+        "result": {
+          "success": true,
+          "message": "Grid Player input, HUD, restart, screenshot and cleanup passed.",
+          "completedTick": 3,
+          "bundlesAfterDisconnect": 0,
+          "scopesAfterClose": 0
+        },
+        "screenshotSha256": "f5c3b10c36e368505fd07693c375037b28136f82a138f3ab642574c1e0bb41f5"
+      }
+    }
+  },
+  "physics": {
+    "project": "examples/unity/PhysicsSandbox",
+    "sourceFiles": 126,
+    "backends": {
+      "Il2Cpp": {
+        "result": {
+          "success": true,
+          "message": "Physics Player pause, input, save, restore, screenshot and cleanup passed.",
+          "restoredTick": 1,
+          "restoredBodies": 4,
+          "worldsAfterDisconnect": 0
+        },
+        "screenshotSha256": "6ccc6e6ca46f3e4fa059f2481eac3f866086ecd306f53cabf51eb77ff92b1db0",
+        "nativeBinaryHash": "6de1cd6c6d6da877c11156b4c6e7154d63f407d10ff28aea879c60d9a26aab25",
+        "nativeRelativePath": "PhysicsSandbox_Data/Plugins/x86_64/ainative_jolt.dll"
+      }
+    }
+  },
+  "assetsDemo": {
+    "sbp-EditMode-reload-On": 2,
+    "sbp-EditMode-reload-Off": 2,
+    "sbp-Il2Cpp": {
+      "success": true,
+      "message": "PASS: shared resources, pool, scene, script types, restart and cleanup"
+    },
+    "sbp-Il2Cpp-failure-after-start": {
+      "exitCode": 1,
+      "result": {
+        "success": false,
+        "message": "System.InvalidOperationException: Injected AssetsDemo failure at after-start"
+      }
+    },
+    "sbp-Il2Cpp-failure-after-first-load": {
+      "exitCode": 1,
+      "result": {
+        "success": false,
+        "message": "System.InvalidOperationException: Injected AssetsDemo failure at after-first-load"
+      }
+    },
+    "sbp-Il2Cpp-destroy": {
+      "success": true,
+      "message": "PASS: scene destruction cancelled work and released resources"
+    }
+  }
+}

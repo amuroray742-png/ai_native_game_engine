@@ -1,6 +1,19 @@
 {
   "name": "AssetsDemo.ShaderVariantTests",
-  "references": ["AssetsDemo", "AssetsDemo.Editor", "AiNative.UnityCore", "AiNative.UnityCore.Assets", "AiNative.UnityCore.Assets.Editor", "UniTask"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"]
+  "references": [
+    "AssetsDemo",
+    "AssetsDemo.Editor",
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Assets",
+    "AiNative.UnityCore.Assets.Editor",
+    "UniTask",
+    "Unity.ugui",
+    "AiNative.UnityCore.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
 }

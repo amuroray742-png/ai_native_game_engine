@@ -47,7 +47,7 @@ def play(project, editor, output, reload):
                    cwd=ROOT, env=env, check=True, timeout=360)
     tests = ET.parse(output / "play.xml").findall(".//test-case")
     required = {"UniformSteps", "CatchupAndRestoreBothBoundaries", "FractionalPauseAndFailedReplacement", "PausedInputAndDebt",
-                "CompletedStepCannotRecursivelyPumpOrReplace", "FileSaveAndPausedRestore", "GameViewPointerQueuesInputWhilePaused",
+                "SceneResourcesAndCommandsAreRevokedAcrossRapidReconnect", "CompletedStepCannotRecursivelyPumpOrReplace", "FileSaveAndPausedRestore", "GameViewPointerQueuesInputWhilePaused",
                 "DefaultLoggerAndPooledInitializationStartTheDrivers", "EveryStartupFailureCleansBothEnteredModules",
                 "CloseDuringInitializationCancelsAndSharesCleanup", "RestartPreservesInstancesAndRegistrationOrder",
                 "RetiredCoreCannotPublishLateInitialization", "CloseContinuationCanStartAnotherRunBeforeCloseReturns",
@@ -64,7 +64,7 @@ def play(project, editor, output, reload):
                     "-testResults", str(cycle_xml),
                     "-logFile", str(output / "exit.log")], cwd=ROOT, env=env, check=True, timeout=300)
     cycles = ET.parse(cycle_xml).findall(".//test-case")
-    required_edit = {"ExitingPlayReleasesTheOnlyWorld", "TwoPlaySessionsReleaseRunningModules",
+    required_edit = {"RejectedSceneLeavesForeignCoreAndInputAlive", "ExitingPlayReleasesTheOnlyWorld", "TwoPlaySessionsReleaseRunningModules",
                      "ExitLoggingWorksInShutdownDestroyAndEditorWithoutReopeningCore",
                      "ExitingDuringInitializationCancelsBeforeTheNextPlay", "FixedRemovalPreservesLateRegistration",
                      "TicketOwnsItsClockAndCannotRemoveReplacement", "TimerOrderReplacementDoesNotLeaveARecycledEntry"}
@@ -142,6 +142,10 @@ def verify(output):
     summary["editor"] = version
     with contextlib.nullcontext(verification_workspace(output)) as tmp:
         project = copy_verification_project(PROJECT, Path(tmp))
+        subprocess.run(["unity", "run", str(project), "--timeout", "600", "--format", "json",
+                        "--log-file", str(output / "content-build.log"), "--no-tail", "--", "-executeMethod",
+                        "AiNative.Examples.PhysicsPlay.Editor.SandboxContent.BuildContent"],
+                       cwd=ROOT, check=True, timeout=630)
         for reload in ("on", "off"):
             report = output / ("reload-" + reload)
             summary["tests"][reload] = play(project, editor, report, reload)

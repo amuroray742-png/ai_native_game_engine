@@ -11,6 +11,8 @@ using UnityEngine.Rendering;
 public sealed class ShaderVariantDemo : MonoBehaviour
 {
     public int ContentVersion;
+    [SerializeField] private UnityEngine.UI.Text sceneStatus;
+    private DemoControls _controls;
     private AssetsModule _module;
     private Core _core;
     private AssetScope _scope;
@@ -21,7 +23,7 @@ public sealed class ShaderVariantDemo : MonoBehaviour
     private bool _ready;
     private bool _green;
     private bool _checkingGreen;
-    private UniTask? _closeTask;
+    private System.Threading.Tasks.Task _closeTask;
     private int _missingErrors;
     private string _unexpectedError;
     public bool Ready => _ready;
@@ -43,11 +45,18 @@ public sealed class ShaderVariantDemo : MonoBehaviour
             ContentVersion = groups.LastBuildVersion;
 #endif
             _module = new AssetsModule(_source);
-            _core = Core.Inst;
-            _core.RegisterModule(_module);
+            var core = Core.Inst;
+            core.RegisterModule(_module);
+            _core = core;
+            _controls = new DemoControls(transform, "Controls/ShaderPanel",
+                () => SetGreen(false), () => SetGreen(true), () => CloseAsync().Forget(Debug.LogException));
+            core.RegisterModule(_controls.Module);
             await _core.RunAsync(this.GetCancellationTokenOnDestroy());
             _scope = _module.CreateScope("shader-variant-demo");
             var token = this.GetCancellationTokenOnDestroy();
+            await _controls.OpenAsync(token);
+            _controls.Show(_status, false);
+            if (sceneStatus != null) { sceneStatus.enabled = false; }
             await _scope.WarmupShadersAsync(new[] { "ShaderDemo/Variants" }, token);
             var instance = await _scope.InstantiateAsync("ShaderDemo/ShaderProbe", cancellationToken: token);
             var renderer = instance.Value.GetComponentsInChildren<Renderer>().Single(x => x.name == "Keyword");
@@ -60,6 +69,7 @@ public sealed class ShaderVariantDemo : MonoBehaviour
 #if UNITY_EDITOR
             _status += "\nEditor preview: use the strict Windows Player to verify missing variants.";
 #endif
+            _controls.Show($"Shader variant demo - content version {ContentVersion}\nBundle source: {_source}\n{_status}", true);
             string expectation = Argument("-variantExpect");
             if (expectation != null) { await Verify(expectation, token); }
         }
@@ -69,7 +79,7 @@ public sealed class ShaderVariantDemo : MonoBehaviour
             _status = error.ToString();
             Debug.LogException(error);
             await CloseAsync();
-            _status = error.ToString();
+            ShowResult(error.ToString());
             if (Argument("-variantResult") != null)
             {
                 WriteResult(false, error.ToString());
@@ -99,11 +109,11 @@ public sealed class ShaderVariantDemo : MonoBehaviour
     {
         if (expectation != "present" && expectation != "missing") { throw new ArgumentException("Expected present or missing."); }
         // Do not render the startup green request outside the acceptance window.
-        SetGreen(false);
+        _controls.ClickForVerification(0);
         await UniTask.NextFrame(cancellationToken: token);
         Capture("red", false);
         _checkingGreen = true;
-        SetGreen(true);
+        _controls.ClickForVerification(1);
         await UniTask.NextFrame(cancellationToken: token);
         Capture(expectation == "missing" ? "missing" : "green", expectation == "missing");
         // Stop further automatic camera draws before closing the expected-error window.
@@ -111,6 +121,7 @@ public sealed class ShaderVariantDemo : MonoBehaviour
         _checkingGreen = false;
         if (expectation == "missing" && _missingErrors == 0) { throw new Exception("No matching missing-variant error was observed."); }
         if (_unexpectedError != null) { throw new Exception("Unexpected rendering error: " + _unexpectedError); }
+        _controls.ClickForVerification(2);
         await CloseAsync();
         if (_unexpectedError != null) { throw new Exception("Error during shutdown: " + _unexpectedError); }
         var state = _module.GetDiagnostics();
@@ -154,36 +165,43 @@ public sealed class ShaderVariantDemo : MonoBehaviour
 
     public UniTask CloseAsync()
     {
-        if (!_closeTask.HasValue) { _closeTask = CloseOperationAsync().Preserve(); }
-        return _closeTask.Value;
+        _closeTask ??= CloseOperationAsync().AsTask();
+        return _closeTask.AsUniTask();
     }
 
     private async UniTask CloseOperationAsync()
     {
         _ready = false;
+        _controls?.Show("Closing...", false);
         if (_keyword != null) { Destroy(_keyword); _keyword = null; }
         if (_scope != null) { await _scope.CloseAsync(); }
-        if (_module != null) { await _core.CloseAsync(); }
-        _status = "Closed: demo resources released.";
+        if (_core != null) { await _core.CloseAsync(); }
+        ShowResult("Closed: demo resources released.");
+    }
+
+    private void ShowResult(string message)
+    {
+        if (sceneStatus != null) { sceneStatus.text = message; sceneStatus.enabled = true; }
+    }
+
+    private void OnEnable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(true); }
+        _controls?.SetHostActive(true);
+    }
+
+    private void OnDisable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(false); }
+        _controls?.SetHostActive(false);
     }
 
     private void OnDestroy()
     {
+        _controls?.Disconnect();
         Application.logMessageReceived -= ObserveLog;
         if (_keyword != null) { Destroy(_keyword); }
-        // Core's host handles Play exit; invalidate this scene's scope immediately on destruction.
-        if (_module != null) { _module.Shut(null); }
         if (_core != null) { _core.CloseAsync().Forget(Debug.LogException); }
-    }
-
-    private void OnGUI()
-    {
-        GUI.Label(new Rect(20, 15, Screen.width - 40, 80), "Shader variant demo — content version " + ContentVersion + "\nBundle source: " + _source + "\n" + _status);
-        GUI.enabled = _ready;
-        if (GUI.Button(new Rect(20, 100, 180, 35), "Base variant (red)")) { SetGreen(false); }
-        if (GUI.Button(new Rect(210, 100, 220, 35), "PROBE_GREEN (green / error)")) { SetGreen(true); }
-        if (GUI.Button(new Rect(440, 100, 150, 35), "Close demo")) { CloseAsync().Forget(); }
-        GUI.enabled = true;
     }
 
     private static string Argument(string name)

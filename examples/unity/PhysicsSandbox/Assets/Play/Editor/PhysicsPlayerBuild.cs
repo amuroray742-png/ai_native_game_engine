@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using AiNative.UnityCore.Assets.Editor;
 using AiNative.Examples.PhysicsPlay;
 using UnityEditor;
 using UnityEditor.Build;
@@ -50,7 +51,7 @@ namespace AiNative.Examples.PhysicsPlay.Editor
                     target = BuildTarget.StandaloneWindows64,
                     options = backend == ScriptingImplementation.Mono2x ? BuildOptions.Development : BuildOptions.None
                 };
-                BuildReport report = BuildPipeline.BuildPlayer(options);
+                BuildReport report = AssetPlayerBuildSupport.BuildDeployedPlayer(options);
                 if (report.summary.result != BuildResult.Succeeded)
                 { throw new InvalidOperationException("PhysicsSandbox Player build failed: " + report.summary.result); }
             }

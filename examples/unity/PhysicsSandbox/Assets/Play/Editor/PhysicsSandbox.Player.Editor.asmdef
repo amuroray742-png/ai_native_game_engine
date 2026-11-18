@@ -1,5 +1,11 @@
 {
   "name": "PhysicsSandbox.Player.Editor",
-  "references": ["PhysicsSandbox.Play"],
-  "includePlatforms": ["Editor"]
+  "references": [
+    "PhysicsSandbox.Play",
+    "AiNative.UnityCore.Assets.Editor",
+    "AiNative.UnityCore.Assets"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
 }

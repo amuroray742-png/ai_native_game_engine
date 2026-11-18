@@ -59,12 +59,18 @@ namespace AiNative.Examples.PhysicsPlay
         {
             var scene = FindFirstObjectByType<SandboxScene>();
             Check(scene != null, "PhysicsSandbox host is missing.");
-            scene!.Paused = true;
-            scene.FrameSeconds = () => { double value = _nextSeconds; _nextSeconds = 0; return value; };
+            scene!.FrameSeconds = () => { double value = _nextSeconds; _nextSeconds = 0; return value; };
+            float deadline = Time.realtimeSinceStartup + 45;
+            while (!scene.Ready && scene.StartupError == null && Time.realtimeSinceStartup < deadline) { yield return null; }
+            Check(scene.Ready, "Sandbox presentation failed to start: " + scene.StartupError);
+            var hud = FindFirstObjectByType<SandboxHud>();
+            Check(hud != null && scene.ApplicationHost.Diagnostics.Bundles.Count > 0, "Bundled HUD is missing.");
+            hud!.pause.onClick.Invoke();
+            Check(scene.Paused, "HUD pause button is disconnected.");
             Check(scene.Session.Tick == 0 && JoltWorldFactory.ActiveWorldCount == 1,
                 "Initial physical world is invalid.");
-            scene.Spawn(ShapeKind.Sphere);
-            scene.Spawn(ShapeKind.Box);
+            hud.sphere.onClick.Invoke();
+            hud.box.onClick.Invoke();
             Check(scene.Session.Pending == 2, "Paused inputs were not queued.");
             bool saveRejected = false;
             try { scene.Save(); }
@@ -77,14 +83,18 @@ namespace AiNative.Examples.PhysicsPlay
             Check(scene.Session.Tick == 1 && scene.Session.Processed == 2, "First physical Tick did not consume both inputs.");
             scene.Paused = true;
             Check(scene.Display.Count == 4, "Spawned bodies are not visible.");
-            var snapshot = scene.Save();
+            string saveFile = Path.ChangeExtension(resultPath, ".snapshot.json");
+            scene.SavePath = saveFile;
+            hud.save.onClick.Invoke();
+            Check(File.Exists(saveFile), "The HUD did not write the save slot.");
 
-            scene.Remove(3);
+            hud.Target.text = "3";
+            hud.remove.onClick.Invoke();
             scene.Paused = false;
             _nextSeconds = 1d / 60d;
             for (int frame = 0; scene.Session.Tick != 2 && frame < 300; frame++) { yield return null; }
             Check(scene.Session.Tick == 2 && scene.Display.Count == 3, "Remove did not reach the scene.");
-            scene.Load(snapshot);
+            hud.load.onClick.Invoke();
             Check(scene.Paused && scene.Session.Tick == 1 && scene.Frames.Current.Tick == 1,
                 "Restore did not return to the saved Tick.");
             Check(scene.Display.Count == 4 && JoltWorldFactory.ActiveWorldCount == 1,
@@ -95,10 +105,18 @@ namespace AiNative.Examples.PhysicsPlay
             result.restoredBodies = scene.Display.Count;
             string screenshot = Path.ChangeExtension(resultPath, ".png");
             CaptureScene(screenshot);
+            hud.restart.onClick.Invoke();
+            Check(scene.Session.Tick == 0 && !scene.Paused && scene.Display.Count == 2,
+                "New world did not restore the initial presentation.");
 
             scene.enabled = false;
             result.worldsAfterDisconnect = JoltWorldFactory.ActiveWorldCount;
             Check(result.worldsAfterDisconnect == 0, "Jolt world remained after scene disconnect.");
+            deadline = Time.realtimeSinceStartup + 30;
+            while (!scene.ApplicationHost.Idle && Time.realtimeSinceStartup < deadline) { yield return null; }
+            var diagnostics = scene.ApplicationHost.Diagnostics;
+            Check(scene.ApplicationHost.Idle && diagnostics.Bundles.Count == 0 && diagnostics.Resources.Count == 0 &&
+                diagnostics.PendingOperations == 0 && diagnostics.Errors.Count == 0, "Presentation resources remain after disconnect.");
             result.message = "Physics Player pause, input, save, restore, screenshot and cleanup passed.";
         }
 

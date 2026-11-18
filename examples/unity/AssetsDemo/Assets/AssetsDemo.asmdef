@@ -4,6 +4,9 @@
     "AiNative.UnityCore",
     "AiNative.UnityCore.Assets",
     "UniTask",
-    "AiNative.UnityCore.Assets.Editor"
+    "AiNative.UnityCore.Assets.Editor",
+    "AiNative.UnityCore.UI",
+    "Unity.ugui",
+    "Unity.InputSystem"
   ]
 }

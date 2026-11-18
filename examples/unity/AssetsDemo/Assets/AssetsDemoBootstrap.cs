@@ -11,7 +11,8 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
 {
     private string _status = "Starting";
     private bool _continue;
-    private bool _showContinue;
+    [SerializeField] private UnityEngine.UI.Text sceneStatus;
+    private DemoControls _controls;
     private Core _core;
     private AssetsModule _module;
     private bool _destroyed;
@@ -41,7 +42,12 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             var core = Core.Inst;
             core.RegisterModule(_module);
             _core = core;
+            _controls = new DemoControls(transform, "Assets/DemoControls/AssetsPanel", () => _continue = true);
+            core.RegisterModule(_controls.Module);
             await _core.RunAsync(destruction);
+            await _controls.OpenAsync(destruction);
+            _controls.Show(_status, false);
+            if (sceneStatus != null) { sceneStatus.enabled = false; }
             FailAt("after-start");
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "-assetsShaderProbe") >= 0)
             { await ShaderProbeVerification.Run(_module, destruction); }
@@ -59,13 +65,11 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
             if (material != second.Value.GetComponent<Renderer>().sharedMaterial) { throw new Exception("Shared material identity differs."); }
             if (material.mainTexture != second.Value.GetComponent<Renderer>().sharedMaterial.mainTexture) { throw new Exception("Shared texture identity differs."); }
             _status = "A and B share one material and texture. Continue to test pool, scene and cleanup.";
+            _controls.Show(_status, true);
             Capture();
-            if (!smoke)
-            {
-                _showContinue = true;
-                await UniTask.WaitUntil(() => _continue, cancellationToken: destruction);
-                _showContinue = false;
-            }
+            if (smoke) { _controls.ClickForVerification(0); }
+            await UniTask.WaitUntil(() => _continue, cancellationToken: destruction);
+            _controls.Show("Running cleanup checks...", false);
             first.Dispose();
             await UniTask.Yield();
             if (second.Value.GetComponent<Renderer>().sharedMaterial != material) { throw new Exception("Releasing A destroyed B dependencies."); }
@@ -92,7 +96,6 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         catch (Exception error) { failure = error; }
         finally
         {
-            _showContinue = false;
             if (_core != null)
             {
                 try { await _core.CloseAsync(); }
@@ -111,6 +114,7 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         { failure = new InvalidOperationException("Player logged an error during acceptance: " + renderingError, failure); }
         if (_destroyed && !expectedDestroy && failure == null) { return; }
         _status = failure == null ? completed : failure.ToString();
+        if (sceneStatus != null) { sceneStatus.text = _status; sceneStatus.enabled = true; }
         if (failure == null) { Debug.Log(_status); }
         else { Debug.LogException(failure); }
         WriteResult(failure == null, _status);
@@ -123,8 +127,21 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         if (index >= 0 && index + 1 < args.Length && args[index + 1] == stage)
         { throw new InvalidOperationException("Injected AssetsDemo failure at " + stage); }
     }
+    private void OnEnable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(true); }
+        _controls?.SetHostActive(true);
+    }
+
+    private void OnDisable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(false); }
+        _controls?.SetHostActive(false);
+    }
+
     private void OnDestroy()
     {
+        _controls?.Disconnect();
         _destroyed = true;
         if (_core != null) { _core.CloseAsync().Forget(Debug.LogException); }
     }
@@ -162,9 +179,4 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         if (index >= 0 && index + 1 < args.Length) { File.WriteAllText(args[index + 1], JsonUtility.ToJson(new SmokeResult { success = success, message = message })); }
     }
     [Serializable] private sealed class SmokeResult { public bool success; public string message; }
-    private void OnGUI()
-    {
-        GUI.Label(new Rect(20, 20, Screen.width - 40, 80), _status);
-        if (_showContinue && GUI.Button(new Rect(20, 110, 200, 40), "Run cleanup checks")) { _continue = true; }
-    }
 }

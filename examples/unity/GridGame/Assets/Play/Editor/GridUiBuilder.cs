@@ -61,7 +61,13 @@ namespace AiNative.Examples.GridGame.Play.Editor
                 settings = ScriptableObject.CreateInstance<AssetGroups>();
                 AssetDatabase.CreateAsset(settings, "Assets/UI/ResourceGroups.asset");
             }
-            settings.Groups = new[] { new ResourceGroup { Id = "GridHud", Assets = new[] { new ResourceAddress { Asset = prefab } } } };
+            var board = AssetDatabase.LoadAssetAtPath<GridBoardArt>("Assets/Art/GridBoardArt.asset");
+            if (board == null) { throw new InvalidOperationException("Grid board artwork is missing."); }
+            settings.Groups = new[]
+            {
+                new ResourceGroup { Id = "GridHud", Assets = new[] { new ResourceAddress { Asset = prefab } } },
+                new ResourceGroup { Id = "GridBoard", Assets = new[] { new ResourceAddress { Asset = board } } }
+            };
             settings.EditorLoadMode = EditorAssetLoadMode.AssetBundle;
             settings.BuildBackend = AssetBuildBackend.ScriptableBuildPipeline;
             EditorUtility.SetDirty(settings);

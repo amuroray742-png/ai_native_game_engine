@@ -55,9 +55,9 @@ def verify(output, examples=("grid", "physics"), backends=("Mono", "Il2Cpp")):
                 if path.is_file() and not generated_content:
                     fingerprints[path.relative_to(source).as_posix()] = sha256(path)
         (report / "sources.json").write_text(json.dumps(fingerprints, indent=2), encoding="utf-8")
-        if name == "grid":
-            run_unity(project, report, "content", "AiNative.Examples.GridGame.Play.Editor.GridUiBuilder.BuildContent",
-                      workspace / "unused.exe")
+        content_builder = ("AiNative.Examples.GridGame.Play.Editor.GridUiBuilder.BuildContent" if name == "grid"
+                           else "AiNative.Examples.PhysicsPlay.Editor.SandboxContent.BuildContent")
+        run_unity(project, report, "content", content_builder, workspace / "unused.exe")
         backend_results = {}
         for backend in backends:
             player = workspace / "players" / backend / (source.name + ".exe")

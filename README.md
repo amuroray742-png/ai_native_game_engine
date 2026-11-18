@@ -2,7 +2,7 @@
 
 可复用的纯 C# 玩法内核与工具链。GridGame（手动回合制）和 PhysicsSandbox（60 Hz 真实 Jolt 刚体）作为独立 Example，共用输入、快照、回放、比较和 CLI。
 
-GridGame 和 PhysicsSandbox 各有一个独立 Unity 工程，均已在 Windows x64 Editor 与 CLI 逐 Tick 对照。PhysicsSandbox 的十组比较覆盖均匀推进、补步、暂停输入和两处读档续跑。Player 与 IL2CPP 另行验收。[GridGame 验收](docs/unity-play-host.md) · [PhysicsSandbox 验收](docs/phase-3-physics-sandbox-unity-plan.md) · [架构设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md)
+GridGame 和 PhysicsSandbox 各有一个独立 Unity 工程，均已在 Windows x64 Editor 与 CLI 逐 Tick 对照。PhysicsSandbox 的十组比较覆盖均匀推进、补步、暂停输入和两处读档续跑。两个游戏的 HUD 和表现资源都通过 UnityCore UI 与 Assets 装配，已在 Windows IL2CPP Player 运行验证。[示例迁移与验收](docs/v2-acceptance.md) · [GridGame 宿主](docs/unity-play-host.md) · [PhysicsSandbox 宿主](docs/phase-3-physics-sandbox-unity-plan.md) · [架构设计](docs/ai-native-game-engine-design.md) · [v2 契约](docs/framework-v2.md)
 
 物理后端使用固定版本的 **joltc + 项目扩展**，支持 0–16 个工作线程、完整状态恢复和同线程配置的确定性回放。PhysicsSandbox 场景使用游戏版本 2，必填 `configuration.workerThreads`（示例取 2）。ABI 4 迁移时，C# 接管了实体映射、快照元数据与恢复编排，原生层负责资源清理、事件收集和内部状态。旧 ABI 的物理记录需要重新生成。该迁移提交已有独立的 Windows/Linux 无头 CI 记录。[物理分层迁移与 CI 制品](docs/managed-physics-migration.md) · [joltc 迁移历史](docs/joltc-migration.md)
 
@@ -82,6 +82,7 @@ Windows x64 Player 另运行 `python scripts/verify_unity_ui_players.py TestResu
 
 ```sh
 python scripts/unity_grid.py prepare
+unity run examples/unity/GridGame -- -executeMethod AiNative.Examples.GridGame.Play.Editor.GridUiBuilder.BuildContent
 unity open examples/unity/GridGame
 ```
 
@@ -94,6 +95,7 @@ unity open examples/unity/GridGame
 ```sh
 python scripts/build_native.py
 python scripts/unity_physics.py prepare
+unity run examples/unity/PhysicsSandbox -- -executeMethod AiNative.Examples.PhysicsPlay.Editor.SandboxContent.BuildContent
 unity open examples/unity/PhysicsSandbox
 ```
 

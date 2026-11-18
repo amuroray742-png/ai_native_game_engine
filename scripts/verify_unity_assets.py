@@ -27,7 +27,7 @@ def is_expected_injection(result, stage):
         "System.InvalidOperationException: Injected AssetsDemo failure at " + stage)
 
 
-def verify(output, players, backend="sbp", baseline_fixture=False, renderer="forward"):
+def verify(output, players, backend="sbp", baseline_fixture=False, renderer="forward", demo_only=False):
     output.mkdir(parents=True, exist_ok=False)
     workspace = verification_workspace(output)
     project = copy_verification_project(PROJECT, workspace)
@@ -39,7 +39,8 @@ def verify(output, players, backend="sbp", baseline_fixture=False, renderer="for
     if not cli:
         raise RuntimeError("Install Unity CLI before running verification")
     fingerprints = {}
-    for base in (ROOT / "packages/com.ainative.unitycore", ROOT / "packages/com.ainative.unitycore.assets", PROJECT / "Assets"):
+    for base in (ROOT / "packages/com.ainative.unitycore", ROOT / "packages/com.ainative.unitycore.assets",
+                 ROOT / "packages/com.ainative.unitycore.ui", PROJECT / "Assets", PROJECT / "Packages"):
         for path in sorted(base.rglob("*")):
             if path.is_file() and "StreamingAssets" not in path.parts:
                 fingerprints[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -75,17 +76,18 @@ def verify(output, players, backend="sbp", baseline_fixture=False, renderer="for
         shutil.copytree(content, output / ("content-" + content_backend))
         for reload in ("On", "Off"):
             method(content_backend + "-reload-" + reload, "AssetsDemoSetup.Reload" + reload)
-            for mode in ("PlayMode", "EditMode"):
+            for mode in (("EditMode",) if demo_only else ("PlayMode", "EditMode")):
                 label = content_backend + "-" + mode + "-reload-" + reload
                 xml = output / (label + ".xml")
-                run(label, ["test", project, "--mode", mode, "--filter", "AiNative.UnityCore",
+                run(label, ["test", project, "--mode", mode, "--filter",
+                            "AiNative.UnityCore.AssetsDemoTests" if demo_only else "AiNative.UnityCore",
                             "--output", xml, "--timeout", "800", "--format", "json", "--", "-logFile", output / (label + ".log")])
                 cases = ET.parse(xml).findall(".//test-case")
                 if not cases or any(case.get("result") != "Passed" for case in cases):
                     raise RuntimeError(f"Failed or empty test report: {xml}")
                 summary[label] = len(cases)
         if players:
-            for player_backend in ("Mono", "Il2Cpp"):
+            for player_backend in (("Il2Cpp",) if demo_only else ("Mono", "Il2Cpp")):
                 label = content_backend + "-" + player_backend
                 entry = "AssetsDemoSetup.Build" + player_backend + ("Standard" if content_backend == "sbp" else "")
                 method("build-" + label, entry)
@@ -145,10 +147,11 @@ if __name__ == "__main__":
     parser.add_argument("--backend", choices=("sbp", "builtin", "both"), default="sbp", help="Content backends to verify; each selected backend also builds Players when requested")
     parser.add_argument("--baseline-fixture", action="store_true", help="Use the committed groups fixture only inside the isolated copy; keep local configuration edits untouched")
     parser.add_argument("--renderers", choices=("forward", "forward-plus", "both"), default="forward", help="URP renderer acceptance matrix")
+    parser.add_argument("--demo-only", action="store_true", help="Run the interactive assets demo Editor tests and, with --players, the Windows IL2CPP Player matrix")
     args = parser.parse_args()
     if args.renderers == "both":
         args.output.mkdir(parents=True, exist_ok=False)
         for renderer in ("forward", "forward-plus"):
-            verify((args.output / renderer).resolve(), args.players, args.backend, args.baseline_fixture, renderer)
+            verify((args.output / renderer).resolve(), args.players, args.backend, args.baseline_fixture, renderer, args.demo_only)
     else:
-        verify(args.output.resolve(), args.players, args.backend, args.baseline_fixture, args.renderers)
+        verify(args.output.resolve(), args.players, args.backend, args.baseline_fixture, args.renderers, args.demo_only)

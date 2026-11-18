@@ -3,7 +3,9 @@
   "references": [
     "PhysicsSandbox.Play",
     "AiNative.Unity",
-    "UnityEngine.UI"
+    "UnityEngine.UI",
+    "AiNative.UnityCore.UI",
+    "AiNative.UnityCore.Assets"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

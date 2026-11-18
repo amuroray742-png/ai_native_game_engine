@@ -48,9 +48,8 @@ public static class ExampleUrpSetup
             EditorGraphicsSettings.SetRenderPipelineGlobalSettingsAsset<UniversalRenderPipeline>(global);
         }
 
-        Material display = null;
-        if (project == "GridGame") { display = MaterialAt(Root + "/GridSprite.mat", "AI Native/Grid Sprite"); }
-        if (project == "PhysicsSandbox") { display = MaterialAt(Root + "/Body.mat", "Universal Render Pipeline/Lit"); }
+        if (project == "GridGame") { MaterialAt(Root + "/GridSprite.mat", "AI Native/Grid Sprite"); }
+        if (project == "PhysicsSandbox") { MaterialAt(Root + "/Body.mat", "Universal Render Pipeline/Lit"); }
         if (project == "AssetsDemo")
         {
             var shared = AssetDatabase.LoadAssetAtPath<Material>("Assets/Probe/SharedMaterial.mat");
@@ -76,15 +75,6 @@ public static class ExampleUrpSetup
                     foreach (var camera in root.GetComponentsInChildren<Camera>(true))
                     { var data = camera.GetUniversalAdditionalCameraData(); data.renderPostProcessing = false; }
                     foreach (var light in root.GetComponentsInChildren<Light>(true)) { light.GetUniversalAdditionalLightData(); }
-                    foreach (var component in root.GetComponentsInChildren<MonoBehaviour>(true))
-                    {
-                        if (component == null || display == null) { continue; }
-                        var serialized = new SerializedObject(component);
-                        string field = component.GetType().Name == "GridBoard" ? "spriteMaterial" : component.GetType().Name == "SandboxScene" ? "bodyMaterial" : null;
-                        if (field == null) { continue; }
-                        serialized.FindProperty(field).objectReferenceValue = display;
-                        serialized.ApplyModifiedPropertiesWithoutUndo();
-                    }
                 }
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene);

@@ -20,6 +20,7 @@ public static class AssetsDemoSetup
     public static void Create()
     {
         ConfigureBuildSettings();
+        DemoControlsSetup.CreateMissingControls();
         const string root = "Assets/Probe";
         var settings = AssetDatabase.LoadAssetAtPath<AssetGroups>("Assets/ResourceGroups.asset");
         if (settings == null)
@@ -55,12 +56,13 @@ public static class AssetsDemoSetup
         ResourceGroup Group(string id, string path) => new ResourceGroup { Id = id, Assets = new[] { new ResourceAddress { Asset = AssetDatabase.LoadMainAssetAtPath(path) } } };
         settings.AddressMode = ResourceAddressMode.FullPath;
         settings.Groups = new[] { Group("A", root + "/A.prefab"), Group("B", root + "/B.prefab"), Group("Data", root + "/Data.asset"),
-            Group("Scene", root + "/Content.unity"), Group("Audio", root + "/Tone.wav"), Group("Sprites", root + "/SpriteSet.asset") };
+            Group("Scene", root + "/Content.unity"), Group("Audio", root + "/Tone.wav"), Group("Sprites", root + "/SpriteSet.asset"),
+            DemoControlsSetup.Group(DemoControlsSetup.AssetsPanel) };
         EditorUtility.SetDirty(settings);
         var bootstrap = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
         var host = new GameObject("Assets Demo");
         SceneManager.MoveGameObjectToScene(host, bootstrap);
-        host.AddComponent<AssetsDemoBootstrap>();
+        DemoControlsSetup.AddStatus(host.AddComponent<AssetsDemoBootstrap>());
         var camera = new GameObject("Camera");
         SceneManager.MoveGameObjectToScene(camera, bootstrap);
         camera.AddComponent<Camera>();

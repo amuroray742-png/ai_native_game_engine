@@ -2,6 +2,10 @@
   "name": "PhysicsSandbox.Play",
   "references": [
     "AiNative.Unity",
-    "UnityEngine.UI"
+    "UnityEngine.UI",
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Assets",
+    "AiNative.UnityCore.UI",
+    "UniTask"
   ]
 }
