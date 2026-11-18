@@ -31,16 +31,42 @@ namespace AiNative.Examples.PhysicsPlay
         internal int Contacts { get; private set; }
         private GameRegistry _registry = null!;
         private string _savePath = "";
-        [SerializeField] private SandboxHud hud = null!;
-        [SerializeField] private Material bodyMaterial = null!;
+        internal SandboxApplication ApplicationHost { get; private set; } = null!;
+        internal Exception? StartupError { get; private set; }
+        internal bool Ready => Session != null;
+        internal event Action? RefreshHud;
+        internal event Action? WorldChanged;
+        internal event Action? Disconnecting;
+        private GameObject _box = null!, _sphere = null!;
 
         protected override void ConnectScene()
         {
             _registry = new GameRegistry(Module);
             EnvironmentIdentity = SandboxIdentity.Read(Module);
             _savePath = Path.Combine(Application.persistentDataPath, "physics-v2.snapshot.json");
+            StartupError = null;
+            ApplicationHost = FindFirstObjectByType<SandboxApplication>();
+            if (ApplicationHost == null)
+            {
+                ApplicationHost = new GameObject("Sandbox Application").AddComponent<SandboxApplication>();
+                ApplicationHost.Initialize();
+            }
+            ApplicationHost.Attach(this);
+        }
+
+        internal void StartWorld(GameObject box, GameObject sphere)
+        {
+            _box = box;
+            _sphere = sphere;
             Restart();
-            hud.Bind(this);
+            RefreshHud?.Invoke();
+        }
+
+        internal void ReportStartupFailure(Exception error)
+        {
+            StartupError = error;
+            Debug.LogException(error, this);
+            enabled = false;
         }
 
         internal void Restart()
@@ -73,7 +99,7 @@ namespace AiNative.Examples.PhysicsPlay
                     candidate = create();
                     try
                     {
-                        staged = new SandboxDisplay(transform, bodyMaterial);
+                        staged = new SandboxDisplay(transform, _box, _sphere);
                         var initial = candidate.CaptureObservation();
                         staged.Draw(initial, initial, 1);
                         if (Camera.main == null) { throw new InvalidOperationException("A MainCamera is required."); }
@@ -95,7 +121,7 @@ namespace AiNative.Examples.PhysicsPlay
             Display.Root.SetActive(true);
             Feedback = "";
             Contacts = 0;
-            hud.Target.text = "2";
+            WorldChanged?.Invoke();
         }
 
         private void ReleaseDisplay()
@@ -137,7 +163,7 @@ namespace AiNative.Examples.PhysicsPlay
                 EventsPresented?.Invoke(batch);
             }
             Display.Draw(Frames.Previous, Frames.Current, (float)Host.Interpolation);
-            hud.Show(this);
+            RefreshHud?.Invoke();
         }
 
         internal void SaveToFile(string path)
@@ -158,9 +184,14 @@ namespace AiNative.Examples.PhysicsPlay
 
         protected override void DisconnectScene()
         {
-            hud?.Unbind();
+            Disconnecting?.Invoke();
+            RefreshHud = null;
+            WorldChanged = null;
+            Disconnecting = null;
             EventsPresented = null;
             ReleaseDisplay();
+            _box = _sphere = null!;
+            ApplicationHost?.Detach(this);
         }
 
         internal void SaveSlot() => TryAction(() => SaveToFile(_savePath));

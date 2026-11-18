@@ -19,7 +19,11 @@
     "com.unity.pipeline": "0.10.0-exp.1",
     "com.ainative.unity": "file:../../../../packages/com.ainative.unity",
     "com.ainative.unitycore": "file:../../../../packages/com.ainative.unitycore",
-    "com.unity.render-pipelines.universal": "17.3.0"
+    "com.unity.render-pipelines.universal": "17.3.0",
+    "com.ainative.unitycore.assets": "file:../../../../packages/com.ainative.unitycore.assets",
+    "com.ainative.unitycore.ui": "file:../../../../packages/com.ainative.unitycore.ui",
+    "com.unity.modules.audio": "1.0.0",
+    "com.unity.modules.ui": "1.0.0"
   },
   "testables": [
     "com.ainative.unitycore"

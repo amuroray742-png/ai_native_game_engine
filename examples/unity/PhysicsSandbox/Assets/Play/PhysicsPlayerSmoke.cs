@@ -59,12 +59,18 @@ namespace AiNative.Examples.PhysicsPlay
         {
             var scene = FindFirstObjectByType<SandboxScene>();
             Check(scene != null, "PhysicsSandbox host is missing.");
-            scene!.Paused = true;
-            scene.FrameSeconds = () => { double value = _nextSeconds; _nextSeconds = 0; return value; };
+            scene!.FrameSeconds = () => { double value = _nextSeconds; _nextSeconds = 0; return value; };
+            float deadline = Time.realtimeSinceStartup + 45;
+            while (!scene.Ready && scene.StartupError == null && Time.realtimeSinceStartup < deadline) { yield return null; }
+            Check(scene.Ready, "Sandbox presentation failed to start: " + scene.StartupError);
+            var hud = FindFirstObjectByType<SandboxHud>();
+            Check(hud != null && scene.ApplicationHost.Diagnostics.Bundles.Count > 0, "Bundled HUD is missing.");
+            hud!.pause.onClick.Invoke();
+            Check(scene.Paused, "HUD pause button is disconnected.");
             Check(scene.Session.Tick == 0 && JoltWorldFactory.ActiveWorldCount == 1,
                 "Initial physical world is invalid.");
-            scene.Spawn(ShapeKind.Sphere);
-            scene.Spawn(ShapeKind.Box);
+            hud.sphere.onClick.Invoke();
+            hud.box.onClick.Invoke();
             Check(scene.Session.Pending == 2, "Paused inputs were not queued.");
             bool saveRejected = false;
             try { scene.Save(); }
@@ -99,6 +105,11 @@ namespace AiNative.Examples.PhysicsPlay
             scene.enabled = false;
             result.worldsAfterDisconnect = JoltWorldFactory.ActiveWorldCount;
             Check(result.worldsAfterDisconnect == 0, "Jolt world remained after scene disconnect.");
+            deadline = Time.realtimeSinceStartup + 30;
+            while (!scene.ApplicationHost.Idle && Time.realtimeSinceStartup < deadline) { yield return null; }
+            var diagnostics = scene.ApplicationHost.Diagnostics;
+            Check(scene.ApplicationHost.Idle && diagnostics.Bundles.Count == 0 && diagnostics.Resources.Count == 0 &&
+                diagnostics.PendingOperations == 0 && diagnostics.Errors.Count == 0, "Presentation resources remain after disconnect.");
             result.message = "Physics Player pause, input, save, restore, screenshot and cleanup passed.";
         }
 

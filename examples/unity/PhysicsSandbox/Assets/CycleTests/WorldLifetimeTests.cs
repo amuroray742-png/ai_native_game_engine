@@ -21,6 +21,8 @@ namespace AiNative.Examples.PhysicsPlayTests
             yield return new EnterPlayMode(expectDomainReload: reload);
             Assert.True(Application.isPlaying);
             Assert.NotNull(Object.FindFirstObjectByType<SandboxScene>());
+            double deadline = EditorApplication.timeSinceStartup + 30;
+            while (JoltWorldFactory.ActiveWorldCount == 0 && EditorApplication.timeSinceStartup < deadline) { yield return null; }
             Assert.AreEqual(1, JoltWorldFactory.ActiveWorldCount);
             yield return new ExitPlayMode();
             Assert.False(EditorApplication.isPlaying);

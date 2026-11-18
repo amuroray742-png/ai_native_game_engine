@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f620af9776af504ab49a215eb26c176, type: 3}
+  m_Name: ResourceGroups
+  m_EditorClassIdentifier: AiNative.UnityCore.Assets.Editor::AiNative.UnityCore.Assets.Editor.AssetGroups
+  Version: 1
+  OutputDirectory: '{projectDir}/BundleBuildOutput/{version}'
+  EditorLoadMode: 0
+  BuildBackend: 0
+  AddressMode: 0
+  BundleNaming: 0
+  Groups:
+  - Id: Bodies
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 154501549533150545, guid: 201b982129b626e4f9d16c279ff59eea, type: 3}
+    - Asset: {fileID: 4561573830002114674, guid: b27ee141370b03a4b9a28ed9d566b67e, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  - Id: Hud
+    Name: 
+    Folders: []
+    Assets:
+    - Asset: {fileID: 1992016762847560740, guid: 523ddfcdf33ffeb48a299078b2c57f37, type: 3}
+    Filter:
+      ExcludedFolders: []
+      IncludedTypes: []
+    PlatformFilters: []
+  BundleWarningBytes: 0
+  TotalWarningBytes: 0
+  Shaders: {fileID: 0}
+  _lastBuildPath: 
+  _lastBuildVersion: 0
+  _lastBuildCatalogSha256: 

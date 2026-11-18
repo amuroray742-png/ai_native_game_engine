@@ -12,7 +12,7 @@ namespace AiNative.Examples.PhysicsPlay
     internal sealed class SandboxDisplay : IDisposable
     {
         internal readonly GameObject Root;
-        private readonly Material _material;
+        private readonly GameObject _box, _sphere;
         private readonly Dictionary<ulong, GameObject> _objects = new Dictionary<ulong, GameObject>();
         private readonly List<ulong> _removed = new List<ulong>();
         private readonly HashSet<ulong> _visible = new HashSet<ulong>();
@@ -22,9 +22,10 @@ namespace AiNative.Examples.PhysicsPlay
         internal long ToTick { get; private set; }
         internal float Fraction { get; private set; }
 
-        internal SandboxDisplay(Transform parent, Material material)
+        internal SandboxDisplay(Transform parent, GameObject box, GameObject sphere)
         {
-            _material = material;
+            _box = box;
+            _sphere = sphere;
             Root = new GameObject("Physics bodies");
             Root.SetActive(false);
             Root.transform.SetParent(parent, false);
@@ -42,18 +43,13 @@ namespace AiNative.Examples.PhysicsPlay
                 _visible.Add(body.Id);
                 if (!_objects.TryGetValue(body.Id, out var item))
                 {
-                    item = GameObject.CreatePrimitive(body.Shape == ShapeKind.Box ? PrimitiveType.Cube : PrimitiveType.Sphere);
+                    item = Object.Instantiate(body.Shape == ShapeKind.Box ? _box : _sphere, Root.transform, false);
                     item.name = "Body " + body.Id;
-                    item.transform.SetParent(Root.transform, false);
-                    var collider = item.GetComponent<Collider>();
-                    collider.enabled = false;
-                    Object.Destroy(collider);
                     var size = Vector(body.Size);
                     item.transform.localScale = body.Shape == ShapeKind.Box ? 2 * size : Vector3.one * (2 * size.x);
                     var tint = new MaterialPropertyBlock();
                     tint.SetColor("_BaseColor", !body.Dynamic ? new Color(.20f,.29f,.36f) :
                         body.Shape == ShapeKind.Sphere ? new Color(.23f,.82f,.74f) : new Color(.98f,.57f,.32f));
-                    item.GetComponent<Renderer>().sharedMaterial = _material;
                     item.GetComponent<Renderer>().SetPropertyBlock(tint);
                     _objects.Add(body.Id, item);
                 }
