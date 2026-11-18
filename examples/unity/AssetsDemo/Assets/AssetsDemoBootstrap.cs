@@ -127,8 +127,21 @@ public sealed class AssetsDemoBootstrap : MonoBehaviour
         if (index >= 0 && index + 1 < args.Length && args[index + 1] == stage)
         { throw new InvalidOperationException("Injected AssetsDemo failure at " + stage); }
     }
+    private void OnEnable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(true); }
+        _controls?.SetHostActive(true);
+    }
+
+    private void OnDisable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(false); }
+        _controls?.SetHostActive(false);
+    }
+
     private void OnDestroy()
     {
+        _controls?.Disconnect();
         _destroyed = true;
         if (_core != null) { _core.CloseAsync().Forget(Debug.LogException); }
     }

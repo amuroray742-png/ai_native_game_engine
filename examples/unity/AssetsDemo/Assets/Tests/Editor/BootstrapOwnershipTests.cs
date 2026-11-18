@@ -41,17 +41,31 @@ namespace AiNative.UnityCore.AssetsDemoTests
         [UnityTest]
         public IEnumerator CleanupButtonReleasesResourcesAndShowsResult()
         {
-            EditorSceneManager.OpenScene("Assets/Bootstrap.unity");
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
             bool reload = !EditorSettings.enterPlayModeOptionsEnabled ||
                 (EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) == 0;
             yield return new EnterPlayMode(expectDomainReload: reload);
             yield return UniTask.ToCoroutine(async () =>
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                var host = Object.FindFirstObjectByType<AssetsDemoBootstrap>();
-                await UniTask.WaitUntil(() => GameObject.Find("Run cleanup checks")?.GetComponent<Button>().IsInteractable() == true,
-                    cancellationToken: timeout.Token);
-                GameObject.Find("Run cleanup checks").GetComponent<Button>().onClick.Invoke();
+                var host = await DemoControlsLifecycle.DisableDuringLoad<AssetsDemoBootstrap>("Assets/Bootstrap.unity", timeout.Token);
+                Button button = null;
+                await UniTask.WaitUntil(() =>
+                {
+                    button = DemoControlsLifecycle.ButtonIncludingInactive("Run cleanup checks");
+                    return button != null && button.GetComponentInParent<DemoControlsView>(true)
+                        .GetComponentsInChildren<Text>(true).Any(label => label.text.Contains("share one material"));
+                }, cancellationToken: timeout.Token);
+                Assert.IsFalse(button.gameObject.activeInHierarchy);
+                button.onClick.Invoke();
+                host.enabled = true;
+                Assert.IsTrue(button.IsInteractable());
+                host.enabled = false;
+                button.onClick.Invoke();
+                await UniTask.NextFrame();
+                host.enabled = true;
+                Assert.IsTrue(button.IsInteractable(), "A stale click started cleanup while the host was disabled.");
+                button.onClick.Invoke();
                 await UniTask.WaitUntil(() => host.GetComponentsInChildren<Text>().Any(label =>
                     label.isActiveAndEnabled && label.text.StartsWith("PASS:", StringComparison.Ordinal)),
                     cancellationToken: timeout.Token);

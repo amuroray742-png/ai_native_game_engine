@@ -52,15 +52,25 @@ public sealed class ShaderVariantDemoTests
     [UnityTest]
     public IEnumerator EditorDisplaysRealBundleContentAndReleasesIt()
     {
-        EditorSceneManager.OpenScene(ShaderVariantDemoSetup.ScenePath);
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
         bool reload = !EditorSettings.enterPlayModeOptionsEnabled ||
             (EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableDomainReload) == 0;
         yield return new EnterPlayMode(expectDomainReload: reload);
         yield return UniTask.ToCoroutine(async () =>
         {
-            var demo = Object.FindFirstObjectByType<ShaderVariantDemo>();
             using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var demo = await DemoControlsLifecycle.DisableDuringLoad<ShaderVariantDemo>(ShaderVariantDemoSetup.ScenePath, timeout.Token);
             await UniTask.WaitUntil(() => demo.Ready, cancellationToken: timeout.Token);
+            var red = DemoControlsLifecycle.ButtonIncludingInactive("Base variant (red)");
+            Assert.IsFalse(red.gameObject.activeInHierarchy);
+            red.onClick.Invoke();
+            Assert.IsTrue(demo.Green);
+            demo.enabled = true;
+            Assert.IsTrue(red.IsInteractable());
+            demo.enabled = false;
+            red.onClick.Invoke();
+            Assert.IsTrue(demo.Green, "A stale click changed the displayed variant.");
+            demo.enabled = true;
             Assert.IsTrue(File.Exists(Path.Combine(demo.Source, "catalog.json")));
             Assert.IsTrue(AssetBundle.GetAllLoadedAssetBundles().Any());
             var camera = demo.GetComponentInChildren<Camera>();

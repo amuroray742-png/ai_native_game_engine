@@ -15,6 +15,7 @@ internal sealed class DemoControls
     private readonly EventSystem _events;
     private string _status;
     private bool _enabled;
+    private bool _hostActive = true;
     internal UIModule Module { get; }
 
     internal DemoControls(Transform sceneRoot, string address, params UnityAction[] commands)
@@ -41,7 +42,21 @@ internal sealed class DemoControls
         _enabled = enabled;
         if (_active == null) { return; }
         _active.Status.text = _status;
-        foreach (var button in _active.Buttons) { button.interactable = _enabled; }
+        _active.Visual.gameObject.SetActive(_hostActive);
+        foreach (var button in _active.Buttons) { button.interactable = _hostActive && _enabled; }
+    }
+
+    internal void SetHostActive(bool active)
+    {
+        _hostActive = active;
+        if (_events != null) { _events.gameObject.SetActive(active); }
+        Show(_status, _enabled);
+    }
+
+    internal void Disconnect()
+    {
+        SetHostActive(false);
+        Array.Clear(_commands, 0, _commands.Length);
     }
 
     // Exercise the same raycast target and click binding as the interactive demo.
@@ -67,10 +82,21 @@ internal sealed class DemoControls
     {
         private readonly DemoControls _controls;
         private readonly DemoControlsView _view;
+        private readonly UnityAction[] _listeners;
         internal Presenter(DemoControls controls, DemoControlsView view)
         {
             _controls = controls;
             _view = view;
+            _listeners = new UnityAction[controls._commands.Length];
+            for (int i = 0; i < _listeners.Length; i++)
+            {
+                int index = i;
+                _listeners[i] = () =>
+                {
+                    if (_controls._hostActive && _controls._enabled && _controls._active == _view)
+                    { _controls._commands[index]?.Invoke(); }
+                };
+            }
         }
 
         public override void Bind()
@@ -78,7 +104,7 @@ internal sealed class DemoControls
             if (_view.Buttons.Length != _controls._commands.Length)
             { throw new InvalidOperationException("Demo controls and commands differ."); }
             for (int i = 0; i < _view.Buttons.Length; i++)
-            { _view.Buttons[i].onClick.AddListener(_controls._commands[i]); }
+            { _view.Buttons[i].onClick.AddListener(_listeners[i]); }
         }
 
         public override void Resume()
@@ -97,7 +123,7 @@ internal sealed class DemoControls
             Suspend();
             if (_view == null) { return; }
             for (int i = 0; i < Math.Min(_view.Buttons.Length, _controls._commands.Length); i++)
-            { _view.Buttons[i].onClick.RemoveListener(_controls._commands[i]); }
+            { _view.Buttons[i].onClick.RemoveListener(_listeners[i]); }
         }
     }
 }

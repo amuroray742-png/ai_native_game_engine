@@ -23,7 +23,7 @@ public sealed class ShaderVariantDemo : MonoBehaviour
     private bool _ready;
     private bool _green;
     private bool _checkingGreen;
-    private UniTask? _closeTask;
+    private System.Threading.Tasks.Task _closeTask;
     private int _missingErrors;
     private string _unexpectedError;
     public bool Ready => _ready;
@@ -165,8 +165,8 @@ public sealed class ShaderVariantDemo : MonoBehaviour
 
     public UniTask CloseAsync()
     {
-        if (!_closeTask.HasValue) { _closeTask = CloseOperationAsync().Preserve(); }
-        return _closeTask.Value;
+        _closeTask ??= CloseOperationAsync().AsTask();
+        return _closeTask.AsUniTask();
     }
 
     private async UniTask CloseOperationAsync()
@@ -184,11 +184,23 @@ public sealed class ShaderVariantDemo : MonoBehaviour
         if (sceneStatus != null) { sceneStatus.text = message; sceneStatus.enabled = true; }
     }
 
+    private void OnEnable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(true); }
+        _controls?.SetHostActive(true);
+    }
+
+    private void OnDisable()
+    {
+        if (sceneStatus != null) { sceneStatus.gameObject.SetActive(false); }
+        _controls?.SetHostActive(false);
+    }
+
     private void OnDestroy()
     {
+        _controls?.Disconnect();
         Application.logMessageReceived -= ObserveLog;
         if (_keyword != null) { Destroy(_keyword); }
-        // Core's host handles Play exit; invalidate this scene's scope immediately on destruction.
         if (_core != null) { _core.CloseAsync().Forget(Debug.LogException); }
     }
 
