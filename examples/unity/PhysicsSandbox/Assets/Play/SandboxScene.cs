@@ -30,7 +30,7 @@ namespace AiNative.Examples.PhysicsPlay
         internal string Feedback { get; private set; } = "";
         internal int Contacts { get; private set; }
         private GameRegistry _registry = null!;
-        private string _savePath = "";
+        internal string SavePath { private get; set; } = "";
         internal SandboxApplication ApplicationHost { get; private set; } = null!;
         internal Exception? StartupError { get; private set; }
         internal bool Ready => Session != null;
@@ -43,7 +43,7 @@ namespace AiNative.Examples.PhysicsPlay
         {
             _registry = new GameRegistry(Module);
             EnvironmentIdentity = SandboxIdentity.Read(Module);
-            _savePath = Path.Combine(Application.persistentDataPath, "physics-v2.snapshot.json");
+            SavePath = Path.Combine(Application.persistentDataPath, "physics-v2.snapshot.json");
             StartupError = null;
             ApplicationHost = FindFirstObjectByType<SandboxApplication>();
             if (ApplicationHost == null)
@@ -194,8 +194,8 @@ namespace AiNative.Examples.PhysicsPlay
             ApplicationHost?.Detach(this);
         }
 
-        internal void SaveSlot() => TryAction(() => SaveToFile(_savePath));
-        internal void LoadSlot() => TryAction(() => LoadFile(_savePath));
+        internal void SaveSlot() => TryAction(() => SaveToFile(SavePath));
+        internal void LoadSlot() => TryAction(() => LoadFile(SavePath));
         internal void NewWorld() => TryAction(Restart);
 
         internal long Impulse(ulong id, NVector value) => Submit(new ApplyImpulse(id, value));
