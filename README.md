@@ -82,6 +82,7 @@ Windows x64 Player 另运行 `python scripts/verify_unity_ui_players.py TestResu
 
 ```sh
 python scripts/unity_grid.py prepare
+unity run examples/unity/GridGame -- -executeMethod AiNative.Examples.GridGame.Play.Editor.GridUiBuilder.BuildContent
 unity open examples/unity/GridGame
 ```
 
@@ -94,6 +95,7 @@ unity open examples/unity/GridGame
 ```sh
 python scripts/build_native.py
 python scripts/unity_physics.py prepare
+unity run examples/unity/PhysicsSandbox -- -executeMethod AiNative.Examples.PhysicsPlay.Editor.SandboxContent.BuildContent
 unity open examples/unity/PhysicsSandbox
 ```
 

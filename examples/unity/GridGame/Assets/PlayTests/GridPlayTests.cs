@@ -158,10 +158,12 @@ namespace AiNative.Examples.GridGame.PlayTests
             _game.enabled = false;
             yield return WaitForUiIdle(app);
             var model = new GridHudModel(() => Assert.Fail(), () => Assert.Fail());
-            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("MissingBoard"));
+            LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("Unknown address"));
             app.Attach(model, "Assets/Art/MissingBoard", _ => Assert.Fail("Missing artwork started a match"));
             yield return WaitForUiIdle(app);
-            Assert.NotNull(model.Error);
+            var error = model.Error as AiNative.UnityCore.Assets.AssetException;
+            Assert.AreEqual("AddressNotFound", error?.Code);
+            Assert.AreEqual("Assets/Art/MissingBoard", error?.Address);
             Assert.False(model.Ready);
             Assert.AreEqual(0, app.UI.GetDiagnostics().WindowCount);
             Assert.AreEqual(0, app.Assets.GetDiagnostics().Resources.Count);

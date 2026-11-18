@@ -44,6 +44,7 @@ flowchart LR
 
 ```sh
 python scripts/unity_grid.py prepare
+unity run examples/unity/GridGame -- -executeMethod AiNative.Examples.GridGame.Play.Editor.GridUiBuilder.BuildContent
 unity open examples/unity/GridGame
 ```
 
