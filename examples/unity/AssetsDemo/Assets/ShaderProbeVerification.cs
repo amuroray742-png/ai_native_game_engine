@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using AiNative.UnityCore.Assets;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -8,7 +9,7 @@ using UnityEngine.Rendering;
 
 public static class ShaderProbeVerification
 {
-    public static async UniTask Run(IAssets assets)
+    public static async UniTask Run(IAssets assets, CancellationToken cancellationToken = default)
     {
         var scope = assets.CreateScope("shader-verification");
         GameObject cameraObject = null;
@@ -18,8 +19,8 @@ public static class ShaderProbeVerification
         Material graph = null;
         try
         {
-            await scope.WarmupShadersAsync(new[] { "Assets/Rendering/ProbeVariants" });
-            var instance = await scope.InstantiateAsync("Assets/Rendering/ShaderProbe");
+            await scope.WarmupShadersAsync(new[] { "Assets/Rendering/ProbeVariants" }, cancellationToken);
+            var instance = await scope.InstantiateAsync("Assets/Rendering/ShaderProbe", cancellationToken: cancellationToken);
             instance.Value.transform.position = new Vector3(0, 0, 100);
             cameraObject = new GameObject("Shader verification camera");
             var camera = cameraObject.AddComponent<Camera>();
@@ -45,7 +46,7 @@ public static class ShaderProbeVerification
             {
                 if (!renderer.sharedMaterial.shader.isSupported) { throw new Exception("Unsupported shader: " + renderer.sharedMaterial.shader.name); }
             }
-            await UniTask.NextFrame();
+            await UniTask.NextFrame(cancellationToken: cancellationToken);
             Capture(camera, target, pixels);
             Color red = pixels.GetPixel(32, 64);
             Color graphBefore = pixels.GetPixel(176, 64);
@@ -59,7 +60,7 @@ public static class ShaderProbeVerification
             keyword.EnableKeyword("PROBE_GREEN");
             graph.EnableKeyword("_EMISSION");
             if (graph.HasProperty("_EmissionColor")) { graph.SetColor("_EmissionColor", Color.green * 2); }
-            await UniTask.NextFrame();
+            await UniTask.NextFrame(cancellationToken: cancellationToken);
             Capture(camera, target, pixels);
             Color green = pixels.GetPixel(32, 64);
             Color graphAfter = pixels.GetPixel(176, 64);

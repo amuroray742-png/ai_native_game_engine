@@ -102,6 +102,32 @@ def verify(output, players, backend="sbp", baseline_fixture=False, renderer="for
                 if not result_path.with_suffix(".shader.png").is_file():
                     raise RuntimeError("Shader pixel verification did not produce its screenshot")
                 summary[label] = result
+                for stage in ("after-start", "after-first-load"):
+                    failure_path = output / (label + "-failure-" + stage + ".json")
+                    failure_log = output / (label + "-failure-" + stage + ".log")
+                    command = [str(executable), "-batchmode", "-force-d3d11", "-assetsSmoke",
+                               "-assetsFailAt", stage, "-assetsResult", str(failure_path), "-logFile", str(failure_log)]
+                    failed = subprocess.run(command, cwd=executable.parent, timeout=90, creationflags=creationflags)
+                    check_native_leaks(failure_log)
+                    if failed.returncode != 1 or not failure_path.is_file():
+                        raise RuntimeError(f"Expected Player failure at {stage}, exit={failed.returncode}")
+                    failure_result = json.loads(failure_path.read_bytes())
+                    if failure_result["success"] or "Injected AssetsDemo failure at " + stage not in failure_result["message"]:
+                        raise RuntimeError(f"Unexpected Player failure result at {stage}: {failure_result}")
+                    summary[label + "-failure-" + stage] = {"exitCode": failed.returncode, "result": failure_result}
+                destroyed_path = output / (label + "-destroy.json")
+                destroyed_log = output / (label + "-destroy.log")
+                command = [str(executable), "-batchmode", "-force-d3d11", "-assetsSmoke",
+                           "-assetsDestroyAfterFirstLoad", "-assetsResult", str(destroyed_path),
+                           "-logFile", str(destroyed_log)]
+                destroyed = subprocess.run(command, cwd=executable.parent, timeout=90, creationflags=creationflags)
+                check_native_leaks(destroyed_log)
+                if destroyed.returncode or not destroyed_path.is_file():
+                    raise RuntimeError(f"AssetsDemo destruction smoke failed ({destroyed.returncode})")
+                destroy_result = json.loads(destroyed_path.read_bytes())
+                if not destroy_result["success"] or "destruction cancelled work" not in destroy_result["message"]:
+                    raise RuntimeError(f"Unexpected destruction result: {destroy_result}")
+                summary[label + "-destroy"] = destroy_result
     (output / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary), flush=True)
 

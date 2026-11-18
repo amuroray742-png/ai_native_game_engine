@@ -37,6 +37,7 @@ namespace AiNative.Examples.PhysicsPlay
             {
                 throw new InvalidOperationException("Loaded Jolt library differs from the build manifest.");
             }
+#if !ENABLE_IL2CPP
             var assemblies = new List<Assembly> { typeof(JsonDocument).Assembly, typeof(RuntimeState).Assembly,
                 typeof(IGameModule).Assembly, typeof(SandboxScene).Assembly, typeof(PlayHost<,>).Assembly,
                 typeof(Application).Assembly, typeof(UnityEngine.UI.Button).Assembly, typeof(System.Text.Encodings.Web.JavaScriptEncoder).Assembly,
@@ -49,15 +50,30 @@ namespace AiNative.Examples.PhysicsPlay
                     assemblies.Add(Assembly.Load(dependency));
                 }
             }
-            return new HostEnvironment("Unity " + Application.unityVersion + " / Mono " + Environment.Version,
+#endif
+            return new HostEnvironment("Unity " + Application.unityVersion + " / " +
+#if ENABLE_IL2CPP
+                "IL2CPP",
+#else
+                "Mono " + Environment.Version,
+#endif
                 Application.platform.ToString(), RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant(),
                 JsonData.Write(writer =>
                 {
                     writer.WriteStartObject();
+#if ENABLE_IL2CPP
+                    // AOT assemblies have no file location. The generated code and metadata are
+                    // the executable identity used for strict Player restore in this backend.
+                    string playerDirectory = Path.GetDirectoryName(Application.dataPath);
+                    writer.WriteString("GameAssembly.dll", JsonData.Hash(File.ReadAllBytes(Path.Combine(playerDirectory, "GameAssembly.dll"))));
+                    writer.WriteString("global-metadata.dat", JsonData.Hash(File.ReadAllBytes(
+                        Path.Combine(Application.dataPath, "il2cpp_data", "Metadata", "global-metadata.dat"))));
+#else
                     foreach (var assembly in assemblies.Distinct())
                     {
                         writer.WriteString(assembly.GetName().Name, JsonData.Hash(File.ReadAllBytes(assembly.Location)));
                     }
+#endif
                     writer.WriteString("ainative_jolt.dll", binaryHash);
                     writer.WriteString("ainative_jolt.build", JsonData.Hash(manifest));
                     writer.WriteEndObject();
