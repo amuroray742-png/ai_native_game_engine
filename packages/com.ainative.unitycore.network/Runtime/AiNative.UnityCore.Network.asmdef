@@ -1,0 +1,4 @@
+{
+  "name": "AiNative.UnityCore.Network",
+  "references": ["AiNative.UnityCore", "UniTask"]
+}

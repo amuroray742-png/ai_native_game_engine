@@ -20,6 +20,7 @@
 | 通用 Headless | Hosting、必要的输入输出适配 | Example、具体物理实现 |
 | Example Runner | 宿主、游戏适配、物理工厂 | 绕过公开契约修改内部状态 |
 | Unity 表现适配 | 核心公开接口、表现与资源能力 | 核心内部可变状态及独立玩法裁决 |
+| UnityCore Network 应用服务 | UnityCore、UniTask、UnityWebRequest、系统套接字 | 玩法、Hosting、UI、Assets、权威 Tick 推进 |
 | UnityCore UI 应用服务 | UnityCore、Assets、uGUI、UniTask | 模拟内核内部状态、Hosting、Example、权威 Tick 推进 |
 | CLI 与验证工具 | 宿主公开能力、测试和报告工具 | 绕过边界直接修改玩法状态 |
 

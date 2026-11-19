@@ -1,0 +1,6 @@
+{
+  "name": "AiNative.UnityCore.Network.EditorTests",
+  "references": ["AiNative.UnityCore.Network", "AiNative.UnityCore", "UniTask"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

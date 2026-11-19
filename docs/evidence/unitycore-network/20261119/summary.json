@@ -1,0 +1,76 @@
+{
+  "unity": "6000.3.23f1",
+  "editor": [
+    {
+      "name": "PlayMode-On",
+      "result": "Passed",
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "13a1d58ce96ed0a4eaf1ee6afc78e11348a41263f8cd01b2932327ad31946c3f",
+      "tests": [
+        "AiNative.NetworkDemo.Tests.NetworkTests.CancelTimeoutAndRefusedAreDistinct",
+        "AiNative.NetworkDemo.Tests.NetworkTests.DemoUsesInterchangeableMessageConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.HttpPreservesBinaryHeadersAndErrorResponses",
+        "AiNative.NetworkDemo.Tests.NetworkTests.MalformedFramesEndOnlyTheirConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PeerCloseDuringWritesSettlesBoundedQueueOnce",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PlayRetirementCancelsWithoutAnotherFrame",
+        "AiNative.NetworkDemo.Tests.NetworkTests.QueuedWriterObservesDisconnectBeforeItsInlineContinuation",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartInsideDisconnectWaitsForRemainingListeners",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartSettlesDependentSendAndRetiresOldWork",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SplitJoinedAndConcurrentMessagesPreserveOrder"
+      ]
+    },
+    {
+      "name": "EditMode-On",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "3b00fa6c915330905e7bdaa636d1fd68e451c0ae6482e0f885d6726dacbe93ca",
+      "tests": [
+        "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests.RealPlayExitsCancelHttpAndDisconnectBeforeReentry"
+      ]
+    },
+    {
+      "name": "PlayMode-Off",
+      "result": "Passed",
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "7da1b350939392ea6ef3c66bcbcd2e0f47780a4429fe6ac5d6c66fab3361a80e",
+      "tests": [
+        "AiNative.NetworkDemo.Tests.NetworkTests.CancelTimeoutAndRefusedAreDistinct",
+        "AiNative.NetworkDemo.Tests.NetworkTests.DemoUsesInterchangeableMessageConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.HttpPreservesBinaryHeadersAndErrorResponses",
+        "AiNative.NetworkDemo.Tests.NetworkTests.MalformedFramesEndOnlyTheirConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PeerCloseDuringWritesSettlesBoundedQueueOnce",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PlayRetirementCancelsWithoutAnotherFrame",
+        "AiNative.NetworkDemo.Tests.NetworkTests.QueuedWriterObservesDisconnectBeforeItsInlineContinuation",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartInsideDisconnectWaitsForRemainingListeners",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartSettlesDependentSendAndRetiresOldWork",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SplitJoinedAndConcurrentMessagesPreserveOrder"
+      ]
+    },
+    {
+      "name": "EditMode-Off",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "f164c4a27538815a5251ea807140394dbfb0d70ad5ff92be75a27680d0896568",
+      "tests": [
+        "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests.RealPlayExitsCancelHttpAndDisconnectBeforeReentry"
+      ]
+    }
+  ],
+  "player": "Windows x64 IL2CPP passed",
+  "ports": {
+    "http": 57224,
+    "tcp": 57227
+  }
+}

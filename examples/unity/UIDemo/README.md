@@ -1,6 +1,6 @@
 # UIDemo
 
-独立 Unity 6000.3.23f1 工程，使用本仓库 Core、Assets、UI 三包及 uGUI Text。打开 `Assets/Bootstrap.unity`，先执行菜单 **UIDemo → Build and deploy SBP content**，再进入 Play。运行宿主始终使用真实 AssetBundle；未部署内容时明确报错，不回退到 AssetDatabase。
+独立 Unity 6000.3.23f1 工程，使用本仓库 Core、Assets、UI 及 uGUI Text；独立网络场景额外装配 Network 包。打开 `Assets/Bootstrap.unity`，先执行菜单 **UIDemo → Build and deploy SBP content**，再进入 Play。运行宿主始终使用真实 AssetBundle；未部署内容时明确报错，不回退到 AssetDatabase。
 
 场景、Prefab、共享图片、ResourceGroups 和 meta 已保存。需要重新生成时先执行 **UIDemo → Create scenes and content**（会重建本 Demo 的场景及 Prefab），再构建。构建克隆 ResourceGroups 到独立的新目录，使用 AssetBuilder + AssetDeployment，不递增开发配置的版本。输出在 `BuildArtifacts/UIContent/<唯一目录>`，部署在 `Assets/StreamingAssets/AiNativeAssets`；生成的 Bundle 不纳入源码。
 
@@ -32,9 +32,11 @@ python -m unittest discover -s scripts -p test_verify_unity_ui.py -v
 python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>
 ```
 
-脚本拒绝已有输出目录；通过 unity_packages 复制三包与工程到独立短路径，重新生成 Demo 并构建/部署 SBP Bundle，再运行 Domain Reload 开/关各 UI EditMode、UI PlayMode 和 Demo PlayMode。源码复制指纹、生成后的 fixture 指纹分开保存；不使用开发目录已有 Bundle。XML 必须非空、无失败/跳过、满足已验基线最小数量，双重载测试名称集合须一致；实际数量由 XML 汇总。逐个校验完整日志、实际 Editor 版本、构建/部署哈希及工作区源码未在运行中变化。故障注入日志仅按对应 suite 的精确文本和出现次数放行。
+脚本拒绝已有输出目录；通过 unity_packages 复制本地源码包与工程到独立短路径，重新生成 Demo 并构建/部署 SBP Bundle，再运行 Domain Reload 开/关各 UI EditMode、UI PlayMode 和 Demo PlayMode。源码复制指纹、生成后的 fixture 指纹分开保存；不使用开发目录已有 Bundle。XML 必须非空、无失败/跳过、满足已验基线最小数量，双重载测试名称集合须一致；实际数量由 XML 汇总。逐个校验完整日志、实际 Editor 版本、构建/部署哈希及工作区源码未在运行中变化。故障注入日志仅按对应 suite 的精确文本和出现次数放行。
 
 `summary.json` 的 Passed 只代表自动矩阵；截图字段保持待可见 Editor 检查，不把测试成功冒充视觉验收。打开 `workspace.txt` 指向副本中的 `examples/unity/UIDemo`，按下文操作取得 screen 截图并独立记录；Pipeline 只作为该副本的观察工具。Task 8 已完成的矩阵和独立截图见[最终验收](../../../docs/unitycore-ui.md#task-8-层级顺序隔离验证与交付2026-11-13)。脚本失败保留 commands.jsonl、stdout/stderr、完整日志、已有 XML 和 failure.json，不发布成功摘要，也不清理失败现场。
+
+网络示例可直接从 `Assets/Network/NetworkDemo.unity` 进入 Play。用于启动回环服务、操作示例及运行独立网络验收的命令见[网络包说明](../../../packages/com.ainative.unitycore.network/README.md)。
 
 ## Windows Player 验收入口
 

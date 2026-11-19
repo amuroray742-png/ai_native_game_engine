@@ -51,6 +51,7 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | packages/com.ainative.unitycore | Unity 应用模块生命周期、日志与表现回调，PhysicsSandbox 直接引用仓库中的源码及测试 |
 | packages/com.ainative.unitycore.assets | 本地资源句柄、作用域、共享 AssetBundle、实例池、场景及 Editor 分包/校验工具 |
 | packages/com.ainative.unitycore.ui | uGUI 窗口所有权、页面/模态导航、缓存、输入焦点与过渡；[包入口](packages/com.ainative.unitycore.ui/README.md) |
+| packages/com.ainative.unitycore.network | Unity 应用 HTTP 请求、TCP 有序二进制消息、显式重连与关闭清理。[接口与验收入口](packages/com.ainative.unitycore.network/README.md) |
 | examples/unity/UIDemo | 独立 UI 交互示例、真实 Bundle 集成与双 Domain Reload 验收 |
 | examples/unity/AssetsDemo | 独立资源示例及 Windows Player 冒烟入口，不依赖 Jolt |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
@@ -68,7 +69,7 @@ PhysicsSandbox 安装了 Unity CLI 的 `com.unity.pipeline` 插件，固定版�
 
 ## 验证
 
-**UnityCore UI**。在新证据目录运行 `python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>`，自动复制独立 UIDemo 与三包，重新构建 Bundle 并执行双 Domain Reload 精确 UI/Demo 矩阵。可见 screen 截图独立验证，自动矩阵 Passed 不替代视觉验收。[启动说明](examples/unity/UIDemo/README.md) · [契约与验收](docs/unitycore-ui.md)
+**UnityCore UI**。在新证据目录运行 `python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>`，自动复制独立 UIDemo 与其本地源码包，重新构建 Bundle 并执行双 Domain Reload 精确 UI/Demo 矩阵。可见 screen 截图独立验证，自动矩阵 Passed 不替代视觉验收。[启动说明](examples/unity/UIDemo/README.md) · [契约与验收](docs/unitycore-ui.md)
 
 Windows x64 Player 另运行 `python scripts/verify_unity_ui_players.py TestResults/ui-players-<唯一后缀>`，分别构建与启动 Mono、IL2CPP Release Player，校验实际后端、Bundle、交互路由、资源清理与屏幕截图。需要 Windows IL2CPP/Visual C++ 工具链及 Pillow；完整范围见 [Player 入口](examples/unity/UIDemo/README.md#windows-player-验收入口)。
 
