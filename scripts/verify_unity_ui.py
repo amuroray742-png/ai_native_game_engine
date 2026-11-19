@@ -16,7 +16,8 @@ from unity_packages import copy_verification_project, local_packages, verificati
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / "examples/unity/UIDemo"
-PACKAGES = ("com.ainative.unitycore", "com.ainative.unitycore.assets", "com.ainative.unitycore.ui")
+PACKAGES = ("com.ainative.unitycore", "com.ainative.unitycore.assets", "com.ainative.unitycore.ui",
+            "com.ainative.unitycore.network")
 UI_FILTER = "AiNative.UnityCore.UI.Tests"
 DEMO_FILTER = "AiNative.UIDemo.Tests.UIDemoTests"
 
@@ -139,7 +140,7 @@ def verify(output):
         expected_unity = (PROJECT / "ProjectSettings/ProjectVersion.txt").read_text(encoding="utf-8").splitlines()[0].split(": ")[1]
         summary["requestedUnity"] = expected_unity
         if set(local_packages(PROJECT)) != set(PACKAGES):
-            raise RuntimeError("UIDemo must reference exactly Core, Assets and UI source packages")
+            raise RuntimeError("UIDemo must reference the expected local source packages")
         workspace = verification_workspace(output)
         project = copy_verification_project(PROJECT, workspace)
         summary["workspace"] = str(workspace)

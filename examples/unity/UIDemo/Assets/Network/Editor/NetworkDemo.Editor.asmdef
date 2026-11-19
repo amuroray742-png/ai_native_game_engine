@@ -1,0 +1,5 @@
+{
+  "name": "AiNative.NetworkDemo.Editor",
+  "references": ["AiNative.NetworkDemo"],
+  "includePlatforms": ["Editor"]
+}

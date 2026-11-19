@@ -1,5 +1,11 @@
 # 通用框架 v2 验收
 
+## UnityCore Network（2026-11-19）
+
+Windows Editor 6000.3.23f1 在 Domain Reload 开、关两种设置下，各通过 10 项 PlayMode 和 1 项 EditMode 测试，共 22 次执行，0 失败、0 跳过。每项 EditMode 用例实际进入和退出 Play 两次，核对在途 HTTP 取消和 TCP 断开。PlayMode 覆盖错误响应、取消与超时、拆合帧、写入中断、显式重连，以及断开回调中重启 Core 的通知顺序。
+
+Windows x64 IL2CPP Player 使用独立回环服务，完成 HTTP 获取配置、TCP 主动推送、二进制消息回显、对端断开、显式重连和主动关闭，进程退出码为 0。示例场景以无图形模式自动运行。另通过 12 项验收脚本与源码包复制测试，并完成网络包的独立代码审查。KCP、实际公网服务、人工界面操作和远端 CI 留待单独验收。[结果与用例](evidence/unitycore-network/20261119/summary.json) · [Player 日志](evidence/unitycore-network/20261119/player.log) · [接口与复现命令](../packages/com.ainative.unitycore.network/README.md)
+
 ## Unity 示例框架迁移（2026-11-18）
 
 两个游戏继续由 v2 PlayHost 管理每局模拟。GridGame 从场景资源作用域取得棋盘和棋子精灵，PhysicsSandbox 从 Bundle 取得 HUD 和无碰撞体的显示预制体。AssetsDemo 的两个交互面板均通过 UnityCore UI 打开。UIDemo 沿用原有装配。

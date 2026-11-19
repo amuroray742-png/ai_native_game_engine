@@ -10,6 +10,8 @@
 
 模拟内核 AiNative.Core 保持纯 C#，不依赖 Unity、文件、网络、JSON、物理实现或任何 Example。物理属于可选能力，由需要它的游戏显式调用。Unity 应用侧另建设独立的 [Assets 本地资源包](unitycore-assets.md)，不扩展模拟内核职责。Unity 应用侧正在建设独立的 [uGUI UI 模块](unitycore-ui.md)，单向依赖 UnityCore 与 Assets，不改变模拟职责。当前不建设音频业务框架、通用 ECS、模拟系统调度框架、网络同步或插件发现。
 
+Unity 应用侧的 [Network 包](../packages/com.ainative.unitycore.network/README.md)管理 HTTP 请求与 TCP 消息连接。应用层按完整消息消费数据，游戏宿主拥有命令解释和推进权。
+
 Unity 应用层另有 `AiNative.UnityCore`，用于显式模块装配、日志和表现回调调度。仅其 `Core` 允许应用级单例，模块由该实例拥有，在明确的依赖绑定阶段按接口查询服务。该例外不扩展到纯 C# 内核与玩法，也不接管每局 PlayHost、物理世界或权威 Tick。[UnityCore 生命周期](unitycore-lifecycle.md)
 
 新增 Hosting 是为了让两个游戏共享协议、记录和表现辅助；新增 Physics 是为了隔离游戏规则与原生实现；保留专属协议适配是为了让共享库不认识游戏字段。可移植库保持 netstandard2.1/C# 9，工具使用 .NET 10。
