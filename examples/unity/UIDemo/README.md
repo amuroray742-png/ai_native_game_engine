@@ -4,6 +4,16 @@
 
 场景、Prefab、共享图片、ResourceGroups 和 meta 已保存。需要重新生成时先执行 **UIDemo → Create scenes and content**（会重建本 Demo 的场景及 Prefab），再构建。构建克隆 ResourceGroups 到独立的新目录，使用 AssetBuilder + AssetDeployment，不递增开发配置的版本。输出在 `BuildArtifacts/UIContent/<唯一目录>`，部署在 `Assets/StreamingAssets/AiNativeAssets`；生成的 Bundle 不纳入源码。
 
+UIDemo 使用 URP 17.3.0。Graphics Settings 默认使用 `Assets/Rendering/UIDemoPipeline.asset`，所有质量档位继承该设置。Bootstrap 的背景相机负责清屏，页面和 HUD 继续使用 Screen Space Overlay。
+
+工程已固定 Unity CLI 的 Editor 连接包 `com.unity.pipeline` 1.0.0。在仓库根目录用以下命令连接 UIDemo；同时打开多个示例时，`--project-path` 将命令限定在此工程。
+
+```powershell
+unity open examples/unity/UIDemo
+unity status --until-ready --project-path examples/unity/UIDemo
+unity command editor status --project-path examples/unity/UIDemo
+```
+
 仓库根目录命令示例：
 
 ```powershell

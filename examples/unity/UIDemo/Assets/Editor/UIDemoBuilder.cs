@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 namespace AiNative.UIDemo.Editor
@@ -159,6 +160,7 @@ namespace AiNative.UIDemo.Editor
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.025f, 0.04f, 0.07f);
             camera.cullingMask = 0;
+            camera.GetUniversalAdditionalCameraData().renderShadows = false;
             var host = new GameObject("UIDemo Host").AddComponent<UIDemoBootstrap>();
             camera.transform.SetParent(host.transform);
             host.Events = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule)).GetComponent<EventSystem>();
