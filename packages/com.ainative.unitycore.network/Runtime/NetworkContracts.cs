@@ -29,11 +29,11 @@ namespace AiNative.UnityCore.Network
 
     public sealed class HttpResponse
     {
-        internal HttpResponse(long statusCode, IReadOnlyDictionary<string, string> headers, byte[] body)
+        public HttpResponse(long statusCode, IReadOnlyDictionary<string, string> headers, byte[] body)
         {
             StatusCode = statusCode;
-            Headers = headers;
-            Body = body;
+            Headers = headers ?? throw new ArgumentNullException(nameof(headers));
+            Body = body ?? throw new ArgumentNullException(nameof(body));
         }
 
         public long StatusCode { get; }

@@ -22,6 +22,8 @@
 
 当前契约入口：[总设计](ai-native-game-engine-design.md)、[架构规范](engineering-guidelines.md)、[v2 契约](framework-v2.md)、[UnityCore](unitycore-lifecycle.md)、[Assets](unitycore-assets.md)、[资源增强](assets-enhancement-urp.md)。
 
+UnityCore Network 专用收发线程在 Windows Editor 双 Domain Reload 共通过 38 次；Windows x64 IL2CPP Player 构建及本机 HTTP/TCP 回环验收通过。[网络验收与历史记录](v2-acceptance.md#tcp-专用收发线程-windows-il2cpp2026-11-22)
+
 ## 2. 模拟内核、物理与 Unity 宿主
 
 | 能力／状态 | 已归档验证范围 | 版本与证据入口 | 未覆盖或待补 |

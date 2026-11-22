@@ -21,9 +21,13 @@ await connection.SendAsync(payload);
 await connection.CloseAsync();
 ```
 
+默认的 `new NetworkModule()` 同时注册两个接口。需要替换消息传输时，注册 `NetworkModule.HttpOnly()`，再由另一个模块注册 `IMessageClient`。需要替换 HTTP 时，注册 `NetworkModule.TcpOnly()` 并提供自己的 `IHttpService`。包外实现可用 `new HttpResponse(statusCode, headers, body)` 创建响应，传入的响应头和正文直接交给调用方。
+
 `SendAsync(HttpRequest)` 支持 HTTP/HTTPS、请求头和二进制正文。返回状态码、响应头和独立正文数组，4xx/5xx 也返回完整响应。默认超时 30 秒，使用真实经过时间，在主线程首次观察到超时时中止请求。主动取消或模块关闭产生 `OperationCanceledException`，超时产生 `TimeoutException`，连接或接收失败产生 `IOException`。协议和状态码的业务含义由调用方处理。请求使用 Unity 的证书校验和项目 HTTP 策略。
 
 ## 长连接
+
+每条连接拥有一个 `Socket` 和两条专用后台线程。发送线程阻塞等待队列，`SendAsync` 复制消息并立即唤醒它，接收回调内的回复也无需等待下一帧。接收线程读完一条消息后等待主线程取走，再读下一帧。主线程在 Update 交付消息和发送完成通知。关闭会打断套接字读写并唤醒队列等待者，正常关闭异步等待两条线程退出。
 
 TCP 帧由四字节大端无符号长度和对应字节数的消息体组成，长度不含帧头。空消息合法。构造模块的 `maxMessageBytes` 默认 1 MiB，发送时检查大小，接收时在分配正文前检查。接收端保留一条在读消息，对下一条的读取跟随主线程消费进度。每次 Update 每个方向最多交付 16 条。收到长度超限或不完整的帧，以 `ProtocolError` 结束连接。
 

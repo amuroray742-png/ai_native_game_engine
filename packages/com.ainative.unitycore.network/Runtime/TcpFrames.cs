@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace AiNative.UnityCore.Network
@@ -18,25 +19,35 @@ namespace AiNative.UnityCore.Network
             return frame;
         }
 
-        // null denotes EOF exactly between frames. Truncation inside a frame is a protocol failure.
-        internal static async Task<byte[]> ReadAsync(Stream stream, int maximum)
+        internal static void Write(byte[] frame, Func<byte[], int, int, int> send)
         {
-            var header = new byte[4];
-            int count = await stream.ReadAsync(header, 0, 4).ConfigureAwait(false);
+            int offset = 0;
+            while (offset < frame.Length)
+            {
+                int count = send(frame, offset, frame.Length - offset);
+                if (count == 0) { throw new IOException("TCP send made no progress."); }
+                offset += count;
+            }
+        }
+
+        // null denotes EOF exactly between frames. Truncation inside a frame is a protocol failure.
+        internal static byte[] Read(Socket socket, int maximum, byte[] header)
+        {
+            int count = socket.Receive(header, SocketFlags.None);
             if (count == 0) { return null; }
-            await ReadRemaining(stream, header, count).ConfigureAwait(false);
+            ReadRemaining(socket, header, count);
             uint length = ((uint)header[0] << 24) | ((uint)header[1] << 16) | ((uint)header[2] << 8) | header[3];
             if (length > maximum) { throw new InvalidDataException("TCP message exceeds the configured maximum."); }
             var payload = new byte[(int)length];
-            await ReadRemaining(stream, payload, 0).ConfigureAwait(false);
+            ReadRemaining(socket, payload, 0);
             return payload;
         }
 
-        private static async Task ReadRemaining(Stream stream, byte[] buffer, int offset)
+        private static void ReadRemaining(Socket socket, byte[] buffer, int offset)
         {
             while (offset < buffer.Length)
             {
-                int count = await stream.ReadAsync(buffer, offset, buffer.Length - offset).ConfigureAwait(false);
+                int count = socket.Receive(buffer, offset, buffer.Length - offset, SocketFlags.None);
                 if (count == 0) { throw new InvalidDataException("TCP connection ended inside a frame."); }
                 offset += count;
             }

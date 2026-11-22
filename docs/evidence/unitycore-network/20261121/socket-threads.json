@@ -1,0 +1,99 @@
+{
+  "unity": "6000.3.23f1",
+  "editor": [
+    {
+      "name": "PlayMode-On",
+      "result": "Passed",
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "f78af87efac9e320076d644c9e8540da02147cd071e2c3dea3e1cb987c731615",
+      "tests": [
+        "AiNative.NetworkDemo.Tests.NetworkTests.CancelTimeoutAndRefusedAreDistinct",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ClosingOrRestartingJoinsBothDedicatedWorkers",
+        "AiNative.NetworkDemo.Tests.NetworkTests.CoreCanRegisterHttpAndTcpIndependently",
+        "AiNative.NetworkDemo.Tests.NetworkTests.DemoUsesInterchangeableMessageConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.EarlierProtocolErrorSurvivesCloseBeforeNextUpdate",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ExternalHttpServiceCanReturnResponse",
+        "AiNative.NetworkDemo.Tests.NetworkTests.HttpPreservesBinaryHeadersAndErrorResponses",
+        "AiNative.NetworkDemo.Tests.NetworkTests.IdleReplyStartsInsideReceiveCallback",
+        "AiNative.NetworkDemo.Tests.NetworkTests.MalformedFramesEndOnlyTheirConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PeerCloseDuringWritesSettlesBoundedQueueOnce",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PlayRetirementCancelsWithoutAnotherFrame",
+        "AiNative.NetworkDemo.Tests.NetworkTests.QueuedWriterObservesDisconnectBeforeItsInlineContinuation",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartInsideDisconnectWaitsForRemainingListeners",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartSettlesDependentSendAndRetiresOldWork",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ShortWritesPreserveLargeFrames",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SlowConsumerLeavesSecondFrameOnSocketAndReceivesBothBeforeEof",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SplitJoinedAndConcurrentMessagesPreserveOrder",
+        "AiNative.NetworkDemo.Tests.NetworkTests.StableMessageListenersDispatchWithoutAllocation"
+      ]
+    },
+    {
+      "name": "EditMode-On",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "0939103e0c4e9e992e49f3f53a573e2e4765b562b7482d14956c9096c34cee49",
+      "tests": [
+        "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests.RealPlayExitsCancelHttpAndDisconnectBeforeReentry"
+      ]
+    },
+    {
+      "name": "PlayMode-Off",
+      "result": "Passed",
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "9ac529833ee0519335d0111561afb1b6205b09e92a221dddad4cafcd141a2091",
+      "tests": [
+        "AiNative.NetworkDemo.Tests.NetworkTests.CancelTimeoutAndRefusedAreDistinct",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ClosingOrRestartingJoinsBothDedicatedWorkers",
+        "AiNative.NetworkDemo.Tests.NetworkTests.CoreCanRegisterHttpAndTcpIndependently",
+        "AiNative.NetworkDemo.Tests.NetworkTests.DemoUsesInterchangeableMessageConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.EarlierProtocolErrorSurvivesCloseBeforeNextUpdate",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ExternalHttpServiceCanReturnResponse",
+        "AiNative.NetworkDemo.Tests.NetworkTests.HttpPreservesBinaryHeadersAndErrorResponses",
+        "AiNative.NetworkDemo.Tests.NetworkTests.IdleReplyStartsInsideReceiveCallback",
+        "AiNative.NetworkDemo.Tests.NetworkTests.MalformedFramesEndOnlyTheirConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PeerCloseDuringWritesSettlesBoundedQueueOnce",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PlayRetirementCancelsWithoutAnotherFrame",
+        "AiNative.NetworkDemo.Tests.NetworkTests.QueuedWriterObservesDisconnectBeforeItsInlineContinuation",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartInsideDisconnectWaitsForRemainingListeners",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartSettlesDependentSendAndRetiresOldWork",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ShortWritesPreserveLargeFrames",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SlowConsumerLeavesSecondFrameOnSocketAndReceivesBothBeforeEof",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SplitJoinedAndConcurrentMessagesPreserveOrder",
+        "AiNative.NetworkDemo.Tests.NetworkTests.StableMessageListenersDispatchWithoutAllocation"
+      ]
+    },
+    {
+      "name": "EditMode-Off",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "bebffe8bdf64d4c684b7ec29719caceee637b40b9121fdeffe6c526567862dbf",
+      "tests": [
+        "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests.RealPlayExitsCancelHttpAndDisconnectBeforeReentry"
+      ]
+    }
+  ],
+  "player": {
+    "build": "Failed",
+    "error": "Error building Player: Currently selected scripting backend (IL2CPP) is not installed.",
+    "executed": false
+  },
+  "sourceHashes": {
+    "examples/unity/UIDemo/Assets/Tests/NetworkTests.cs": "ffaf959880df8ef81a287e8c634d65d86bcb994bf683afc0edde52bb4fd8a783",
+    "packages/com.ainative.unitycore.network/Runtime/NetworkContracts.cs": "cc757f9f76c7d9ce846cdf018298e32d7d44143b1fb4b8a2e57b04fb7ae20f53",
+    "packages/com.ainative.unitycore.network/Runtime/NetworkModule.cs": "01e254669c01908360611f0a66c97beec0ba02144063edbad2bbf9e280d0d565",
+    "packages/com.ainative.unitycore.network/Runtime/TcpFrames.cs": "002f58ec7969143eae4c0b20c3a883ac61a0245c8a069904ae4ead9c11981c97",
+    "packages/com.ainative.unitycore.network/Runtime/TcpMessageConnection.cs": "535466cd3a3d03393c18b8a46adba7d07e5da81eb1355ed6e30e853544b4bebc"
+  }
+}

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,26 +18,36 @@ namespace AiNative.UnityCore.Network
     public sealed class NetworkModule : IModule, IAsyncShutdownModule, IHttpService, IMessageClient
     {
         private readonly int _maxMessageBytes;
+        private readonly bool _registerHttp;
+        private readonly bool _registerTcp;
         private readonly HashSet<TcpMessageConnection> _connections = new HashSet<TcpMessageConnection>();
         private readonly List<Task> _retiring = new List<Task>();
         private CancellationTokenSource? _lifetime;
         private CancellationTokenRegistration _stopConnections;
         private ICore? _core;
 
-        public NetworkModule(int maxMessageBytes = 1024 * 1024)
+        private const int DefaultMessageBytes = 1024 * 1024;
+
+        public NetworkModule(int maxMessageBytes = DefaultMessageBytes) : this(true, true, maxMessageBytes) { }
+        public static NetworkModule HttpOnly() => new NetworkModule(true, false, DefaultMessageBytes);
+        public static NetworkModule TcpOnly(int maxMessageBytes = DefaultMessageBytes) => new NetworkModule(false, true, maxMessageBytes);
+
+        private NetworkModule(bool registerHttp, bool registerTcp, int maxMessageBytes)
         {
             if (maxMessageBytes <= 0 || maxMessageBytes > int.MaxValue - 4)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxMessageBytes));
             }
             _maxMessageBytes = maxMessageBytes;
+            _registerHttp = registerHttp;
+            _registerTcp = registerTcp;
         }
 
         public string GetModuleName() => "AiNative.UnityCore.Network";
         public void OnRegister(ICore core)
         {
-            core.RegisterInterface<IHttpService, NetworkModule>(this);
-            core.RegisterInterface<IMessageClient, NetworkModule>(this);
+            if (_registerHttp) { core.RegisterInterface<IHttpService, NetworkModule>(this); }
+            if (_registerTcp) { core.RegisterInterface<IMessageClient, NetworkModule>(this); }
         }
 
         public UniTask<UniCoreException?> Initialize(ICore core, CancellationToken cancellationToken)
@@ -112,22 +123,46 @@ namespace AiNative.UnityCore.Network
         {
             using var operation = CancellationTokenSource.CreateLinkedTokenSource(RunToken(), cancellationToken);
             operation.Token.ThrowIfCancellationRequested();
-            var client = new TcpClient();
-            Task? connecting = null;
+            if (string.IsNullOrWhiteSpace(host)) { throw new ArgumentException("TCP host is required.", nameof(host)); }
+            if (port < 0 || port > 65535) { throw new ArgumentOutOfRangeException(nameof(port)); }
+            IPAddress[] addresses;
+            if (IPAddress.TryParse(host, out var literal)) { addresses = new[] { literal }; }
+            else
+            {
+                var lookup = Dns.GetHostAddressesAsync(host);
+                await WaitForNetworkTask(lookup, operation.Token);
+                addresses = lookup.GetAwaiter().GetResult();
+            }
+            SocketException? lastError = null;
+            foreach (var address in addresses)
+            {
+                Socket? socket = null;
+                try
+                {
+                    socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    await WaitForNetworkTask(socket.ConnectAsync(new IPEndPoint(address, port)), operation.Token);
+                    var connection = new TcpMessageConnection(socket, _maxMessageBytes, _core!.TimeMachine, RunToken(), OnRetired);
+                    _connections.Add(connection);
+                    socket = null; // The connection now owns it.
+                    return connection;
+                }
+                catch (SocketException error) { lastError = error; }
+                finally { socket?.Dispose(); }
+            }
+            throw lastError ?? new SocketException((int)SocketError.HostNotFound);
+        }
+
+        private async UniTask WaitForNetworkTask(Task task, CancellationToken token)
+        {
             try
             {
-                connecting = client.ConnectAsync(host, port);
-                await UniTask.WaitUntil(() => connecting.IsCompleted, cancellationToken: operation.Token, cancelImmediately: true);
-                operation.Token.ThrowIfCancellationRequested();
-                connecting.GetAwaiter().GetResult();
-                var connection = new TcpMessageConnection(client, _maxMessageBytes, _core!.TimeMachine, RunToken(), OnRetired);
-                _connections.Add(connection);
-                return connection;
+                await UniTask.WaitUntil(() => task.IsCompleted, cancellationToken: token, cancelImmediately: true);
+                token.ThrowIfCancellationRequested();
+                task.GetAwaiter().GetResult();
             }
-            catch
+            catch (OperationCanceledException)
             {
-                client.Dispose();
-                if (connecting != null) { TrackDrain(TcpFrames.DrainAsync(connecting)); }
+                TrackDrain(TcpFrames.DrainAsync(task));
                 throw;
             }
         }

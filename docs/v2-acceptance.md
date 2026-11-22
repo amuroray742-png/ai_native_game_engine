@@ -1,5 +1,17 @@
 # 通用框架 v2 验收
 
+## TCP 专用收发线程 Windows IL2CPP（2026-11-22）
+
+安装 Unity 6000.3.23f1 Windows Build Support (IL2CPP) 后，使用网络专项脚本在隔离工程重新运行双 Domain Reload，各通过 18 项 PlayMode 和 1 项 EditMode，共 38 次，0 失败、0 跳过。Windows x64 IL2CPP Player 构建成功，在独立回环服务上完成 HTTP 配置读取、TCP 推送、回显、对端断线、重连与主动关闭。进程记录 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。[测试用例、运行结果、可执行文件与源码指纹](evidence/unitycore-network/20261122/summary.json)
+
+## TCP 专用收发线程（2026-11-21）
+
+Windows Editor 6000.3.23f1 在 Domain Reload 开、关各通过 18 项 PlayMode 和 1 项 EditMode，共 38 次，0 失败、0 跳过。回环测试验证每连接两条独立后台线程、关闭及重启后线程退出、单帧接收背压、半关闭时回调内回复、首个终止原因，以及 1 MiB 消息回显。另以可控短写验证分段发送的偏移与内容。首轮发现的 localhost 混合地址连接失败已修复，最终复测通过。Windows Player 构建因缺少此版本的 Windows IL2CPP 后端失败。[用例、XML 摘要与源码指纹](evidence/unitycore-network/20261121/socket-threads.json)
+
+## UnityCore Network 审查回归（2026-11-21）
+
+Windows Editor 6000.3.23f1 在 Domain Reload 开、关各通过 14 项 PlayMode 和 1 项 EditMode，共 30 次，0 失败、0 跳过。新增四项覆盖包外 HTTP 响应、HTTP/TCP 独立注册、接收回调当帧写出及主线程完成通知、稳定订阅下的消息分发。最后一项在预热后单独调用分发方法 256 次，记录到 0 次 GC.Alloc。Windows Player 构建因本机缺少该版本的 Windows IL2CPP 后端而失败。[用例、XML 摘要和源码指纹](evidence/unitycore-network/20261121/summary.json)
+
 ## UnityCore Network（2026-11-19）
 
 Windows Editor 6000.3.23f1 在 Domain Reload 开、关两种设置下，各通过 10 项 PlayMode 和 1 项 EditMode 测试，共 22 次执行，0 失败、0 跳过。每项 EditMode 用例实际进入和退出 Play 两次，核对在途 HTTP 取消和 TCP 断开。PlayMode 覆盖错误响应、取消与超时、拆合帧、写入中断、显式重连，以及断开回调中重启 Core 的通知顺序。

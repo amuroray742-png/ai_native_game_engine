@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using AiNative.UnityCore;
@@ -13,6 +14,7 @@ using AiNative.UnityCore.Interfaces;
 using AiNative.UnityCore.Network;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
+using Unity.Profiling;
 using UnityEngine.TestTools;
 
 namespace AiNative.NetworkDemo.Tests
@@ -47,6 +49,232 @@ namespace AiNative.NetworkDemo.Tests
             _deadline.Cancel();
             _deadline.Dispose();
             Core.ResetForPlay();
+        });
+
+        [UnityTest]
+        public IEnumerator ExternalHttpServiceCanReturnResponse() => UniTask.ToCoroutine(async () =>
+        {
+            IHttpService http = new StubHttp();
+            var response = await http.SendAsync(new HttpRequest("GET", UriFor("/config")));
+            Assert.AreEqual(200, response.StatusCode);
+            Assert.AreEqual("stub", response.Headers["X-Source"]);
+            CollectionAssert.AreEqual(new byte[] { 42 }, response.Body);
+        });
+
+        private sealed class StubHttp : IHttpService
+        {
+            public UniTask<HttpResponse> SendAsync(HttpRequest request, CancellationToken token = default) =>
+                UniTask.FromResult(new HttpResponse(200, new Dictionary<string, string> { { "X-Source", "stub" } },
+                    new byte[] { 42 }));
+        }
+
+        [UnityTest]
+        public IEnumerator CoreCanRegisterHttpAndTcpIndependently() => UniTask.ToCoroutine(async () =>
+        {
+            await _core.CloseAsync();
+            Core.ResetForPlay();
+            _core = Core.Inst;
+            var http = NetworkModule.HttpOnly();
+            var tcp = NetworkModule.TcpOnly();
+            _core.RegisterModule(http).RegisterModule(tcp);
+            await _core.RunAsync();
+            Assert.AreSame(http, _core.GetModule<IHttpService>());
+            Assert.AreSame(tcp, _core.GetModule<IMessageClient>());
+            Assert.AreEqual(200, (await http.SendAsync(new HttpRequest("GET", UriFor("/config")), _deadline.Token)).StatusCode);
+            var connection = await tcp.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+            await connection.CloseAsync();
+        });
+
+        [UnityTest]
+        public IEnumerator IdleReplyStartsInsideReceiveCallback() => UniTask.ToCoroutine(async () =>
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                var accepting = listener.AcceptTcpClientAsync();
+                var connection = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                using var peer = await accepting;
+                peer.ReceiveTimeout = 2000;
+                var stream = peer.GetStream();
+                bool callbackRan = false;
+                int received = 0;
+                var reply = new byte[5];
+                UniTask<int> completionThread = default;
+                UniTaskStatus statusAtPeerRead = default;
+                int mainThread = Thread.CurrentThread.ManagedThreadId;
+                connection.MessageReceived += _ =>
+                {
+                    var send = connection.SendAsync(new byte[] { 42 });
+                    completionThread = ThreadAfterSend(send);
+                    // Hold this Update until the peer sees the frame. A write deferred to the next Update fails.
+                    try
+                    {
+                        while (received < reply.Length)
+                        {
+                            int count = stream.Read(reply, received, reply.Length - received);
+                            if (count == 0) { break; }
+                            received += count;
+                        }
+                    }
+                    catch (IOException) { }
+                    statusAtPeerRead = send.Status;
+                    callbackRan = true;
+                };
+                stream.Write(new byte[4], 0, 4);
+                peer.Client.Shutdown(SocketShutdown.Send);
+                await UniTask.WaitUntil(() => callbackRan, cancellationToken: _deadline.Token);
+                Assert.AreEqual(5, received);
+                CollectionAssert.AreEqual(new byte[] { 0, 0, 0, 1, 42 }, reply);
+                Assert.AreEqual(UniTaskStatus.Pending, statusAtPeerRead);
+                Assert.AreEqual(mainThread, await completionThread);
+                await connection.CloseAsync();
+            }
+            finally { listener.Stop(); }
+        });
+
+        private static async UniTask<int> ThreadAfterSend(UniTask send)
+        {
+            await send;
+            return Thread.CurrentThread.ManagedThreadId;
+        }
+
+        private static T ConnectionField<T>(IMessageConnection connection, string name) =>
+            (T)connection.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).GetValue(connection);
+
+        [UnityTest]
+        public IEnumerator EarlierProtocolErrorSurvivesCloseBeforeNextUpdate() => UniTask.ToCoroutine(async () =>
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                var accepting = listener.AcceptTcpClientAsync();
+                var connection = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                using var peer = await accepting;
+                peer.GetStream().Write(new byte[] { 255, 255, 255, 255 }, 0, 4);
+                var gate = ConnectionField<object>(connection, "_gate");
+                Assert.IsTrue(SpinWait.SpinUntil(() =>
+                {
+                    lock (gate) { return ConnectionField<DisconnectReason?>(connection, "_terminal").HasValue; }
+                }, 2000));
+                DisconnectReason? reason = null;
+                connection.Disconnected += value => reason = value;
+                var pending = connection.SendAsync(new byte[] { 1 });
+                Assert.AreEqual(UniTaskStatus.Pending, pending.Status);
+                await connection.CloseAsync();
+                try { await pending; Assert.Fail("Send should fail after the protocol error."); }
+                catch (InvalidDataException) { Assert.AreEqual(DisconnectReason.ProtocolError, reason); }
+            }
+            finally { listener.Stop(); }
+        });
+
+        [UnityTest]
+        public IEnumerator ClosingOrRestartingJoinsBothDedicatedWorkers() => UniTask.ToCoroutine(async () =>
+        {
+            for (int cycle = 0; cycle < 4; cycle++)
+            {
+                var connection = await _network.ConnectAsync("localhost", TcpPort, _deadline.Token);
+                var receiver = ConnectionField<Thread>(connection, "_receiver");
+                var sender = ConnectionField<Thread>(connection, "_sender");
+                Assert.IsTrue(receiver.IsAlive && sender.IsAlive && receiver.IsBackground && sender.IsBackground);
+                Assert.AreNotEqual(sender.ManagedThreadId, receiver.ManagedThreadId);
+                Assert.AreNotEqual(Thread.CurrentThread.ManagedThreadId, sender.ManagedThreadId);
+                Assert.AreNotEqual(Thread.CurrentThread.ManagedThreadId, receiver.ManagedThreadId);
+                bool welcomed = false;
+                connection.MessageReceived += _ => welcomed = true;
+                await UniTask.WaitUntil(() => welcomed, cancellationToken: _deadline.Token);
+                if (cycle % 2 == 0) { await connection.CloseAsync().AttachExternalCancellation(_deadline.Token); }
+                else { await _core.RestartAsync().AttachExternalCancellation(_deadline.Token); }
+                Assert.IsFalse(sender.IsAlive || receiver.IsAlive, "A retired connection still owns a live worker.");
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator SlowConsumerLeavesSecondFrameOnSocketAndReceivesBothBeforeEof() => UniTask.ToCoroutine(async () =>
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                var accepting = listener.AcceptTcpClientAsync();
+                var connection = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                using var peer = await accepting;
+                var received = new List<int>();
+                DisconnectReason? reason = null;
+                connection.MessageReceived += bytes => received.Add(bytes[0]);
+                connection.Disconnected += value => reason = value;
+                var socket = ConnectionField<Socket>(connection, "_socket");
+                var gate = ConnectionField<object>(connection, "_gate");
+                byte[] wire = { 0, 0, 0, 1, 7, 0, 0, 0, 1, 9 };
+                peer.GetStream().Write(wire, 0, wire.Length);
+                peer.Client.Shutdown(SocketShutdown.Send);
+                Assert.IsTrue(SpinWait.SpinUntil(() =>
+                {
+                    lock (gate)
+                    {
+                        return ConnectionField<byte[]>(connection, "_incoming") != null && socket.Available == 5;
+                    }
+                }, 2000), "The receiver must leave the second frame unread while the main thread holds the first.");
+                await UniTask.WaitUntil(() => reason.HasValue, cancellationToken: _deadline.Token);
+                CollectionAssert.AreEqual(new[] { 7, 9 }, received);
+                Assert.AreEqual(DisconnectReason.RemoteClose, reason);
+                await connection.CloseAsync();
+            }
+            finally { listener.Stop(); }
+        });
+
+        [UnityTest]
+        public IEnumerator ShortWritesPreserveLargeFrames() => UniTask.ToCoroutine(async () =>
+        {
+            var payload = new byte[1024 * 1024];
+            new Random(42).NextBytes(payload);
+            // Force partial writes independent of kernel buffer size, then exercise the real wire path.
+            var codec = typeof(NetworkModule).Assembly.GetType("AiNative.UnityCore.Network.TcpFrames");
+            var write = (Action<byte[], Func<byte[], int, int, int>>)Delegate.CreateDelegate(
+                typeof(Action<byte[], Func<byte[], int, int, int>>), codec.GetMethod("Write", BindingFlags.NonPublic | BindingFlags.Static));
+            using var captured = new MemoryStream();
+            write(payload, (bytes, offset, count) =>
+            {
+                int accepted = Math.Min(4093, count);
+                captured.Write(bytes, offset, accepted);
+                return accepted;
+            });
+            CollectionAssert.AreEqual(payload, captured.ToArray());
+            var connection = await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+            byte[] reply = null;
+            connection.MessageReceived += bytes => { if (bytes.Length == payload.Length) { reply = bytes; } };
+            await connection.SendAsync(payload).AttachExternalCancellation(_deadline.Token);
+            await UniTask.WaitUntil(() => reply != null, cancellationToken: _deadline.Token);
+            CollectionAssert.AreEqual(payload, reply);
+        });
+
+        [UnityTest]
+        public IEnumerator StableMessageListenersDispatchWithoutAllocation() => UniTask.ToCoroutine(async () =>
+        {
+            var connection = await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+            var dispatch = (Action<byte[]>)Delegate.CreateDelegate(typeof(Action<byte[]>), connection,
+                connection.GetType().GetMethod("DispatchMessage", BindingFlags.NonPublic | BindingFlags.Instance));
+            var payload = new byte[1];
+            int first = 0, second = 0;
+            Action<byte[]> listener = _ => second++;
+            connection.MessageReceived += _ => first++;
+            connection.MessageReceived += listener;
+            dispatch(payload);
+            using var recorder = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "GC.Alloc", 4096,
+                ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+            GC.KeepAlive(new byte[128]);
+            recorder.Stop();
+            Assert.Greater(recorder.Count, 0, "The allocation recorder must detect the positive control.");
+            recorder.Reset();
+            recorder.Start();
+            for (int i = 0; i < 256; i++) { dispatch(payload); }
+            recorder.Stop();
+            Assert.Zero(recorder.Count);
+            connection.MessageReceived -= listener;
+            dispatch(payload);
+            Assert.AreEqual(258, first);
+            Assert.AreEqual(257, second);
         });
 
         [UnityTest]
