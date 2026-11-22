@@ -1,0 +1,115 @@
+{
+  "unity": "6000.3.23f1",
+  "editor": [
+    {
+      "name": "PlayMode-On",
+      "result": "Passed",
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "28e2215f99bf6025adc91f9c4165dbfa01096c33dedd4ac4368b201e119d0548",
+      "tests": [
+        "AiNative.NetworkDemo.Tests.NetworkTests.CancelTimeoutAndRefusedAreDistinct",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ClosingOrRestartingJoinsBothDedicatedWorkers",
+        "AiNative.NetworkDemo.Tests.NetworkTests.CoreCanRegisterHttpAndTcpIndependently",
+        "AiNative.NetworkDemo.Tests.NetworkTests.DemoUsesInterchangeableMessageConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.EarlierProtocolErrorSurvivesCloseBeforeNextUpdate",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ExternalHttpServiceCanReturnResponse",
+        "AiNative.NetworkDemo.Tests.NetworkTests.HttpPreservesBinaryHeadersAndErrorResponses",
+        "AiNative.NetworkDemo.Tests.NetworkTests.IdleReplyStartsInsideReceiveCallback",
+        "AiNative.NetworkDemo.Tests.NetworkTests.MalformedFramesEndOnlyTheirConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PeerCloseDuringWritesSettlesBoundedQueueOnce",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PlayRetirementCancelsWithoutAnotherFrame",
+        "AiNative.NetworkDemo.Tests.NetworkTests.QueuedWriterObservesDisconnectBeforeItsInlineContinuation",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartInsideDisconnectWaitsForRemainingListeners",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartSettlesDependentSendAndRetiresOldWork",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ShortWritesPreserveLargeFrames",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SlowConsumerLeavesSecondFrameOnSocketAndReceivesBothBeforeEof",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SplitJoinedAndConcurrentMessagesPreserveOrder",
+        "AiNative.NetworkDemo.Tests.NetworkTests.StableMessageListenersDispatchWithoutAllocation"
+      ]
+    },
+    {
+      "name": "EditMode-On",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "7bb4dd13bf3660c9787af435630bc20508a04de80586bcfc4b14b37ee267811d",
+      "tests": [
+        "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests.RealPlayExitsCancelHttpAndDisconnectBeforeReentry"
+      ]
+    },
+    {
+      "name": "PlayMode-Off",
+      "result": "Passed",
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "798588e82e229f11cbdc648ed7d298a277677d733ee6881196ad02c3d25fe0da",
+      "tests": [
+        "AiNative.NetworkDemo.Tests.NetworkTests.CancelTimeoutAndRefusedAreDistinct",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ClosingOrRestartingJoinsBothDedicatedWorkers",
+        "AiNative.NetworkDemo.Tests.NetworkTests.CoreCanRegisterHttpAndTcpIndependently",
+        "AiNative.NetworkDemo.Tests.NetworkTests.DemoUsesInterchangeableMessageConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.EarlierProtocolErrorSurvivesCloseBeforeNextUpdate",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ExternalHttpServiceCanReturnResponse",
+        "AiNative.NetworkDemo.Tests.NetworkTests.HttpPreservesBinaryHeadersAndErrorResponses",
+        "AiNative.NetworkDemo.Tests.NetworkTests.IdleReplyStartsInsideReceiveCallback",
+        "AiNative.NetworkDemo.Tests.NetworkTests.MalformedFramesEndOnlyTheirConnection",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PeerCloseDuringWritesSettlesBoundedQueueOnce",
+        "AiNative.NetworkDemo.Tests.NetworkTests.PlayRetirementCancelsWithoutAnotherFrame",
+        "AiNative.NetworkDemo.Tests.NetworkTests.QueuedWriterObservesDisconnectBeforeItsInlineContinuation",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartInsideDisconnectWaitsForRemainingListeners",
+        "AiNative.NetworkDemo.Tests.NetworkTests.RestartSettlesDependentSendAndRetiresOldWork",
+        "AiNative.NetworkDemo.Tests.NetworkTests.ShortWritesPreserveLargeFrames",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SlowConsumerLeavesSecondFrameOnSocketAndReceivesBothBeforeEof",
+        "AiNative.NetworkDemo.Tests.NetworkTests.SplitJoinedAndConcurrentMessagesPreserveOrder",
+        "AiNative.NetworkDemo.Tests.NetworkTests.StableMessageListenersDispatchWithoutAllocation"
+      ]
+    },
+    {
+      "name": "EditMode-Off",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "1ddbcb22d3693f82128fd2278544ae3af21eee39c9fab0a4c87977edcef72f3a",
+      "tests": [
+        "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests.RealPlayExitsCancelHttpAndDisconnectBeforeReentry"
+      ]
+    }
+  ],
+  "player": "Windows x64 IL2CPP passed",
+  "ports": {
+    "http": 52803,
+    "tcp": 52804
+  },
+  "exitCodes": {
+    "reload-On": 0,
+    "PlayMode-On": 0,
+    "EditMode-On": 0,
+    "reload-Off": 0,
+    "PlayMode-Off": 0,
+    "EditMode-Off": 0,
+    "build": 0,
+    "player": 0
+  },
+  "playerLogMarker": "NETWORK_SMOKE_PASSED IL2CPP",
+  "playerSha256": {
+    "NetworkDemo.exe": "417a4c8880dfbddcd26d0870ec516648df0f1f3281783acbf969c865ee8428db",
+    "GameAssembly.dll": "b7d6aee9c46e0fd751e9d19d7b1030935f3a6531a0df5a46cd8833a353b8fe12"
+  },
+  "playerLogSha256": "c7a418910b4217c177ecfc674a6c9ff7e0d6bb3ced121d7743b8d19911c58db8",
+  "sourceHashes": {
+    "examples/unity/UIDemo/Assets/Tests/NetworkTests.cs": "ffaf959880df8ef81a287e8c634d65d86bcb994bf683afc0edde52bb4fd8a783",
+    "packages/com.ainative.unitycore.network/Runtime/NetworkContracts.cs": "cc757f9f76c7d9ce846cdf018298e32d7d44143b1fb4b8a2e57b04fb7ae20f53",
+    "packages/com.ainative.unitycore.network/Runtime/NetworkModule.cs": "01e254669c01908360611f0a66c97beec0ba02144063edbad2bbf9e280d0d565",
+    "packages/com.ainative.unitycore.network/Runtime/TcpFrames.cs": "002f58ec7969143eae4c0b20c3a883ac61a0245c8a069904ae4ead9c11981c97",
+    "packages/com.ainative.unitycore.network/Runtime/TcpMessageConnection.cs": "535466cd3a3d03393c18b8a46adba7d07e5da81eb1355ed6e30e853544b4bebc"
+  }
+}
