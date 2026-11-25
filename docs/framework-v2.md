@@ -21,7 +21,7 @@ Unity 应用服务允许单独的、有边界的例外：`AiNative.UnityCore.Cor
 
 Unity 侧的 [Assets 资源包](unitycore-assets.md) 单向依赖 UnityCore，拥有本地资源、实例、池和场景；其异步关闭扩展不改变模拟时间、状态、文件协议和每局 PlayHost 所有权。
 
-Unity 应用层的 [Network 包](../packages/com.ainative.unitycore.network/README.md)随 UnityCore 管理连接与请求。默认同时注册 HTTP 和 TCP，也可用 `NetworkModule.HttpOnly()` 或 `NetworkModule.TcpOnly()` 单独注册对应服务。外部 HTTP 实现可直接构造 `HttpResponse`，传入的响应头和正文由实现方交给调用方。每条 TCP 连接的 Socket 由独立的收、发线程处理，提交即唤醒发送线程，完成通知与消息交付由主线程驱动。应用消息通过独立接口交付，模拟输入仍须由宿主提交。
+Unity 应用层的 [Network 包](../packages/com.ainative.unitycore.network/README.md)随 UnityCore 管理连接与请求。默认同时注册 HTTP 和 TCP，也可用 `NetworkModule.HttpOnly()` 或 `NetworkModule.TcpOnly()` 单独注册对应服务。外部 HTTP 实现可直接构造 `HttpResponse`，传入的响应头和正文由实现方交给调用方。每条 TCP 连接的 Socket 由独立的收、发线程处理，发送任务数和待写字节持续超过任一水位时告警并继续接单，默认水位分别为 256 和 4 MiB。默认单条正文上限为 8 MiB，连接可回收常用 256 字节发送缓冲；发送线程只合并已排队的小帧，单次最多 32 条、8 KiB，按实际写完整的帧结算。主线程回调借用只读接收正文，需要在回调后持有时显式复制。接收预读受条数和正文字节预算约束，完成通知与消息交付由主线程驱动。对端半关闭后，主线程先交付已接收消息，再限时写完回调提交的回复。主动关闭按完整帧的实际写入结果结算。应用消息通过独立接口交付，模拟输入仍须由宿主提交。
 
 Submit 分配连续输入序号并入队。Advance 消费调用开始时全部排队输入，按序执行，再推进一次游戏并发布结果；即使无输入也增加 Tick。输入结果携带输入序号，TickResult 携带 Tick，游戏回合只存在于 GridGame 状态。运行时禁止重入，包括 Tick 回调期间的提交、推进、观察与保存。
 

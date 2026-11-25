@@ -1,0 +1,194 @@
+{
+  "environment": "Windows x64, Unity 6000.3.23f1 Editor, Mono, loopback, TCP_NODELAY on both endpoints. Same two test methods injected into the NetworkTests class in isolated copies. Dedicated writer and receiver; Pump driven on the main thread without frame sleeps.",
+  "workload": "Benchmark processes ran serially, before/after then after/before. Per process a warmup and three recorded rounds, 96 batches of 64 frames, 128-byte body. submit_us is time in SendAsync per message in the echo phase. send_fps counts complete frames consumed by a separate peer in the send-only phase. echo_fps includes read, echo, receive and dispatch.",
+  "allocations": "Unity ProfilerRecorder GC.Alloc events for 128 warmed operations on the measuring thread. Encode & ReadPayload measured separately with their actual pool returns, a reusable buffer raw socket read control, and an independent task object control. Submission measured on a real connection; counts are allocation events, not bytes.",
+  "workloadSha256": "11ba8f9f265f46b5c50dde5a9f69a81b0edcac617a1e9c79ea4d176ff398768c",
+  "versions": {
+    "before": {
+      "runs": [
+        {
+          "rawResults": "TestResults/tcp-pool-bench-before-measured",
+          "logSha256": "767f30828b8c7c4aa7e7f505075d5e843b4c3a060d54509f276ee10df8f3bf17",
+          "xmlSha256": "4e6439c49bebbee8b0546e29bced12702b146e3c606722d98dafbff538b37e0f",
+          "roundsIncludingWarmup": [
+            {
+              "index": 0,
+              "submit_us": 0.422,
+              "echo_fps": 60055.3,
+              "send_fps": 88016.0
+            },
+            {
+              "index": 1,
+              "submit_us": 0.371,
+              "echo_fps": 92562.7,
+              "send_fps": 85976.6
+            },
+            {
+              "index": 2,
+              "submit_us": 0.365,
+              "echo_fps": 110027.9,
+              "send_fps": 82920.5
+            },
+            {
+              "index": 3,
+              "submit_us": 0.395,
+              "echo_fps": 87628.8,
+              "send_fps": 87842.3
+            }
+          ],
+          "allocationEventsFor128": {
+            "positiveControl": 128,
+            "completionSource": 128,
+            "encode": 128,
+            "receiveBody": 128,
+            "sendAsync": 256,
+            "rawSocketRead": 0
+          }
+        },
+        {
+          "rawResults": "TestResults/tcp-pool-bench-before-measured-repeat",
+          "logSha256": "4b518e715a3c9f100f995cf9beab002253feca86b880e4198c049c5e2fec7310",
+          "xmlSha256": "8330bcad20d4876264acd6f99d32d559d307e77ff1b5d5482394e06fe03a67b8",
+          "roundsIncludingWarmup": [
+            {
+              "index": 0,
+              "submit_us": 0.453,
+              "echo_fps": 74764.6,
+              "send_fps": 83460.1
+            },
+            {
+              "index": 1,
+              "submit_us": 0.409,
+              "echo_fps": 64258.0,
+              "send_fps": 85867.1
+            },
+            {
+              "index": 2,
+              "submit_us": 0.396,
+              "echo_fps": 102753.6,
+              "send_fps": 86020.8
+            },
+            {
+              "index": 3,
+              "submit_us": 0.374,
+              "echo_fps": 64127.2,
+              "send_fps": 85484.0
+            }
+          ],
+          "allocationEventsFor128": {
+            "positiveControl": 128,
+            "completionSource": 128,
+            "encode": 128,
+            "receiveBody": 128,
+            "sendAsync": 256,
+            "rawSocketRead": 0
+          }
+        }
+      ],
+      "median": {
+        "submit_us": 0.3845,
+        "send_fps": 85921.85,
+        "echo_fps": 90095.75
+      },
+      "runtimeSha256": {
+        "NetworkContracts.cs": "30ab2cfaf9c38edeb73c1ce1bca78083467e7e4a484475f538723e2c7204e8de",
+        "NetworkModule.cs": "c26b3f0e2c3d29ed1f6972476310424cefa09e463aa51ce3eb4ec48231f328a6",
+        "TcpFrames.cs": "9df548ab8967efb562703f70475703a095513b3ee3e327f24064c2c830542d35",
+        "TcpMessageConnection.cs": "4e930cae165500569826da0b51521f521f0659557b4d5bbfd314543edb71ce3e"
+      }
+    },
+    "after": {
+      "runs": [
+        {
+          "rawResults": "TestResults/tcp-pool-bench-after-measured",
+          "logSha256": "b1271924818a96ce587a98ca90a00e72e159dfaae737223597770b4d56f87070",
+          "xmlSha256": "e5cb4204c4e96c0578e9731f4e833d99e98e5e16fc09f32dfdd9fb7823a11011",
+          "roundsIncludingWarmup": [
+            {
+              "index": 0,
+              "submit_us": 0.469,
+              "echo_fps": 75025.3,
+              "send_fps": 93892.0
+            },
+            {
+              "index": 1,
+              "submit_us": 0.461,
+              "echo_fps": 63954.2,
+              "send_fps": 94096.6
+            },
+            {
+              "index": 2,
+              "submit_us": 0.46,
+              "echo_fps": 77455.1,
+              "send_fps": 94146.5
+            },
+            {
+              "index": 3,
+              "submit_us": 0.45,
+              "echo_fps": 133542.9,
+              "send_fps": 93323.5
+            }
+          ],
+          "allocationEventsFor128": {
+            "positiveControl": 128,
+            "completionSource": 128,
+            "encode": 0,
+            "receiveBody": 0,
+            "sendAsync": 128,
+            "rawSocketRead": 0
+          }
+        },
+        {
+          "rawResults": "TestResults/tcp-pool-bench-after-measured-repeat",
+          "logSha256": "2991b852c0fb08218d13c1dafd75d19a7bf3c45b39d30c045c8d8a6e013e8e15",
+          "xmlSha256": "68574ec5c00eeece7897c3559bfbf1955b3d25691fb1f52ea396f9af87d3ad1e",
+          "roundsIncludingWarmup": [
+            {
+              "index": 0,
+              "submit_us": 0.503,
+              "echo_fps": 58551.1,
+              "send_fps": 90760.6
+            },
+            {
+              "index": 1,
+              "submit_us": 0.456,
+              "echo_fps": 75439.3,
+              "send_fps": 110142.5
+            },
+            {
+              "index": 2,
+              "submit_us": 0.45,
+              "echo_fps": 84417.6,
+              "send_fps": 93270.4
+            },
+            {
+              "index": 3,
+              "submit_us": 0.451,
+              "echo_fps": 107494.1,
+              "send_fps": 93050.0
+            }
+          ],
+          "allocationEventsFor128": {
+            "positiveControl": 128,
+            "completionSource": 128,
+            "encode": 0,
+            "receiveBody": 0,
+            "sendAsync": 128,
+            "rawSocketRead": 0
+          }
+        }
+      ],
+      "median": {
+        "submit_us": 0.4535,
+        "send_fps": 93710.05,
+        "echo_fps": 80936.35
+      },
+      "runtimeSha256": {
+        "NetworkContracts.cs": "8811d195ff499bf3425d3cb373de116f6612ebedabd66f135f50157a54c29f93",
+        "NetworkModule.cs": "cf9dd8b98f170815446d95d0c82aab3b67998a76eb580c6d0f84f816a912d31b",
+        "TcpFrames.cs": "60a5e31453f0741844caece0cb6893f8e5bf79533b3f5db088eaccc512cf5f17",
+        "TcpMessageConnection.cs": "deaeb093d0c9f2e7480f634dcc4160a1c0e74d22ee55b7cbd6cc7a40e109425c"
+      }
+    }
+  }
+}

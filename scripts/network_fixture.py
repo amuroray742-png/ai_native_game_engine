@@ -53,7 +53,7 @@ class MessageHandler(socketserver.StreamRequestHandler):
                 if len(header) != 4:
                     return
                 length, = struct.unpack(">I", header)
-                if length > 1024 * 1024:
+                if length > 8 * 1024 * 1024:
                     return
                 body = self.rfile.read(length)
                 if len(body) != length or body == b"/drop":
@@ -64,7 +64,7 @@ class MessageHandler(socketserver.StreamRequestHandler):
                         self.wfile.write(chunk)
                         time.sleep(.015)
                 elif body == b"/oversize":
-                    self.wfile.write(struct.pack(">I", 0xffffffff))
+                    self.wfile.write(struct.pack(">I", 8 * 1024 * 1024 + 1))
                     return
                 elif body == b"/truncate":
                     self.wfile.write(frame(b"partial")[:-1])

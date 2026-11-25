@@ -1,0 +1,158 @@
+        [UnityTest]
+        public IEnumerator LoopbackBench() => UniTask.ToCoroutine(async () =>
+        {
+            const int width = 64, batches = 96;
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                var accept = listener.AcceptTcpClientAsync();
+                var conn = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                using var peer = await accept;
+                peer.NoDelay = true;
+                ConnectionField<Socket>(conn, "_socket").NoDelay = true;
+                int received = 0;
+                conn.MessageReceived += bytes => received++;
+                var stream = peer.GetStream();
+                var echo = System.Threading.Tasks.Task.Run(() =>
+                {
+                    var data = new byte[32768];
+                    int left = width * batches * 4 * 132;
+                    while (left > 0)
+                    {
+                        int n = stream.Read(data, 0, Math.Min(left, data.Length));
+                        if (n == 0) { throw new EndOfStreamException(); }
+                        stream.Write(data, 0, n);
+                        left -= n;
+                    }
+                });
+                var pump = (Action<float>)Delegate.CreateDelegate(typeof(Action<float>), conn, conn.GetType().GetMethod("Pump", BindingFlags.NonPublic | BindingFlags.Instance));
+                var payload = new byte[128];
+                var clock = new System.Diagnostics.Stopwatch();
+                for (int run = 0; run < 4; run++)
+                {
+                    long submitTicks = 0;
+                    clock.Restart();
+                    for (int batch = 0; batch < batches; batch++)
+                    {
+                        long start = System.Diagnostics.Stopwatch.GetTimestamp();
+                        UniTask last = default;
+                        for (int i = 0; i < width; i++) { last = conn.SendAsync(payload); }
+                        submitTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
+                        int target = ((run * batches) + batch + 1) * width;
+                        while (received < target || last.Status == UniTaskStatus.Pending)
+                        {
+                            pump(0);
+                            if (clock.ElapsedMilliseconds > 15000) { Assert.Fail("benchmark timeout"); }
+                            Thread.Yield();
+                        }
+                    }
+                    clock.Stop();
+                    double secs = clock.Elapsed.TotalSeconds;
+                    UnityEngine.Debug.Log(FormattableString.Invariant($"TCP_BENCH {run} {submitTicks * 1e6 / System.Diagnostics.Stopwatch.Frequency / (width*batches):F3} {width*batches/secs:F1}"));
+                }
+                await echo;
+                for (int run = 0; run < 4; run++)
+                {
+                    var data = new byte[32768];
+                    var reader = System.Threading.Tasks.Task.Run(() =>
+                    {
+                        int left = width * batches * 132;
+                        while (left != 0)
+                        {
+                            int n = stream.Read(data, 0, Math.Min(data.Length, left));
+                            if (n == 0) { throw new EndOfStreamException(); }
+                            left -= n;
+                        }
+                    });
+                    clock.Restart();
+                    for (int batch = 0; batch < batches; batch++)
+                    {
+                        UniTask last = default;
+                        for (int i = 0; i < width; i++) { last = conn.SendAsync(payload); }
+                        while (last.Status == UniTaskStatus.Pending)
+                        {
+                            pump(0);
+                            if (clock.ElapsedMilliseconds > 15000) { Assert.Fail("send benchmark timeout"); }
+                            Thread.Yield();
+                        }
+                    }
+                    reader.GetAwaiter().GetResult();
+                    clock.Stop();
+                    UnityEngine.Debug.Log(FormattableString.Invariant($"TCP_WRITE {run} {width*batches/clock.Elapsed.TotalSeconds:F1}"));
+                }
+                await conn.CloseAsync();
+            }
+            finally { listener.Stop(); }
+        });
+        private static long AllocationEvents(Action work)
+        {
+            using var recorder = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "GC.Alloc", 8192,
+                ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+            recorder.Stop();
+            recorder.Reset();
+            recorder.Start();
+            for (int i = 0; i < 128; i++) { work(); }
+            recorder.Stop();
+            return recorder.Count;
+        }
+
+        [UnityTest]
+        public IEnumerator FrameBufferAllocations() => UniTask.ToCoroutine(async () =>
+        {
+            var codec = typeof(NetworkModule).Assembly.GetType("AiNative.UnityCore.Network.TcpFrames");
+            var encode = codec.GetMethod("Encode", BindingFlags.NonPublic | BindingFlags.Static);
+            var read = codec.GetMethod("ReadPayload", BindingFlags.NonPublic | BindingFlags.Static);
+            var data = new byte[128];
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                var accept = listener.AcceptTcpClientAsync();
+                using var client = new TcpClient();
+                client.Connect(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port);
+                using var peer = await accept;
+                var feed = new byte[257 * 128];
+                peer.GetStream().Write(feed, 0, feed.Length);
+                Action enc, dec;
+                if (encode.ReturnType == typeof(byte[]))
+                {
+                    var e = (Func<byte[], byte[]>)encode.CreateDelegate(typeof(Func<byte[], byte[]>));
+                    var r = (Func<Socket, int, byte[]>)read.CreateDelegate(typeof(Func<Socket,int,byte[]>));
+                    enc = () => GC.KeepAlive(e(data));
+                    dec = () => GC.KeepAlive(r(client.Client, 128));
+                }
+                else
+                {
+                    var e = (Func<byte[],System.Buffers.ArrayPool<byte>,ArraySegment<byte>>)encode.CreateDelegate(typeof(Func<byte[],System.Buffers.ArrayPool<byte>,ArraySegment<byte>>));
+                    var r = (Func<Socket,int,System.Buffers.ArrayPool<byte>,ArraySegment<byte>>)read.CreateDelegate(typeof(Func<Socket,int,System.Buffers.ArrayPool<byte>,ArraySegment<byte>>));
+                    var ret = (Action<ArraySegment<byte>,System.Buffers.ArrayPool<byte>>)codec.GetMethod("Return", BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate(typeof(Action<ArraySegment<byte>,System.Buffers.ArrayPool<byte>>));
+                    enc = () => ret(e(data,null),null);
+                    dec = () => ret(r(client.Client,128,null),null);
+                }
+                enc(); dec();
+                long ctrl = AllocationEvents(() => GC.KeepAlive(new byte[128]));
+                long taskEvents = AllocationEvents(() => GC.KeepAlive(new UniTaskCompletionSource()));
+                long send = AllocationEvents(enc), receive = AllocationEvents(dec);
+                long raw = AllocationEvents(() =>
+                {
+                    int consumed = 0;
+                    while (consumed < 128) { consumed += client.Client.Receive(data, consumed, 128-consumed, SocketFlags.None); }
+                });
+                var acceptConn = listener.AcceptTcpClientAsync();
+                var conn = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                using var peerConn = await acceptConn;
+                var tasks = new UniTask[128];
+                for (int i=0; i<128; i++) { tasks[i]=conn.SendAsync(data); }
+                await UniTask.WhenAll(tasks);
+                int index = 0;
+                long submit = AllocationEvents(() => tasks[index++]=conn.SendAsync(data));
+                await UniTask.WhenAll(tasks);
+                await conn.CloseAsync();
+                UnityEngine.Debug.Log($"TCP_ALLOC {ctrl} {taskEvents} {send} {receive} {submit} {raw}");
+                Assert.AreEqual(128, ctrl, "GC.Alloc control events");
+                Assert.AreEqual(128, taskEvents);
+                if (encode.ReturnType != typeof(byte[])) { Assert.Zero(send); Assert.AreEqual(raw,receive); }
+            }
+            finally { listener.Stop(); }
+        });

@@ -1,5 +1,54 @@
 # 通用框架 v2 验收
 
+## TCP 小缓冲回收、批量写与接收队列对照（2026-11-25）
+
+Windows Unity 6000.3.23f1 在 Domain Reload 开、关两种设置下各通过 28 项 PlayMode 和 1 项 EditMode，共 58 次，0 失败、0 跳过。覆盖 252/253 字节正文边界、空帧、32/33 帧边界、8 MiB 回显、短写停止在帧内或边界、主动关闭、半关闭、重启及缓冲归还。Windows x64 IL2CPP Player 通过 HTTP 配置获取、TCP 推送与回显、断线重连和主动关闭，进程记录 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。首轮有一项旧测试假定 8 MiB 帧在关闭前一定写不完，Windows 回环上该帧已完成。改为在已写完的帧归还缓冲时控制发送线程停点，独立审查后完整重跑。[功能验收及源码指纹](evidence/unitycore-network/20261125-send-batch/summary.json)
+
+**发送对照。** 在同一 Windows Editor 进程交错执行四种配置，表中为预热后 12 轮中位数。正文 128 字节，发送端启用 TCP_NODELAY，每轮 192 批、每批 64 条，吞吐测到对端读完和本地发送完成。空闲首包指约 1 ms 的空闲间隔后，从提交到对端读完整帧。分配仅统计提交线程的 Unity Profiler GC.Alloc 事件。
+
+| 配置 | 提交 μs/条 | 单向吞吐 条/s | Socket.Send 次/64 条 | GC 分配次/64 条 | 空闲首包 P95 μs |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 修改前 | 0.474 | 87,582 | 64.00 | 64 | 111.0 |
+| 仅小缓存 | 0.321 | 91,362 | 64.00 | 64 | 100.5 |
+| 仅批量写 | 0.549 | 836,948 | 2.65 | 64 | 108.1 |
+| 小缓存与批量写 | 0.324 | 1,057,644 | 2.89 | 64 | 104.0 |
+
+**接收队列。** 固定两项发送优化与套接字读取方式，A 使用原有有界队列和 Monitor，B 使用 ConcurrentQueue、独立额度计数和空间等待。两个独立 Editor 进程分别交错执行，三种场景各预热后测 12 轮。下表为 B 相对 A 的中位数变化；每格按进程一、进程二排列。派发耗时统计有消息交付的整次 Pump 墙钟时间并按消息条数均摊；P95 从对端提交消息组计至接收回调。
+
+| 场景 | 派发耗时变化 | 吞吐变化 | P95 延迟变化 |
+| --- | ---: | ---: | ---: |
+| 连续推送 | −35.36% / −34.81% | +26.76% / +26.27% | −24.55% / −19.74% |
+| 主线程落后 | −23.34% / −25.97% | +0.20% / −1.05% | −0.90% / +0.52% |
+| 正常逐帧 Update | −2.44% / −5.44% | −1.22% / +48.07% | +15.77% / −58.63% |
+
+**生产接收队列保留 A。** 正常 Update 在首个进程中未达到 5% 改善，且 P95 从 699.70 增至 810.05 μs，超过 5% 回退上限。第二个进程正常 Update 的 P95 有改善，未改变双进程门槛的结论。以上性能数据限于 Windows Editor 回环，Player 执行的是功能验收。[逐轮指标和指纹](evidence/unitycore-network/20261125-send-batch/benchmark.json) · [测试负载](evidence/unitycore-network/20261125-send-batch/benchmark-workloads.cs.txt) · [接收 B 版差异](evidence/unitycore-network/20261125-send-batch/receive-candidate.patch)
+
+## TCP 积压告警与缓冲池（2026-11-25）
+
+完整 UIDemo 在 Windows Unity 6000.3.23f1、Domain Reload 开和关的设置下各通过 25 项 PlayMode 和 1 项 EditMode，共 52 次，0 失败、0 跳过。回归涵盖 1,024 帧突发顺序、8 MiB 回显、超长拒绝、停读与仅通知积压、告警计时与恢复、关闭与重入，以及截断、订阅者异常、回调内关闭和 Core 重启后的缓冲归还。Windows x64 IL2CPP Player 完成 HTTP 配置、TCP 推送与回显、重连和主动关闭，输出 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。[用例及指纹](evidence/unitycore-network/20261125-pooled-tcp/summary.json)
+
+同机 Editor 回环比较改动前后的实现。两版按正序、逆序各跑一次，每个进程预热后取 3 轮，每轮 96 批、每批 64 条、正文 128 字节。下表耗时和吞吐为各版本 6 轮的中位数；发送吞吐以对端读完整批数据为准，回显吞吐包括主线程派发。池预热后以 Unity Profiler 的 `GC.Alloc` 事件计数，分配正对照和独立完成对象对照每 128 次操作均产生 128 个事件。[各轮指标和源码指纹](evidence/unitycore-network/20261125-pooled-tcp/benchmark.json) · [同一套对照用例](evidence/unitycore-network/20261125-pooled-tcp/benchmark-methods.cs.txt)
+
+| 指标 | 修改前 | 修改后 |
+| --- | ---: | ---: |
+| 主线程提交，微秒/条 | 0.385 | 0.454 |
+| 单向发送，条/秒 | 85,922 | 93,710 |
+| 回显及派发，条/秒 | 90,096 | 80,936 |
+| 128 次编码 / 128 次正文读取的分配事件 | 128 / 128 | 0 / 0 |
+| 128 次完整发送提交的分配事件 | 256 | 128 |
+
+本次单向发送吞吐提升约 9%，主线程提交耗时增加约 18%，完整回显吞吐下降约 10%。这是 Windows Editor 回环微基准，Player 执行了功能验收。对照用例可插入两版隔离 UIDemo 的 `NetworkTests` 类，使用 Unity CLI 的 PlayMode 过滤器分别运行 `LoopbackBench` 和 `FrameBufferAllocations`。
+
+## TCP 发送预算（2026-11-25）
+
+Windows Editor 6000.3.23f1 在 Domain Reload 开、关两种设置下，各通过 24 项 PlayMode 和 1 项 EditMode，共 50 次，0 失败、0 跳过。新增回归验证单次突发 256 条消息的有序写入和第 257 条的背压、按编码帧大小精确计费、写完后在下一次 Update 前复用额度，以及对端停读时在写帧持续占用预算。Windows x64 IL2CPP Player 完成 HTTP 配置获取、TCP 推送和回显、断线重连与主动关闭。Player 记录 `NETWORK_SMOKE_PASSED IL2CPP` 并以 0 退出。[逐项结果及源码、Player 指纹](evidence/unitycore-network/20261125-send-budget/summary.json)
+
+## TCP 批量接收与半关闭（2026-11-25）
+
+完整 UIDemo 在 Windows Editor 6000.3.23f1 的 Domain Reload 开、关两种设置下，各通过 21 项 PlayMode 和 1 项 EditMode，共 44 次执行，0 失败、0 跳过。覆盖 64 条突发消息的顺序、按帧派发与条数背压、分配前的字节预算、已写完发送在主动关闭或 Core 重启时的结算，以及半关闭时的完整回复、停读超时和重启接管。真实退出并重入 Play 的用例也通过日志检查。Windows x64 IL2CPP Player 完成 HTTP 配置、TCP 推送与回显、断线重连和主动关闭，记录 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。
+
+首次完整工程启动超时。中间专项工程的 HTTP 响应用例也曾超时，改动前源码单独执行可复现。最终在核对源码指纹并复用隔离工程的 Library 后，完整专项通过。独立 .NET 8 回环测量在目标 60 FPS 下突发 64 条 64 字节正文，修改前 3 轮需 55–64 次 Update，修改后两组各 3 轮分别需 7–9 次和 4 次。[各轮结果、源码及 Player 指纹](evidence/unitycore-network/20261125/summary.json)
+
 ## TCP 专用收发线程 Windows IL2CPP（2026-11-22）
 
 安装 Unity 6000.3.23f1 Windows Build Support (IL2CPP) 后，使用网络专项脚本在隔离工程重新运行双 Domain Reload，各通过 18 项 PlayMode 和 1 项 EditMode，共 38 次，0 失败、0 跳过。Windows x64 IL2CPP Player 构建成功，在独立回环服务上完成 HTTP 配置读取、TCP 推送、回显、对端断线、重连与主动关闭。进程记录 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。[测试用例、运行结果、可执行文件与源码指纹](evidence/unitycore-network/20261122/summary.json)

@@ -55,7 +55,7 @@ namespace AiNative.UnityCore.Network.Tests
             core.RegisterModule(network);
             await core.RunAsync();
             using var timeout = new CancellationTokenSource();
-            timeout.CancelAfterSlim(TimeSpan.FromSeconds(10), DelayType.Realtime);
+            using var timer = timeout.CancelAfterSlim(TimeSpan.FromSeconds(10), DelayType.Realtime);
             int port = int.Parse(Environment.GetEnvironmentVariable("AINATIVE_NETWORK_TCP") ?? "18081");
             var connection = await network.ConnectAsync("127.0.0.1", port, timeout.Token);
             bool ready = false;

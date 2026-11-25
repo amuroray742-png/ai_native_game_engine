@@ -1,0 +1,124 @@
+        private static long Tick() => System.Diagnostics.Stopwatch.GetTimestamp();
+        private static double Us(long ticks) => ticks * 1e6 / System.Diagnostics.Stopwatch.Frequency;
+        private static double P95(double[] values)
+        {
+            Array.Sort(values);
+            return values[(int)Math.Ceiling(values.Length * .95)-1];
+        }
+
+        [UnityTest]
+        public IEnumerator SendStudy() => UniTask.ToCoroutine(async () =>
+        {
+            string[] modes={"Baseline","Cache","Batch","Both"};
+            var server=new TcpListener(IPAddress.Loopback,0);server.Start();
+            try
+            {
+                for(int r=-1;r<12;r++)
+                for(int j=0;j<4;j++)
+                {
+                    string mode=modes[(Math.Max(r,0)+(r%2==0?j:4-j))%4];
+                    using var s=new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
+                    s.NoDelay=true;s.Connect(server.LocalEndpoint);
+                    using var peer=server.AcceptTcpClient();peer.ReceiveTimeout=5000;
+                    var conn=StudyFactory.Create(mode,s,_core.TimeMachine,_=>{},false,out var pump,out var stats);
+                    const int width=64,batches=192,wire=132;
+                    var stream=peer.GetStream(); var payload=new byte[128];var tmp=new byte[32768];
+                    var idle=new double[64];
+                    for(int i=0;i<idle.Length;i++)
+                    {
+                        Thread.Sleep(1);
+                        long start=Tick();var send=conn.SendAsync(payload);
+                        int n=0;while(n<wire) { int k=stream.Read(tmp,n,wire-n); if(k==0)throw new EndOfStreamException();n+=k; }
+                        idle[i]=Us(Tick()-start);
+                        while(send.Status==UniTaskStatus.Pending) {pump(0);Thread.Yield();}
+                    }
+                    using var atPeer=new ManualResetEventSlim(false);
+                    var reader=System.Threading.Tasks.Task.Run(()=>{
+                        int left=(8+batches+1)*width*wire;
+                        while(left>0){int n=stream.Read(tmp,0,Math.Min(left,tmp.Length));if(n==0)throw new EndOfStreamException();left-=n;if(left==width*wire)atPeer.Set();}
+                    });
+                    long submit=0, startAll=0,startCalls=0,lastAt=0, stopCalls=0;
+                    using var rec=ProfilerRecorder.StartNew(ProfilerCategory.Internal,"GC.Alloc",4096,ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+                    rec.Stop();rec.Reset();rec.Start();for(int i=0;i<width;i++)GC.KeepAlive(new byte[128]);rec.Stop();Assert.AreEqual(width,rec.Count);
+                    for(int batch=-8;batch<=batches;batch++)
+                    {
+                        if(batch==0){submit=0;startCalls=stats()[0];startAll=Tick();}
+                        if(batch==batches){rec.Reset();rec.Start();}
+                        UniTask last=default;
+                        long start=Tick();
+                        for(int n=0;n<width;n++) last=conn.SendAsync(payload);
+                        if(batch<batches)submit+=Tick()-start;
+                        if(batch==batches)rec.Stop();
+                        while(last.Status==UniTaskStatus.Pending){pump(0);Thread.Yield();if(Us(Tick()-start)>5e6)Assert.Fail("send stalled");}
+                        if(batch==batches-1){Assert.IsTrue(atPeer.Wait(5000));lastAt=Tick();stopCalls=stats()[0];}
+                    }
+                    await reader;
+                    UnityEngine.Debug.Log(FormattableString.Invariant($"SEND_STUDY {r} {mode} {Us(submit)/(width*batches):F4} {width*batches*1e6/Us(lastAt-startAll):F1} {(stopCalls-startCalls)/(double)batches:F3} {P95(idle):F2} {rec.Count}"));
+                    await conn.CloseAsync();
+                }
+            }finally{server.Stop();}
+        });
+
+        [UnityTest]
+        public IEnumerator ReceiveStudy() => UniTask.ToCoroutine(async () =>
+        {
+            var server=new TcpListener(IPAddress.Loopback,0);server.Start();
+            try
+            {
+                for(int r=-1;r<12;r++)
+                foreach(string scenario in new[]{"Push","Lag","Update"})
+                for(int j=0;j<2;j++)
+                {
+                    string mode=(Math.Max(0,r)+j)%2==0?"Both":"ReceiverB";
+                    using var s=new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
+                    s.Connect(server.LocalEndpoint);
+                    using var peer=server.AcceptTcpClient();peer.NoDelay=true;peer.SendTimeout=3000;
+                    var stream=peer.GetStream();bool paced=scenario=="Update";
+                    int group=paced?8:64, groups=paced?12:32, total=group*groups;
+                    var stamps=new long[groups];var latency=new double[total];int received=0,bad=0;
+                    var conn=StudyFactory.Create(mode,s,_core.TimeMachine,bytes=>{
+                        int id=(bytes[0]<<8)|bytes[1];
+                        if(bytes.Length!=128 || id!=received){bad++;return;}
+                        latency[received++]=Us(Tick()-Volatile.Read(ref stamps[id/group]));
+                    },true,out var pump,out var stats);
+                    byte[] data=new byte[group*132];
+                    void WriteGroup(int g)
+                    {
+                        for(int n=0;n<group;n++)
+                        {
+                            int pos=n*132,id=g*group+n;
+                            data[pos+3]=128;data[pos+4]=(byte)(id>>8);data[pos+5]=(byte)id;
+                        }
+                        Volatile.Write(ref stamps[g],Tick());stream.Write(data,0,data.Length);
+                    }
+                    long begin=Tick();
+                    if(paced)
+                    {
+                        for(int g=0;g<groups;g++)
+                        {
+                            WriteGroup(g);
+                            while(received<(g+1)*group)
+                            {
+                                await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+                                if(Us(Tick()-begin)>5e6)Assert.Fail("frame dispatch stalled");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var pushing=System.Threading.Tasks.Task.Run(()=>{for(int g=0;g<groups;g++)WriteGroup(g);});
+                        int nextPause=0;
+                        while(received<total)
+                        {
+                            if(scenario=="Lag" && received>=nextPause){Thread.Sleep(2);nextPause+=64;}
+                            pump(0);Thread.Yield();if(Us(Tick()-begin)>5e6)Assert.Fail("push stalled");
+                        }
+                        await pushing;
+                    }
+                    var elapsed=Us(Tick()-begin);var counters=stats();
+                    Assert.Zero(bad);Assert.AreEqual(total,received);
+                    UnityEngine.Debug.Log(FormattableString.Invariant($"RX_STUDY {r} {scenario} {mode} {Us(counters[1])/total:F4} {total*1e6/elapsed:F1} {P95(latency):F2}"));
+                    await conn.CloseAsync();
+                }
+            }finally{server.Stop();}
+        });

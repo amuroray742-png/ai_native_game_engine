@@ -42,7 +42,7 @@ def verify(output):
             method = "AiNative.UIDemo.Editor.UIDemoBuilder.Reload" + reload
             run_command(output, label, [cli, "run", project, "--timeout", "800", "--no-tail", "--format", "json",
                         "--log-file", output / (label + ".log"), "--", "-executeMethod", method])
-            for mode, test_filter, minimum in (("PlayMode", suite, 18),
+            for mode, test_filter, minimum in (("PlayMode", suite, 28),
                     ("EditMode", "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests", 1)):
                 label = mode + "-" + reload
                 xml = output / (label + ".xml")
@@ -50,7 +50,8 @@ def verify(output):
                 run_command(output, label, [cli, "test", project, "--mode", mode, "--filter", test_filter,
                             "--output", xml, "--timeout", "800", "--format", "json", "--", "-logFile", log])
                 tests.append(read_test_report(xml, test_filter, minimum))
-                check_log(log)
+                expected = ("InvalidOperationException: expected TCP listener test failure",) if mode == "PlayMode" else ()
+                check_log(log, expected)
                 read_unity_version(log, version)
         if any(tests[i]["tests"] != tests[i + 2]["tests"] for i in (0, 1)):
             raise RuntimeError("Editor test sets differ between Domain Reload settings")
