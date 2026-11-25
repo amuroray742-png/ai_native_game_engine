@@ -22,7 +22,13 @@
 
 当前契约入口：[总设计](ai-native-game-engine-design.md)、[架构规范](engineering-guidelines.md)、[v2 契约](framework-v2.md)、[UnityCore](unitycore-lifecycle.md)、[Assets](unitycore-assets.md)、[资源增强](assets-enhancement-urp.md)。
 
-UnityCore Network 专用收发线程在 Windows Editor 双 Domain Reload 共通过 38 次；Windows x64 IL2CPP Player 构建及本机 HTTP/TCP 回环验收通过。[网络验收与历史记录](v2-acceptance.md#tcp-专用收发线程-windows-il2cpp2026-11-22)
+UnityCore Network 的小缓冲回收和批量写通过 58 次 Editor 测试及 Windows x64 IL2CPP Player 回环。接收队列按双进程对照结果保留现有实现。[功能和性能验收](v2-acceptance.md#tcp-小缓冲回收批量写与接收队列对照2026-11-25)
+
+UnityCore Network 的无硬上限发送、持续积压告警与池化接收经过 52 次 Editor 测试和 Windows x64 IL2CPP Player 回环，另有同机收发性能与分配对照。[告警、缓冲所有权与性能验收](v2-acceptance.md#tcp-积压告警与缓冲池2026-11-25)
+
+UnityCore Network 的 TCP 发送预算与在写帧回收通过双 Domain Reload 共 50 次 Editor 测试及 Windows x64 IL2CPP Player 回环。[发送预算验收](v2-acceptance.md#tcp-发送预算2026-11-25)
+
+UnityCore Network 的批量接收与半关闭在完整 UIDemo 的双 Domain Reload 共通过 44 次 Editor 测试，Windows x64 IL2CPP Player 回环通过。[本轮用例与历史记录](v2-acceptance.md#tcp-批量接收与半关闭2026-11-25)
 
 ## 2. 模拟内核、物理与 Unity 宿主
 

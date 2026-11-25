@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,6 +19,9 @@ namespace AiNative.UnityCore.Network
     public sealed class NetworkModule : IModule, IAsyncShutdownModule, IHttpService, IMessageClient
     {
         private readonly int _maxMessageBytes;
+        private readonly int _maxPendingSends;
+        private readonly long _maxPendingSendBytes;
+        private readonly ArrayPool<byte>? _bufferPool;
         private readonly bool _registerHttp;
         private readonly bool _registerTcp;
         private readonly HashSet<TcpMessageConnection> _connections = new HashSet<TcpMessageConnection>();
@@ -26,19 +30,32 @@ namespace AiNative.UnityCore.Network
         private CancellationTokenRegistration _stopConnections;
         private ICore? _core;
 
-        private const int DefaultMessageBytes = 1024 * 1024;
+        private const int DefaultMessageBytes = 8 * 1024 * 1024;
+
+        private const int DefaultPendingSends = 256;
+        private const int DefaultPendingSendBytes = 4 * 1024 * 1024;
 
         public NetworkModule(int maxMessageBytes = DefaultMessageBytes) : this(true, true, maxMessageBytes) { }
+        public NetworkModule(int maxMessageBytes, int maxPendingSends, long maxPendingSendBytes)
+            : this(true, true, maxMessageBytes, maxPendingSends, maxPendingSendBytes) { }
         public static NetworkModule HttpOnly() => new NetworkModule(true, false, DefaultMessageBytes);
         public static NetworkModule TcpOnly(int maxMessageBytes = DefaultMessageBytes) => new NetworkModule(false, true, maxMessageBytes);
+        public static NetworkModule TcpOnly(int maxMessageBytes, int maxPendingSends, long maxPendingSendBytes) =>
+            new NetworkModule(false, true, maxMessageBytes, maxPendingSends, maxPendingSendBytes);
 
-        private NetworkModule(bool registerHttp, bool registerTcp, int maxMessageBytes)
+        private NetworkModule(bool registerHttp, bool registerTcp, int maxMessageBytes,
+            int maxPendingSends = DefaultPendingSends, long maxPendingSendBytes = DefaultPendingSendBytes, ArrayPool<byte>? bufferPool = null)
         {
-            if (maxMessageBytes <= 0 || maxMessageBytes > int.MaxValue - 4)
+            if (maxMessageBytes <= 0 || maxMessageBytes > int.MaxValue - TcpFrames.HeaderSize)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxMessageBytes));
             }
+            if (maxPendingSends <= 0) { throw new ArgumentOutOfRangeException(nameof(maxPendingSends)); }
+            if (maxPendingSendBytes <= 0) { throw new ArgumentOutOfRangeException(nameof(maxPendingSendBytes)); }
+            _bufferPool = bufferPool;
             _maxMessageBytes = maxMessageBytes;
+            _maxPendingSends = maxPendingSends;
+            _maxPendingSendBytes = maxPendingSendBytes;
             _registerHttp = registerHttp;
             _registerTcp = registerTcp;
         }
@@ -141,7 +158,8 @@ namespace AiNative.UnityCore.Network
                 {
                     socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     await WaitForNetworkTask(socket.ConnectAsync(new IPEndPoint(address, port)), operation.Token);
-                    var connection = new TcpMessageConnection(socket, _maxMessageBytes, _core!.TimeMachine, RunToken(), OnRetired);
+                    var connection = new TcpMessageConnection(socket, _maxMessageBytes, _maxPendingSends, _maxPendingSendBytes,
+                        _core!.TimeMachine, RunToken(), OnRetired, _bufferPool);
                     _connections.Add(connection);
                     socket = null; // The connection now owns it.
                     return connection;

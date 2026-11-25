@@ -1,0 +1,1944 @@
+{
+  "host": "Windows x64, Unity Editor 6000.3.23f1, Mono, loopback, no injected network delay. Throughput values count application frames.",
+  "sendWorkload": "Four interleaved configurations, one warm-up round then 12 measured per configuration. 1 ms idle gap before each first-send latency probe; TCP_NODELAY enabled on sender. Each throughput sample has 192 bursts of 64 x 128-byte bodies. Time to peer consumption and last local completion. ProfilerRecorder GC.Alloc positive control 64 allocations, records only the submitting thread.",
+  "receiveWorkload": "Two independent Editor processes, interleaved A/B; one warm-up then 12 measured rounds per scenario per mode. Identical batch+cache sending and frame reads. Dispatch = wall-clock duration of nonempty Pump calls / number of delivered frames, with callback; excludes idle polls. Latency includes offered peer group to callback. Push: 2048 frames in 64-frame groups, manual continuous pumping. Lag: same workload, main sleeps 2 ms every 64 deliveries. Update: 12 groups of eight per connection delivered through normal Core updates, offered sequentially; loopback Editor frame pacing is variable.",
+  "receiverDecision": "Keep the bounded Queue and Monitor implementation (A). B failed the normal Update P95 regression gate in process 1. All three scenarios and both processes must pass; prior to running, threshold was >=5% dispatch or throughput improvement, <=5% regression in the other and P95 latency.",
+  "runs": {
+    "benchmark-1": {
+      "rawFolder": "TestResults/tcp-send-batch-study",
+      "xmlSha256": "013a5ad05eede28b899475cd88ee9c54dd4df39930b67c07376f6e3cc530639e",
+      "logSha256": "8d6a64fccc429b048fa344977f89e459e710cacb4478e0c4bb2730f3353432c4",
+      "commandLog": "commands.jsonl",
+      "receive": {
+        "Push": {
+          "Both": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.8457,
+              "receivedFramesPerSec": 481721.0,
+              "p95PeerOfferToCallbackUs": 3565.35
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.6668,
+                "receivedFramesPerSec": 537208.5,
+                "p95PeerOfferToCallbackUs": 3242.3
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.6773,
+                "receivedFramesPerSec": 530308.9,
+                "p95PeerOfferToCallbackUs": 3059.9
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.8299,
+                "receivedFramesPerSec": 510099.9,
+                "p95PeerOfferToCallbackUs": 3435.2
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 1.0783,
+                "receivedFramesPerSec": 415171.6,
+                "p95PeerOfferToCallbackUs": 4336.8
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 1.0576,
+                "receivedFramesPerSec": 422817.3,
+                "p95PeerOfferToCallbackUs": 4170.0
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.786,
+                "receivedFramesPerSec": 480525.6,
+                "p95PeerOfferToCallbackUs": 3682.3
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.6495,
+                "receivedFramesPerSec": 552557.7,
+                "p95PeerOfferToCallbackUs": 3124.0
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.6569,
+                "receivedFramesPerSec": 559685.2,
+                "p95PeerOfferToCallbackUs": 3085.0
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 1.1754,
+                "receivedFramesPerSec": 466908.3,
+                "p95PeerOfferToCallbackUs": 3524.1
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.9233,
+                "receivedFramesPerSec": 445527.3,
+                "p95PeerOfferToCallbackUs": 3906.7
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.933,
+                "receivedFramesPerSec": 419002.4,
+                "p95PeerOfferToCallbackUs": 4298.7
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.8615,
+                "receivedFramesPerSec": 482916.4,
+                "p95PeerOfferToCallbackUs": 3606.6
+              }
+            ]
+          },
+          "ReceiverB": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.5467,
+              "receivedFramesPerSec": 610611.7,
+              "p95PeerOfferToCallbackUs": 2690.2
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.543,
+                "receivedFramesPerSec": 612623.4,
+                "p95PeerOfferToCallbackUs": 2687.2
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.5164,
+                "receivedFramesPerSec": 626894.0,
+                "p95PeerOfferToCallbackUs": 2705.3
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.6469,
+                "receivedFramesPerSec": 568809.9,
+                "p95PeerOfferToCallbackUs": 2605.1
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.5134,
+                "receivedFramesPerSec": 630639.0,
+                "p95PeerOfferToCallbackUs": 2693.2
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.5503,
+                "receivedFramesPerSec": 614406.1,
+                "p95PeerOfferToCallbackUs": 2779.7
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.531,
+                "receivedFramesPerSec": 576917.7,
+                "p95PeerOfferToCallbackUs": 2592.1
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.5764,
+                "receivedFramesPerSec": 515077.6,
+                "p95PeerOfferToCallbackUs": 3435.4
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.5567,
+                "receivedFramesPerSec": 608600.0,
+                "p95PeerOfferToCallbackUs": 2793.5
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.5317,
+                "receivedFramesPerSec": 615939.8,
+                "p95PeerOfferToCallbackUs": 2414.9
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.59,
+                "receivedFramesPerSec": 538678.0,
+                "p95PeerOfferToCallbackUs": 3172.1
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.5313,
+                "receivedFramesPerSec": 617816.5,
+                "p95PeerOfferToCallbackUs": 2618.9
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.6229,
+                "receivedFramesPerSec": 594864.6,
+                "p95PeerOfferToCallbackUs": 2664.3
+              }
+            ]
+          }
+        },
+        "Lag": {
+          "Both": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 1.0539,
+              "receivedFramesPerSec": 22820.95,
+              "p95PeerOfferToCallbackUs": 86482.5
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 1.143,
+                "receivedFramesPerSec": 23127.5,
+                "p95PeerOfferToCallbackUs": 85820.9
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 1.0704,
+                "receivedFramesPerSec": 22385.0,
+                "p95PeerOfferToCallbackUs": 88019.6
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 1.0883,
+                "receivedFramesPerSec": 22937.6,
+                "p95PeerOfferToCallbackUs": 86646.3
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 1.0067,
+                "receivedFramesPerSec": 22842.3,
+                "p95PeerOfferToCallbackUs": 86004.5
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 1.0374,
+                "receivedFramesPerSec": 22536.2,
+                "p95PeerOfferToCallbackUs": 87261.1
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 1.1402,
+                "receivedFramesPerSec": 21876.7,
+                "p95PeerOfferToCallbackUs": 89887.5
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 1.125,
+                "receivedFramesPerSec": 22952.3,
+                "p95PeerOfferToCallbackUs": 86295.1
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 1.0007,
+                "receivedFramesPerSec": 22194.1,
+                "p95PeerOfferToCallbackUs": 89246.0
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 1.1795,
+                "receivedFramesPerSec": 22630.9,
+                "p95PeerOfferToCallbackUs": 87023.7
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.9963,
+                "receivedFramesPerSec": 23567.3,
+                "p95PeerOfferToCallbackUs": 83863.0
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 1.0002,
+                "receivedFramesPerSec": 22799.6,
+                "p95PeerOfferToCallbackUs": 86318.7
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.9758,
+                "receivedFramesPerSec": 23206.4,
+                "p95PeerOfferToCallbackUs": 84810.6
+              }
+            ]
+          },
+          "ReceiverB": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.8079,
+              "receivedFramesPerSec": 22867.2,
+              "p95PeerOfferToCallbackUs": 85706.8
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.7317,
+                "receivedFramesPerSec": 23411.5,
+                "p95PeerOfferToCallbackUs": 84472.2
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.83,
+                "receivedFramesPerSec": 22760.8,
+                "p95PeerOfferToCallbackUs": 86400.9
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.8122,
+                "receivedFramesPerSec": 23331.8,
+                "p95PeerOfferToCallbackUs": 84221.9
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.8367,
+                "receivedFramesPerSec": 23321.9,
+                "p95PeerOfferToCallbackUs": 85049.4
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.9393,
+                "receivedFramesPerSec": 22320.2,
+                "p95PeerOfferToCallbackUs": 88806.3
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.7771,
+                "receivedFramesPerSec": 22761.4,
+                "p95PeerOfferToCallbackUs": 86892.7
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.7784,
+                "receivedFramesPerSec": 22973.0,
+                "p95PeerOfferToCallbackUs": 85719.3
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.7982,
+                "receivedFramesPerSec": 22219.4,
+                "p95PeerOfferToCallbackUs": 88727.7
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.8775,
+                "receivedFramesPerSec": 22707.3,
+                "p95PeerOfferToCallbackUs": 85694.3
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.8037,
+                "receivedFramesPerSec": 23684.9,
+                "p95PeerOfferToCallbackUs": 82960.3
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.8446,
+                "receivedFramesPerSec": 23044.4,
+                "p95PeerOfferToCallbackUs": 85294.2
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.7537,
+                "receivedFramesPerSec": 19595.9,
+                "p95PeerOfferToCallbackUs": 100750.8
+              }
+            ]
+          }
+        },
+        "Update": {
+          "Both": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.7912,
+              "receivedFramesPerSec": 30094.7,
+              "p95PeerOfferToCallbackUs": 699.7
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.7948,
+                "receivedFramesPerSec": 28190.5,
+                "p95PeerOfferToCallbackUs": 706.0
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.7521,
+                "receivedFramesPerSec": 34397.5,
+                "p95PeerOfferToCallbackUs": 665.1
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.7469,
+                "receivedFramesPerSec": 34717.2,
+                "p95PeerOfferToCallbackUs": 673.3
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.7583,
+                "receivedFramesPerSec": 34906.6,
+                "p95PeerOfferToCallbackUs": 576.8
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.7875,
+                "receivedFramesPerSec": 42220.1,
+                "p95PeerOfferToCallbackUs": 200.9
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.775,
+                "receivedFramesPerSec": 31998.9,
+                "p95PeerOfferToCallbackUs": 693.4
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.8604,
+                "receivedFramesPerSec": 23090.8,
+                "p95PeerOfferToCallbackUs": 778.8
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.8365,
+                "receivedFramesPerSec": 27114.0,
+                "p95PeerOfferToCallbackUs": 1061.2
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.8948,
+                "receivedFramesPerSec": 22544.2,
+                "p95PeerOfferToCallbackUs": 1475.2
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.8271,
+                "receivedFramesPerSec": 21072.5,
+                "p95PeerOfferToCallbackUs": 1506.2
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.7344,
+                "receivedFramesPerSec": 42427.2,
+                "p95PeerOfferToCallbackUs": 310.8
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.9813,
+                "receivedFramesPerSec": 14126.6,
+                "p95PeerOfferToCallbackUs": 2055.2
+              }
+            ]
+          },
+          "ReceiverB": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.7719,
+              "receivedFramesPerSec": 29726.65,
+              "p95PeerOfferToCallbackUs": 810.05
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.875,
+                "receivedFramesPerSec": 20047.2,
+                "p95PeerOfferToCallbackUs": 1311.7
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.7844,
+                "receivedFramesPerSec": 21982.6,
+                "p95PeerOfferToCallbackUs": 1657.6
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.6896,
+                "receivedFramesPerSec": 29428.9,
+                "p95PeerOfferToCallbackUs": 1099.0
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.7354,
+                "receivedFramesPerSec": 39522.4,
+                "p95PeerOfferToCallbackUs": 231.3
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.7188,
+                "receivedFramesPerSec": 43648.3,
+                "p95PeerOfferToCallbackUs": 181.3
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.8615,
+                "receivedFramesPerSec": 18511.0,
+                "p95PeerOfferToCallbackUs": 1178.7
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.751,
+                "receivedFramesPerSec": 31546.8,
+                "p95PeerOfferToCallbackUs": 579.1
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.726,
+                "receivedFramesPerSec": 37887.8,
+                "p95PeerOfferToCallbackUs": 343.7
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.8688,
+                "receivedFramesPerSec": 19721.0,
+                "p95PeerOfferToCallbackUs": 1610.5
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.8281,
+                "receivedFramesPerSec": 30024.4,
+                "p95PeerOfferToCallbackUs": 247.6
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.8115,
+                "receivedFramesPerSec": 33011.2,
+                "p95PeerOfferToCallbackUs": 307.0
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.7594,
+                "receivedFramesPerSec": 24244.9,
+                "p95PeerOfferToCallbackUs": 1041.0
+              }
+            ]
+          }
+        }
+      },
+      "send": {
+        "Baseline": {
+          "median": {
+            "submitUsPerFrame": 0.4557,
+            "peerConsumedFramesPerSec": 89250.55,
+            "socketSendsPer64": 64.0,
+            "p95IdlePeerReadUs": 106.75,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.4474,
+              "peerConsumedFramesPerSec": 90111.8,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 112.2,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.4491,
+              "peerConsumedFramesPerSec": 89420.9,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 117.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.4467,
+              "peerConsumedFramesPerSec": 92769.0,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 98.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.4567,
+              "peerConsumedFramesPerSec": 91046.0,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 98.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.4739,
+              "peerConsumedFramesPerSec": 87343.1,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 93.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.5333,
+              "peerConsumedFramesPerSec": 78563.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 117.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.5121,
+              "peerConsumedFramesPerSec": 90456.8,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 132.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.446,
+              "peerConsumedFramesPerSec": 91858.1,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 129.9,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.4448,
+              "peerConsumedFramesPerSec": 89007.8,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 96.1,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.4548,
+              "peerConsumedFramesPerSec": 89080.2,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 110.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.4745,
+              "peerConsumedFramesPerSec": 87096.0,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 94.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.487,
+              "peerConsumedFramesPerSec": 86743.2,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 103.5,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        },
+        "Cache": {
+          "median": {
+            "submitUsPerFrame": 0.3161,
+            "peerConsumedFramesPerSec": 90597.9,
+            "socketSendsPer64": 64.0,
+            "p95IdlePeerReadUs": 101.0,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.3497,
+              "peerConsumedFramesPerSec": 89469.7,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 93.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.3011,
+              "peerConsumedFramesPerSec": 90848.6,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 87.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.3052,
+              "peerConsumedFramesPerSec": 91558.4,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 104.1,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.3114,
+              "peerConsumedFramesPerSec": 90159.6,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 96.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.3266,
+              "peerConsumedFramesPerSec": 86232.8,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 116.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.3338,
+              "peerConsumedFramesPerSec": 85805.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 129.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.339,
+              "peerConsumedFramesPerSec": 85841.8,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 100.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.3127,
+              "peerConsumedFramesPerSec": 91228.5,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 102.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.2985,
+              "peerConsumedFramesPerSec": 93559.7,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 91.7,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.3037,
+              "peerConsumedFramesPerSec": 92361.1,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 103.9,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.3196,
+              "peerConsumedFramesPerSec": 99490.9,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 92.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.3219,
+              "peerConsumedFramesPerSec": 90347.2,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 101.5,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        },
+        "Batch": {
+          "median": {
+            "submitUsPerFrame": 0.5285,
+            "peerConsumedFramesPerSec": 861710.8,
+            "socketSendsPer64": 2.6355,
+            "p95IdlePeerReadUs": 99.8,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.4943,
+              "peerConsumedFramesPerSec": 937793.3,
+              "socketSendsPer64": 2.599,
+              "p95IdlePeerReadUs": 97.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.5301,
+              "peerConsumedFramesPerSec": 753564.5,
+              "socketSendsPer64": 2.594,
+              "p95IdlePeerReadUs": 89.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.5449,
+              "peerConsumedFramesPerSec": 815210.9,
+              "socketSendsPer64": 2.646,
+              "p95IdlePeerReadUs": 136.7,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.5162,
+              "peerConsumedFramesPerSec": 850427.7,
+              "socketSendsPer64": 2.552,
+              "p95IdlePeerReadUs": 97.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.5042,
+              "peerConsumedFramesPerSec": 936699.6,
+              "socketSendsPer64": 2.693,
+              "p95IdlePeerReadUs": 223.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.5671,
+              "peerConsumedFramesPerSec": 720775.7,
+              "socketSendsPer64": 2.547,
+              "p95IdlePeerReadUs": 94.7,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.5383,
+              "peerConsumedFramesPerSec": 839992.6,
+              "socketSendsPer64": 2.792,
+              "p95IdlePeerReadUs": 108.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.5534,
+              "peerConsumedFramesPerSec": 893451.8,
+              "socketSendsPer64": 2.688,
+              "p95IdlePeerReadUs": 107.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.5268,
+              "peerConsumedFramesPerSec": 803263.3,
+              "socketSendsPer64": 2.438,
+              "p95IdlePeerReadUs": 79.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.5346,
+              "peerConsumedFramesPerSec": 886324.3,
+              "socketSendsPer64": 2.625,
+              "p95IdlePeerReadUs": 102.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.4955,
+              "peerConsumedFramesPerSec": 937214.0,
+              "socketSendsPer64": 2.708,
+              "p95IdlePeerReadUs": 93.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.517,
+              "peerConsumedFramesPerSec": 872993.9,
+              "socketSendsPer64": 2.724,
+              "p95IdlePeerReadUs": 124.1,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        },
+        "Both": {
+          "median": {
+            "submitUsPerFrame": 0.3175,
+            "peerConsumedFramesPerSec": 1056902.95,
+            "socketSendsPer64": 2.8675,
+            "p95IdlePeerReadUs": 101.6,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.3023,
+              "peerConsumedFramesPerSec": 1140301.2,
+              "socketSendsPer64": 2.969,
+              "p95IdlePeerReadUs": 85.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.3324,
+              "peerConsumedFramesPerSec": 942302.4,
+              "socketSendsPer64": 2.87,
+              "p95IdlePeerReadUs": 91.1,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.4262,
+              "peerConsumedFramesPerSec": 789002.3,
+              "socketSendsPer64": 2.859,
+              "p95IdlePeerReadUs": 103.2,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.3137,
+              "peerConsumedFramesPerSec": 1122099.6,
+              "socketSendsPer64": 2.906,
+              "p95IdlePeerReadUs": 121.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.5073,
+              "peerConsumedFramesPerSec": 840096.0,
+              "socketSendsPer64": 2.865,
+              "p95IdlePeerReadUs": 100.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.3137,
+              "peerConsumedFramesPerSec": 1062516.2,
+              "socketSendsPer64": 2.844,
+              "p95IdlePeerReadUs": 113.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.3154,
+              "peerConsumedFramesPerSec": 1041267.7,
+              "socketSendsPer64": 2.953,
+              "p95IdlePeerReadUs": 137.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.3182,
+              "peerConsumedFramesPerSec": 1051289.7,
+              "socketSendsPer64": 2.854,
+              "p95IdlePeerReadUs": 125.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.3093,
+              "peerConsumedFramesPerSec": 1124409.8,
+              "socketSendsPer64": 2.839,
+              "p95IdlePeerReadUs": 88.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.3189,
+              "peerConsumedFramesPerSec": 1122243.0,
+              "socketSendsPer64": 2.953,
+              "p95IdlePeerReadUs": 90.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.3167,
+              "peerConsumedFramesPerSec": 1066407.5,
+              "socketSendsPer64": 2.901,
+              "p95IdlePeerReadUs": 96.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.4236,
+              "peerConsumedFramesPerSec": 732728.3,
+              "socketSendsPer64": 2.719,
+              "p95IdlePeerReadUs": 135.2,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        }
+      }
+    },
+    "benchmark-2": {
+      "rawFolder": "TestResults/tcp-send-batch-study",
+      "xmlSha256": "c50fdee723125def3c745ad53a298acb5ebed60c20e10aa56c0acbdc7ba691e2",
+      "logSha256": "8fcecb29e6065a3f6e21eea0eaf26843307d8d03b6cd3ce5536042ba0f5a32f1",
+      "commandLog": "commands.jsonl",
+      "receive": {
+        "Push": {
+          "Both": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.8581,
+              "receivedFramesPerSec": 469141.85,
+              "p95PeerOfferToCallbackUs": 3477.3
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.6856,
+                "receivedFramesPerSec": 532917.0,
+                "p95PeerOfferToCallbackUs": 3221.6
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.9597,
+                "receivedFramesPerSec": 402531.5,
+                "p95PeerOfferToCallbackUs": 4366.3
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.7174,
+                "receivedFramesPerSec": 519849.7,
+                "p95PeerOfferToCallbackUs": 3329.6
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 1.0152,
+                "receivedFramesPerSec": 430143.7,
+                "p95PeerOfferToCallbackUs": 3590.5
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.616,
+                "receivedFramesPerSec": 550522.8,
+                "p95PeerOfferToCallbackUs": 3087.5
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.9916,
+                "receivedFramesPerSec": 467857.6,
+                "p95PeerOfferToCallbackUs": 3364.1
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.7387,
+                "receivedFramesPerSec": 502737.1,
+                "p95PeerOfferToCallbackUs": 3360.3
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.9045,
+                "receivedFramesPerSec": 393846.2,
+                "p95PeerOfferToCallbackUs": 4080.9
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.911,
+                "receivedFramesPerSec": 465729.7,
+                "p95PeerOfferToCallbackUs": 3729.5
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.8511,
+                "receivedFramesPerSec": 404303.6,
+                "p95PeerOfferToCallbackUs": 4002.1
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.6474,
+                "receivedFramesPerSec": 549194.2,
+                "p95PeerOfferToCallbackUs": 2825.3
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.8652,
+                "receivedFramesPerSec": 470426.1,
+                "p95PeerOfferToCallbackUs": 3725.6
+              }
+            ]
+          },
+          "ReceiverB": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.5594,
+              "receivedFramesPerSec": 592401.85,
+              "p95PeerOfferToCallbackUs": 2791.0
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.6804,
+                "receivedFramesPerSec": 528816.4,
+                "p95PeerOfferToCallbackUs": 2889.6
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.5833,
+                "receivedFramesPerSec": 586550.6,
+                "p95PeerOfferToCallbackUs": 2748.2
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.5402,
+                "receivedFramesPerSec": 612220.5,
+                "p95PeerOfferToCallbackUs": 2783.1
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.5148,
+                "receivedFramesPerSec": 627816.4,
+                "p95PeerOfferToCallbackUs": 2683.5
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.5453,
+                "receivedFramesPerSec": 614479.9,
+                "p95PeerOfferToCallbackUs": 2339.6
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.8601,
+                "receivedFramesPerSec": 468832.3,
+                "p95PeerOfferToCallbackUs": 3165.4
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.5353,
+                "receivedFramesPerSec": 623382.9,
+                "p95PeerOfferToCallbackUs": 2697.8
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.5612,
+                "receivedFramesPerSec": 580202.8,
+                "p95PeerOfferToCallbackUs": 2934.0
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.5349,
+                "receivedFramesPerSec": 598253.1,
+                "p95PeerOfferToCallbackUs": 2555.0
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.831,
+                "receivedFramesPerSec": 407286.6,
+                "p95PeerOfferToCallbackUs": 3882.6
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.8925,
+                "receivedFramesPerSec": 474337.6,
+                "p95PeerOfferToCallbackUs": 3706.8
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.5575,
+                "receivedFramesPerSec": 607462.8,
+                "p95PeerOfferToCallbackUs": 2798.9
+              }
+            ]
+          }
+        },
+        "Lag": {
+          "Both": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 1.066,
+              "receivedFramesPerSec": 22704.3,
+              "p95PeerOfferToCallbackUs": 87189.9
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 1.2352,
+                "receivedFramesPerSec": 22326.2,
+                "p95PeerOfferToCallbackUs": 88263.1
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.8898,
+                "receivedFramesPerSec": 22606.9,
+                "p95PeerOfferToCallbackUs": 87633.5
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.8733,
+                "receivedFramesPerSec": 22902.3,
+                "p95PeerOfferToCallbackUs": 85330.4
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.9875,
+                "receivedFramesPerSec": 23405.4,
+                "p95PeerOfferToCallbackUs": 83924.9
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 1.0518,
+                "receivedFramesPerSec": 23129.6,
+                "p95PeerOfferToCallbackUs": 85092.9
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 1.2591,
+                "receivedFramesPerSec": 22695.6,
+                "p95PeerOfferToCallbackUs": 87687.1
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.9725,
+                "receivedFramesPerSec": 23053.0,
+                "p95PeerOfferToCallbackUs": 85317.0
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 1.0802,
+                "receivedFramesPerSec": 22361.8,
+                "p95PeerOfferToCallbackUs": 88082.8
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 1.3472,
+                "receivedFramesPerSec": 21662.2,
+                "p95PeerOfferToCallbackUs": 90476.2
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 1.2822,
+                "receivedFramesPerSec": 23076.7,
+                "p95PeerOfferToCallbackUs": 85225.8
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 1.2165,
+                "receivedFramesPerSec": 22359.6,
+                "p95PeerOfferToCallbackUs": 87635.4
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 1.0009,
+                "receivedFramesPerSec": 22713.0,
+                "p95PeerOfferToCallbackUs": 86746.3
+              }
+            ]
+          },
+          "ReceiverB": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.7892,
+              "receivedFramesPerSec": 22464.8,
+              "p95PeerOfferToCallbackUs": 87644.35
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.8983,
+                "receivedFramesPerSec": 22913.0,
+                "p95PeerOfferToCallbackUs": 85821.1
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.6965,
+                "receivedFramesPerSec": 23063.4,
+                "p95PeerOfferToCallbackUs": 85400.7
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.7392,
+                "receivedFramesPerSec": 23371.8,
+                "p95PeerOfferToCallbackUs": 84256.5
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.8584,
+                "receivedFramesPerSec": 22570.4,
+                "p95PeerOfferToCallbackUs": 87280.7
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.7938,
+                "receivedFramesPerSec": 22643.0,
+                "p95PeerOfferToCallbackUs": 86988.5
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.7815,
+                "receivedFramesPerSec": 21858.6,
+                "p95PeerOfferToCallbackUs": 89731.4
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 1.6364,
+                "receivedFramesPerSec": 18208.4,
+                "p95PeerOfferToCallbackUs": 108977.2
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.7845,
+                "receivedFramesPerSec": 21925.3,
+                "p95PeerOfferToCallbackUs": 89911.9
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.9945,
+                "receivedFramesPerSec": 22028.2,
+                "p95PeerOfferToCallbackUs": 89275.4
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.7382,
+                "receivedFramesPerSec": 22359.2,
+                "p95PeerOfferToCallbackUs": 88008.0
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.8113,
+                "receivedFramesPerSec": 22294.7,
+                "p95PeerOfferToCallbackUs": 88250.1
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.7182,
+                "receivedFramesPerSec": 23516.0,
+                "p95PeerOfferToCallbackUs": 83592.7
+              }
+            ]
+          }
+        },
+        "Update": {
+          "Both": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.862,
+              "receivedFramesPerSec": 18883.9,
+              "p95PeerOfferToCallbackUs": 1348.45
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.8323,
+                "receivedFramesPerSec": 32139.3,
+                "p95PeerOfferToCallbackUs": 506.7
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.9021,
+                "receivedFramesPerSec": 17351.7,
+                "p95PeerOfferToCallbackUs": 1837.6
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.9417,
+                "receivedFramesPerSec": 17651.6,
+                "p95PeerOfferToCallbackUs": 754.4
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.7125,
+                "receivedFramesPerSec": 33733.9,
+                "p95PeerOfferToCallbackUs": 663.8
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.8271,
+                "receivedFramesPerSec": 19368.9,
+                "p95PeerOfferToCallbackUs": 1234.8
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.8469,
+                "receivedFramesPerSec": 30984.7,
+                "p95PeerOfferToCallbackUs": 388.8
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.9281,
+                "receivedFramesPerSec": 15654.0,
+                "p95PeerOfferToCallbackUs": 1568.0
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.8771,
+                "receivedFramesPerSec": 18398.9,
+                "p95PeerOfferToCallbackUs": 1694.7
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.9396,
+                "receivedFramesPerSec": 17137.0,
+                "p95PeerOfferToCallbackUs": 1404.5
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 0.9292,
+                "receivedFramesPerSec": 16706.1,
+                "p95PeerOfferToCallbackUs": 1823.5
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.8083,
+                "receivedFramesPerSec": 24452.4,
+                "p95PeerOfferToCallbackUs": 1404.3
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.8,
+                "receivedFramesPerSec": 23390.1,
+                "p95PeerOfferToCallbackUs": 1292.6
+              }
+            ]
+          },
+          "ReceiverB": {
+            "median": {
+              "nonemptyPumpUsPerFrame": 0.8151,
+              "receivedFramesPerSec": 27962.0,
+              "p95PeerOfferToCallbackUs": 557.85
+            },
+            "rounds": [
+              {
+                "round": 0,
+                "nonemptyPumpUsPerFrame": 0.8031,
+                "receivedFramesPerSec": 24578.2,
+                "p95PeerOfferToCallbackUs": 1056.9
+              },
+              {
+                "round": 1,
+                "nonemptyPumpUsPerFrame": 0.724,
+                "receivedFramesPerSec": 32050.2,
+                "p95PeerOfferToCallbackUs": 553.5
+              },
+              {
+                "round": 2,
+                "nonemptyPumpUsPerFrame": 0.849,
+                "receivedFramesPerSec": 21598.3,
+                "p95PeerOfferToCallbackUs": 1419.1
+              },
+              {
+                "round": 3,
+                "nonemptyPumpUsPerFrame": 0.7708,
+                "receivedFramesPerSec": 34310.2,
+                "p95PeerOfferToCallbackUs": 254.4
+              },
+              {
+                "round": 4,
+                "nonemptyPumpUsPerFrame": 0.7844,
+                "receivedFramesPerSec": 35450.5,
+                "p95PeerOfferToCallbackUs": 294.3
+              },
+              {
+                "round": 5,
+                "nonemptyPumpUsPerFrame": 0.7438,
+                "receivedFramesPerSec": 38321.8,
+                "p95PeerOfferToCallbackUs": 244.6
+              },
+              {
+                "round": 6,
+                "nonemptyPumpUsPerFrame": 0.7979,
+                "receivedFramesPerSec": 30112.0,
+                "p95PeerOfferToCallbackUs": 305.9
+              },
+              {
+                "round": 7,
+                "nonemptyPumpUsPerFrame": 0.9375,
+                "receivedFramesPerSec": 15139.1,
+                "p95PeerOfferToCallbackUs": 2532.4
+              },
+              {
+                "round": 8,
+                "nonemptyPumpUsPerFrame": 0.8406,
+                "receivedFramesPerSec": 30612.2,
+                "p95PeerOfferToCallbackUs": 279.5
+              },
+              {
+                "round": 9,
+                "nonemptyPumpUsPerFrame": 1.0865,
+                "receivedFramesPerSec": 19950.5,
+                "p95PeerOfferToCallbackUs": 562.2
+              },
+              {
+                "round": 10,
+                "nonemptyPumpUsPerFrame": 0.8333,
+                "receivedFramesPerSec": 18030.2,
+                "p95PeerOfferToCallbackUs": 1592.0
+              },
+              {
+                "round": 11,
+                "nonemptyPumpUsPerFrame": 0.8271,
+                "receivedFramesPerSec": 25812.0,
+                "p95PeerOfferToCallbackUs": 716.6
+              }
+            ]
+          }
+        }
+      }
+    },
+    "send-final": {
+      "rawFolder": "TestResults/tcp-send-batch-study",
+      "xmlSha256": "75900ec0c8f6998628c3f67a234703ea4843b339392cc9e540759b28aa25485c",
+      "logSha256": "ff0fd56a03cd27e114cc6d753c229ad123fe78a41235cf1ff9808a90a1fc4dc5",
+      "commandLog": "commands.jsonl",
+      "send": {
+        "Baseline": {
+          "median": {
+            "submitUsPerFrame": 0.4742,
+            "peerConsumedFramesPerSec": 87582.35,
+            "socketSendsPer64": 64.0,
+            "p95IdlePeerReadUs": 111.0,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.4662,
+              "peerConsumedFramesPerSec": 86402.0,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 118.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.4696,
+              "peerConsumedFramesPerSec": 81952.2,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 109.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.439,
+              "peerConsumedFramesPerSec": 92330.0,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 96.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.4721,
+              "peerConsumedFramesPerSec": 93472.7,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 113.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.4722,
+              "peerConsumedFramesPerSec": 106116.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 112.7,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.4851,
+              "peerConsumedFramesPerSec": 85605.1,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 105.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.4675,
+              "peerConsumedFramesPerSec": 90552.9,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 98.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.4919,
+              "peerConsumedFramesPerSec": 87682.4,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 117.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.4872,
+              "peerConsumedFramesPerSec": 82501.2,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 121.9,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.5876,
+              "peerConsumedFramesPerSec": 72507.6,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 105.2,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.4761,
+              "peerConsumedFramesPerSec": 91476.9,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 105.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.4965,
+              "peerConsumedFramesPerSec": 87482.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 115.0,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        },
+        "Cache": {
+          "median": {
+            "submitUsPerFrame": 0.3207,
+            "peerConsumedFramesPerSec": 91362.0,
+            "socketSendsPer64": 64.0,
+            "p95IdlePeerReadUs": 100.5,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.3444,
+              "peerConsumedFramesPerSec": 94367.6,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 100.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.3135,
+              "peerConsumedFramesPerSec": 88866.1,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 97.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.2981,
+              "peerConsumedFramesPerSec": 90726.7,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 103.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.3195,
+              "peerConsumedFramesPerSec": 93880.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 77.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.3219,
+              "peerConsumedFramesPerSec": 118325.8,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 113.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.3033,
+              "peerConsumedFramesPerSec": 91090.1,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 87.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.2966,
+              "peerConsumedFramesPerSec": 93634.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 100.2,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.3112,
+              "peerConsumedFramesPerSec": 87707.0,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 98.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.3365,
+              "peerConsumedFramesPerSec": 91633.9,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 130.2,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.508,
+              "peerConsumedFramesPerSec": 66016.5,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 89.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.3338,
+              "peerConsumedFramesPerSec": 88621.9,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 113.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.3491,
+              "peerConsumedFramesPerSec": 100620.3,
+              "socketSendsPer64": 64.0,
+              "p95IdlePeerReadUs": 113.7,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        },
+        "Batch": {
+          "median": {
+            "submitUsPerFrame": 0.5494,
+            "peerConsumedFramesPerSec": 836948.45,
+            "socketSendsPer64": 2.651,
+            "p95IdlePeerReadUs": 108.1,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.5446,
+              "peerConsumedFramesPerSec": 823852.0,
+              "socketSendsPer64": 2.599,
+              "p95IdlePeerReadUs": 107.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.5243,
+              "peerConsumedFramesPerSec": 871582.1,
+              "socketSendsPer64": 2.51,
+              "p95IdlePeerReadUs": 109.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.6223,
+              "peerConsumedFramesPerSec": 848115.1,
+              "socketSendsPer64": 2.943,
+              "p95IdlePeerReadUs": 99.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.5627,
+              "peerConsumedFramesPerSec": 858232.4,
+              "socketSendsPer64": 2.859,
+              "p95IdlePeerReadUs": 111.8,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.5246,
+              "peerConsumedFramesPerSec": 919533.3,
+              "socketSendsPer64": 2.745,
+              "p95IdlePeerReadUs": 121.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.5541,
+              "peerConsumedFramesPerSec": 844646.4,
+              "socketSendsPer64": 2.708,
+              "p95IdlePeerReadUs": 108.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.5364,
+              "peerConsumedFramesPerSec": 866829.4,
+              "socketSendsPer64": 2.651,
+              "p95IdlePeerReadUs": 98.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.5426,
+              "peerConsumedFramesPerSec": 829250.5,
+              "socketSendsPer64": 2.531,
+              "p95IdlePeerReadUs": 112.9,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.5546,
+              "peerConsumedFramesPerSec": 813543.2,
+              "socketSendsPer64": 2.651,
+              "p95IdlePeerReadUs": 107.9,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.5677,
+              "peerConsumedFramesPerSec": 678284.2,
+              "socketSendsPer64": 2.458,
+              "p95IdlePeerReadUs": 114.2,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.5684,
+              "peerConsumedFramesPerSec": 707911.6,
+              "socketSendsPer64": 2.557,
+              "p95IdlePeerReadUs": 103.7,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.5356,
+              "peerConsumedFramesPerSec": 809368.9,
+              "socketSendsPer64": 2.677,
+              "p95IdlePeerReadUs": 98.7,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        },
+        "Both": {
+          "median": {
+            "submitUsPerFrame": 0.3235,
+            "peerConsumedFramesPerSec": 1057643.95,
+            "socketSendsPer64": 2.893,
+            "p95IdlePeerReadUs": 103.95,
+            "gcAllocEventsPer64": 64.0
+          },
+          "rounds": [
+            {
+              "round": 0,
+              "submitUsPerFrame": 0.3095,
+              "peerConsumedFramesPerSec": 1169851.2,
+              "socketSendsPer64": 2.974,
+              "p95IdlePeerReadUs": 106.7,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 1,
+              "submitUsPerFrame": 0.3239,
+              "peerConsumedFramesPerSec": 1044764.7,
+              "socketSendsPer64": 2.906,
+              "p95IdlePeerReadUs": 103.1,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 2,
+              "submitUsPerFrame": 0.3142,
+              "peerConsumedFramesPerSec": 1128986.3,
+              "socketSendsPer64": 2.911,
+              "p95IdlePeerReadUs": 108.0,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 3,
+              "submitUsPerFrame": 0.3426,
+              "peerConsumedFramesPerSec": 849722.0,
+              "socketSendsPer64": 2.271,
+              "p95IdlePeerReadUs": 98.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 4,
+              "submitUsPerFrame": 0.323,
+              "peerConsumedFramesPerSec": 997232.6,
+              "socketSendsPer64": 2.839,
+              "p95IdlePeerReadUs": 96.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 5,
+              "submitUsPerFrame": 0.3104,
+              "peerConsumedFramesPerSec": 1157258.3,
+              "socketSendsPer64": 2.979,
+              "p95IdlePeerReadUs": 104.5,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 6,
+              "submitUsPerFrame": 0.325,
+              "peerConsumedFramesPerSec": 1073525.3,
+              "socketSendsPer64": 2.943,
+              "p95IdlePeerReadUs": 103.4,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 7,
+              "submitUsPerFrame": 0.3002,
+              "peerConsumedFramesPerSec": 1204989.4,
+              "socketSendsPer64": 2.932,
+              "p95IdlePeerReadUs": 109.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 8,
+              "submitUsPerFrame": 0.3058,
+              "peerConsumedFramesPerSec": 1070523.2,
+              "socketSendsPer64": 2.88,
+              "p95IdlePeerReadUs": 83.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 9,
+              "submitUsPerFrame": 0.3969,
+              "peerConsumedFramesPerSec": 690787.3,
+              "socketSendsPer64": 2.474,
+              "p95IdlePeerReadUs": 105.6,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 10,
+              "submitUsPerFrame": 0.3918,
+              "peerConsumedFramesPerSec": 827820.4,
+              "socketSendsPer64": 2.75,
+              "p95IdlePeerReadUs": 88.3,
+              "gcAllocEventsPer64": 64
+            },
+            {
+              "round": 11,
+              "submitUsPerFrame": 0.4654,
+              "peerConsumedFramesPerSec": 653940.5,
+              "socketSendsPer64": 2.714,
+              "p95IdlePeerReadUs": 119.5,
+              "gcAllocEventsPer64": 64
+            }
+          ]
+        }
+      }
+    }
+  },
+  "receiveComparison": {
+    "benchmark-1": {
+      "Push": {
+        "BvsAPercent_dispatch_throughput_p95": [
+          -35.36,
+          26.76,
+          -24.55
+        ],
+        "passes": true
+      },
+      "Lag": {
+        "BvsAPercent_dispatch_throughput_p95": [
+          -23.34,
+          0.2,
+          -0.9
+        ],
+        "passes": true
+      },
+      "Update": {
+        "BvsAPercent_dispatch_throughput_p95": [
+          -2.44,
+          -1.22,
+          15.77
+        ],
+        "passes": false
+      }
+    },
+    "benchmark-2": {
+      "Push": {
+        "BvsAPercent_dispatch_throughput_p95": [
+          -34.81,
+          26.27,
+          -19.74
+        ],
+        "passes": true
+      },
+      "Lag": {
+        "BvsAPercent_dispatch_throughput_p95": [
+          -25.97,
+          -1.05,
+          0.52
+        ],
+        "passes": true
+      },
+      "Update": {
+        "BvsAPercent_dispatch_throughput_p95": [
+          -5.44,
+          48.07,
+          -58.63
+        ],
+        "passes": true
+      }
+    }
+  },
+  "productionRuntimeSha256": {
+    "NetworkContracts.cs": "8811d195ff499bf3425d3cb373de116f6612ebedabd66f135f50157a54c29f93",
+    "NetworkModule.cs": "cf9dd8b98f170815446d95d0c82aab3b67998a76eb580c6d0f84f816a912d31b",
+    "TcpFrames.cs": "60a5e31453f0741844caece0cb6893f8e5bf79533b3f5db088eaccc512cf5f17",
+    "TcpMessageConnection.cs": "84688eeb8868a036a8210b8013782afdba17e90b4d22201826dd23d60fa1e973",
+    "TcpSmallSendPool.cs": "e741147b15b2972cebaa85b5d8d1b6a5073ed5816cf558bcecd351c6537de5ee",
+    "TcpWriteBatch.cs": "19321dcd039e8294fe05750364778005bee96f6229ce6de4272bf3c1bfb7884f"
+  },
+  "baselineRuntimeSha256": {
+    "NetworkContracts.cs": "8811d195ff499bf3425d3cb373de116f6612ebedabd66f135f50157a54c29f93",
+    "NetworkModule.cs": "cf9dd8b98f170815446d95d0c82aab3b67998a76eb580c6d0f84f816a912d31b",
+    "TcpFrames.cs": "60a5e31453f0741844caece0cb6893f8e5bf79533b3f5db088eaccc512cf5f17",
+    "TcpMessageConnection.cs": "deaeb093d0c9f2e7480f634dcc4160a1c0e74d22ee55b7cbd6cc7a40e109425c"
+  },
+  "workloadsSha256": "2692bc1986c3e3393c7793d64aed11823f884e4317d14b7e0541967d8e0589e0",
+  "candidatePatchSha256": "7a925736b0b54ab8a4f2da4618a00ee90f3dda0509b2a7661ac8317d94558d56"
+}

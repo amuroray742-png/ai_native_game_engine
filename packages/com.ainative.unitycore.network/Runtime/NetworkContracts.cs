@@ -49,12 +49,15 @@ namespace AiNative.UnityCore.Network
 
     public enum DisconnectReason { LocalClose, RemoteClose, TransportError, ProtocolError, ModuleShutdown }
 
+    /// <summary>正文仅在同步回调期间有效。跨回调保存时使用 ToArray()。</summary>
+    public delegate void MessageReceivedHandler(ReadOnlySpan<byte> payload);
+
     public interface IMessageConnection
     {
-        /// <summary>主线程按序交付独立的消息数组；连接成功后应立即订阅。</summary>
-        event Action<byte[]> MessageReceived;
+        /// <summary>主线程按序交付借用的只读正文；连接成功后应立即订阅。</summary>
+        event MessageReceivedHandler MessageReceived;
         event Action<DisconnectReason> Disconnected;
-        /// <summary>复制并排队，完成表示已写入本地流。队列已满时报告失败，调用方可等待先前的发送。</summary>
+        /// <summary>复制并排队，完成表示整帧已写入本地流；关闭保留已写完的结果。持续积压会记录告警。</summary>
         UniTask SendAsync(byte[] message);
         /// <summary>立即停止收发，等待套接字操作收尾，可重复调用。重连须取得新连接。</summary>
         UniTask CloseAsync();
