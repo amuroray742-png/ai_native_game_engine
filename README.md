@@ -10,6 +10,8 @@ GridGame 和 PhysicsSandbox 各有一个独立 Unity 工程，均已在 Windows 
 
 能力状态、分模块历史验收、未覆盖范围及复现入口统一见 [当前验收总索引](docs/acceptance-index.md)。索引不代表当前 HEAD 已重新通过全部验证。
 
+联机扩展已开始 S1 基础实施：[服务器端架构设计](docs/server-architecture.md)规定 Gateway、AuthSession、LobbyCoordinator、GameWorker 四类独立进程；首期采用六进程验收拓扑、Actor 状态隔离、每房间独占线程及双人 GridGame 跨网关重连。[实施记录](docs/server-implementation.md)列出已完成的 Actor／分帧基础及测试；角色服务与联机对局尚未实现，未进行服务器运行验收。
+
 ## 运行
 
 需要 global.json 指定的 .NET 10 SDK。GridGame 不需要原生库：

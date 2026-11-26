@@ -16,11 +16,14 @@
 | 已实现／有历史验收 | 能力已有实现，链接记录证明其指定版本与范围通过；不自动证明当前 HEAD 通过 |
 | 待验证 | 已有能力或验收要求，但尚缺对应范围的执行证据 |
 | 待阶段收口 | 已有部分实践，但未找到满足阶段退出条件的完整索引 |
+| 设计阶段 | 已形成设计与实施入口，能力尚未实现、尚未运行验收 |
 | 范围外 | 当前设计不承诺；不因列入本页而成为已批准开发任务 |
 
 历史验收只能用于原被测源码、配置与环境。判断能否复用时，应核对该轮提交或 `sources.json` 等源码指纹及后续变更；不能把不同版本的测试数相加，也不能用最新专项为较早的完整矩阵续签。
 
 当前契约入口：[总设计](ai-native-game-engine-design.md)、[架构规范](engineering-guidelines.md)、[v2 契约](framework-v2.md)、[UnityCore](unitycore-lifecycle.md)、[Assets](unitycore-assets.md)、[资源增强](assets-enhancement-urp.md)。
+
+2026-11-26 服务器扩展进入 **S1 基础实施**：[服务器端架构设计](server-architecture.md)规定四类独立进程与六进程验收拓扑。首批 Actor 执行器、邮箱预算和异步分帧已实现，本机 26 项基础测试通过并经独立审查，范围与复现见[实施记录](server-implementation.md)。S1 整体尚未完成，未执行联机、六进程部署、性能或恢复验收；不扩大已有 Network 或模拟宿主的历史证据。
 
 UnityCore Network 的小缓冲回收和批量写通过 58 次 Editor 测试及 Windows x64 IL2CPP Player 回环。接收队列按双进程对照结果保留现有实现。[功能和性能验收](v2-acceptance.md#tcp-小缓冲回收批量写与接收队列对照2026-11-25)
 
