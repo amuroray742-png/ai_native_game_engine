@@ -18,12 +18,12 @@ namespace AiNative.Server.Actors
         private readonly TaskCompletionSource _started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         private bool _signaled;
 
-        public DedicatedThreadActor(string actorId, int maxMessages, long maxBytes, Func<IActorBehavior<T>> factory)
+        public DedicatedThreadActor(string actorId, int maxMessages, long maxBytes, Func<IActorBehavior<T>> factory, int reservedControlMessages = 0, long reservedControlBytes = 0)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(actorId);
             ArgumentNullException.ThrowIfNull(factory);
             _factory = factory;
-            _mailbox = new ActorMailbox<T>(maxMessages, maxBytes, Wake);
+            _mailbox = new ActorMailbox<T>(maxMessages, maxBytes, Wake, reservedControlMessages, reservedControlBytes);
             Reference = new ActorRef<T>(actorId, _mailbox);
             _thread = new Thread(Run) { IsBackground = true, Name = actorId };
             _thread.Start();
@@ -72,7 +72,7 @@ namespace AiNative.Server.Actors
                         }
                         finally
                         {
-                            _mailbox.Release(entry.Bytes);
+                            _mailbox.Release(entry.Bytes, entry.IsControl);
                         }
                     }
                     else if (_mailbox.IsDrained)

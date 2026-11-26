@@ -36,34 +36,43 @@ namespace AiNative.Server.Transport
             _sendBudget = sendBudget;
         }
 
-        /// <summary>帧边界 EOF 返回 null；截断、超限和预算不足失败后必须关闭连接，禁止续读。</summary>
-        public async ValueTask<ReceivedFrame?> ReadAsync(CancellationToken cancellationToken = default)
+        /// <summary>
+        /// 帧边界 EOF 返回 null。条数满时在帧头前等待，字节满时在正文分配和读取前等待。
+        /// 消费者必须释放已交付帧以恢复读取；取消包括预算等待，失败或取消后必须关闭连接。
+        /// </summary>
+        public async ValueTask<ReceivedFrame?> ReadAsync(CancellationToken cancellationToken = default, TimeSpan? firstByteTimeout = null, TimeSpan? frameTimeout = null)
         {
+            if (firstByteTimeout <= TimeSpan.Zero || frameTimeout <= TimeSpan.Zero) { throw new ArgumentOutOfRangeException(nameof(frameTimeout)); }
             Enter(ref _reading);
             int reservedBytes = 0;
+            bool reservedFrame = false;
             try
             {
+                await _receiveBudget.ReserveFrameAsync(cancellationToken).ConfigureAwait(false);
+                reservedFrame = true;
                 var header = new byte[4];
-                int first = await _stream.ReadAsync(header.AsMemory(), cancellationToken).ConfigureAwait(false);
+                using var firstDeadline = firstByteTimeout.HasValue ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken) : null;
+                if (firstDeadline != null) { firstDeadline.CancelAfter(firstByteTimeout!.Value); }
+                int first = await _stream.ReadAsync(header.AsMemory(), firstDeadline?.Token ?? cancellationToken).ConfigureAwait(false);
                 if (first == 0)
                 {
                     return null;
                 }
-                await _stream.ReadExactlyAsync(header.AsMemory(first), cancellationToken).ConfigureAwait(false);
+                using var frameDeadline = frameTimeout.HasValue ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken) : null;
+                if (frameDeadline != null) { frameDeadline.CancelAfter(frameTimeout!.Value); }
+                CancellationToken frameToken = frameDeadline?.Token ?? cancellationToken;
+                await _stream.ReadExactlyAsync(header.AsMemory(first), frameToken).ConfigureAwait(false);
                 int length = BinaryPrimitives.ReadInt32BigEndian(header);
                 if (length <= 0 || length > _maxBodyBytes)
                 {
                     throw new InvalidDataException("帧正文长度必须为正且不超过配置上限。");
                 }
-                if (!_receiveBudget.TryReserve(length))
-                {
-                    throw new IOException("接收正文预算已满，连接必须关闭。");
-                }
+                await _receiveBudget.ReserveBodyAsync(length, frameToken).ConfigureAwait(false);
                 reservedBytes = length;
                 var body = new byte[length];
-                await _stream.ReadExactlyAsync(body, cancellationToken).ConfigureAwait(false);
+                await _stream.ReadExactlyAsync(body, frameToken).ConfigureAwait(false);
                 var frame = new ReceivedFrame(body, _receiveBudget);
-                reservedBytes = 0;
+                reservedFrame = false;
                 return frame;
             }
             catch
@@ -73,7 +82,7 @@ namespace AiNative.Server.Transport
             }
             finally
             {
-                if (reservedBytes != 0)
+                if (reservedFrame)
                 {
                     _receiveBudget.Release(reservedBytes);
                 }

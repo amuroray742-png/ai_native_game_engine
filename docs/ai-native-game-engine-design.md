@@ -8,7 +8,7 @@
 
 工程为不同类型游戏提供可观察、可操作、可复现、可验证的玩法内核与工具链。通用性来自明确的游戏实现与宿主装配边界，不把网格、攻击、回合或刚体强加给所有游戏。GridGame 和 PhysicsSandbox 分别验证手动回合制与固定频率实时物理。
 
-模拟内核 AiNative.Core 保持纯 C#，不依赖 Unity、文件、网络、JSON、物理实现或任何 Example。物理属于可选能力，由需要它的游戏显式调用。Unity 应用侧另建设独立的 [Assets 本地资源包](unitycore-assets.md)，不扩展模拟内核职责。Unity 应用侧正在建设独立的 [uGUI UI 模块](unitycore-ui.md)，单向依赖 UnityCore 与 Assets，不改变模拟职责。当前不建设音频业务框架、通用 ECS、模拟系统调度框架或插件发现。联机扩展按[服务器端架构设计](server-architecture.md)进入 S1 基础实施，采用 Gateway、AuthSession、LobbyCoordinator、GameWorker 多进程架构、Actor 模型与每房间独占线程，首期验证双人 GridGame、跨网关重连和对局进程故障隔离；Actor 与分帧基础已实施，详见[实施记录](server-implementation.md)；角色服务与游戏网络同步尚未实现、尚未验收。
+模拟内核 AiNative.Core 保持纯 C#，不依赖 Unity、文件、网络、JSON、物理实现或任何 Example。物理属于可选能力，由需要它的游戏显式调用。Unity 应用侧另建设独立的 [Assets 本地资源包](unitycore-assets.md)，不扩展模拟内核职责。Unity 应用侧正在建设独立的 [uGUI UI 模块](unitycore-ui.md)，单向依赖 UnityCore 与 Assets，不改变模拟职责。当前不建设音频业务框架、通用 ECS、模拟系统调度框架或插件发现。联机扩展按[服务器端架构设计](server-architecture.md)完成 S1 基础实施，采用 Gateway、AuthSession、LobbyCoordinator、GameWorker 多进程架构、Actor 模型与每房间独占线程，首期验证双人 GridGame、跨网关重连和对局进程故障隔离；协议、Actor、传输、配置、生命周期和 Host 基础已实施并验收，详见[S1 验收](server-s1-acceptance.md)；角色服务与游戏网络同步尚未实现、尚未验收。
 
 Unity 应用侧的 [Network 包](../packages/com.ainative.unitycore.network/README.md)管理 HTTP 请求与 TCP 消息连接。应用层按完整消息消费数据，游戏宿主拥有命令解释和推进权。
 
@@ -143,7 +143,7 @@ CLI 提供 games / describe / run / inspect / replay / compare。输入先严格
 扩展的启动依据如下：
 
 - 更多实时玩法：使用 v2 固定步长与显式输入采样契约，按产品需求补充规则。
-- 多人联网：已有单机权威状态与回放基础；[服务器端设计](server-architecture.md)参考商业方案的官方资料，明确四类独立进程、唯一房间归属、内部消息及首期服务器裁决、同步和跨网关恢复策略。当前已开始 S1 基础实施，不代表阶段 5 的联机实现或验收已完成。
+- 多人联网：已有单机权威状态与回放基础；[服务器端设计](server-architecture.md)参考商业方案的官方资料，明确四类独立进程、唯一房间归属、内部消息及首期服务器裁决、同步和跨网关恢复策略。当前已完成 S1 基础实施，不代表阶段 5 的联机实现或验收已完成。
 - 体素：产品需要可编辑空间，先验证世界数据量与修改语义。
 - ECS/GAS：当前组合模型在具体实体规模或技能需求下出现可测的维护与执行瓶颈。
 - Rust：剖析证实 C# 热点无法通过更简单的局部改进解决，再评估互操作和维护成本。

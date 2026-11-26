@@ -23,7 +23,7 @@
 
 当前契约入口：[总设计](ai-native-game-engine-design.md)、[架构规范](engineering-guidelines.md)、[v2 契约](framework-v2.md)、[UnityCore](unitycore-lifecycle.md)、[Assets](unitycore-assets.md)、[资源增强](assets-enhancement-urp.md)。
 
-2026-11-26 服务器扩展进入 **S1 基础实施**：[服务器端架构设计](server-architecture.md)规定四类独立进程与六进程验收拓扑。首批 Actor 执行器、邮箱预算和异步分帧已实现，本机 26 项基础测试通过并经独立审查，范围与复现见[实施记录](server-implementation.md)。S1 整体尚未完成，未执行联机、六进程部署、性能或恢复验收；不扩大已有 Network 或模拟宿主的历史证据。
+2026-11-26 服务器 **S1 完成**，本机全量 181 项测试及独立退出审计通过，覆盖协议、Actor、TLS/ServerLink、配置、生命周期和 Host 真实启动停止。[逐项验收](server-s1-acceptance.md) · [实施记录](server-implementation.md)。S2–S6 的业务服务、六进程完整对局、性能、重连和 Unity 尚未验收，不扩大既有 Network 或模拟宿主的历史证据。
 
 UnityCore Network 的小缓冲回收和批量写通过 58 次 Editor 测试及 Windows x64 IL2CPP Player 回环。接收队列按双进程对照结果保留现有实现。[功能和性能验收](v2-acceptance.md#tcp-小缓冲回收批量写与接收队列对照2026-11-25)
 
