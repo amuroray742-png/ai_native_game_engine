@@ -53,6 +53,220 @@ namespace AiNative.NetworkDemo.Tests
             Core.ResetForPlay();
         });
 
+        private sealed class HeldWriterPool : ArrayPool<byte>, IDisposable
+        {
+            private readonly ManualResetEventSlim _release = new ManualResetEventSlim();
+            private byte[] _held;
+            internal volatile bool Holding;
+            internal bool TimedOut;
+            internal int Rented, Returned;
+
+            public override byte[] Rent(int size)
+            {
+                var buffer = Shared.Rent(size);
+                Interlocked.Increment(ref Rented);
+                if (size == 257) { _held = buffer; }
+                return buffer;
+            }
+
+            public override void Return(byte[] buffer, bool clearArray = false)
+            {
+                if (ReferenceEquals(buffer, _held))
+                {
+                    _held = null;
+                    Holding = true;
+                    TimedOut = !_release.Wait(5000);
+                }
+                Shared.Return(buffer, clearArray);
+                Interlocked.Increment(ref Returned);
+            }
+
+            internal void Release() { _release.Set(); }
+            public void Dispose() { _release.Dispose(); }
+        }
+
+        [UnityTest]
+        public IEnumerator CloseReturnsWhileWriterHeldAndSettlesExactPrefix() => UniTask.ToCoroutine(async () =>
+        {
+            using var pool = new HeldWriterPool();
+            await UseTcpLimits(1024, 256, 65536, pool);
+            var connection = await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+            var first = connection.SendAsync(new byte[253]);
+            Assert.IsTrue(SpinWait.SpinUntil(() => pool.Holding, 3000));
+            var order = new List<string>();
+            connection.Disconnected += _ => order.Add("disconnect");
+            var second = RecordSendFailure(connection.SendAsync(new byte[] { 1 }), order);
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            var close = connection.CloseAsync();
+            try
+            {
+                Assert.Less(clock.ElapsedMilliseconds, 1000, "Close blocked on the held writer");
+                Assert.AreEqual(UniTaskStatus.Pending, close.Status);
+                Assert.AreEqual(UniTaskStatus.Pending, first.Status);
+                CollectionAssert.AreEqual(new[] { "disconnect" }, order);
+                await UniTask.Yield();
+                Assert.AreEqual(UniTaskStatus.Pending, close.Status, "Close finished before resource reclamation");
+            }
+            finally { pool.Release(); }
+            await close;
+            await first;
+            await second;
+            Assert.IsFalse(pool.TimedOut);
+            Assert.AreEqual(pool.Rented, pool.Returned);
+            CollectionAssert.AreEqual(new[] { "disconnect", "failed" }, order);
+        });
+
+        private static async UniTask RecordSendFailure(UniTask send, List<string> order)
+        {
+            try { await send; Assert.Fail("Unwritten send succeeded"); }
+            catch (IOException) { order.Add("failed"); }
+        }
+
+        [UnityTest]
+        public IEnumerator ForcedExitSettlesWithoutWriterOrNextFrame() => UniTask.ToCoroutine(async () =>
+        {
+            foreach (bool closing in new[] { false, true })
+            {
+                using var pool = new HeldWriterPool();
+                await UseTcpLimits(1024, 256, 65536, pool);
+                var connection = await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+                var sender = ConnectionField<Thread>(connection, "_sender");
+                var receiver = ConnectionField<Thread>(connection, "_receiver");
+                var written = connection.SendAsync(new byte[253]);
+                Assert.IsTrue(SpinWait.SpinUntil(() => pool.Holding, 3000));
+                var unwritten = connection.SendAsync(new byte[] { 1 });
+                int notifications = 0;
+                DisconnectReason? reason = null;
+                connection.Disconnected += value => { reason = value; notifications++; };
+                var close = closing ? connection.CloseAsync().SuppressCancellationThrow() : UniTask.FromResult(false);
+                try
+                {
+                    Core.ResetForPlay();
+                    Assert.AreEqual(UniTaskStatus.Succeeded, written.Status);
+                    Assert.AreEqual(UniTaskStatus.Canceled, unwritten.Status);
+                    Assert.AreEqual(1, notifications);
+                    Assert.AreEqual(closing ? DisconnectReason.LocalClose : DisconnectReason.ModuleShutdown, reason);
+                    Assert.IsTrue(sender.IsAlive, "Fixture did not hold the writer across retirement");
+                    Assert.IsFalse(pool.TimedOut);
+                }
+                finally { pool.Release(); }
+                await written;
+                Assert.IsTrue(await unwritten.SuppressCancellationThrow());
+                await close;
+                _core = Core.Inst;
+                _network = new NetworkModule();
+                _core.RegisterModule(_network);
+                await _core.RunAsync();
+                await UniTask.WaitUntil(() => !sender.IsAlive && !receiver.IsAlive && pool.Returned == pool.Rented,
+                    cancellationToken: _deadline.Token);
+                await UniTask.Yield();
+                Assert.AreEqual(1, notifications);
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ForcedExitInsideDisconnectOrSendContinuationSettlesOnce() => UniTask.ToCoroutine(async () =>
+        {
+            foreach (bool fromDisconnect in new[] { true, false })
+            {
+                using var pool = new HeldWriterPool();
+                await UseTcpLimits(1024, 256, 65536, pool);
+                var connection = await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+                var written = connection.SendAsync(new byte[253]);
+                Assert.IsTrue(SpinWait.SpinUntil(() => pool.Holding, 3000));
+                var unwritten = connection.SendAsync(new byte[] { 1 });
+                int notifications = 0;
+                connection.Disconnected += _ =>
+                {
+                    notifications++;
+                    if (fromDisconnect) { Core.ResetForPlay(); }
+                };
+                var continuation = fromDisconnect ? UniTask.CompletedTask : RetireAfterSend(written);
+                var close = connection.CloseAsync().SuppressCancellationThrow();
+                pool.Release();
+                await close;
+                if (fromDisconnect) { await written; }
+                else { await continuation; }
+                Assert.IsTrue(await unwritten.SuppressCancellationThrow());
+                Assert.AreEqual(1, notifications);
+                _core = Core.Inst;
+                _network = new NetworkModule();
+                _core.RegisterModule(_network);
+                await _core.RunAsync();
+                await UniTask.WaitUntil(() => pool.Rented == pool.Returned, cancellationToken: _deadline.Token);
+                Assert.IsFalse(pool.TimedOut);
+            }
+        });
+
+        private static async UniTask RetireAfterSend(UniTask send)
+        {
+            await send;
+            Core.ResetForPlay();
+        }
+
+        [UnityTest]
+        public IEnumerator CanceledDnsDoesNotDelayRestartOrCreateLateConnection() => UniTask.ToCoroutine(async () =>
+        {
+            foreach (var (fault, cancelCaller) in new[] { (false, false), (false, true), (true, false), (true, true) })
+            {
+                var lookup = new System.Threading.Tasks.TaskCompletionSource<IPAddress[]>();
+                var resolver = typeof(NetworkModule).GetField("_resolveHost", BindingFlags.NonPublic | BindingFlags.Instance);
+                resolver.SetValue(_network, new Func<string, System.Threading.Tasks.Task<IPAddress[]>>(_ => lookup.Task));
+                using var cancel = new CancellationTokenSource();
+                var connecting = _network.ConnectAsync("held.invalid", TcpPort, cancel.Token);
+                if (cancelCaller) { cancel.Cancel(); }
+                var restart = _core.RestartAsync();
+                Assert.IsTrue((await connecting.SuppressCancellationThrow()).IsCanceled);
+                try
+                {
+                    // The DNS task remains incomplete throughout restart.
+                    for (int frame = 0; frame < 10 && restart.Status == UniTaskStatus.Pending; frame++) { await UniTask.Yield(); }
+                    Assert.AreEqual(UniTaskStatus.Succeeded, restart.Status);
+                    Assert.IsFalse(lookup.Task.IsCompleted);
+                }
+                finally
+                {
+                    if (fault) { lookup.SetException(new SocketException((int)SocketError.HostNotFound)); }
+                    else { lookup.SetResult(new[] { IPAddress.Loopback }); }
+                }
+                await restart;
+                await UniTask.Yield();
+                var connections = typeof(NetworkModule).GetField("_connections", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetValue(_network);
+                Assert.AreEqual(0, connections.GetType().GetProperty("Count").GetValue(connections));
+                resolver.SetValue(_network, new Func<string, System.Threading.Tasks.Task<IPAddress[]>>(Dns.GetHostAddressesAsync));
+                var fresh = await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+                await fresh.CloseAsync();
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator ReceiverStartupFailureReclaimsStartedSender() => UniTask.ToCoroutine(async () =>
+        {
+            Thread sender = null;
+            int starts = 0;
+            var field = typeof(NetworkModule).GetField("_startThread", BindingFlags.NonPublic | BindingFlags.Instance);
+            field.SetValue(_network, new Action<Thread>(thread =>
+            {
+                if (++starts == 2) { throw new InvalidOperationException("controlled receiver startup failure"); }
+                sender = thread;
+                thread.Start();
+            }));
+            try
+            {
+                try
+                {
+                    await _network.ConnectAsync("127.0.0.1", TcpPort, _deadline.Token);
+                    Assert.Fail("Expected startup failure");
+                }
+                catch (InvalidOperationException error) { StringAssert.Contains("controlled receiver", error.Message); }
+                await _core.RestartAsync();
+                Assert.IsNotNull(sender);
+                Assert.IsFalse(sender.IsAlive);
+            }
+            finally { field.SetValue(_network, null); }
+        });
+
         [UnityTest]
         public IEnumerator ExternalHttpServiceCanReturnResponse() => UniTask.ToCoroutine(async () =>
         {
@@ -402,7 +616,7 @@ namespace AiNative.NetworkDemo.Tests
                     var first = connection.SendAsync(new byte[8]);
                     var second = connection.SendAsync(Array.Empty<byte>());
                     Assert.IsTrue(SpinWait.SpinUntil(() => ConnectionField<long>(connection, "_written") == 2 * (cycle + 1), 3000));
-                    long start = (cycle + 1) * 20 * sec;
+                    long start = System.Diagnostics.Stopwatch.GetTimestamp() + (cycle + 1) * 20 * sec;
                     sample(start);
                     sample(start + sec - 1);
                     Assert.AreEqual(2 * cycle, logs.Count);

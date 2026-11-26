@@ -57,9 +57,9 @@ namespace AiNative.UnityCore.Network
         /// <summary>主线程按序交付借用的只读正文；连接成功后应立即订阅。</summary>
         event MessageReceivedHandler MessageReceived;
         event Action<DisconnectReason> Disconnected;
-        /// <summary>复制并排队，完成表示整帧已写入本地流；关闭保留已写完的结果。持续积压会记录告警。</summary>
+        /// <summary>复制并排队，成功表示整帧已写入本地流，不表示对端确认。正常关闭精确结算；强制退出保留已发布成功前缀，其余取消。持续积压会记录告警。</summary>
         UniTask SendAsync(byte[] message);
-        /// <summary>立即停止收发，等待套接字操作收尾，可重复调用。重连须取得新连接。</summary>
+        /// <summary>立即停止收发，异步等待线程回收及发送结算，不在主线程等待线程退出。可重复调用；Core 关闭接管等待。重连须取得新连接。</summary>
         UniTask CloseAsync();
     }
 }

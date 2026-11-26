@@ -1,0 +1,82 @@
+
+        [UnityTest]
+        public IEnumerator CloseBenchmarkRead1024() => UniTask.ToCoroutine(() => MeasureCloseBacklog(1024, false));
+        [UnityTest]
+        public IEnumerator CloseBenchmarkRead10000() => UniTask.ToCoroutine(() => MeasureCloseBacklog(10000, false));
+        [UnityTest]
+        public IEnumerator CloseBenchmarkStall1024() => UniTask.ToCoroutine(() => MeasureCloseBacklog(1024, true));
+        [UnityTest]
+        public IEnumerator CloseBenchmarkStall10000() => UniTask.ToCoroutine(() => MeasureCloseBacklog(10000, true));
+
+        private async UniTask MeasureCloseBacklog(int count, bool stalled)
+        {
+            int oldRate = UnityEngine.Application.targetFrameRate;
+            int oldVsync = UnityEngine.QualitySettings.vSyncCount;
+            UnityEngine.Application.targetFrameRate = 60;
+            UnityEngine.QualitySettings.vSyncCount = 0;
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Server.ReceiveBufferSize = 8192;
+            listener.Start();
+            try
+            {
+                var accept = listener.AcceptTcpClientAsync();
+                var connection = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                using var peer = await accept;
+                ConnectionField<Socket>(connection, "_socket").SendBufferSize = 8192;
+                var wire = new byte[count * 132];
+                var reading = stalled ? System.Threading.Tasks.Task.CompletedTask :
+                    ReadReplyAsync(peer.GetStream(), wire, _deadline.Token);
+                var sends = new UniTask<bool>[count];
+                var payload = new byte[128];
+                var clock = System.Diagnostics.Stopwatch.StartNew();
+                using var allocations = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "GC.Alloc", 65536,
+                    ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+                GC.KeepAlive(new byte[128]);
+                allocations.Stop();
+                Assert.Greater(allocations.Count, 0, "Allocation positive control failed");
+                allocations.Reset();
+                allocations.Start();
+                for (int i = 0; i < count; i++) { sends[i] = Wrote(connection, payload); }
+                double submittedMs = clock.Elapsed.TotalMilliseconds;
+                allocations.Stop();
+                long submitBytes = allocations.Count;
+                double writtenMs = -1, notifiedMs = -1;
+                if (!stalled)
+                {
+                    await UniTask.WaitUntil(() => ConnectionField<long>(connection, "_written") == count, cancellationToken: _deadline.Token);
+                    writtenMs = clock.Elapsed.TotalMilliseconds;
+                }
+                else { await UniTask.Delay(100, DelayType.Realtime, cancellationToken: _deadline.Token); }
+                long writtenAtClose = ConnectionField<long>(connection, "_written");
+                long pendingAtClose = count - ConnectionField<long>(connection, "_notified");
+                // For the readable peer, also measure the bounded completion dispatch separately.
+                if (!stalled)
+                {
+                    await UniTask.WhenAll(sends);
+                    notifiedMs = clock.Elapsed.TotalMilliseconds;
+                    await reading;
+                }
+                var closingClock = System.Diagnostics.Stopwatch.StartNew();
+                allocations.Reset();
+                allocations.Start();
+                var closing = connection.CloseAsync();
+                double closeCallMs = closingClock.Elapsed.TotalMilliseconds;
+                allocations.Stop();
+                long closeCallBytes = allocations.Count;
+                await closing;
+                double closeTotalMs = closingClock.Elapsed.TotalMilliseconds;
+                if (stalled) { await UniTask.WhenAll(sends); }
+                string output = Environment.GetEnvironmentVariable("AINATIVE_NETWORK_BENCH");
+                File.AppendAllText(output, string.Join(",", count, stalled, submittedMs.ToString("F3", System.Globalization.CultureInfo.InvariantCulture),
+                    submitBytes, writtenMs.ToString("F3", System.Globalization.CultureInfo.InvariantCulture),
+                    notifiedMs.ToString("F3", System.Globalization.CultureInfo.InvariantCulture), writtenAtClose, pendingAtClose,
+                    closeCallMs.ToString("F3", System.Globalization.CultureInfo.InvariantCulture), closeCallBytes,
+                    closeTotalMs.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)) + "\n");
+            }
+            finally
+            {
+                listener.Stop();
+                UnityEngine.Application.targetFrameRate = oldRate;
+                UnityEngine.QualitySettings.vSyncCount = oldVsync;
+            }
+        }

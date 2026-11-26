@@ -19,13 +19,16 @@ namespace AiNative.UnityCore.Network
     public sealed class NetworkModule : IModule, IAsyncShutdownModule, IHttpService, IMessageClient
     {
         private readonly int _maxMessageBytes;
-        private readonly int _maxPendingSends;
-        private readonly long _maxPendingSendBytes;
+        private readonly int _warnPendingSends;
+        private readonly long _warnPendingSendBytes;
         private readonly ArrayPool<byte>? _bufferPool;
         private readonly bool _registerHttp;
         private readonly bool _registerTcp;
         private readonly HashSet<TcpMessageConnection> _connections = new HashSet<TcpMessageConnection>();
         private readonly List<Task> _retiring = new List<Task>();
+        private readonly Dictionary<TcpMessageConnection, Task> _closing = new Dictionary<TcpMessageConnection, Task>();
+        private Func<string, Task<IPAddress[]>> _resolveHost = Dns.GetHostAddressesAsync;
+        private Action<Thread>? _startThread = null;
         private CancellationTokenSource? _lifetime;
         private CancellationTokenRegistration _stopConnections;
         private ICore? _core;
@@ -54,8 +57,8 @@ namespace AiNative.UnityCore.Network
             if (maxPendingSendBytes <= 0) { throw new ArgumentOutOfRangeException(nameof(maxPendingSendBytes)); }
             _bufferPool = bufferPool;
             _maxMessageBytes = maxMessageBytes;
-            _maxPendingSends = maxPendingSends;
-            _maxPendingSendBytes = maxPendingSendBytes;
+            _warnPendingSends = maxPendingSends;
+            _warnPendingSendBytes = maxPendingSendBytes;
             _registerHttp = registerHttp;
             _registerTcp = registerTcp;
         }
@@ -146,8 +149,8 @@ namespace AiNative.UnityCore.Network
             if (IPAddress.TryParse(host, out var literal)) { addresses = new[] { literal }; }
             else
             {
-                var lookup = Dns.GetHostAddressesAsync(host);
-                await WaitForNetworkTask(lookup, operation.Token);
+                var lookup = _resolveHost(host);
+                await WaitForLookupAsync(lookup, operation.Token);
                 addresses = lookup.GetAwaiter().GetResult();
             }
             SocketException? lastError = null;
@@ -158,8 +161,8 @@ namespace AiNative.UnityCore.Network
                 {
                     socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     await WaitForNetworkTask(socket.ConnectAsync(new IPEndPoint(address, port)), operation.Token);
-                    var connection = new TcpMessageConnection(socket, _maxMessageBytes, _maxPendingSends, _maxPendingSendBytes,
-                        _core!.TimeMachine, RunToken(), OnRetired, _bufferPool);
+                    var connection = new TcpMessageConnection(socket, _maxMessageBytes, _warnPendingSends, _warnPendingSendBytes,
+                        _core!.TimeMachine, RunToken(), OnRetired, OnReleased, _bufferPool, _startThread);
                     _connections.Add(connection);
                     socket = null; // The connection now owns it.
                     return connection;
@@ -168,6 +171,23 @@ namespace AiNative.UnityCore.Network
                 finally { socket?.Dispose(); }
             }
             throw lastError ?? new SocketException((int)SocketError.HostNotFound);
+        }
+
+        private static async UniTask WaitForLookupAsync(Task lookup, CancellationToken token)
+        {
+            try
+            {
+                await UniTask.WaitUntil(() => lookup.IsCompleted, cancellationToken: token, cancelImmediately: true);
+                token.ThrowIfCancellationRequested();
+                lookup.GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                // DNS owns no module resources. Observe late faults without delaying restart
+                // or retaining a reference to this module or its next run.
+                _ = TcpFrames.DrainAsync(lookup);
+                throw;
+            }
         }
 
         private async UniTask WaitForNetworkTask(Task task, CancellationToken token)
@@ -188,7 +208,17 @@ namespace AiNative.UnityCore.Network
         private void OnRetired(TcpMessageConnection connection, Task drain)
         {
             _connections.Remove(connection);
+            foreach (var closed in new List<TcpMessageConnection>(_closing.Keys))
+            {
+                if (_closing[closed].IsCompleted) { _closing.Remove(closed); }
+            }
+            _closing.Add(connection, drain);
             TrackDrain(drain);
+        }
+
+        private void OnReleased(TcpMessageConnection connection)
+        {
+            _closing.Remove(connection);
         }
 
         private void TrackDrain(Task drain)
@@ -213,11 +243,14 @@ namespace AiNative.UnityCore.Network
             {
                 await UniTask.WaitUntil(() => drains.IsCompleted, cancellationToken: forcedExit, cancelImmediately: true);
             }
+            drains.GetAwaiter().GetResult();
         }
 
         public void Shut(ICore core)
         {
             _lifetime?.Cancel();
+            foreach (var connection in new List<TcpMessageConnection>(_closing.Keys)) { connection.ForceStop(); }
+            _closing.Clear();
             _stopConnections.Dispose();
             _lifetime?.Dispose();
             _lifetime = null;
