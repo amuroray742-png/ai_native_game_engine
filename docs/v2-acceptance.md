@@ -1,5 +1,13 @@
 # 通用框架 v2 验收
 
+## TCP 接收队列切换至 ConcurrentQueue（2026-11-26）
+
+生产接收队列采用 B 版。接收线程独占生产计数，主线程出队后发布可复用额度。条数满 16 时停在帧头前，正文字节额度不足时停在正文前。关闭时先唤醒等待线程，接收线程退出后归还与关闭并发入队的最后一批缓冲。
+
+11 月 25 日的两次 Editor 连续推送对照中，B 的吞吐分别提高 26.76% 和 26.27%。后续在两个独立 Editor 进程中增加逐消息计时，每进程各预热一轮，再测 24 轮。每轮分 12 组发出，每组 8 条，正文 128 字节。A、B 分开测正常 Update 时，每轮处于 P95 的消息均在派发它的 Update 之前入队。两种队列改为共用同一批 Unity 帧后，两个进程的端到端 P95 中位数分别为 A/B 464.25/458.50 μs、487.80/480.90 μs。这次选型依据同帧对照和连续推送吞吐。下方保留前一轮的原始门槛及结论。[P95 逐轮消息与分段耗时](evidence/unitycore-network/20261126-receive-queue/latency-rounds.csv) · [连续推送与背压对照](evidence/unitycore-network/20261125-send-batch/benchmark.json)
+
+Windows Unity 6000.3.23f1 在 Domain Reload 开、关时各通过 29 项 PlayMode 和 1 项 EditMode，共 60 次，0 失败、0 跳过。新增用例在接收线程实际等待额度时触发主动关闭或 Core 重启，核对线程退出和缓冲逐个归还。Windows x64 IL2CPP Player 完成 HTTP 配置、TCP 推送、回显、断开重连及主动关闭，记录 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。[功能验收与源码指纹](evidence/unitycore-network/20261126-receive-queue/summary.json)
+
 ## TCP 小缓冲回收、批量写与接收队列对照（2026-11-25）
 
 Windows Unity 6000.3.23f1 在 Domain Reload 开、关两种设置下各通过 28 项 PlayMode 和 1 项 EditMode，共 58 次，0 失败、0 跳过。覆盖 252/253 字节正文边界、空帧、32/33 帧边界、8 MiB 回显、短写停止在帧内或边界、主动关闭、半关闭、重启及缓冲归还。Windows x64 IL2CPP Player 通过 HTTP 配置获取、TCP 推送与回显、断线重连和主动关闭，进程记录 `NETWORK_SMOKE_PASSED IL2CPP`，退出码 0。首轮有一项旧测试假定 8 MiB 帧在关闭前一定写不完，Windows 回环上该帧已完成。改为在已写完的帧归还缓冲时控制发送线程停点，独立审查后完整重跑。[功能验收及源码指纹](evidence/unitycore-network/20261125-send-batch/summary.json)
@@ -21,7 +29,7 @@ Windows Unity 6000.3.23f1 在 Domain Reload 开、关两种设置下各通过 28
 | 主线程落后 | −23.34% / −25.97% | +0.20% / −1.05% | −0.90% / +0.52% |
 | 正常逐帧 Update | −2.44% / −5.44% | −1.22% / +48.07% | +15.77% / −58.63% |
 
-**生产接收队列保留 A。** 正常 Update 在首个进程中未达到 5% 改善，且 P95 从 699.70 增至 810.05 μs，超过 5% 回退上限。第二个进程正常 Update 的 P95 有改善，未改变双进程门槛的结论。以上性能数据限于 Windows Editor 回环，Player 执行的是功能验收。[逐轮指标和指纹](evidence/unitycore-network/20261125-send-batch/benchmark.json) · [测试负载](evidence/unitycore-network/20261125-send-batch/benchmark-workloads.cs.txt) · [接收 B 版差异](evidence/unitycore-network/20261125-send-batch/receive-candidate.patch)
+**本轮先保留 A。** 正常 Update 在首个进程中未达到 5% 改善，且 P95 从 699.70 增至 810.05 μs，超过 5% 回退上限。第二个进程正常 Update 的 P95 有改善，未改变双进程门槛的结论。以上性能数据限于 Windows Editor 回环，Player 执行的是功能验收。[逐轮指标和指纹](evidence/unitycore-network/20261125-send-batch/benchmark.json) · [测试负载](evidence/unitycore-network/20261125-send-batch/benchmark-workloads.cs.txt) · [接收 B 版差异](evidence/unitycore-network/20261125-send-batch/receive-candidate.patch)
 
 ## TCP 积压告警与缓冲池（2026-11-25）
 

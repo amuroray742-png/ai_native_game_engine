@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -229,12 +230,8 @@ namespace AiNative.NetworkDemo.Tests
 
         private static void WaitForBuffered(IMessageConnection connection, int count)
         {
-            var gate = ConnectionField<object>(connection, "_gate");
-            var incoming = ConnectionField<Queue<ArraySegment<byte>>>(connection, "_incoming");
-            Assert.IsTrue(SpinWait.SpinUntil(() =>
-            {
-                lock (gate) { return incoming.Count == count; }
-            }, 3000));
+            var incoming = ConnectionField<ConcurrentQueue<ArraySegment<byte>>>(connection, "_incoming");
+            Assert.IsTrue(SpinWait.SpinUntil(() => incoming.Count == count, 3000));
         }
 
         [UnityTest]
@@ -263,6 +260,46 @@ namespace AiNative.NetworkDemo.Tests
                 await UniTask.WaitUntil(() => lengths.Count == 2, cancellationToken: _deadline.Token);
                 CollectionAssert.AreEqual(new[] { 1024 * 1024, 1 }, lengths);
                 await connection.CloseAsync();
+            }
+            finally { listener.Stop(); }
+        });
+
+        [UnityTest]
+        public IEnumerator ClosingWakesBackpressuredReceiverAndReturnsQueuedBodies() => UniTask.ToCoroutine(async () =>
+        {
+            var pool = new CountingPool();
+            await UseTcpLimits(64, 256, 1024, pool);
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            try
+            {
+                foreach (bool fullByCount in new[] { false, true })
+                {
+                    var accepting = listener.AcceptTcpClientAsync();
+                    var conn = await _network.ConnectAsync("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port, _deadline.Token);
+                    using var peer = await accepting;
+                    var receiver = ConnectionField<Thread>(conn, "_receiver");
+                    int dispatched = 0;
+                    conn.MessageReceived += _ => dispatched++;
+                    int size = fullByCount ? 1 : 64;
+                    int frames = fullByCount ? 16 : 1;
+                    var wire = new byte[(frames + 1) * (4 + size)];
+                    for (int i = 0; i <= frames; i++) { wire[i * (4 + size) + 3] = (byte)size; }
+                    int initialRents = pool.Rented;
+                    peer.GetStream().Write(wire, 0, wire.Length);
+                    var gate = ConnectionField<object>(conn, "_gate");
+                    Assert.IsTrue(SpinWait.SpinUntil(() =>
+                    {
+                        lock (gate) { return ConnectionField<int>(conn, "_waitingForRoom") == 1; }
+                    }, 3000), "Receiver did not enter its capacity wait.");
+                    if (fullByCount) { await _core.RestartAsync().AttachExternalCancellation(_deadline.Token); }
+                    else { await conn.CloseAsync().AttachExternalCancellation(_deadline.Token); }
+                    Assert.IsFalse(receiver.IsAlive);
+                    Assert.Zero(dispatched);
+                    Assert.AreEqual(frames, pool.Rented - initialRents);
+                    Assert.AreEqual(pool.Rented, pool.Returned);
+                    Assert.Zero(pool.InvalidReturns);
+                }
             }
             finally { listener.Stop(); }
         });

@@ -42,7 +42,7 @@ def verify(output):
             method = "AiNative.UIDemo.Editor.UIDemoBuilder.Reload" + reload
             run_command(output, label, [cli, "run", project, "--timeout", "800", "--no-tail", "--format", "json",
                         "--log-file", output / (label + ".log"), "--", "-executeMethod", method])
-            for mode, test_filter, minimum in (("PlayMode", suite, 28),
+            for mode, test_filter, minimum in (("PlayMode", suite, 29),
                     ("EditMode", "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests", 1)):
                 label = mode + "-" + reload
                 xml = output / (label + ".xml")

@@ -39,8 +39,11 @@ namespace AiNative.UnityCore.Network
         private readonly ArrayPool<byte>? _bufferPool;
         private TcpSmallSendPool? _smallBuffers;
         private TcpWriteBatch? _batch;
-        private readonly Queue<ArraySegment<byte>> _incoming = new Queue<ArraySegment<byte>>(ReceiveQueueCapacity);
-        private int _incomingBytes;
+        private readonly ConcurrentQueue<ArraySegment<byte>> _incoming = new ConcurrentQueue<ArraySegment<byte>>();
+        // The receiver owns the produced totals. Only the main thread releases capacity.
+        private long _receivedFrames, _receivedBytes;
+        private long _consumedFrames, _consumedBytes;
+        private int _waitingForRoom;
         private bool _peerFinishedSending;
         private long? _replyDeadline;
         private DisconnectReason? _terminal;
@@ -131,36 +134,45 @@ namespace AiNative.UnityCore.Network
         {
             try
             {
-                while (true)
+                while (WaitForRoom(0))
                 {
-                    lock (_gate)
-                    {
-                        while (_incoming.Count == ReceiveQueueCapacity && !_terminal.HasValue) { Monitor.Wait(_gate); }
-                        if (_terminal.HasValue) { return; }
-                    }
                     int? length = TcpFrames.ReadLength(_socket, _maximum, _readHeader);
-                    lock (_gate)
+                    if (!length.HasValue)
                     {
-                        if (!length.HasValue)
-                        {
-                            _peerFinishedSending = true;
-                            return;
-                        }
-                        // Only this thread adds frames. Reserve space before allocating the body.
-                        while (length.Value > _maximum - _incomingBytes && !_terminal.HasValue) { Monitor.Wait(_gate); }
-                        if (_terminal.HasValue) { return; }
+                        lock (_gate) { _peerFinishedSending = true; }
+                        return;
                     }
+                    if (!WaitForRoom(length.Value)) { return; }
                     var payload = TcpFrames.ReadPayload(_socket, length.Value, _bufferPool);
-                    lock (_gate)
-                    {
-                        if (_terminal.HasValue) { TcpFrames.Return(payload, _bufferPool); return; }
-                        _incoming.Enqueue(payload);
-                        _incomingBytes += payload.Count;
-                    }
+                    if (Volatile.Read(ref _writerState) == WriterStopped) { TcpFrames.Return(payload, _bufferPool); return; }
+                    _receivedFrames++;
+                    _receivedBytes += payload.Count;
+                    _incoming.Enqueue(payload);
                 }
             }
             catch (InvalidDataException error) { StopWorkers(DisconnectReason.ProtocolError, error); }
             catch (Exception error) { StopWorkers(DisconnectReason.TransportError, error); }
+        }
+
+        private bool HasRoom(int length) =>
+            _receivedFrames - Volatile.Read(ref _consumedFrames) < ReceiveQueueCapacity &&
+            length <= _maximum - (_receivedBytes - Volatile.Read(ref _consumedBytes));
+
+        private bool WaitForRoom(int length)
+        {
+            if (HasRoom(length)) { return Volatile.Read(ref _writerState) != WriterStopped; }
+            lock (_gate)
+            {
+                // Publish the waiter before checking capacity again. The consumer publishes
+                // capacity before checking this flag, so neither side can miss the handoff.
+                Interlocked.Exchange(ref _waitingForRoom, 1);
+                try
+                {
+                    while (!_terminal.HasValue && !HasRoom(length)) { Monitor.Wait(_gate); }
+                    return !_terminal.HasValue;
+                }
+                finally { Volatile.Write(ref _waitingForRoom, 0); }
+            }
         }
 
         private void SendLoop()
@@ -262,13 +274,12 @@ namespace AiNative.UnityCore.Network
             }
             for (int i = 0; i < DispatchBudget && _drain == null; i++)
             {
-                ArraySegment<byte> payload;
-                lock (_gate)
+                if (!_incoming.TryDequeue(out var payload)) { break; }
+                Volatile.Write(ref _consumedBytes, _consumedBytes + payload.Count);
+                Interlocked.Increment(ref _consumedFrames);
+                if (Volatile.Read(ref _waitingForRoom) != 0)
                 {
-                    if (_incoming.Count == 0) { break; }
-                    payload = _incoming.Dequeue();
-                    _incomingBytes -= payload.Count;
-                    Monitor.PulseAll(_gate);
+                    lock (_gate) { Monitor.PulseAll(_gate); }
                 }
                 try { DispatchMessage(payload.AsSpan()); }
                 finally { TcpFrames.Return(payload, _bufferPool); }
@@ -302,7 +313,7 @@ namespace AiNative.UnityCore.Network
             DisconnectReason reason;
             lock (_gate)
             {
-                if (_incoming.Count != 0) { return; }
+                if (!_incoming.IsEmpty) { return; }
                 if (_terminal.HasValue) { reason = _terminal.Value; }
                 else
                 {
@@ -348,8 +359,7 @@ namespace AiNative.UnityCore.Network
             {
                 reason = _terminal!.Value;
                 cause = _failure;
-                while (_incoming.Count > 0) { TcpFrames.Return(_incoming.Dequeue(), _bufferPool); }
-                _incomingBytes = 0;
+                while (_incoming.TryDequeue(out var pending)) { TcpFrames.Return(pending, _bufferPool); }
             }
             while (_toWrite.TryDequeue(out var frame)) { TcpFrames.Return(frame, _bufferPool); }
             var notified = new TaskCompletionSource<bool>();
@@ -358,6 +368,8 @@ namespace AiNative.UnityCore.Network
                 _sender.Join();
                 _smallBuffers?.Drain();
                 _receiver.Join();
+                // A read may have raced terminal publication just before enqueue.
+                while (_incoming.TryDequeue(out var late)) { TcpFrames.Return(late, _bufferPool); }
                 _wakeSender.Dispose();
             });
             // A subscriber can restart Core inline. Keep this connection in shutdown's
