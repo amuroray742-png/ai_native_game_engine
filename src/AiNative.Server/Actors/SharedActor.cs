@@ -17,14 +17,14 @@ namespace AiNative.Server.Actors
         private int _signaled;
         private int _finished;
 
-        public SharedActor(string actorId, int maxMessages, long maxBytes, Func<IActorBehavior<T>> factory, int messagesPerTurn = 32)
+        public SharedActor(string actorId, int maxMessages, long maxBytes, Func<IActorBehavior<T>> factory, int messagesPerTurn = 32, int reservedControlMessages = 0, long reservedControlBytes = 0)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(actorId);
             ArgumentNullException.ThrowIfNull(factory);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(messagesPerTurn);
             _factory = factory;
             _messagesPerTurn = messagesPerTurn;
-            _mailbox = new ActorMailbox<T>(maxMessages, maxBytes, Wake);
+            _mailbox = new ActorMailbox<T>(maxMessages, maxBytes, Wake, reservedControlMessages, reservedControlBytes);
             Reference = new ActorRef<T>(actorId, _mailbox);
             Wake();
         }
@@ -80,7 +80,7 @@ namespace AiNative.Server.Actors
                     }
                     finally
                     {
-                        _mailbox.Release(entry.Bytes);
+                        _mailbox.Release(entry.Bytes, entry.IsControl);
                     }
                 }
                 if (_mailbox.IsDrained)

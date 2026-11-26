@@ -1,6 +1,6 @@
 # 服务器端架构设计
 
-状态：多进程设计基线，已开始 S1 基础实施，整体服务器尚未完成、尚未运行联机验收。日期：2026-11-26。[实施记录](server-implementation.md)区分实际代码、基础测试与剩余工作。本文替换此前的单进程首期方案，不据此宣称已有联机、跨进程部署、高可用或性能能力。第 10 节补充质量目标与高可用演进，第 11 节规定基础网络性能设计；后续 H 阶段不改变首期故障承诺。
+状态：多进程设计基线，S1 基础实施与独立验收已完成，整体服务器尚未完成、尚未运行联机验收。日期：2026-11-26。[实施记录](server-implementation.md)区分实际代码、基础测试与剩余工作。本文替换此前的单进程首期方案，不据此宣称已有联机、跨进程部署、高可用或性能能力。第 10 节补充质量目标与高可用演进，第 11 节规定基础网络性能设计；后续 H 阶段不改变首期故障承诺。
 
 采用独立权威服务器、Actor 状态隔离和多进程部署。首期双人 GridGame 验证客户端断线与跨网关重连；每个 Game 进程承载多个 Room Actor，每个房间独占一条线程。最近的线程评估未改变该约定，未来调整执行策略须另行修订。**房间 Actor、房间线程和 Game 进程是三个不同层级，不采用每房间一个进程。**
 
@@ -116,7 +116,7 @@ Server、Server.Protocol 及服务入口为 net10.0；Multiplayer.Protocol 为 n
 
 ### 3.4 目录结构与项目职责
 
-以下是相对于仓库根目录 `C:\work\github\ai_native_game_engine` 的目标布局。当前仅创建 Server 的 Actors／Transport 和 Server.Tests 的对应基础测试；其余服务器项目、配置、脚本均为后续交付。按实际实现逐步建立，不预先生成占位接口或空目录。项目内部子目录用于组织职责，不是独立程序集。
+以下是相对于仓库根目录 `C:\work\github\ai_native_game_engine` 的目标布局。当前已创建两个 Protocol 项目、Server 的 Actors／Transport 和 Server.Tests 的对应测试；Server.Configuration、Lifecycle 和 Server.Host 已实现；游戏适配与运维脚本为后续交付。按实际实现逐步建立，不预先生成占位接口或空目录。项目内部子目录用于组织职责，不是独立程序集。
 
 ```text
 src/
@@ -180,7 +180,7 @@ TestResults/server/<run-id>/            # 报告、日志、回放及故障证�
 | 项目 | 目标／类型 | 直接项目引用与职责边界 |
 | --- | --- | --- |
 | AiNative.Multiplayer.Protocol | netstandard2.1 / 类库 | 不引用服务器、Unity 或具体游戏；提供客户端可移植 DTO 与编解码 |
-| AiNative.Server.Protocol | net10.0 / 类库 | 不引用 Actor 实现或游戏；仅提供内部 DTO、信封和编解码 |
+| AiNative.Server.Protocol | net10.0 / 类库 | 引用 Multiplayer.Protocol 校验嵌套客户端消息；不引用 Actor 实现或游戏；提供内部 DTO、信封和编解码 |
 | AiNative.Server | net10.0 / 类库 | 引用两个协议项目及 AiNative.Hosting；不得反向引用 Example |
 | AiNative.Server.Host | net10.0 / 可执行程序 | 引用 AiNative.Server，只负责配置、角色选择与显式启动 |
 | AiNative.GridGame.Server | net10.0 / 类库 | 引用 AiNative.Server 的游戏适配契约及 AiNative.GridGame.Hosting；不拥有监听或进程生命周期 |
@@ -232,6 +232,8 @@ TestResults/server/<run-id>/            # 报告、日志、回放及故障证�
 ## 5. 进程间协议与路由身份
 
 ### 5.1 内部链路
+
+已实施的字段与 TLS 边界详见[线协议说明](server-protocol.md)；基础 ServerLink 与 Host 已实施，业务注册仍待 S3 接入。
 
 内部使用长连接 TCP、四字节大端正文长度与 JSON，独立 `serverProtocolVersion: 1`。通过 .NET TLS 双向证书验证连接双方，部署配置显式映射允许的证书身份、serviceId 与角色；不能仅相信消息正文里的 sourceRole。测试证书在后续实施夹具生成，不在本次文档任务创建。跨机器内部地址默认不对客户端开放。
 
@@ -630,6 +632,8 @@ System.IO.Pipelines 是后续替换增量解析器的候选，不是首期强制
 
 ### 11.3 背压、公平性与顺序
 
+实施状态：分帧层已实现条数满时在帧头前异步等待、字节满时在正文前等待，消费释放后恢复。发送队列的有界字节轮转与控制预留已实现，连接期限、下游邮箱协调及整体 ServerLink 尚未实现；验证范围见[服务器实施记录](server-implementation.md)。
+
 第 9.2 节条数和字节上限是硬预算，覆盖待发、在读、在写和转交中的正文，不能在移出队列时提前归还。解析 DTO、编码临时空间、TLS、系统 Socket 缓冲、线程栈另计进程内存；队列字节数不是进程总内存上限。启动配置须检查最大帧能进入对应预算，并按最大连接数计算内存上界估算，压测核对实际占用。
 
 客户端接收满时暂停预读，由 TCP 流控抑制对端；发送满按现有语义断开该客户端。内部共享链路不能因一个 Room 邮箱 Full 无限阻塞读取：完整读取并校验当前帧后，拒绝投递并走现有路由故障／Busy 处理；响应也使用有界控制额度，不能无限制造错误消息。业务已经进入未知结果状态时不得返回 consumed=false。
@@ -676,6 +680,8 @@ ServerLink 在不同房间路由之间按字节额度轮转，同一路由保持
 
 ## 12. 实施顺序与验收
 
+S1 已完成并通过独立审计，逐项证据见[S1 验收](server-s1-acceptance.md)。下表 S2–S6 仍为目标交付，不是已实现能力。
+
 | 阶段 | 交付 | 退出条件 |
 | --- | --- | --- |
 | D0 本次设计 | 本文的商业参考、进程边界、目录树、项目引用、六进程映射、Actor 与协议 | 文档检查，不是代码或运行验收 |
@@ -686,7 +692,7 @@ ServerLink 在不同房间路由之间按字节额度轮转，同一路由保持
 | S5 多进程运维与故障 | examples/server/local 的配置与说明；scripts/server 三个脚本；Integration／Fixtures 的六进程故障夹具；Performance 场景与 Diagnostics 分段指标 | 单 Worker 故障隔离、旧 epoch 隔离、满容量、网络公平性、重连风暴和退出证据；建立第 10.1、11.5 节测量基线，记录未达目标；只清理本次运行，输出归档到约定目录 |
 | S6 Unity 与交付 | 现有 GridGame Unity 示例中的远程控制器，对 Multiplayer.Protocol 的客户端引用；独立审查、最终验证与验收索引 | 双客户端完整对局、重连画面与 CLI 轨迹一致，单机不回归，记录未验范围 |
 
-S1 已完成首批 Actor 执行器与分帧原语，尚未达到整个阶段退出条件，详见[实施记录](server-implementation.md)。S2–S6 尚未实施。代码交付由独立 Reviewer 审查，审查后的最终改动重跑受影响检查。以下矩阵仍是完整服务器待建设的测试层，不是本批基础测试的通过声明。
+S1 已完成两个协议、Actor、传输、配置、生命周期与显式角色 Host，通过阶段退出条件，详见[S1 验收](server-s1-acceptance.md)。S2–S6 尚未实施。代码交付由独立 Reviewer 审查，审查后的最终改动重跑受影响检查。以下矩阵仍是完整服务器待建设的测试层，不是本批基础测试的通过声明。
 
 后续生产阶段依赖已批准的质量目标与独立设计，不能以首期验收替代：
 

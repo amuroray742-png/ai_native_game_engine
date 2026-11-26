@@ -93,8 +93,21 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
-      "ainative.server": {
+      "ainative.multiplayer.protocol": {
         "type": "Project"
+      },
+      "ainative.server": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Multiplayer.Protocol": "[1.0.0, )",
+          "AiNative.Server.Protocol": "[1.0.0, )"
+        }
+      },
+      "ainative.server.protocol": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.Multiplayer.Protocol": "[1.0.0, )"
+        }
       }
     }
   }

@@ -2,7 +2,7 @@
 
 本文件是当前契约，验证状态单列在[v2 验收索引](v2-acceptance.md)。v1 文档及材料仅保留历史证据，执行入口统一 v2，不静默迁移。
 
-联机扩展的拟议边界见[服务器端架构设计](server-architecture.md)：服务器按 Gateway、AuthSession、LobbyCoordinator、GameWorker 分为独立进程，采用 Actor 状态隔离，只有 GameWorker 中的房间在独占线程上通过现有 IGameModule/IHostedGame 装配、推进与释放，网络协议使用独立版本，客户端通过公开观察重同步。当前仅完成 Actor 与分帧基础，详见[实施记录](server-implementation.md)，整体联机尚未实现或验收；不改变本文件的现有接口、v2 文件格式、本地 PlayHost 推进权及同环境恢复承诺。
+联机扩展的拟议边界见[服务器端架构设计](server-architecture.md)：服务器按 Gateway、AuthSession、LobbyCoordinator、GameWorker 分为独立进程，采用 Actor 状态隔离，只有 GameWorker 中的房间在独占线程上通过现有 IGameModule/IHostedGame 装配、推进与释放，网络协议使用独立版本，客户端通过公开观察重同步。当前 S1 协议、Actor、传输、配置、生命周期与 Host 基础已完成，详见[S1 验收](server-s1-acceptance.md)，整体联机尚未实现或验收；不改变本文件的现有接口、v2 文件格式、本地 PlayHost 推进权及同环境恢复承诺。
 
 ## 公共边界
 

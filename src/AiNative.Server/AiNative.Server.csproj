@@ -2,4 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AiNative.Server.Protocol/AiNative.Server.Protocol.csproj" />
+    <ProjectReference Include="../AiNative.Multiplayer.Protocol/AiNative.Multiplayer.Protocol.csproj" />
+  </ItemGroup>
 </Project>
