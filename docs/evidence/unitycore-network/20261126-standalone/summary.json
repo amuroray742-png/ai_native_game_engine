@@ -1,0 +1,54 @@
+{
+  "project": "examples/unity/NetworkDemo",
+  "unity": "6000.3.23f1",
+  "sourceFileCount": 156,
+  "sourcesSha256": "5f5308d807caf73f5c326c82a779eb544787659851d4723b039dffa67574f66c",
+  "editor": [
+    {
+      "name": "PlayMode-On",
+      "result": "Passed",
+      "total": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "36ce4c2ac0a46251a5bde88cfb679f8cd9818f9f2b32431d11f95ecf2e2530dd"
+    },
+    {
+      "name": "EditMode-On",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "4fe8e1f7a0ecdbd0785d0e943f499a3d41f83cf31187ba2241ef78116d387137"
+    },
+    {
+      "name": "PlayMode-Off",
+      "result": "Passed",
+      "total": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "19c7595630fee0c397c740681d833a5c4f7c2afb807a37285f49c25575438d1d"
+    },
+    {
+      "name": "EditMode-Off",
+      "result": "Passed",
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "xmlSha256": "5e1db2f9ec1606b1f3ad54f7a1388470aced25688294fcc7f903dd78221d44e4"
+    }
+  ],
+  "player": {
+    "platform": "Windows x64",
+    "backend": "IL2CPP",
+    "buildExitCode": 0,
+    "exitCode": 0,
+    "marker": "NETWORK_SMOKE_PASSED IL2CPP",
+    "exeSha256": "417a4c8880dfbddcd26d0870ec516648df0f1f3281783acbf969c865ee8428db",
+    "gameAssemblySha256": "d4d9df9ebf16197f4ddf96d95c64679f3f70edc504b83296e5a5cceb149e91e0",
+    "logSha256": "63fff85de285611ab0eb55ee8e5a9771dcf6b9ffc9e00133287560524c02dc09"
+  }
+}

@@ -1,6 +1,6 @@
 # UIDemo
 
-独立 Unity 6000.3.23f1 工程，使用本仓库 Core、Assets、UI 及 uGUI Text；独立网络场景额外装配 Network 包。打开 `Assets/Bootstrap.unity`，先执行菜单 **UIDemo → Build and deploy SBP content**，再进入 Play。运行宿主始终使用真实 AssetBundle；未部署内容时明确报错，不回退到 AssetDatabase。
+独立 Unity 6000.3.23f1 工程，使用本仓库 Core、Assets、UI 及 uGUI Text。打开 `Assets/Bootstrap.unity`，先执行菜单 **UIDemo → Build and deploy SBP content**，再进入 Play。运行宿主始终使用真实 AssetBundle；未部署内容时明确报错，不回退到 AssetDatabase。
 
 场景、Prefab、共享图片、ResourceGroups 和 meta 已保存。需要重新生成时先执行 **UIDemo → Create scenes and content**（会重建本 Demo 的场景及 Prefab），再构建。构建克隆 ResourceGroups 到独立的新目录，使用 AssetBuilder + AssetDeployment，不递增开发配置的版本。输出在 `BuildArtifacts/UIContent/<唯一目录>`，部署在 `Assets/StreamingAssets/AiNativeAssets`；生成的 Bundle 不纳入源码。
 
@@ -36,7 +36,7 @@ python scripts/verify_unity_ui.py TestResults/ui-editor-<唯一后缀>
 
 `summary.json` 的 Passed 只代表自动矩阵；截图字段保持待可见 Editor 检查，不把测试成功冒充视觉验收。打开 `workspace.txt` 指向副本中的 `examples/unity/UIDemo`，按下文操作取得 screen 截图并独立记录；Pipeline 只作为该副本的观察工具。Task 8 已完成的矩阵和独立截图见[最终验收](../../../docs/unitycore-ui.md#task-8-层级顺序隔离验证与交付2026-11-13)。脚本失败保留 commands.jsonl、stdout/stderr、完整日志、已有 XML 和 failure.json，不发布成功摘要，也不清理失败现场。
 
-网络示例可直接从 `Assets/Network/NetworkDemo.unity` 进入 Play。用于启动回环服务、操作示例及运行独立网络验收的命令见[网络包说明](../../../packages/com.ainative.unitycore.network/README.md)。
+HTTP/TCP 演示与网络验收入口见独立 [NetworkDemo 工程](../NetworkDemo/README.md)。
 
 ## Windows Player 验收入口
 

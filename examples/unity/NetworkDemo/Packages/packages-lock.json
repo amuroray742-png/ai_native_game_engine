@@ -1,0 +1,69 @@
+{
+  "dependencies": {
+    "com.ainative.unitycore": {
+      "version": "file:../../../../packages/com.ainative.unitycore",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.cysharp.unitask": "2.5.11"
+      }
+    },
+    "com.ainative.unitycore.network": {
+      "version": "file:../../../../packages/com.ainative.unitycore.network",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.ainative.unitycore": "0.1.0",
+        "com.cysharp.unitask": "2.5.11",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      }
+    },
+    "com.cysharp.unitask": {
+      "version": "2.5.11",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
+    "com.unity.ext.nunit": {
+      "version": "2.0.5",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.test-framework": {
+      "version": "1.6.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.ext.nunit": "2.0.3",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      }
+    },
+    "com.unity.modules.unitywebrequest": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.audio": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.imgui": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.jsonserialize": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
+    }
+  }
+}

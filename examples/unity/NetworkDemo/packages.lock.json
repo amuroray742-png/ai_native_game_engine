@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETStandard,Version=v2.1": {
+      "ainative.unitycore": {
+        "type": "Project"
+      },
+      "ainative.unitycore.network": {
+        "type": "Project",
+        "dependencies": {
+          "AiNative.UnityCore": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,6 @@
   "dependencies": {
     "com.ainative.unitycore": "file:../../../../packages/com.ainative.unitycore",
     "com.ainative.unitycore.assets": "file:../../../../packages/com.ainative.unitycore.assets",
-    "com.ainative.unitycore.network": "file:../../../../packages/com.ainative.unitycore.network",
     "com.ainative.unitycore.ui": "file:../../../../packages/com.ainative.unitycore.ui",
     "com.unity.ide.visualstudio": "2.0.29",
     "com.unity.render-pipelines.universal": "17.3.0",
@@ -25,7 +24,6 @@
     }
   ],
   "testables": [
-    "com.ainative.unitycore.network",
     "com.ainative.unitycore.ui",
     "com.ainative.unitycore",
     "com.ainative.unitycore.assets"
