@@ -116,7 +116,7 @@ class UiVerificationTests(unittest.TestCase):
         for response in (subprocess.CompletedProcess([], 6, b'failed', b'compile'),
                          subprocess.TimeoutExpired([], 1, output=b'partial', stderr=b'timed out')):
             label = 'failure' if isinstance(response, subprocess.CompletedProcess) else 'timeout'
-            with patch.object(ui.subprocess, "run") as run:
+            with patch.object(subprocess, "run") as run:
                 if isinstance(response, Exception):
                     run.side_effect = response
                 else:

@@ -7,28 +7,31 @@ import shutil
 import subprocess
 import sys
 
-from unity_packages import copy_verification_project, verification_workspace
-from verify_unity_ui import PROJECT, ROOT, check_log, fingerprint, read_test_report, read_unity_version, run_command, write_json
+from unity_packages import copy_verification_project, local_packages, verification_workspace
+from unity_verification import (
+    ROOT, check_log, fingerprint_project, read_test_report, read_unity_version, run_command, write_json,
+)
+
+PROJECT = ROOT / "examples/unity/NetworkDemo"
+PACKAGES = ("com.ainative.unitycore", "com.ainative.unitycore.network")
+BUILDER = "AiNative.NetworkDemo.Editor.NetworkPlayerBuilder."
 
 
 def verify(output):
+    cli = shutil.which("unity")
+    if not cli:
+        raise RuntimeError("Unity CLI is required")
+    if set(local_packages(PROJECT)) != set(PACKAGES):
+        raise RuntimeError("NetworkDemo must reference the Core and Network local source packages")
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     workspace = verification_workspace(output)
-    source = fingerprint(ROOT, PROJECT)
+    source = fingerprint_project(ROOT, PROJECT, PACKAGES)
     project = copy_verification_project(PROJECT, workspace)
-    if source != fingerprint(workspace, project):
+    if source != fingerprint_project(workspace, project, PACKAGES):
         raise RuntimeError("Network verification snapshot differs from source")
     write_json(output / "sources.json", source)
-    # The network-only Player has no Bundle consumers. A developer deployment without
-    # its external preservation snapshot would otherwise be bundled in the isolated build.
-    content = project / "Assets/StreamingAssets/AiNativeAssets"
-    if content.is_dir():
-        shutil.move(str(content), str(output / "unused-ui-content"))
-    if content.with_suffix(".meta").is_file():
-        shutil.move(str(content.with_suffix(".meta")), str(output / "unused-ui-content.meta"))
     version = (project / "ProjectSettings/ProjectVersion.txt").read_text().splitlines()[0].split(": ")[1]
-    cli = shutil.which("unity")
     fixture = None
     try:
         fixture = subprocess.Popen([sys.executable, str(Path(__file__).with_name("network_fixture.py"))],
@@ -39,9 +42,12 @@ def verify(output):
         tests = []
         for reload in ("On", "Off"):
             label = "reload-" + reload
-            method = "AiNative.UIDemo.Editor.UIDemoBuilder.Reload" + reload
+            method = BUILDER + "Reload" + reload
+            log = output / (label + ".log")
             run_command(output, label, [cli, "run", project, "--timeout", "800", "--no-tail", "--format", "json",
-                        "--log-file", output / (label + ".log"), "--", "-executeMethod", method])
+                        "--log-file", log, "--", "-executeMethod", method])
+            check_log(log)
+            read_unity_version(log, version)
             for mode, test_filter, minimum in (("PlayMode", suite, 34),
                     ("EditMode", "AiNative.UnityCore.Network.Tests.NetworkPlayCycleTests", 1)):
                 label = mode + "-" + reload
@@ -58,9 +64,11 @@ def verify(output):
 
         exe = workspace / "NetworkPlayer/NetworkDemo.exe"
         os.environ["AINATIVE_NETWORK_PLAYER"] = str(exe)
+        build_log = output / "build.log"
         run_command(output, "build", [cli, "run", project, "--timeout", "1800", "--no-tail", "--format", "json",
-                    "--log-file", output / "build.log", "--", "-executeMethod",
-                    "AiNative.NetworkDemo.Editor.NetworkPlayerBuilder.Build"], 1900)
+                    "--log-file", build_log, "--", "-executeMethod", BUILDER + "Build"], 1900)
+        check_log(build_log)
+        read_unity_version(build_log, version)
         if not (exe.parent / "GameAssembly.dll").is_file():
             raise RuntimeError("Missing IL2CPP Player artifact")
         os.environ["AINATIVE_NETWORK_SMOKE"] = "1"
@@ -69,7 +77,7 @@ def verify(output):
         check_log(log)
         if "NETWORK_SMOKE_PASSED IL2CPP" not in log.read_text(encoding="utf-8", errors="replace"):
             raise RuntimeError("Player did not finish network checks")
-        if source != fingerprint(ROOT, PROJECT):
+        if source != fingerprint_project(ROOT, PROJECT, PACKAGES):
             raise RuntimeError("Source changed during verification, run a fresh snapshot")
         write_json(output / "summary.json", dict(unity=version, editor=tests, player="Windows x64 IL2CPP passed", ports=ports))
     finally:

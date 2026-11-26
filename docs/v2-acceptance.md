@@ -1,5 +1,13 @@
 # 通用框架 v2 验收
 
+## NetworkDemo 工程拆分（2026-11-26）
+
+[NetworkDemo](../examples/unity/NetworkDemo/README.md) 独立拥有 Unity 工程设置、HTTP/TCP 场景、测试程序集和 Player 构建入口。项目使用 UnityCore、Network 和内置 IMGUI，UIDemo 的清单与测试程序集已移除网络依赖。
+
+独立审查核对了项目引用、场景 GUID、测试程序集和验收入口。Windows Unity 6000.3.23f1 在 Domain Reload 开、关两种设置下各通过 34 项 PlayMode 和 1 项真实退出/重入 Play 测试，共 70 次，零失败、零跳过。Windows x64 IL2CPP Player 完成 HTTP 获取配置、TCP 主动推送、回显、对端断开、重连和主动关闭，记录 `NETWORK_SMOKE_PASSED IL2CPP` 并退出 0。当前记录覆盖自动回环验收，原生界面操作、其他平台和远端 CI 有待验证。[测试与 Player 摘要](evidence/unitycore-network/20261126-standalone/summary.json)
+
+UIDemo 重新构建并部署 SBP Bundle，双 Domain Reload 各通过 36 项 UI EditMode、113 项 UI PlayMode 和 15 项 Demo 测试，共 328 次。首次并行验收在 Editor 退出时触发 Unity Pipeline 插件的 `HttpListenerResponse` 已释放异常，串行复跑通过。另通过 20 项 Python 验收辅助测试。
+
 ## Network 关闭与 DNS 取消收敛（2026-11-26）
 
 TCP 正常关闭立即停止接单、注销派发并中止 Socket，在后台等待线程和缓冲回收，再在主线程按完整写入的最终前缀结算。主线程不再执行 `Thread.Join`，依赖模块等待发送任务也不依赖已经停止的 Core TimeMachine。强制退出保留当时已发布的成功前缀，其余未结算发送取消；迟到工作线程只回收资源。取消中的 DNS 解析仅观察迟到结果，不阻挡 Core 重启。

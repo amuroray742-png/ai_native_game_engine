@@ -1,0 +1,12 @@
+{
+  "name": "AiNative.NetworkDemo.PlayTests",
+  "references": [
+    "AiNative.NetworkDemo",
+    "AiNative.UnityCore",
+    "AiNative.UnityCore.Network",
+    "UniTask"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

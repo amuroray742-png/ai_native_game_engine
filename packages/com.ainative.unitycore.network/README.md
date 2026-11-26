@@ -51,6 +51,4 @@ DNS 取消结束调用方等待，底层解析迟到时只观察结果或异常�
 
 ## 本机示例与验收
 
-1. 在仓库根目录运行 `python scripts/network_fixture.py --http 18080 --tcp 18081`。省略端口时由操作系统分配并以 JSON 打印。
-2. 打开 UIDemo 的 `Assets/Network/NetworkDemo.unity`，直接从此场景进入 Play。GET 获取配置，Connect 接收服务端的 welcome，Send 回显输入，发送 `/drop` 可观察对端断开并重新连接。此场景是独立的应用启动入口。
-3. 在 Windows 运行 `python scripts/verify_unity_network.py TestResults/network-<新名称>`。脚本在独立目录复制工程，启动单独的回环服务，运行双 Domain Reload 的 Editor 测试、实际退出/重入 Play 测试，再构建并启动 Windows x64 IL2CPP Player。端口、XML、Player 日志与结果汇总写入指定目录。
+示例、回环服务和 Windows Editor / IL2CPP 验收命令见独立 [NetworkDemo 工程](../../examples/unity/NetworkDemo/README.md)。

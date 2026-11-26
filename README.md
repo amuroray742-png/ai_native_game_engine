@@ -53,6 +53,7 @@ dotnet run --project examples/AiNative.Examples.Runner --no-build -- replay --in
 | packages/com.ainative.unitycore.ui | uGUI 窗口所有权、页面/模态导航、缓存、输入焦点与过渡；[包入口](packages/com.ainative.unitycore.ui/README.md) |
 | packages/com.ainative.unitycore.network | Unity 应用 HTTP 请求、TCP 有序二进制消息、显式重连与关闭清理。[接口与验收入口](packages/com.ainative.unitycore.network/README.md) |
 | examples/unity/UIDemo | 独立 UI 交互示例、真实 Bundle 集成与双 Domain Reload 验收 |
+| examples/unity/NetworkDemo | 独立 HTTP/TCP 回环示例、双 Domain Reload 验收与 Windows IL2CPP 冒烟。[启动与验收](examples/unity/NetworkDemo/README.md) |
 | examples/unity/AssetsDemo | 独立资源示例及 Windows Player 冒烟入口，不依赖 Jolt |
 | examples/unity/GridGame | 独立 Unity 工程，含 Play 场景、Sprite 棋盘、UGUI HUD 和 PlayMode 验收 |
 | examples/unity/PhysicsSandbox | 独立 Windows Editor 工程，提供 Jolt 沙盒、实时输入、存读档和逐 Tick 对照 |
