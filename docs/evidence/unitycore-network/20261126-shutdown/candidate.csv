@@ -1,0 +1,5 @@
+messages,stalled,submitMilliseconds,submitAllocationEvents,writtenObservedMilliseconds,notificationsMilliseconds,writtenAtSample,pendingNotificationsAtSample,closeCallMilliseconds,closeCallAllocationEvents,closeTotalMilliseconds
+10000,False,17.935,51207,21.782,10408.765,10000,9984,4.163,80,17.057
+1024,False,1.105,3085,15.355,1049.091,1024,1008,0.273,34,16.439
+10000,True,14.809,39650,-1.0,-1.0,186,9872,0.199,34,58.386
+1024,True,1.699,3726,-1.0,-1.0,193,912,0.193,34,20.676

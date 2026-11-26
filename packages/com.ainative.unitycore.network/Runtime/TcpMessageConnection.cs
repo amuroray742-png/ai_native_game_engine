@@ -29,7 +29,6 @@ namespace AiNative.UnityCore.Network
         private const int WriterIdle = 0, WriterActive = 1, WriterStopped = 2;
         private int _writerState;
         private int _sleeping;
-        private bool _joinActiveWriter;
         // The sender publishes cumulative successful writes; only the main thread dispatches them.
         private long _written, _writtenBytes;
         private long _notified, _submittedBytes;
@@ -53,15 +52,21 @@ namespace AiNative.UnityCore.Network
         private readonly long _warnPendingSendBytes;
         private readonly CancellationToken _lifetime;
         private readonly Action<TcpMessageConnection, Task> _retired;
+        private readonly Action<TcpMessageConnection> _released;
         private readonly ITimeTicket _update;
         private readonly Queue<UniTaskCompletionSource> _sends = new Queue<UniTaskCompletionSource>();
         private readonly byte[] _readHeader = new byte[TcpFrames.HeaderSize];
         private MessageReceivedHandler? _messageReceived;
         private Delegate[] _messageListeners = Array.Empty<Delegate>();
         private Task? _drain;
+        private TaskCompletionSource<bool>? _settled;
+        private CancellationTokenSource? _settlementCancellation;
+        private bool _notifying, _settling, _forced;
+        private long _forcedWrites;
 
         internal TcpMessageConnection(Socket socket, int maximum, int maxPendingSends, long maxPendingSendBytes,
-            ITimeMachine time, CancellationToken lifetime, Action<TcpMessageConnection, Task> retired, ArrayPool<byte>? bufferPool)
+            ITimeMachine time, CancellationToken lifetime, Action<TcpMessageConnection, Task> retired, Action<TcpMessageConnection> released,
+            ArrayPool<byte>? bufferPool, Action<Thread>? startThread = null)
         {
             _socket = socket;
             _peer = socket.RemoteEndPoint!.ToString();
@@ -71,22 +76,28 @@ namespace AiNative.UnityCore.Network
             _warnPendingSendBytes = maxPendingSendBytes;
             _lifetime = lifetime;
             _retired = retired;
+            _released = released;
             _receiver = new Thread(ReceiveLoop) { Name = "Network.TCP.Receive", IsBackground = true };
             _sender = new Thread(SendLoop) { Name = "Network.TCP.Send", IsBackground = true };
             _update = time.RegisterUpdate(Pump, "Network.TCP");
             bool senderStarted = false;
             try
             {
-                _sender.Start();
+                if (startThread == null) { _sender.Start(); } else { startThread(_sender); }
                 senderStarted = true;
-                _receiver.Start();
+                if (startThread == null) { _receiver.Start(); } else { startThread(_receiver); }
             }
             catch
             {
                 _update.Unregister();
                 StopWorkers(DisconnectReason.TransportError);
-                if (senderStarted) { _sender.Join(); }
-                _wakeSender.Dispose();
+                _drain = Task.Run(() =>
+                {
+                    if (senderStarted) { _sender.Join(); }
+                    _wakeSender.Dispose();
+                });
+                _ = TcpFrames.DrainAsync(_drain);
+                _retired(this, _drain);
                 throw;
             }
         }
@@ -248,7 +259,7 @@ namespace AiNative.UnityCore.Network
             lock (_gate)
             {
                 if (_terminal.HasValue) { return; }
-                _joinActiveWriter = Interlocked.Exchange(ref _writerState, WriterStopped) == WriterActive;
+                Interlocked.Exchange(ref _writerState, WriterStopped);
                 _wakeSender.Set();
                 _terminal = reason;
                 _failure = cause;
@@ -339,11 +350,15 @@ namespace AiNative.UnityCore.Network
             }
         }
 
-        public UniTask CloseAsync()
+        public async UniTask CloseAsync()
         {
             var drain = Stop(DisconnectReason.LocalClose);
-            return drain.IsCompleted ? UniTask.CompletedTask : UniTask.WaitUntil(() => drain.IsCompleted,
-                cancellationToken: _lifetime, cancelImmediately: true);
+            if (!drain.IsCompleted)
+            {
+                await UniTask.WaitUntil(() => drain.IsCompleted,
+                    cancellationToken: _lifetime, cancelImmediately: true);
+            }
+            drain.GetAwaiter().GetResult();
         }
 
         internal Task Stop(DisconnectReason reason, Exception? cause = null)
@@ -351,60 +366,96 @@ namespace AiNative.UnityCore.Network
             if (_drain != null) { return _drain; }
             _update.Unregister();
             StopWorkers(reason, cause);
-            // A dequeued frame may start writing only by claiming WriterIdle. Once stopped,
-            // only a writer that already claimed it can still publish a successful write.
-            if (_joinActiveWriter) { _sender.Join(); }
-            long completedWrites = Volatile.Read(ref _written) - _notified;
-            lock (_gate)
-            {
-                reason = _terminal!.Value;
-                cause = _failure;
-                while (_incoming.TryDequeue(out var pending)) { TcpFrames.Return(pending, _bufferPool); }
-            }
-            while (_toWrite.TryDequeue(out var frame)) { TcpFrames.Return(frame, _bufferPool); }
-            var notified = new TaskCompletionSource<bool>();
-            var workers = Task.Run(() =>
-            {
-                _sender.Join();
-                _smallBuffers?.Drain();
-                _receiver.Join();
-                // A read may have raced terminal publication just before enqueue.
-                while (_incoming.TryDequeue(out var late)) { TcpFrames.Return(late, _bufferPool); }
-                _wakeSender.Dispose();
-            });
-            // A subscriber can restart Core inline. Keep this connection in shutdown's
-            // drain set until every old subscriber and pending send has been notified.
-            _drain = Task.WhenAll(workers, notified.Task);
+            var workers = Task.Run(ReclaimWorkers);
+            _settled = new TaskCompletionSource<bool>();
+            _settlementCancellation = new CancellationTokenSource();
+            // Publish retirement before invoking subscribers: they may restart or retire Core inline.
+            _drain = Task.WhenAll(workers, _settled.Task);
+            _ = TcpFrames.DrainAsync(_drain);
             _retired(this, _drain);
             var listeners = Disconnected;
             Disconnected = null;
             _messageReceived = null;
             _messageListeners = Array.Empty<Delegate>();
-            // UniTask resumes waiting callers inline. Publish the terminal reason before a
-            // failed writer can resume and treat an already-drained socket as fully closed.
+            _notifying = true;
             try
             {
                 if (listeners != null)
                 {
                     foreach (Action<DisconnectReason> listener in listeners.GetInvocationList())
                     {
-                        try { listener(reason); }
+                        if (_forced) { break; }
+                        try { listener(_terminal!.Value); }
                         catch (Exception error) { Debug.LogException(error); }
                     }
                 }
+            }
+            finally
+            {
+                _notifying = false;
+                if (_forced) { SettleSends(); }
+                else { SettleAfterWorkersAsync(workers).Forget(); }
+            }
+            return _drain;
+        }
+
+        private void ReclaimWorkers()
+        {
+            _sender.Join();
+            _smallBuffers?.Drain();
+            _receiver.Join();
+            while (_toWrite.TryDequeue(out var frame)) { TcpFrames.Return(frame, _bufferPool); }
+            while (_incoming.TryDequeue(out var payload)) { TcpFrames.Return(payload, _bufferPool); }
+            _wakeSender.Dispose();
+        }
+
+        private async UniTask SettleAfterWorkersAsync(Task workers)
+        {
+            try
+            {
+                // Core's dispatcher is already stopped during shutdown. UniTask's PlayerLoop
+                // still runs, independently of module shutdown order and the run token.
+                await UniTask.WaitUntil(() => workers.IsCompleted,
+                    cancellationToken: _settlementCancellation!.Token, cancelImmediately: true);
+            }
+            catch (OperationCanceledException) when (_forced) { return; }
+            if (workers.IsFaulted) { _failure ??= workers.Exception; }
+            SettleSends();
+        }
+
+        internal void ForceStop()
+        {
+            Stop(DisconnectReason.ModuleShutdown);
+            // A constructor failure has no admitted sends or business callbacks.
+            if (_settled == null || _settled.Task.IsCompleted || _forced) { return; }
+            _forcedWrites = Volatile.Read(ref _written);
+            _forced = true;
+            _settlementCancellation!.Cancel();
+            if (!_notifying) { SettleSends(); }
+        }
+
+        private void SettleSends()
+        {
+            if (_settling || _settled!.Task.IsCompleted) { return; }
+            _settling = true;
+            try
+            {
                 while (_sends.Count > 0)
                 {
                     var completion = _sends.Dequeue();
-                    if (completedWrites > 0)
-                    {
-                        completedWrites--;
-                        completion.TrySetResult();
-                    }
-                    else { completion.TrySetException(cause ?? new IOException("TCP connection closed: " + reason)); }
+                    long completedWrites = _forced ? _forcedWrites : Volatile.Read(ref _written);
+                    bool written = _notified++ < completedWrites;
+                    if (written) { completion.TrySetResult(); }
+                    else if (_forced) { completion.TrySetCanceled(); }
+                    else { completion.TrySetException(_failure ?? new IOException("TCP connection closed: " + _terminal)); }
                 }
             }
-            finally { notified.SetResult(true); }
-            return _drain;
+            finally
+            {
+                _settlementCancellation!.Dispose();
+                _settled.TrySetResult(true);
+                _released(this);
+            }
         }
     }
 }

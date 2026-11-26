@@ -1,0 +1,217 @@
+{
+  "environment": "Windows Unity 6000.3.23f1 Editor loopback, target 60 FPS, 128-byte bodies",
+  "scope": "One sample per workload and version; not a throughput or statistical performance acceptance. Allocation events use Unity GC.Alloc with positive control; includes Wrote test wrapper. No zero-allocation claim.",
+  "samples": {
+    "baseline": [
+      {
+        "messages": 10000,
+        "stalled": false,
+        "submitMilliseconds": 16.893,
+        "submitAllocationEvents": 59465,
+        "writtenObservedMilliseconds": 53.77,
+        "notificationsMilliseconds": 10403.982,
+        "writtenAtSample": 10000,
+        "pendingNotificationsAtSample": 9952,
+        "closeCallMilliseconds": 2.206,
+        "closeCallAllocationEvents": 24,
+        "closeTotalMilliseconds": 17.387
+      },
+      {
+        "messages": 1024,
+        "stalled": false,
+        "submitMilliseconds": 1.576,
+        "submitAllocationEvents": 3087,
+        "writtenObservedMilliseconds": 15.368,
+        "notificationsMilliseconds": 1048.738,
+        "writtenAtSample": 1024,
+        "pendingNotificationsAtSample": 1008,
+        "closeCallMilliseconds": 0.199,
+        "closeCallAllocationEvents": 16,
+        "closeTotalMilliseconds": 16.737
+      },
+      {
+        "messages": 10000,
+        "stalled": true,
+        "submitMilliseconds": 14.619,
+        "submitAllocationEvents": 39674,
+        "writtenObservedMilliseconds": -1.0,
+        "notificationsMilliseconds": -1.0,
+        "writtenAtSample": 162,
+        "pendingNotificationsAtSample": 9872,
+        "closeCallMilliseconds": 58.064,
+        "closeCallAllocationEvents": 108242,
+        "closeTotalMilliseconds": 58.068
+      },
+      {
+        "messages": 1024,
+        "stalled": true,
+        "submitMilliseconds": 1.497,
+        "submitAllocationEvents": 3756,
+        "writtenObservedMilliseconds": -1.0,
+        "notificationsMilliseconds": -1.0,
+        "writtenAtSample": 162,
+        "pendingNotificationsAtSample": 912,
+        "closeCallMilliseconds": 5.042,
+        "closeCallAllocationEvents": 9496,
+        "closeTotalMilliseconds": 5.045
+      }
+    ],
+    "candidate": [
+      {
+        "messages": 10000,
+        "stalled": false,
+        "submitMilliseconds": 17.935,
+        "submitAllocationEvents": 51207,
+        "writtenObservedMilliseconds": 21.782,
+        "notificationsMilliseconds": 10408.765,
+        "writtenAtSample": 10000,
+        "pendingNotificationsAtSample": 9984,
+        "closeCallMilliseconds": 4.163,
+        "closeCallAllocationEvents": 80,
+        "closeTotalMilliseconds": 17.057
+      },
+      {
+        "messages": 1024,
+        "stalled": false,
+        "submitMilliseconds": 1.105,
+        "submitAllocationEvents": 3085,
+        "writtenObservedMilliseconds": 15.355,
+        "notificationsMilliseconds": 1049.091,
+        "writtenAtSample": 1024,
+        "pendingNotificationsAtSample": 1008,
+        "closeCallMilliseconds": 0.273,
+        "closeCallAllocationEvents": 34,
+        "closeTotalMilliseconds": 16.439
+      },
+      {
+        "messages": 10000,
+        "stalled": true,
+        "submitMilliseconds": 14.809,
+        "submitAllocationEvents": 39650,
+        "writtenObservedMilliseconds": -1.0,
+        "notificationsMilliseconds": -1.0,
+        "writtenAtSample": 186,
+        "pendingNotificationsAtSample": 9872,
+        "closeCallMilliseconds": 0.199,
+        "closeCallAllocationEvents": 34,
+        "closeTotalMilliseconds": 58.386
+      },
+      {
+        "messages": 1024,
+        "stalled": true,
+        "submitMilliseconds": 1.699,
+        "submitAllocationEvents": 3726,
+        "writtenObservedMilliseconds": -1.0,
+        "notificationsMilliseconds": -1.0,
+        "writtenAtSample": 193,
+        "pendingNotificationsAtSample": 912,
+        "closeCallMilliseconds": 0.193,
+        "closeCallAllocationEvents": 34,
+        "closeTotalMilliseconds": 20.676
+      }
+    ],
+    "discardedSharedExceptionCandidate": [
+      {
+        "messages": 10000,
+        "stalled": false,
+        "submitMilliseconds": 16.871,
+        "submitAllocationEvents": 52368,
+        "writtenObservedMilliseconds": 21.469,
+        "notificationsMilliseconds": 10404.18,
+        "writtenAtSample": 10000,
+        "pendingNotificationsAtSample": 9984,
+        "closeCallMilliseconds": 3.687,
+        "closeCallAllocationEvents": 80,
+        "closeTotalMilliseconds": 17.239
+      },
+      {
+        "messages": 1024,
+        "stalled": false,
+        "submitMilliseconds": 1.089,
+        "submitAllocationEvents": 3087,
+        "writtenObservedMilliseconds": 14.992,
+        "notificationsMilliseconds": 1048.294,
+        "writtenAtSample": 1024,
+        "pendingNotificationsAtSample": 1008,
+        "closeCallMilliseconds": 0.244,
+        "closeCallAllocationEvents": 34,
+        "closeTotalMilliseconds": 16.661
+      },
+      {
+        "messages": 10000,
+        "stalled": true,
+        "submitMilliseconds": 15.075,
+        "submitAllocationEvents": 39674,
+        "writtenObservedMilliseconds": -1.0,
+        "notificationsMilliseconds": -1.0,
+        "writtenAtSample": 162,
+        "pendingNotificationsAtSample": 9872,
+        "closeCallMilliseconds": 0.202,
+        "closeCallAllocationEvents": 34,
+        "closeTotalMilliseconds": 292.13
+      },
+      {
+        "messages": 1024,
+        "stalled": true,
+        "submitMilliseconds": 1.54,
+        "submitAllocationEvents": 3728,
+        "writtenObservedMilliseconds": -1.0,
+        "notificationsMilliseconds": -1.0,
+        "writtenAtSample": 191,
+        "pendingNotificationsAtSample": 912,
+        "closeCallMilliseconds": 0.203,
+        "closeCallAllocationEvents": 34,
+        "closeTotalMilliseconds": 23.646
+      }
+    ]
+  },
+  "notes": [
+    "Initial GC.GetAllocatedBytesForCurrentThread returned zero even for submissions; those samples were discarded and rerun with ProfilerRecorder and positive control.",
+    "Sharing the default IOException regressed the 10,000-message stalled cleanup sample to 292.130ms. Restoring independent default exceptions brought the sample to 58.386ms; all final functional checks use this version.",
+    "CloseTotal includes asynchronous waiting and main-thread task continuations. It is not the maximum frame duration. Large backlogs are still settled in one main-thread pass.",
+    "For readable peers, pendingNotificationsAtSample is sampled when all writes are observed, then the workload awaits all notifications before CloseAsync. Thus the readable close sample has no pending sends. Stalled peers are sampled after 100ms and closed immediately.",
+    "Archived workload uses LF line endings; workloadSha256 identifies the normalized archived text. Runtime source and XML hashes identify the original verification files."
+  ],
+  "baselineTests": {
+    "total": "4",
+    "passed": "4",
+    "failed": "0",
+    "skipped": "0",
+    "result": "Passed"
+  },
+  "baselineXmlSha256": "d61146f69a6e7b677b1dffac0ba5a01679e82c605a4e22293a6c917bb270df77",
+  "candidateTests": {
+    "total": "4",
+    "passed": "4",
+    "failed": "0",
+    "skipped": "0",
+    "result": "Passed"
+  },
+  "candidateXmlSha256": "cfb337280360c0a251aa6ac5acf6be18d27c09f5d739e33010ad169b5ce5dabd",
+  "baselineRepro": {
+    "test": "CloseReturnsWhileWriterHeldAndSettlesExactPrefix",
+    "result": "Expected failure",
+    "closeCallMilliseconds": 4997,
+    "limitMilliseconds": 1000,
+    "xmlSha256": "49fb8a7fe4a4d7f2eee16aaa8d9a5da8f7110dd15c97b2a2fd99236894ae5f7d"
+  },
+  "sourceFingerprints": {
+    "baseline": {
+      "packages/com.ainative.unitycore.network/Runtime/NetworkContracts.cs": "8811d195ff499bf3425d3cb373de116f6612ebedabd66f135f50157a54c29f93",
+      "packages/com.ainative.unitycore.network/Runtime/NetworkModule.cs": "cf9dd8b98f170815446d95d0c82aab3b67998a76eb580c6d0f84f816a912d31b",
+      "packages/com.ainative.unitycore.network/Runtime/TcpFrames.cs": "60a5e31453f0741844caece0cb6893f8e5bf79533b3f5db088eaccc512cf5f17",
+      "packages/com.ainative.unitycore.network/Runtime/TcpMessageConnection.cs": "f42ec567b811487406f6f3d05c418359b36020edfa34172330c442f49242c350",
+      "packages/com.ainative.unitycore.network/Runtime/TcpSmallSendPool.cs": "e741147b15b2972cebaa85b5d8d1b6a5073ed5816cf558bcecd351c6537de5ee",
+      "packages/com.ainative.unitycore.network/Runtime/TcpWriteBatch.cs": "19321dcd039e8294fe05750364778005bee96f6229ce6de4272bf3c1bfb7884f"
+    },
+    "candidate": {
+      "packages/com.ainative.unitycore.network/Runtime/NetworkContracts.cs": "afce3a02ca9b755fc45c952de2d588ff81c69aa82a4ed7249d4a9b0816fd8859",
+      "packages/com.ainative.unitycore.network/Runtime/NetworkModule.cs": "c47aa9980611d23d8bfd59adfc9ed65eca7d9d48421ef4ba83d80e6c88f5cc32",
+      "packages/com.ainative.unitycore.network/Runtime/TcpFrames.cs": "60a5e31453f0741844caece0cb6893f8e5bf79533b3f5db088eaccc512cf5f17",
+      "packages/com.ainative.unitycore.network/Runtime/TcpMessageConnection.cs": "fb5e5a0eaf5621c492aac8c06d9b9b0a72fcc555a1f3de0dd3188a3d624dc864",
+      "packages/com.ainative.unitycore.network/Runtime/TcpSmallSendPool.cs": "e741147b15b2972cebaa85b5d8d1b6a5073ed5816cf558bcecd351c6537de5ee",
+      "packages/com.ainative.unitycore.network/Runtime/TcpWriteBatch.cs": "19321dcd039e8294fe05750364778005bee96f6229ce6de4272bf3c1bfb7884f"
+    }
+  },
+  "workloadSha256": "2db8fba8ba4fb3914b14d8a9d802c1fa9a8ab5afbaf74963f899355a3f76ebd5"
+}
